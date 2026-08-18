@@ -1,0 +1,92 @@
+---
+interface Props {
+	/** Page title. Rendered in <title> — the <h1> is set separately by the page. */
+	title: string;
+	/** Meta description. Max 160 characters (see CLAUDE.md). */
+	description: string;
+}
+
+const { title, description } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="generator" content={Astro.generator} />
+	</head>
+	<body>
+		<main>
+			<slot />
+		</main>
+	</body>
+</html>
+
+<style is:global>
+	/* Mobile first: these are the styles for a 375px-wide screen. */
+	:root {
+		--ink: #241c1a;
+		--paper: #fbf7f2;
+		--muted: #6b5d57;
+		--measure: 34rem;
+	}
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	html {
+		background: var(--paper);
+		color: var(--ink);
+		font-family: Georgia, 'Times New Roman', serif;
+		line-height: 1.6;
+		-webkit-text-size-adjust: 100%;
+	}
+
+	body {
+		margin: 0;
+	}
+
+	main {
+		max-width: var(--measure);
+		margin-inline: auto;
+		padding: 2rem 1.25rem 4rem;
+	}
+
+	h1 {
+		font-size: 2rem;
+		line-height: 1.15;
+		letter-spacing: -0.01em;
+		margin: 0 0 0.5rem;
+	}
+
+	p {
+		margin: 0 0 1rem;
+	}
+
+	img {
+		max-width: 100%;
+		height: auto;
+	}
+
+	@media (min-width: 40rem) {
+		main {
+			padding: 4rem 2rem 6rem;
+		}
+
+		h1 {
+			font-size: 2.75rem;
+		}
+	}
+</style>

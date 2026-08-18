@@ -1,0 +1,52 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import placeholderHero from '../assets/placeholder-hero.jpg';
+
+const title = 'Hookd — free crochet patterns and yarn tests';
+const description =
+	'Free crochet patterns and honest write-ups of yarn, fibre and stitch tests. Being built now — patterns and posts are on the way.';
+---
+
+<Base title={title} description={description}>
+	<h1>Hookd</h1>
+
+	<p class="standfirst">
+		Free crochet patterns, and write-ups of yarn, fibre and stitch tests.
+	</p>
+
+	<Image
+		src={placeholderHero}
+		alt="Placeholder cover image with the word Hookd over a pattern of stitch marks."
+		widths={[375, 750, 1200]}
+		sizes="(min-width: 40rem) 34rem, 100vw"
+		loading="eager"
+	/>
+
+	<p>
+		This site is being built. Patterns and posts will land here as they are
+		finished and tested.
+	</p>
+
+	<p class="muted">
+		Patterns are published free. Anything for sale lives on Ravelry, never here.
+	</p>
+</Base>
+
+<style>
+	.standfirst {
+		font-size: 1.125rem;
+		color: var(--muted);
+		margin-bottom: 2rem;
+	}
+
+	img {
+		border-radius: 4px;
+		margin-bottom: 2rem;
+	}
+
+	.muted {
+		color: var(--muted);
+		font-size: 0.9375rem;
+	}
+</style>
