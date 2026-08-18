@@ -3,14 +3,14 @@
 A personal crochet blog: free patterns, and write-ups of yarn, fibre and stitch tests.
 Static site, no database and no server. Selling happens on Ravelry, never here.
 
-Live at **https://hookd-blog.pages.dev**
+Live at **https://hookd-blog.sklocheva.workers.dev**
 
 ## Stack
 
 - [Astro](https://astro.build) with TypeScript, static output
 - `@astrojs/sitemap` for `/sitemap-index.xml`
 - Astro's built-in image optimization (`<Image>` from `astro:assets`, backed by sharp)
-- Hosted on Cloudflare Pages, free tier
+- Hosted on Cloudflare Workers (static assets), free tier
 
 ## Requirements
 
@@ -33,8 +33,8 @@ npm install
 
 ## Deploying
 
-Cloudflare Pages is connected to this repo's `main` branch. **Pushing to `main` builds and
-deploys automatically** — there is no manual deploy step.
+Cloudflare (Workers, connected via git integration) is wired to this repo's `main` branch.
+**Pushing to `main` builds and deploys automatically** — there is no manual deploy step.
 
 Cloudflare build settings:
 
@@ -44,10 +44,10 @@ Cloudflare build settings:
 | Build output directory | `dist` |
 | Production branch | `main` |
 
-Pull requests get their own preview deployment.
-
-If the site's hostname ever changes, update `site` in `astro.config.mjs` and the `Sitemap:`
-line in `public/robots.txt` together — the sitemap's absolute URLs come from `site`.
+Currently live at `https://hookd-blog.sklocheva.workers.dev` — there is no custom domain yet.
+**When a custom domain is attached, `site` in `astro.config.mjs` and the `Sitemap:` line in
+`public/robots.txt` must be updated to the new domain** — the sitemap's absolute URLs and the
+canonical `<link>` both derive from `site`, and both files need to change together.
 
 ## Conventions
 

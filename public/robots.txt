@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://hookd-blog.pages.dev/sitemap-index.xml
+Sitemap: https://hookd-blog.sklocheva.workers.dev/sitemap-index.xml

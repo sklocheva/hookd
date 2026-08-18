@@ -6,6 +6,6 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
 	// Absolute URL of the deployed site. @astrojs/sitemap needs this at build time
 	// to emit absolute <loc> entries. Keep in sync with public/robots.txt.
-	site: 'https://hookd-blog.pages.dev',
+	site: 'https://hookd-blog.sklocheva.workers.dev',
 	integrations: [sitemap()],
 });
