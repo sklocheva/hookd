@@ -3,7 +3,7 @@
 A personal crochet blog: free patterns, and write-ups of yarn, fibre and stitch tests.
 Static site, no database and no server. Selling happens on Ravelry, never here.
 
-Live at **https://hookd.pages.dev**
+Live at **https://hookd-blog.pages.dev**
 
 ## Stack
 
