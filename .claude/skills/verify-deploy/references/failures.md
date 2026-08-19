@@ -14,14 +14,17 @@ fetching that URL returned 404. The same commit built locally produced
 `src="/_astro/placeholder-hero.aRYK9wIt_1Ol83K.webp"`, which served 200.
 
 **Cause.** `/_image` is Astro's *runtime* image endpoint, used in dev and in server output. The
-host built this as a server app; the deployment is static assets with no server, so nothing
-answers the endpoint.
+repo had no `wrangler.jsonc`, so Cloudflare generated its own config — taking the Worker name
+from `package.json` and auto-detecting a framework setup that built Astro in **server mode**.
+The deployment is static assets with no server, so nothing answered the endpoint.
 
-**Status: still open.** Pinning `output: 'static'` and the sharp image service in
-`astro.config.mjs` (commit `5759ffd`) *failed the Cloudflare build* — two pushes carrying it
-never deployed, against a 62s baseline — so it was reverted in `c4bd7d8` to unblock the
-pipeline. The root cause can't be settled from outside: it needs the Cloudflare build log,
-which only the user can reach. Ask for it rather than trying more blind config permutations.
+**Fixed** in commit `1f7691c` by declaring the Worker explicitly — `name`,
+`compatibility_date`, and `assets.directory: ./dist` — so nothing is inferred. Verified: all
+image variants serve 200 `image/webp`. If this recurs, check `wrangler.jsonc` still exists.
+
+**What actually found it:** a **warning on a successful build**, saying the config's Worker
+name (`hookd`, from `package.json`) didn't match the project (`hookd-blog`). It read as
+cosmetic. It was the root cause. Read warnings on green builds.
 
 **How to spot it fast.** If images render locally but not live, look at the `src` attribute
 before anything else. `/_image` means server-mode output on a static host.
@@ -40,21 +43,26 @@ written to detect.
 suspiciously fast deserves distrust, not celebration. Before relying on a check, state what
 the failure looks like and confirm the check rejects it.
 
-## A silent build failure that looked like a slow deploy
+## Concluding "the build failed" from a site that didn't change — wrongly
 
-**Symptom.** Pushed a commit, site never changed. No error anywhere.
+**Symptom.** Pushed a commit, site never changed. After 11 minutes against a 62s baseline, it
+was declared a failed build and the commit was reverted.
 
-**Evidence.** A previous deploy had landed in 62s. After 11 minutes the live HTML was
-unchanged. GitHub showed nothing: `repos/.../deployments` was empty and
-`commits/main/status` returned `state: pending, count: 0`.
+**The build had succeeded.** The log showed no errors. The change simply had *no effect on the
+output*, so the deployed HTML was byte-identical and there was nothing to observe. The revert
+was unnecessary and undid a harmless change.
 
-**Cause.** The build failed on Cloudflare. Cloudflare's git integration reports no commit
-status, no deployment record and no notification, and the previous deployment keeps serving.
+**Lesson — the important one on this project.** "Nothing changed" has two causes that look
+identical from outside: the build failed, or the build succeeded and produced the same output.
+Do not guess between them. A config-level change often can't be seen in the HTML at all, so
+absence of change is not evidence of failure.
 
-**Lesson.** A failed deploy and a successful one are indistinguishable from the outside unless
-you have a marker that must change. Past roughly three minutes with no change, assume failure
-and ask for the build log rather than theorising — the log is only available in the dashboard,
-which Claude has no access to.
+Before treating an unchanged site as a failure, ask: *would this change actually alter a byte
+of the response?* If it wouldn't, you have no signal either way and must get the build log
+instead of inferring. Cloudflare reports nothing to GitHub — `repos/.../deployments` is empty
+and `commits/main/status` returns `state: pending, count: 0` — so the log is the only source
+of truth, and only the user can reach it. Ask early; guessing cost several cycles and one
+needless revert.
 
 ## Predicting a hostname and baking it into config
 

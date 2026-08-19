@@ -51,10 +51,16 @@ Pass `--expect <string>` to make it wait for your marker to appear rather than j
 current state. Read the script before trusting it on a new failure mode; it encodes the traps
 listed here, not every possible one.
 
-**If the marker hasn't appeared after roughly three minutes, treat the build as failed.** Say
-so plainly and get the build log — you cannot diagnose a Cloudflare build failure from
-outside, and guessing at it burns far more time than asking. Only the user has dashboard
-access.
+**If the marker hasn't appeared after roughly three minutes, ask for the Cloudflare build
+log.** Do not conclude the build failed — that mistake has already been made here. A build
+that succeeds but produces identical output is indistinguishable from one that failed, and a
+config-only change often alters nothing in the response. Before reading "unchanged" as
+"failed", check whether your change would alter a byte of the output at all. If it wouldn't,
+you have no signal, and only the log can tell you. Ask early; it is dashboard-only and the
+user is the only one who can fetch it.
+
+Read the **warnings** on a successful build too, not just errors. The root cause of the
+long-running image bug here was a warning on a green build.
 
 ## What to check, and why each one exists
 
@@ -63,10 +69,10 @@ mode Astro emits `/_image?href=...&w=375&f=webp` for `<Image>`. That is a runtim
 static hosting nothing answers it, so it returns 404 and every image on the site is broken
 while the HTML still looks perfect.
 
-The live site is **currently in this state** — this is a known open bug, not a regression you
-just caused. Pinning `output: 'static'` and the sharp image service in `astro.config.mjs` was
-tried and failed the Cloudflare build, so it was reverted. Resolving it needs the build log.
-Don't burn time re-deriving this from scratch; check `references/failures.md` first.
+This was fixed by `wrangler.jsonc`, which declares the Worker name and
+`assets.directory: ./dist` so Cloudflare doesn't infer a server-mode build. **If `/_image`
+URLs come back, check that `wrangler.jsonc` still exists and still points at `./dist`** before
+investigating anything else — `references/failures.md` has the full history.
 
 Check that image `src` values start with `/_astro/` and end in a real extension, then fetch
 each one and confirm a 200 with an image content-type.

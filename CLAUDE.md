@@ -48,8 +48,9 @@ reads it to emit `<loc>` entries, and `Base.astro` derives the canonical `<link>
 `public/robots.txt`. **Changing the domain means editing both files together**, and this will
 have to happen again when a custom domain is attached.
 
-**Images are currently broken on the live site.** The deployed HTML points `<Image>` at
-`/_image?href=...`, a runtime endpoint that 404s on static hosting. See Deployment.
+**`wrangler.jsonc` is what keeps the deploy static.** It declares the Worker name and
+`assets.directory: ./dist`. Without it Cloudflare infers a config and builds Astro in server
+mode, which breaks every image. Do not delete it. See Deployment.
 
 ## Content model
 
@@ -96,14 +97,18 @@ Things that have already gone wrong here, and cost real time:
 - **Never trust that the host builds what this machine builds.** The same commit has produced
   different output locally and on Cloudflare. A green local `npm run build` is necessary, not
   sufficient.
-- **OPEN BUG: images 404 on the live site.** In server mode Astro emits `/_image?href=...`
-  URLs for `<Image>`. That is a runtime endpoint; on static hosting it 404s and every image
-  breaks while the HTML still looks fine. The live site is in this state now. The identical
-  commit builds correctly here, producing static `/_astro/*.webp` — so the divergence is in
-  Cloudflare's build, not the source. Pinning `output: 'static'` plus the sharp image service
-  in `astro.config.mjs` was tried and **failed the build** (commit `5759ffd`, reverted in
-  `c4bd7d8`). Fixing this properly needs the Cloudflare build log, which is dashboard-only.
-  If images render locally but 404 live, check the `src` attribute for `/_image` first.
+- **Never let Cloudflare infer its own config — this cost the most time of anything here.**
+  With no `wrangler.jsonc` in the repo, Cloudflare generates one: it takes the Worker name
+  from `package.json` and auto-detects a framework setup that builds Astro in **server mode**.
+  Server mode emits `/_image?href=...` URLs for `<Image>`, a runtime endpoint that 404s on
+  static hosting — so every image breaks while the HTML still looks perfect, and the identical
+  commit keeps building correctly on this machine. `wrangler.jsonc` now pins the name and
+  `assets.directory`, which fixed it (commit `1f7691c`). If images render locally but 404
+  live, check the `src` attribute for `/_image` first, then check that `wrangler.jsonc` is
+  still there.
+- **Read the build warnings, not just the errors.** The line that identified the above was a
+  *warning* on a **successful** build: a Worker name mismatch between `package.json` and the
+  project. It looked cosmetic and was the root cause.
 - **Node version.** `.nvmrc` pins 24 so local and CI agree. Astro requires >= 22.12 and
   rejects odd-numbered majors (23, 25).
 - **Pushing needs the gh credential helper**, configured local to this repo. It resolves in
