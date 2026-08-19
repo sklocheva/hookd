@@ -1,0 +1,14 @@
+{
+	// Explicit Worker config. Without this file Cloudflare's build system infers one,
+	// taking the Worker name from package.json ("hookd") which mismatches the project
+	// ("hookd-blog"), and auto-detecting a framework setup that produced a server-mode
+	// Astro build — that emitted /_image?href=... URLs which 404 on static hosting.
+	//
+	// This site is static assets only. There is no server and no Astro adapter:
+	// `npm run build` writes dist/, and everything in it is served as-is.
+	"name": "hookd-blog",
+	"compatibility_date": "2026-08-19",
+	"assets": {
+		"directory": "./dist"
+	}
+}
