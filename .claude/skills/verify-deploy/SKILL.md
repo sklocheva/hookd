@@ -61,9 +61,12 @@ access.
 **Images resolve.** This is the failure most likely to recur and the least visible. In server
 mode Astro emits `/_image?href=...&w=375&f=webp` for `<Image>`. That is a runtime endpoint. On
 static hosting nothing answers it, so it returns 404 and every image on the site is broken
-while the HTML still looks perfect. `astro.config.mjs` pins `output: 'static'` and the sharp
-image service to prevent this — if you see `/_image` in the live HTML, that pin is not taking
-effect on the host, and the site's images are broken right now.
+while the HTML still looks perfect.
+
+The live site is **currently in this state** — this is a known open bug, not a regression you
+just caused. Pinning `output: 'static'` and the sharp image service in `astro.config.mjs` was
+tried and failed the Cloudflare build, so it was reverted. Resolving it needs the build log.
+Don't burn time re-deriving this from scratch; check `references/failures.md` first.
 
 Check that image `src` values start with `/_astro/` and end in a real extension, then fetch
 each one and confirm a 200 with an image content-type.

@@ -15,8 +15,13 @@ fetching that URL returned 404. The same commit built locally produced
 
 **Cause.** `/_image` is Astro's *runtime* image endpoint, used in dev and in server output. The
 host built this as a server app; the deployment is static assets with no server, so nothing
-answers the endpoint. `astro.config.mjs` now pins `output: 'static'` and the sharp image
-service against this.
+answers the endpoint.
+
+**Status: still open.** Pinning `output: 'static'` and the sharp image service in
+`astro.config.mjs` (commit `5759ffd`) *failed the Cloudflare build* — two pushes carrying it
+never deployed, against a 62s baseline — so it was reverted in `c4bd7d8` to unblock the
+pipeline. The root cause can't be settled from outside: it needs the Cloudflare build log,
+which only the user can reach. Ask for it rather than trying more blind config permutations.
 
 **How to spot it fast.** If images render locally but not live, look at the `src` attribute
 before anything else. `/_image` means server-mode output on a static host.

@@ -48,8 +48,8 @@ reads it to emit `<loc>` entries, and `Base.astro` derives the canonical `<link>
 `public/robots.txt`. **Changing the domain means editing both files together**, and this will
 have to happen again when a custom domain is attached.
 
-**Images are optimized at build time into static files.** `astro.config.mjs` pins
-`output: 'static'` and the sharp image service deliberately — see Deployment for why.
+**Images are currently broken on the live site.** The deployed HTML points `<Image>` at
+`/_image?href=...`, a runtime endpoint that 404s on static hosting. See Deployment.
 
 ## Content model
 
@@ -96,10 +96,14 @@ Things that have already gone wrong here, and cost real time:
 - **Never trust that the host builds what this machine builds.** The same commit has produced
   different output locally and on Cloudflare. A green local `npm run build` is necessary, not
   sufficient.
-- **`output: 'static'` and the pinned sharp image service are load-bearing.** In server mode
-  Astro emits `/_image?href=...` URLs for `<Image>`. That is a runtime endpoint; on static
-  hosting it 404s and every image on the site breaks while the HTML still looks fine. If
-  images render locally but 404 live, check the `src` attribute for `/_image` first.
+- **OPEN BUG: images 404 on the live site.** In server mode Astro emits `/_image?href=...`
+  URLs for `<Image>`. That is a runtime endpoint; on static hosting it 404s and every image
+  breaks while the HTML still looks fine. The live site is in this state now. The identical
+  commit builds correctly here, producing static `/_astro/*.webp` — so the divergence is in
+  Cloudflare's build, not the source. Pinning `output: 'static'` plus the sharp image service
+  in `astro.config.mjs` was tried and **failed the build** (commit `5759ffd`, reverted in
+  `c4bd7d8`). Fixing this properly needs the Cloudflare build log, which is dashboard-only.
+  If images render locally but 404 live, check the `src` attribute for `/_image` first.
 - **Node version.** `.nvmrc` pins 24 so local and CI agree. Astro requires >= 22.12 and
   rejects odd-numbered majors (23, 25).
 - **Pushing needs the gh credential helper**, configured local to this repo. It resolves in
