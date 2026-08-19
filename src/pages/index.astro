@@ -1,6 +1,5 @@
 ---
 import { getCollection } from 'astro:content';
-import type { ImageMetadata } from 'astro';
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import { formatDate, patternSpecLine } from '../lib/format';
@@ -18,7 +17,8 @@ type FeedItem = {
 	summary: string;
 	spec?: string;
 	photo: string;
-	image?: ImageMetadata;
+	/** Path as stored in frontmatter, resolved by Hero. */
+	image?: string;
 };
 
 const feed: FeedItem[] = [

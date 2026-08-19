@@ -48,16 +48,17 @@ const size = z.object({
 
 const patterns = defineCollection({
 	loader: glob({ base: './src/content/patterns', pattern: '**/*.{md,mdx}' }),
-	// image() resolves the path relative to the entry file and hands Astro a real asset,
-	// so <Image> can optimize it at build. Sveltia writes `../../assets/…`, which lands
-	// in src/assets/ — see media_folder / public_folder in public/admin/config.yml.
-	schema: ({ image }) =>
+	// heroImage is the path the CMS writes, e.g. "/src/assets/photo.webp". Astro's
+	// image() helper is not used here because it needs a path relative to the entry
+	// file, while Sveltia requires an absolute public_folder — src/lib/images.ts
+	// bridges the two and still runs the file through Astro's image pipeline.
+	schema:
 		z.object({
 			title: z.string(),
 			date: z.coerce.date(),
 			summary: z.string(),
 			/** Optional: absent triggers the designed "photography still to come" state. */
-			heroImage: image().optional(),
+			heroImage: z.string().optional(),
 			/** Shown on the no-photo card, e.g. "Shoot booked · September". */
 			heroImagePending: z.string().optional(),
 
@@ -94,13 +95,13 @@ const patterns = defineCollection({
 
 const posts = defineCollection({
 	loader: glob({ base: './src/content/posts', pattern: '**/*.{md,mdx}' }),
-	schema: ({ image }) =>
+	schema:
 		z.object({
 			title: z.string(),
 			date: z.coerce.date(),
 			updated: z.coerce.date().optional(),
 			summary: z.string(),
-			heroImage: image().optional(),
+			heroImage: z.string().optional(),
 			/** Drives the eyebrow and the journal filters. */
 			kind: z.enum(['Yarn test', 'Stitch test', 'Fibre note']),
 			/** The muted line under the excerpt, e.g. "6 yarns · 32 sts × 24 rows hdc". */

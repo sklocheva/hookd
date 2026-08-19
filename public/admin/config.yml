@@ -13,12 +13,15 @@ backend:
   # Until one is deployed, sign in with a Personal Access Token instead, which needs no setup.
   # base_url: https://<your-auth-worker>.workers.dev
 
-# Uploads land in src/assets/ so Astro can optimize them at build.
-# public_folder is the path written into frontmatter: relative, because the Zod schemas
-# use Astro's image() helper, which resolves relative to the entry file
-# (src/content/<collection>/<file>.md → ../../assets/<file>).
-media_folder: src/assets
-public_folder: ../../assets
+# Uploads land in src/assets/ so Astro can optimize them at build, rather than in
+# public/ where they would be served untouched.
+#
+# public_folder is the path written into frontmatter. Sveltia requires an absolute
+# path starting with "/" — a relative one is rejected outright — so entries store
+# "/src/assets/<file>" and src/lib/images.ts resolves that to a real asset for
+# <Image>. See the comment there for why the resolver exists.
+media_folder: /src/assets
+public_folder: /src/assets
 
 media_libraries:
   all:
