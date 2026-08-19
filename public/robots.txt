@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
 
+# The CMS is a tool, not content, and it is behind a login anyway.
+Disallow: /admin
+
 Sitemap: https://hookd-blog.sklocheva.workers.dev/sitemap-index.xml

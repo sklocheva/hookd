@@ -49,6 +49,40 @@ Currently live at `https://hookd-blog.sklocheva.workers.dev` — there is no cus
 `public/robots.txt` must be updated to the new domain** — the sitemap's absolute URLs and the
 canonical `<link>` both derive from `site`, and both files need to change together.
 
+## Publishing from the browser
+
+Sveltia CMS is served at **`/admin`**. It writes Markdown straight into this repo, so
+publishing from the panel is a commit to `main`, which deploys like any other push.
+
+The form fields mirror the Zod schemas in `src/content.config.ts`. The required SEO fields
+are marked required in the panel too, so it asks while you're writing rather than failing
+the build afterwards. **If you change a schema, change `public/admin/config.yml` to match.**
+
+Uploaded images land in `src/assets/` and are resized in the browser before upload —
+converted to WebP and capped at 2000px on the long edge, so an oversized original never
+enters the repo.
+
+### Signing in — needs setting up once
+
+Two options:
+
+**Personal Access Token** — works immediately, nothing to deploy. On the sign-in screen
+choose *Sign In with Token* and paste a GitHub fine-grained token with read/write access to
+this repo. Fine for one person; the token lives in your browser.
+
+**Sign in with GitHub** — the nicer flow, but it needs two things that only you can create:
+
+1. A **GitHub OAuth App** (GitHub → Settings → Developer settings → OAuth Apps). It issues a
+   client ID and secret.
+2. An **auth worker**, because the OAuth flow needs a server-side step to exchange the code
+   for a token, and this site has no server. Cloudflare's free tier runs
+   [Sveltia CMS Authenticator](https://github.com/sveltia/sveltia-cms-auth) for this.
+
+Then uncomment `base_url` in `public/admin/config.yml` and point it at the worker.
+
+Keep the client secret in the worker's environment. It must never be committed here — this
+repo is public.
+
 ## Conventions
 
 Project rules — content model, SEO requirements, image handling — live in `CLAUDE.md`.

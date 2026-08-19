@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
-import PhotoPlaceholder from '../../components/PhotoPlaceholder.astro';
+import Hero from '../../components/Hero.astro';
 import { formatDate, readTime } from '../../lib/format';
 
 export const getStaticPaths = (async () => {
@@ -37,7 +37,15 @@ const { Content } = await render(post);
 			<p class="standfirst">{d.summary}</p>
 		</div>
 
-		<PhotoPlaceholder caption={`${d.title.toLowerCase()}, 3:2`} ratio="3/2" />
+		<Hero
+			image={d.heroImage}
+			alt={d.heroImageAlt}
+			ratio="3/2"
+			caption={d.title.toLowerCase()}
+			widths={[600, 1000, 1600]}
+			sizes="(min-width: 1000px) 1000px, 100vw"
+			loading="eager"
+		/>
 
 		<div class="prose">
 			<Content />

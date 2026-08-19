@@ -1,7 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
+import type { ImageMetadata } from 'astro';
 import Base from '../layouts/Base.astro';
-import PhotoPlaceholder from '../components/PhotoPlaceholder.astro';
+import Hero from '../components/Hero.astro';
 import { formatDate, patternSpecLine } from '../lib/format';
 
 const [patterns, posts] = await Promise.all([
@@ -17,6 +18,7 @@ type FeedItem = {
 	summary: string;
 	spec?: string;
 	photo: string;
+	image?: ImageMetadata;
 };
 
 const feed: FeedItem[] = [
@@ -27,7 +29,8 @@ const feed: FeedItem[] = [
 		date: p.data.date,
 		summary: p.data.summary,
 		spec: patternSpecLine(p.data),
-		photo: `${p.data.title.toLowerCase()}, 1:1`,
+		photo: p.data.title.toLowerCase(),
+		image: p.data.heroImage,
 	})),
 	...posts.map((p) => ({
 		kind: 'Journal' as const,
@@ -36,7 +39,8 @@ const feed: FeedItem[] = [
 		date: p.data.date,
 		summary: p.data.summary,
 		spec: p.data.method,
-		photo: `${p.data.title.toLowerCase()}, 1:1`,
+		photo: p.data.title.toLowerCase(),
+		image: p.data.heroImage,
 	})),
 ]
 	.sort((a, b) => b.date.valueOf() - a.date.valueOf())
@@ -85,7 +89,7 @@ const pinned = [
 			pinned.map((item, i) => (
 				<div class="pinned__slide" data-slide hidden={i !== 0}>
 					<a href={item.href} class="pinned__media" tabindex={i === 0 ? undefined : -1}>
-						<PhotoPlaceholder caption={item.photo} ratio="4/5" />
+						<Hero alt={item.title} ratio="4/5" caption={item.photo} widths={[300, 520, 1040]} sizes="(min-width: 1160px) 520px, 100vw" loading="eager" />
 					</a>
 					<div class="pinned__text">
 						<div class="pinned__eyebrow">Pinned</div>
@@ -130,7 +134,7 @@ const pinned = [
 			feed.map((item) => (
 				<a href={item.href} class="feed__row hoverable">
 					<div class="feed__thumb">
-						<PhotoPlaceholder caption={item.photo} ratio="1/1" />
+						<Hero image={item.image} alt={item.title} ratio="1/1" caption={item.photo} widths={[140, 280]} sizes="140px" />
 					</div>
 					<div class="feed__text">
 						<div class="feed__meta">

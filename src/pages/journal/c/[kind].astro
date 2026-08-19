@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../../layouts/Base.astro';
-import PhotoPlaceholder from '../../../components/PhotoPlaceholder.astro';
+import Hero from '../../../components/Hero.astro';
 import { formatDate, readTime, slugify } from '../../../lib/format';
 
 export const getStaticPaths = (async () => {
@@ -59,7 +59,7 @@ const { kind, posts, all } = Astro.props;
 			posts.map((post, i) => (
 				<a href={`/journal/${post.id}/`} class:list={['row', { 'row--first': i === 0 }]}>
 					<div class="row__media">
-						<PhotoPlaceholder caption={`${post.data.title.toLowerCase()}, 3:2`} ratio="3/2" />
+						<Hero image={post.data.heroImage} alt={post.data.heroImageAlt} ratio="3/2" caption={post.data.title.toLowerCase()} widths={[320, 640]} sizes="(min-width: 1160px) 320px, 100vw" />
 					</div>
 					<div class="row__text hoverable">
 						<div class="row__meta">

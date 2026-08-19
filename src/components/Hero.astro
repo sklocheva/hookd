@@ -1,0 +1,61 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import PhotoPlaceholder from './PhotoPlaceholder.astro';
+import PhotoPending from './PhotoPending.astro';
+
+/**
+ * Every image slot on the site goes through here, so the day real photography lands
+ * there is one place that changes behaviour rather than five.
+ *
+ * With an image: Astro's <Image>, optimized at build (never a plain <img>).
+ * Without one:
+ *   - `pending` slots show the designed "photography still to come" state, which ships.
+ *   - everything else shows the striped placeholder, which is scaffolding.
+ */
+interface Props {
+	image?: ImageMetadata;
+	alt: string;
+	/** CSS aspect-ratio, e.g. "4/5". Honour the ratios the layouts depend on. */
+	ratio: string;
+	/** Shot-list caption used by the striped placeholder, e.g. "cardigan, worn". */
+	caption: string;
+	/** Use the designed absent-photo state rather than the striped placeholder. */
+	pending?: boolean;
+	/** e.g. "Shoot booked · September". */
+	pendingNote?: string;
+	/** Widths to emit. Matched to the slot so we are not shipping 1200px thumbnails. */
+	widths?: number[];
+	sizes?: string;
+	loading?: 'eager' | 'lazy';
+}
+
+const {
+	image,
+	alt,
+	ratio,
+	caption,
+	pending = false,
+	pendingNote,
+	widths = [400, 800, 1200],
+	sizes = '(min-width: 1160px) 560px, 100vw',
+	loading = 'lazy',
+} = Astro.props;
+---
+
+{
+	image ? (
+		<Image
+			src={image}
+			alt={alt}
+			widths={widths}
+			sizes={sizes}
+			loading={loading}
+			style={`aspect-ratio:${ratio};width:100%;height:auto;object-fit:cover`}
+		/>
+	) : pending ? (
+		<PhotoPending note={pendingNote} ratio={ratio} />
+	) : (
+		<PhotoPlaceholder caption={`${caption}, ${ratio.replace('/', ':')}`} ratio={ratio} />
+	)
+}

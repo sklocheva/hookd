@@ -1,7 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import PhotoPlaceholder from './PhotoPlaceholder.astro';
-import PhotoPending from './PhotoPending.astro';
+import Hero from './Hero.astro';
 import Difficulty from './Difficulty.astro';
 import { finishedMeasurements, hook, mainYarn, sizeRange } from '../lib/format';
 
@@ -21,13 +20,16 @@ const specs = [
 ---
 
 <a href={`/patterns/${pattern.id}/`} class="card hoverable">
-	{
-		d.heroImage ? (
-			<PhotoPlaceholder caption={`${d.title.toLowerCase()}, 4:5`} ratio="4/5" />
-		) : (
-			<PhotoPending note={d.heroImagePending} ratio="4/5" />
-		)
-	}
+	<Hero
+		image={d.heroImage}
+		alt={d.heroImageAlt}
+		ratio="4/5"
+		caption={d.title.toLowerCase()}
+		pending
+		pendingNote={d.heroImagePending}
+		widths={[270, 540, 810]}
+		sizes="(min-width: 1160px) 270px, 100vw"
+	/>
 
 	<h2 class="hoverable__title">{d.title}</h2>
 

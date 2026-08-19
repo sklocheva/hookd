@@ -1,0 +1,227 @@
+# Sveltia CMS — admin panel at /admin
+#
+# The fields here mirror the Zod schemas in src/content.config.ts. When you change one,
+# change the other: the schema is the enforcement (the build fails), this file is the
+# form. Fields marked `required: true` here are the ones Zod would reject, so the panel
+# asks at write time instead of the build failing afterwards.
+
+backend:
+  name: github
+  repo: sklocheva/hookd
+  branch: main
+  # Authorization Code Flow needs an OAuth client — see README "Publishing from the browser".
+  # Until one is deployed, sign in with a Personal Access Token instead, which needs no setup.
+  # base_url: https://<your-auth-worker>.workers.dev
+
+# Uploads land in src/assets/ so Astro can optimize them at build.
+# public_folder is the path written into frontmatter: relative, because the Zod schemas
+# use Astro's image() helper, which resolves relative to the entry file
+# (src/content/<collection>/<file>.md → ../../assets/<file>).
+media_folder: src/assets
+public_folder: ../../assets
+
+media_libraries:
+  all:
+    # House rule: nothing above 2000px on the long edge gets committed, because git keeps
+    # every version of every binary forever. Sveltia resizes in the browser before upload,
+    # so the oversized original never enters the repo at all.
+    transformations:
+      raster_image:
+        format: webp
+        quality: 85
+        width: 2000
+        height: 2000
+
+collections:
+  # ---------------------------------------------------------------- patterns
+  - name: patterns
+    label: Free patterns
+    label_singular: Pattern
+    folder: src/content/patterns
+    create: true
+    extension: mdx
+    format: frontmatter
+    slug: '{{fields.title | slugify}}'
+    summary: '{{title}} — {{difficulty}}'
+    preview_path: patterns/{{slug}}
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Publish date, name: date, widget: datetime, format: yyyy-MM-dd, time_format: false }
+      - label: Summary
+        name: summary
+        widget: text
+        hint: The standfirst under the title. Two sentences at most.
+
+      # --- SEO. Required, deliberately. ---------------------------------
+      - label: Meta description
+        name: metaDescription
+        widget: string
+        required: true
+        pattern: ['^.{1,160}$', 'Must be 160 characters or fewer.']
+        hint: Max 160 characters. The build fails without this.
+      - label: Hero image
+        name: heroImage
+        widget: image
+        required: false
+        hint: Leave empty and the pattern shows "photography still to come" — it stays published and usable.
+      - label: Hero image alt text
+        name: heroImageAlt
+        widget: string
+        required: true
+        hint: Describe the photo for someone who cannot see it. Required even before the photo exists.
+      - label: Social share image
+        name: socialImage
+        widget: string
+        required: true
+        hint: Root-relative path under public/, e.g. /social/oland-cardigan.jpg
+      - label: Shoot note
+        name: heroImagePending
+        widget: string
+        required: false
+        hint: Shown when there is no hero image, e.g. "Shoot booked · September".
+
+      # --- Classification ------------------------------------------------
+      - label: Difficulty
+        name: difficulty
+        widget: select
+        options: [Basic, Easy, Intermediate, Complex]
+        hint: Craft Yarn Council's four levels. Drawn as four bars on the card.
+      - { label: Category, name: category, widget: select, options: [Garments, Accessories, Home] }
+      - label: Terms
+        name: terms
+        widget: select
+        options: [US, UK]
+        default: US
+      - { label: Tags, name: tags, widget: list, required: false }
+
+      # --- Yarn. A list, because colour-blocked work uses several. --------
+      - label: Yarns
+        name: yarns
+        widget: list
+        label_singular: Yarn
+        summary: '{{fields.brand}} {{fields.line}} ({{fields.role}})'
+        fields:
+          - { label: Brand, name: brand, widget: string }
+          - { label: Line, name: line, widget: string }
+          - { label: Fibre content, name: fibreContent, widget: string, hint: 'e.g. 100% Norwegian wool' }
+          - { label: Ball weight (g), name: ballWeightG, widget: number, value_type: int }
+          - { label: Ball length (m), name: ballLengthM, widget: number, value_type: int }
+          - label: CYC weight category
+            name: cycWeight
+            widget: number
+            value_type: int
+            min: 0
+            max: 7
+          - { label: CYC weight name, name: cycWeightName, widget: string, hint: 'e.g. Medium (worsted/aran)' }
+          - { label: Colour name, name: colourName, widget: string, required: false }
+          - { label: Role, name: role, widget: string, default: main, hint: 'main, contrast, optional…' }
+
+      # --- Hook ----------------------------------------------------------
+      - { label: Hook (mm), name: hookMm, widget: number, value_type: float }
+      - { label: Hook (US), name: hookUs, widget: string, hint: 'e.g. 7, G-6, I-9' }
+      - { label: Second hook (mm), name: secondHookMm, widget: number, value_type: float, required: false }
+      - { label: Second hook (US), name: secondHookUs, widget: string, required: false }
+      - { label: Second hook used for, name: secondHookFor, widget: string, required: false, hint: 'e.g. bands and cuffs' }
+
+      # --- Gauge. Two objects, never one. --------------------------------
+      - label: Swatch gauge
+        name: swatchGauge
+        widget: object
+        hint: Measured flat on a blocked swatch.
+        fields:
+          - { label: Stitches, name: stitches, widget: number, value_type: float }
+          - { label: Rows, name: rows, widget: number, value_type: float }
+          - { label: Measured over (cm), name: overCm, widget: number, value_type: int, default: 10 }
+          - { label: Stitch pattern, name: stitchPattern, widget: string }
+          - { label: Blocked, name: blocked, widget: boolean, default: true }
+          - { label: Note, name: note, widget: string, required: false, hint: How and where it was measured. }
+      - label: Piece gauge
+        name: pieceGauge
+        widget: object
+        hint: >-
+          Measured on the actual piece, under its own weight. This differs from the swatch
+          gauge and both matter — it is the number people skip. Never copy one into the other.
+        fields:
+          - { label: Stitches, name: stitches, widget: number, value_type: float }
+          - { label: Rows, name: rows, widget: number, value_type: float }
+          - { label: Measured over (cm), name: overCm, widget: number, value_type: int, default: 10 }
+          - { label: Stitch pattern, name: stitchPattern, widget: string }
+          - { label: Blocked, name: blocked, widget: boolean, default: true }
+          - { label: Note, name: note, widget: string, required: false }
+
+      # --- Sizes. Structured, so the table is generated. ------------------
+      - label: Sizes
+        name: sizes
+        widget: list
+        label_singular: Size
+        summary: '{{fields.name}} — {{fields.yardageM}} m'
+        hint: The finished-measurements table is generated from this, so it must be data, not prose.
+        fields:
+          - { label: Size name, name: name, widget: string, hint: 'XS, M, 3X, One size…' }
+          - { label: Finished bust (cm), name: finishedBustCm, widget: number, value_type: float, required: false }
+          - { label: Finished length (cm), name: finishedLengthCm, widget: number, value_type: float, required: false }
+          - { label: Yardage (m), name: yardageM, widget: number, value_type: int }
+      - { label: Ease, name: ease, widget: string, required: false, hint: 'e.g. worn with 10–15 cm ease' }
+
+      # --- Links ----------------------------------------------------------
+      - { label: Ravelry URL, name: ravelryUrl, widget: string, required: false }
+      - { label: PDF URL, name: pdfUrl, widget: string, required: false }
+      - label: Related journal post
+        name: relatedPost
+        widget: relation
+        collection: posts
+        search_fields: [title]
+        value_field: '{{slug}}'
+        display_fields: [title]
+        required: false
+        hint: The test that justifies this pattern's yarn advice. Linked from the substitution note.
+
+      - { label: Body, name: body, widget: markdown }
+
+  # ---------------------------------------------------------------- posts
+  - name: posts
+    label: Journal
+    label_singular: Journal post
+    folder: src/content/posts
+    create: true
+    extension: mdx
+    format: frontmatter
+    slug: '{{fields.title | slugify}}'
+    summary: '{{title}} — {{kind}}'
+    preview_path: journal/{{slug}}
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Date, name: date, widget: datetime, format: yyyy-MM-dd, time_format: false }
+      - { label: Updated, name: updated, widget: datetime, format: yyyy-MM-dd, time_format: false, required: false }
+      - { label: Summary, name: summary, widget: text }
+      - label: Kind
+        name: kind
+        widget: select
+        options: ['Yarn test', 'Stitch test', 'Fibre note']
+        hint: Drives the eyebrow colour and the journal filters.
+
+      # --- SEO. Required, deliberately. ---------------------------------
+      - label: Meta description
+        name: metaDescription
+        widget: string
+        required: true
+        pattern: ['^.{1,160}$', 'Must be 160 characters or fewer.']
+        hint: Max 160 characters. The build fails without this.
+      - { label: Hero image, name: heroImage, widget: image, required: false }
+      - label: Hero image alt text
+        name: heroImageAlt
+        widget: string
+        required: true
+      - label: Social share image
+        name: socialImage
+        widget: string
+        required: true
+        hint: Root-relative path under public/, e.g. /social/six-dk-wools.jpg
+
+      - label: Method
+        name: method
+        widget: string
+        required: false
+        hint: 'The muted line under the excerpt, e.g. "6 yarns · 32 sts × 24 rows hdc".'
+      - { label: Tags, name: tags, widget: list, required: false }
+      - { label: Body, name: body, widget: markdown }

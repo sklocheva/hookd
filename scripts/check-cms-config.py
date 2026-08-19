@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""Check the Sveltia CMS form matches the Zod schemas.
+
+The schema in src/content.config.ts is the enforcement — the build fails without a
+required field. public/admin/config.yml is only the form. If they drift, the panel
+either asks for something the build ignores, or silently omits something the build
+demands, and the author finds out from a failed deploy rather than from the form.
+
+Run: python scripts/check-cms-config.py
+Exits non-zero on a mismatch, so it can gate a build later.
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+import yaml
+
+ROOT = Path(__file__).resolve().parent.parent
+SCHEMA = ROOT / 'src' / 'content.config.ts'
+CMS = ROOT / 'public' / 'admin' / 'config.yml'
+
+# Fields the schema defines but the form intentionally does not ask for.
+# `body` is the markdown itself; Astro derives the slug from the filename.
+CMS_ONLY = {'body'}
+SCHEMA_ONLY: set[str] = set()
+
+# Required on every collection, deliberately — see CLAUDE.md.
+SEO_REQUIRED = {'metaDescription', 'heroImageAlt', 'socialImage'}
+
+
+def collection_block(src: str, collection: str) -> str:
+    """The source of one `const <name> = defineCollection(...)` statement."""
+    starts = {
+        m.group(1): m.start()
+        for m in re.finditer(r'const (\w+) = defineCollection\(', src)
+    }
+    start = starts[collection]
+    later = [p for p in starts.values() if p > start]
+    return src[start : min(later)] if later else src[start:]
+
+
+def schema_fields(src: str, collection: str) -> set[str]:
+    """Field names at the top level of a collection's z.object({...})."""
+    block = collection_block(src, collection)
+    body = block[block.index('z.object({') + len('z.object({') :]
+
+    names: set[str] = set()
+    depth = 0  # depth relative to the inside of the top-level z.object
+    for ch_i, line in enumerate(body.splitlines()):
+        stripped = line.strip()
+        if depth == 0 and not stripped.startswith('//') and not stripped.startswith('*'):
+            m = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)\s*:', stripped)
+            if m:
+                names.add(m.group(1))
+        depth += line.count('{') + line.count('(') + line.count('[')
+        depth -= line.count('}') + line.count(')') + line.count(']')
+        if depth < 0:  # closed the top-level object
+            break
+    return names
+
+
+def main() -> int:
+    src = SCHEMA.read_text(encoding='utf-8')
+    cfg = yaml.safe_load(CMS.read_text(encoding='utf-8'))
+
+    # The shared seoFields spread is not literal in either collection block.
+    shared = SEO_REQUIRED
+
+    failures: list[str] = []
+
+    for coll in cfg['collections']:
+        name = coll['name']
+        form = {f['name'] for f in coll['fields']}
+        schema = schema_fields(src, name) | shared
+
+        missing_in_form = schema - form - SCHEMA_ONLY
+        extra_in_form = form - schema - CMS_ONLY
+
+        if missing_in_form:
+            failures.append(
+                f'{name}: in the schema but not in the CMS form: {sorted(missing_in_form)}'
+            )
+        if extra_in_form:
+            failures.append(
+                f'{name}: in the CMS form but not in the schema: {sorted(extra_in_form)}'
+            )
+
+        # The SEO fields must be marked required in the form, so the panel asks at
+        # write time instead of the build failing later.
+        not_required = [
+            f['name']
+            for f in coll['fields']
+            if f['name'] in SEO_REQUIRED and f.get('required') is not True
+        ]
+        if not_required:
+            failures.append(f'{name}: SEO fields not marked required in the form: {not_required}')
+
+        print(f'{name:9} form={len(form):3} schema={len(schema):3}  ok' if not failures else f'{name}: checked')
+
+    if failures:
+        print('\nMISMATCH:')
+        for f in failures:
+            print('  -', f)
+        return 1
+
+    print('\nCMS form and Zod schemas agree.')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
