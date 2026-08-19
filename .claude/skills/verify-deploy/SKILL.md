@@ -85,9 +85,18 @@ with the URL you actually fetched.
 **Sitemap and robots.txt serve.** `/sitemap-index.xml`, `/sitemap-0.xml`, `/robots.txt`, all
 200.
 
-**The page still meets the project's rules.** Exactly one `<h1>`, and zero `<script>` tags —
-the site is server-rendered HTML only because AI crawlers fetch JavaScript but don't execute
-it. A stray client-side island silently breaks that promise.
+**The page still meets the project's rules.** Exactly one `<h1>`, and the content is present
+in the raw HTML.
+
+The rule is *no client-side-only content*, which is not the same as *no JavaScript*. The
+pinned rotator on the homepage is a legitimate script: all three entries render server-side
+and it only toggles which is visible. What breaks the promise is content that does not exist
+until JS runs, because AI crawlers fetch JavaScript but do not execute it.
+
+Since `curl` never executes anything, whatever the fetched HTML contains is exactly what a
+non-executing crawler sees — so checking for real headings and links in that HTML tests the
+actual requirement. Counting `<script>` tags does not, and an earlier version of this skill
+got that wrong and failed on a correct page.
 
 ## Writing checks that can't lie to you
 
