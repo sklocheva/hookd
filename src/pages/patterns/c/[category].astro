@@ -1,0 +1,105 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../layouts/Base.astro';
+import PatternCard from '../../../components/PatternCard.astro';
+
+// The design shows filters but leaves them unwired. Real static routes keep them
+// working without client-side JS, which the no-JS rule requires.
+export const getStaticPaths = (async () => {
+	const patterns = await getCollection('patterns');
+	const categories = [...new Set(patterns.map((p) => p.data.category))];
+
+	return categories.map((category) => ({
+		params: { category: category.toLowerCase() },
+		props: {
+			category,
+			patterns: patterns
+				.filter((p) => p.data.category === category)
+				.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()),
+			all: [...new Set(patterns.map((p) => p.data.category))],
+		},
+	}));
+}) satisfies GetStaticPaths;
+
+const { category, patterns, all } = Astro.props;
+---
+
+<Base
+	title={`${category} — free crochet patterns`}
+	description={`Free crochet patterns in the ${category.toLowerCase()} category, written out in full with sizes and gauge stated.`}
+	active="patterns"
+>
+	<div class="shell head">
+		<h1>{category}</h1>
+		<p class="standfirst">
+			{patterns.length}
+			{patterns.length === 1 ? 'free pattern' : 'free patterns'} in this category. Every one is
+			written out in full, with both gauges stated.
+		</p>
+
+		<div class="filters label">
+			<a href="/patterns/" class="filter">All</a>
+			{
+				all.map((c) => (
+					<a
+						href={`/patterns/c/${c.toLowerCase()}/`}
+						class:list={['filter', { 'filter--active': c === category }]}
+						aria-current={c === category ? 'page' : undefined}
+					>
+						{c}
+					</a>
+				))
+			}
+		</div>
+		<div class="hairline"></div>
+	</div>
+
+	<div class="shell grid">
+		{patterns.map((p) => <PatternCard pattern={p} />)}
+	</div>
+</Base>
+
+<style>
+	.head {
+		padding-top: 44px;
+	}
+
+	h1 {
+		margin: 0 0 16px;
+		font: 400 clamp(32px, 5vw, 44px) / 1.05 var(--serif);
+		color: var(--ink);
+	}
+
+	.standfirst {
+		margin: 0 0 30px;
+		max-width: 600px;
+		font: 400 clamp(15px, 1.4vw, 17px) / 1.6 var(--sans);
+		color: var(--muted);
+	}
+
+	.filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 18px;
+		padding-bottom: 18px;
+	}
+
+	.filter {
+		color: var(--muted);
+		text-decoration: none;
+	}
+
+	.filter--active {
+		color: var(--ink);
+		border-bottom: 1px solid rgba(42, 35, 32, 0.4);
+		padding-bottom: 4px;
+	}
+
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+		gap: 52px 36px;
+		padding-top: 40px;
+	}
+</style>

@@ -1,0 +1,53 @@
+---
+/** CYC's four levels, drawn as four bars. */
+const LEVELS = ['Basic', 'Easy', 'Intermediate', 'Complex'] as const;
+
+interface Props {
+	level: (typeof LEVELS)[number];
+}
+
+const { level } = Astro.props;
+const filled = LEVELS.indexOf(level) + 1;
+---
+
+<div class="difficulty">
+	<span class="bars" role="img" aria-label={`Difficulty: ${level}`}>
+		{
+			LEVELS.map((_, i) => (
+				<span class:list={['bar', { 'bar--on': i < filled }]} aria-hidden="true" />
+			))
+		}
+	</span>
+	<span class="level">{level}</span>
+</div>
+
+<style>
+	.difficulty {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding-bottom: 14px;
+	}
+
+	.bars {
+		display: flex;
+		gap: 3px;
+	}
+
+	.bar {
+		width: 16px;
+		height: 3px;
+		background: var(--bar-empty);
+	}
+
+	.bar--on {
+		background: var(--terracotta);
+	}
+
+	.level {
+		font: 600 10.5px/1 var(--sans);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--ink-2);
+	}
+</style>

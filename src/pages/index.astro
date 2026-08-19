@@ -1,52 +1,443 @@
 ---
-import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import placeholderHero from '../assets/placeholder-hero.jpg';
+import PhotoPlaceholder from '../components/PhotoPlaceholder.astro';
+import { formatDate, patternSpecLine } from '../lib/format';
 
-const title = 'Hookd — free crochet patterns and yarn tests';
-const description =
-	'Free crochet patterns and honest write-ups of yarn, fibre and stitch tests. Being built now — patterns and posts are on the way.';
+const [patterns, posts] = await Promise.all([
+	getCollection('patterns'),
+	getCollection('posts'),
+]);
+
+type FeedItem = {
+	kind: 'Pattern' | 'Journal';
+	title: string;
+	href: string;
+	date: Date;
+	summary: string;
+	spec?: string;
+	photo: string;
+};
+
+const feed: FeedItem[] = [
+	...patterns.map((p) => ({
+		kind: 'Pattern' as const,
+		title: p.data.title,
+		href: `/patterns/${p.id}/`,
+		date: p.data.date,
+		summary: p.data.summary,
+		spec: patternSpecLine(p.data),
+		photo: `${p.data.title.toLowerCase()}, 1:1`,
+	})),
+	...posts.map((p) => ({
+		kind: 'Journal' as const,
+		title: p.data.title,
+		href: `/journal/${p.id}/`,
+		date: p.data.date,
+		summary: p.data.summary,
+		spec: p.data.method,
+		photo: `${p.data.title.toLowerCase()}, 1:1`,
+	})),
+]
+	.sort((a, b) => b.date.valueOf() - a.date.valueOf())
+	.slice(0, 4);
+
+// Editorially pinned, in rotation order. Deliberately hand-picked rather than derived —
+// this is the one editorial slot on the site.
+const pinned = [
+	{
+		title: 'Halland Cowl',
+		excerpt:
+			'A single-skein cowl in garter-look crochet, picked to open the season — free while the wool lasts.',
+		cta: 'Read the pattern →',
+		href: '/patterns/halland-cowl/',
+		photo: 'cowl styled, 4:5',
+	},
+	{
+		title: 'Fjord Yoke Pullover',
+		excerpt:
+			'The one everyone asks about — a top-down circular yoke, still our most-repeated pattern.',
+		cta: 'Read the pattern →',
+		href: '/patterns/fjord-yoke-pullover/',
+		photo: 'blanket folded, textured, 4:5',
+	},
+	{
+		title: 'Six DK wools, swatched and washed',
+		excerpt:
+			'Six autumn wools, swatched before you buy — worth it, skip it, or wait for the sale.',
+		cta: 'Read the notes →',
+		href: '/journal/six-dk-wools-swatched-and-washed/',
+		photo: 'yarn haul, autumn tones, 4:5',
+	},
+];
 ---
 
-<Base title={title} description={description}>
-	<h1>Hookd</h1>
+<Base
+	title="Hookd — free crochet patterns and yarn tests"
+	description="Free crochet patterns written out in full, and write-ups of yarn, fibre and stitch tests. Never a shop."
+>
+	<h1 class="visually-hidden">Hookd — free crochet patterns and yarn tests</h1>
 
-	<p class="standfirst">
-		Free crochet patterns, and write-ups of yarn, fibre and stitch tests.
-	</p>
+	{/* All three pinned entries are rendered server-side; the script only toggles which
+	    is visible. Crawlers that fetch but do not execute JS still see the first. */}
+	<section class="shell pinned" data-rotator>
+		{
+			pinned.map((item, i) => (
+				<div class="pinned__slide" data-slide hidden={i !== 0}>
+					<a href={item.href} class="pinned__media" tabindex={i === 0 ? undefined : -1}>
+						<PhotoPlaceholder caption={item.photo} ratio="4/5" />
+					</a>
+					<div class="pinned__text">
+						<div class="pinned__eyebrow">Pinned</div>
+						<h2>{item.title}</h2>
+						<p>{item.excerpt}</p>
+						<a href={item.href} class="pinned__cta">
+							{item.cta}
+						</a>
+					</div>
+				</div>
+			))
+		}
 
-	<Image
-		src={placeholderHero}
-		alt="Placeholder cover image with the word Hookd over a pattern of stitch marks."
-		widths={[375, 750, 1200]}
-		sizes="(min-width: 40rem) 34rem, 100vw"
-		loading="eager"
-	/>
+		<div class="dots" role="tablist" aria-label="Pinned posts">
+			{
+				pinned.map((item, i) => (
+					<button
+						type="button"
+						class:list={['dot', { 'dot--on': i === 0 }]}
+						data-dot
+						data-index={i}
+						role="tab"
+						aria-selected={i === 0 ? 'true' : 'false'}
+						aria-label={`Show pinned post: ${item.title}`}
+					/>
+				))
+			}
+		</div>
+	</section>
 
-	<p>
-		This site is being built. Patterns and posts will land here as they are
-		finished and tested.
-	</p>
+	<div class="shell latest-bar">
+		<div class="latest-bar__title">Latest</div>
+		<div class="latest-bar__filters label">
+			<a href="/" class="filter filter--active" aria-current="page">All</a>
+			<a href="/patterns/" class="filter">Free patterns</a>
+			<a href="/journal/" class="filter">Journal</a>
+		</div>
+	</div>
 
-	<p class="muted">
-		Patterns are published free. Anything for sale lives on Ravelry, never here.
-	</p>
+	<section class="shell feed">
+		{
+			feed.map((item) => (
+				<a href={item.href} class="feed__row hoverable">
+					<div class="feed__thumb">
+						<PhotoPlaceholder caption={item.photo} ratio="1/1" />
+					</div>
+					<div class="feed__text">
+						<div class="feed__meta">
+							<span
+								class:list={[
+									'feed__kind',
+									item.kind === 'Pattern' ? 'is-pattern' : 'is-journal',
+								]}
+							>
+								{item.kind}
+							</span>
+							<span class="feed__date">· {formatDate(item.date)}</span>
+						</div>
+						<h3 class="hoverable__title">{item.title}</h3>
+						<p class="feed__excerpt">{item.summary}</p>
+						{item.spec && <p class="feed__spec">{item.spec}</p>}
+					</div>
+				</a>
+			))
+		}
+	</section>
+
+	<section class="shell archive">
+		<div class="hairline"></div>
+		<p class="archive__line">
+			You're looking at our latest posts — the rest live in the archive.
+		</p>
+		<div class="archive__ctas label">
+			<a href="/patterns/" class="cta-terracotta">All free patterns →</a>
+			<a href="/journal/" class="cta-ochre">Read the journal →</a>
+		</div>
+	</section>
 </Base>
 
+<script>
+	// Progressive enhancement only: without this the first pinned entry stays visible
+	// and every link still works.
+	const rotator = document.querySelector('[data-rotator]');
+	if (rotator) {
+		const slides = Array.from(rotator.querySelectorAll('[data-slide]')) as HTMLElement[];
+		const dots = Array.from(rotator.querySelectorAll('[data-dot]')) as HTMLElement[];
+		const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+		let index = 0;
+		let timer: number | undefined;
+
+		function show(next: number) {
+			index = (next + slides.length) % slides.length;
+			slides.forEach((slide, i) => {
+				const on = i === index;
+				slide.hidden = !on;
+				const link = slide.querySelector('a');
+				if (link) link.tabIndex = on ? 0 : -1;
+			});
+			dots.forEach((dot, i) => {
+				dot.classList.toggle('dot--on', i === index);
+				dot.setAttribute('aria-selected', i === index ? 'true' : 'false');
+			});
+		}
+
+		function start() {
+			if (reduced.matches) return;
+			stop();
+			timer = window.setInterval(() => show(index + 1), 5000);
+		}
+		function stop() {
+			if (timer) window.clearInterval(timer);
+			timer = undefined;
+		}
+
+		dots.forEach((dot) =>
+			dot.addEventListener('click', () => {
+				show(Number(dot.dataset.index));
+				start();
+			})
+		);
+
+		// Pausing on hover and focus keeps the thing readable.
+		rotator.addEventListener('mouseenter', stop);
+		rotator.addEventListener('mouseleave', start);
+		rotator.addEventListener('focusin', stop);
+		rotator.addEventListener('focusout', start);
+		reduced.addEventListener('change', start);
+
+		start();
+	}
+</script>
+
 <style>
-	.standfirst {
-		font-size: 1.125rem;
-		color: var(--muted);
-		margin-bottom: 2rem;
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
-	img {
-		border-radius: 4px;
-		margin-bottom: 2rem;
+	/* Pinned hero */
+	.pinned {
+		padding-block: clamp(28px, 4vw, 44px);
+		position: relative;
 	}
 
-	.muted {
+	.pinned__slide {
+		display: flex;
+		flex-wrap: wrap;
+		gap: clamp(24px, 4vw, 52px);
+		align-items: center;
+	}
+
+	.pinned__slide[hidden] {
+		display: none;
+	}
+
+	.pinned__media {
+		flex: 1 1 46%;
+		min-width: 280px;
+		max-width: 520px;
+		text-decoration: none;
+		display: block;
+	}
+
+	.pinned__text {
+		flex: 1 1 40%;
+		min-width: 280px;
+	}
+
+	.pinned__eyebrow {
+		font: 600 10px/1 var(--sans);
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--annotation);
+		margin-bottom: 18px;
+	}
+
+	.pinned__text h2 {
+		margin: 0 0 18px;
+		font: 400 clamp(30px, 4.2vw, 44px) / 1.12 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.pinned__text p {
+		margin: 0 0 30px;
+		font: 400 clamp(15px, 1.5vw, 17px) / 1.7 var(--sans);
 		color: var(--muted);
-		font-size: 0.9375rem;
+		max-width: 440px;
+		text-wrap: pretty;
+	}
+
+	.pinned__cta {
+		font: 600 12px/1 var(--sans);
+		letter-spacing: 0.07em;
+		text-transform: uppercase;
+		color: var(--terracotta);
+		text-decoration: none;
+	}
+
+	.dots {
+		display: flex;
+		gap: 8px;
+		margin-top: 32px;
+	}
+
+	.dot {
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+		border: none;
+		padding: 0;
+		cursor: pointer;
+		background: var(--dot-inactive);
+	}
+
+	.dot--on {
+		background: var(--terracotta);
+	}
+
+	/* Latest bar */
+	.latest-bar {
+		padding-bottom: 16px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		justify-content: space-between;
+		align-items: baseline;
+	}
+
+	.latest-bar__title {
+		font: italic 400 clamp(18px, 2vw, 21px) / 1 var(--serif);
+		color: var(--ink);
+	}
+
+	.latest-bar__filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16px;
+	}
+
+	.filter {
+		color: var(--muted);
+		text-decoration: none;
+	}
+
+	.filter--active {
+		color: var(--ink);
+		border-bottom: 1px solid rgba(42, 35, 32, 0.4);
+		padding-bottom: 4px;
+	}
+
+	/* Feed */
+	.feed__row {
+		display: flex;
+		gap: clamp(16px, 2vw, 24px);
+		align-items: center;
+		padding-block: clamp(18px, 2vw, 22px);
+		border-top: 1px solid var(--rule-light);
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.feed__thumb {
+		width: clamp(100px, 20vw, 140px);
+		flex: none;
+	}
+
+	.feed__text {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.feed__meta {
+		font: 600 10px/1 var(--sans);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		margin-bottom: 10px;
+	}
+
+	.feed__kind.is-pattern {
+		color: var(--terracotta);
+	}
+
+	.feed__kind.is-journal {
+		color: var(--ochre);
+	}
+
+	.feed__date {
+		font-weight: 400;
+		letter-spacing: 0.04em;
+		text-transform: none;
+		color: var(--muted);
+	}
+
+	.feed__text h3 {
+		margin: 0 0 8px;
+		font: 400 clamp(19px, 2.2vw, 24px) / 1.25 var(--serif);
+		color: var(--ink);
+	}
+
+	.feed__excerpt {
+		margin: 0 0 8px;
+		font: 400 clamp(12.5px, 1.3vw, 14px) / 1.55 var(--sans);
+		color: var(--muted);
+		display: -webkit-box;
+		-webkit-line-clamp: 1;
+		line-clamp: 1;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.feed__spec {
+		margin: 0;
+		font: 400 clamp(10.5px, 1.1vw, 11.5px) / 1.5 var(--sans);
+		color: var(--muted);
+	}
+
+	/* Archive nudge */
+	.archive {
+		padding-top: 40px;
+	}
+
+	.archive__line {
+		margin: 26px 0 18px;
+		text-align: center;
+		font: 400 clamp(14px, 1.4vw, 15.5px) / 1.6 var(--sans);
+		color: var(--muted);
+	}
+
+	.archive__ctas {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 26px;
+		justify-content: center;
+	}
+
+	.archive__ctas a {
+		text-decoration: none;
+	}
+
+	.cta-terracotta {
+		color: var(--terracotta);
+	}
+
+	.cta-ochre {
+		color: var(--ochre);
 	}
 </style>

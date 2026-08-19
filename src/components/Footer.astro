@@ -1,0 +1,138 @@
+---
+const year = new Date().getFullYear();
+
+const nav = [
+	{ label: 'Free patterns', href: '/patterns/' },
+	{ label: 'Journal', href: '/journal/' },
+	{ label: 'About', href: '#' },
+	{ label: 'RSS', href: '/rss.xml' },
+];
+
+// Text stubs standing in for icon artwork. Ravelry carries the accent colour.
+const social = [
+	{ label: 'IG', name: 'Instagram', accent: false },
+	{ label: 'YT', name: 'YouTube', accent: false },
+	{ label: 'PIN', name: 'Pinterest', accent: false },
+	{ label: 'RAV', name: 'Ravelry', accent: true },
+];
+---
+
+<footer class="shell site-footer">
+	<div class="hairline"></div>
+
+	<div class="footer-row">
+		<div class="footer-left">
+			<a href="/" class="footer-wordmark">Hookd</a>
+			<nav class="footer-nav">
+				{nav.map((item) => <a href={item.href}>{item.label}</a>)}
+			</nav>
+		</div>
+
+		<div class="socials">
+			{
+				social.map((s) => (
+					<a
+						href="#"
+						class:list={['social', { 'social--accent': s.accent }]}
+						aria-label={s.name}
+					>
+						{s.label}
+					</a>
+				))
+			}
+		</div>
+	</div>
+
+	<div class="copyright">
+		<span>
+			© {year} Hookd. Patterns are free — anything for sale lives on Ravelry, never here.
+		</span>
+		{/* Placeholder scaffolding: delete with the social stubs above. */}
+		<span class="annotation">Social marks — drop in icon artwork</span>
+	</div>
+</footer>
+
+<style>
+	.site-footer {
+		padding-top: clamp(48px, 6vw, 72px);
+	}
+
+	.footer-row {
+		padding-top: 46px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 24px;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.footer-left {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 24px;
+	}
+
+	.footer-wordmark {
+		font: italic 500 20px/1 var(--script);
+		color: var(--ink);
+		text-decoration: none;
+	}
+
+	.footer-nav {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 20px;
+		font: 400 12.5px/1 var(--sans);
+	}
+
+	.footer-nav a {
+		color: var(--muted);
+		text-decoration: none;
+	}
+
+	.footer-nav a:hover {
+		color: var(--ink);
+	}
+
+	.socials {
+		display: flex;
+		gap: 10px;
+	}
+
+	.social {
+		width: 38px;
+		height: 38px;
+		border-radius: 999px;
+		border: 1px solid var(--border-dashed);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font: 600 9.5px/1 var(--sans);
+		letter-spacing: 0.06em;
+		color: var(--muted);
+		text-decoration: none;
+	}
+
+	.social--accent {
+		color: var(--terracotta);
+	}
+
+	.copyright {
+		padding: 26px 0 46px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		justify-content: space-between;
+		align-items: baseline;
+		font: 400 12px/1.6 var(--sans);
+		color: var(--muted);
+	}
+
+	.annotation {
+		font: 9px/1.4 var(--mono);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--faint);
+	}
+</style>

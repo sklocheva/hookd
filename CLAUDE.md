@@ -52,10 +52,20 @@ have to happen again when a custom domain is attached.
 `assets.directory: ./dist`. Without it Cloudflare infers a config and builds Astro in server
 mode, which breaks every image. Do not delete it. See Deployment.
 
+**All photography is placeholder.** `PhotoPlaceholder.astro` draws the striped stand-in and
+its caption doubles as the shot list — it is scaffolding, to be deleted when real images land.
+`PhotoPending.astro` is different: it is the *designed* state for a pattern that is written but
+not yet shot, triggered by omitting `heroImage`, and it ships. Same for the dashed wordmark box
+in `Header.astro` and the social stubs in `Footer.astro`, both marked in the source.
+
+**Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
+`/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real
+static routes rather than client-side filtering, because of the no-JS rule.
+
 ## Content model
 
-Two collections, both with Zod schemas in `src/content.config.ts`. **Neither is built yet** —
-the site is currently one placeholder homepage.
+Two collections, both with Zod schemas in `src/content.config.ts`. Example entries live in
+`src/content/` — they exist to exercise the schemas and should be replaced by real ones.
 
 **patterns** carries structured data, not prose: yarn (brand, line, fibre content, ball
 weight and length, CYC weight category), hook size in mm and US, gauge as TWO separate

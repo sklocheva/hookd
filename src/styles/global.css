@@ -1,0 +1,114 @@
+/* Design tokens and global reset.
+   Values come from the design handoff (design_handoff_hookd_blog/README.md).
+   Everything is fluid — clamp() type, flex-wrap and auto-fit grids. There are
+   deliberately no media queries. */
+
+:root {
+	/* Colour */
+	--paper: #fbf6ef;
+	--ink: #2a2320;
+	--ink-2: #4a4038;
+	--muted: #7a6d63;
+	--faint: #c0b3a4;
+
+	--terracotta: #b1603f;
+	--terracotta-hover: #8f4a2f;
+	--ochre: #8f6714;
+	--ochre-rule: #b88a2e;
+
+	/* Placeholder scaffolding — remove with the placeholders themselves */
+	--ph-stripe-a: #ecdfc9;
+	--ph-stripe-b: #e3d3b4;
+	--ph-caption: #8a7256;
+	--annotation: #8a7c6e;
+
+	/* Hairlines */
+	--rule-strong: rgba(42, 35, 32, 0.3);
+	--rule: rgba(42, 35, 32, 0.14);
+	--rule-light: rgba(42, 35, 32, 0.11);
+	--border-dashed: rgba(42, 35, 32, 0.24);
+	--bar-empty: rgba(42, 35, 32, 0.16);
+	--dot-inactive: rgba(42, 35, 32, 0.18);
+
+	/* Type */
+	--serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+	--script: 'Lora', Georgia, serif;
+	--sans: 'Work Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--mono: ui-monospace, Menlo, monospace;
+
+	/* Layout */
+	--shell: 1160px;
+	--shell-narrow: 1000px;
+	--measure: 640px;
+	--gutter: clamp(20px, 4vw, 48px);
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--sans);
+	font-weight: 400;
+}
+
+a {
+	color: var(--terracotta);
+}
+
+a:hover {
+	color: var(--terracotta-hover);
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+}
+
+/* The shell every region sits in. */
+.shell {
+	max-width: var(--shell);
+	margin: 0 auto;
+	padding-inline: var(--gutter);
+}
+
+.shell--narrow {
+	max-width: var(--shell-narrow);
+}
+
+.hairline {
+	height: 1px;
+	background: var(--rule);
+}
+
+/* One uppercase label style serves every eyebrow, filter and CTA. */
+.label {
+	font: 600 11px/1 var(--sans);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+/* Whole rows and cards are clickable, so the title needs a hover affordance —
+   the design defines only the global a:hover colour. */
+.hoverable:hover .hoverable__title {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.01ms !important;
+	}
+}

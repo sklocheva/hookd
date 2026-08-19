@@ -1,0 +1,330 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import PhotoPlaceholder from '../../components/PhotoPlaceholder.astro';
+import PhotoPending from '../../components/PhotoPending.astro';
+import {
+	formatDate,
+	gaugeLine,
+	mainYarn,
+	sizeRange,
+	yardageRangeBoth,
+} from '../../lib/format';
+
+export const getStaticPaths = (async () => {
+	const patterns = await getCollection('patterns');
+	return patterns.map((pattern) => ({
+		params: { slug: pattern.id },
+		props: { pattern },
+	}));
+}) satisfies GetStaticPaths;
+
+const { pattern } = Astro.props;
+const d = pattern.data;
+const { Content } = await render(pattern);
+
+const yarn = mainYarn(d);
+const related = d.relatedPost ? await getEntry(d.relatedPost) : undefined;
+
+const hookValue = `${d.hookMm} mm · US ${d.hookUs} (main)`;
+const hookSecond = d.secondHookMm
+	? `${d.secondHookMm} mm · US ${d.secondHookUs} for ${d.secondHookFor}`
+	: undefined;
+
+const specs = [
+	{
+		label: 'Yarn',
+		value: `CYC ${yarn.cycWeight} · ${yarn.cycWeightName}`,
+		note: `Shown in ${yarn.brand} ${yarn.line}, ${yarn.fibreContent}`,
+	},
+	{
+		label: 'Yardage',
+		value: yardageRangeBoth(d),
+		note: `${sizeRange(d)} · buy one extra skein for the largest sizes`,
+	},
+	{ label: 'Hook', value: hookValue, note: hookSecond },
+	{
+		label: 'Swatch gauge',
+		value: gaugeLine(d.swatchGauge),
+		note: d.swatchGauge.note,
+	},
+	{
+		// The one intentional emphasis in the grid: piece gauge is the number people skip.
+		label: 'Piece gauge',
+		value: gaugeLine(d.pieceGauge),
+		note: d.pieceGauge.note,
+		emphasis: true,
+	},
+	{
+		label: 'Sizes',
+		value: d.sizes.map((s) => s.name).join(' · '),
+		note: d.ease
+			? `Finished bust ${d.sizes[0].finishedBustCm}–${d.sizes[d.sizes.length - 1].finishedBustCm} cm · ${d.ease}`
+			: undefined,
+	},
+];
+---
+
+<Base
+	title={`${d.title} — free crochet pattern`}
+	description={d.metaDescription}
+	active="patterns"
+	shareImage={d.socialImage}
+>
+	<article class="shell shell--narrow">
+		<div class="title-block">
+			<div class="eyebrow">
+				<span class="eyebrow__kind">Pattern</span>
+				<span class="eyebrow__rest">· {formatDate(d.date)} · free, always</span>
+			</div>
+			<h1>{d.title}</h1>
+			<p class="standfirst">{d.summary}</p>
+		</div>
+
+		{
+			d.heroImage ? (
+				<PhotoPlaceholder caption={`${d.title.toLowerCase()}, worn, 16:10`} ratio="16/10" />
+			) : (
+				<PhotoPending note={d.heroImagePending} ratio="16/10" />
+			)
+		}
+
+		<section class="before">
+			<h2 class="before__title">Before you start</h2>
+
+			<div class="before__grid">
+				{
+					specs.map((s) => (
+						<div class="cell">
+							<div class:list={['cell__label', { 'cell__label--emphasis': s.emphasis }]}>
+								{s.label}
+							</div>
+							<div class="cell__value">
+								{s.value}
+								{s.note && (
+									<>
+										<br />
+										<span class="cell__note">{s.note}</span>
+									</>
+								)}
+							</div>
+						</div>
+					))
+				}
+			</div>
+
+			<div class="callout callout--gauge">
+				<span class="callout__bar" aria-hidden="true"></span>
+				<p>
+					Match the <strong>piece gauge</strong>, not the swatch. A 10 cm square held flat
+					on a table behaves nothing like a 60 cm panel hanging off a shoulder — the
+					fabric drops under its own weight, and the difference between those two numbers
+					is where most fit problems begin.
+				</p>
+			</div>
+
+			<div class="callout callout--sub">
+				<span class="callout__bar" aria-hidden="true"></span>
+				<p>
+					<strong>Substituting yarn.</strong> Stay within CYC {yarn.cycWeight} and check
+					metreage per gram rather than the category label. Two of the wools in{' '}
+					{
+						related ? (
+							<a href={`/journal/${related.id}/`}>the DK wool test</a>
+						) : (
+							<span>the DK wool test</span>
+						)
+					}{' '}
+					grew by five per cent after washing and never came back — if you pick one of
+					those, swatch long and hang it for a day before you size.
+				</p>
+			</div>
+
+			<div class="actions">
+				<a href="#instructions" class="pill">Jump to the pattern</a>
+				<a href="#" class="quiet">Print / save as PDF</a>
+				{
+					d.ravelryUrl ? (
+						<a href={d.ravelryUrl} class="quiet">
+							Add to Ravelry queue
+						</a>
+					) : (
+						<a href="#" class="quiet">
+							Add to Ravelry queue
+						</a>
+					)
+				}
+			</div>
+		</section>
+
+		<div class="prose" id="instructions">
+			<Content />
+		</div>
+	</article>
+</Base>
+
+<style>
+	article {
+		padding-bottom: 20px;
+	}
+
+	.title-block {
+		padding-top: 44px;
+	}
+
+	.eyebrow {
+		font: 600 11px/1 var(--sans);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		margin-bottom: 18px;
+	}
+
+	.eyebrow__kind {
+		color: var(--terracotta);
+	}
+
+	.eyebrow__rest {
+		font-weight: 400;
+		letter-spacing: 0.04em;
+		text-transform: none;
+		color: var(--muted);
+	}
+
+	h1 {
+		margin: 0 0 18px;
+		font: 400 clamp(34px, 6vw, 54px) / 1.1 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.standfirst {
+		margin: 0 0 34px;
+		max-width: 620px;
+		font: 400 clamp(15px, 1.6vw, 18px) / 1.6 var(--sans);
+		color: var(--ink-2);
+	}
+
+	/* Before you start */
+	.before {
+		border-top: 1px solid var(--rule-strong);
+		border-bottom: 1px solid var(--rule-strong);
+		padding: 30px 0;
+		margin-top: 40px;
+	}
+
+	.before__title {
+		margin: 0 0 26px;
+		font: italic 400 22px/1 var(--serif);
+		color: var(--ink);
+	}
+
+	.before__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 28px 40px;
+	}
+
+	.cell__label {
+		font: 600 10px/1 var(--sans);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--muted);
+		margin-bottom: 8px;
+	}
+
+	.cell__label--emphasis {
+		color: var(--ochre);
+	}
+
+	.cell__value {
+		font: 400 15px/1.55 var(--sans);
+		color: var(--ink);
+	}
+
+	.cell__note {
+		color: var(--muted);
+	}
+
+	.callout {
+		display: flex;
+		gap: 14px;
+		max-width: 760px;
+		margin-top: 28px;
+		padding-top: 22px;
+		border-top: 1px solid var(--rule-light);
+	}
+
+	.callout__bar {
+		width: 3px;
+		flex: none;
+		align-self: stretch;
+	}
+
+	.callout--gauge .callout__bar {
+		background: var(--ochre-rule);
+	}
+
+	.callout--sub .callout__bar {
+		background: rgba(42, 35, 32, 0.24);
+	}
+
+	.callout p {
+		margin: 0;
+		font: 400 14px/1.7 var(--sans);
+		color: var(--ink-2);
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 24px;
+		margin-top: 30px;
+	}
+
+	.pill {
+		border: 1px solid var(--terracotta);
+		border-radius: 999px;
+		padding: 14px 26px;
+		font: 600 11px/1 var(--sans);
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--terracotta);
+		text-decoration: none;
+	}
+
+	.pill:hover {
+		background: var(--terracotta);
+		color: var(--paper);
+	}
+
+	.quiet {
+		font: 400 13px/1 var(--sans);
+		color: var(--muted);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	/* Body */
+	.prose {
+		max-width: 620px;
+		padding-top: 10px;
+	}
+
+	.prose :global(h2) {
+		margin: clamp(34px, 4vw, 46px) 0 16px;
+		font: 400 clamp(24px, 3vw, 30px) / 1.25 var(--serif);
+		color: var(--ink);
+	}
+
+	.prose :global(p) {
+		margin: 0 0 20px;
+		font: 400 clamp(16px, 1.6vw, 17.5px) / 1.8 var(--sans);
+		color: var(--ink);
+	}
+
+	.prose :global(strong) {
+		font-weight: 600;
+	}
+</style>

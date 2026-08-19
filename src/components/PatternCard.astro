@@ -1,0 +1,80 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import PhotoPlaceholder from './PhotoPlaceholder.astro';
+import PhotoPending from './PhotoPending.astro';
+import Difficulty from './Difficulty.astro';
+import { finishedMeasurements, hook, mainYarn, sizeRange } from '../lib/format';
+
+interface Props {
+	pattern: CollectionEntry<'patterns'>;
+}
+
+const { pattern } = Astro.props;
+const d = pattern.data;
+const yarn = mainYarn(d);
+
+const specs = [
+	{ label: 'Yarn', value: `${yarn.cycWeight} · ${yarn.cycWeightName}` },
+	{ label: 'Hook', value: hook(d), nowrap: true },
+	{ label: 'Finished', value: `${sizeRange(d)} · ${finishedMeasurements(d)}` },
+];
+---
+
+<a href={`/patterns/${pattern.id}/`} class="card hoverable">
+	{
+		d.heroImage ? (
+			<PhotoPlaceholder caption={`${d.title.toLowerCase()}, 4:5`} ratio="4/5" />
+		) : (
+			<PhotoPending note={d.heroImagePending} ratio="4/5" />
+		)
+	}
+
+	<h2 class="hoverable__title">{d.title}</h2>
+
+	<Difficulty level={d.difficulty} />
+
+	<div class="specs">
+		{
+			specs.map((s) => (
+				<div class="spec">
+					<span class="spec__label">{s.label}</span>
+					<span class="spec__value" style={s.nowrap ? 'white-space:nowrap' : undefined}>
+						{s.value}
+					</span>
+				</div>
+			))
+		}
+	</div>
+</a>
+
+<style>
+	.card {
+		display: block;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	h2 {
+		margin: 18px 0 12px;
+		font: 400 24px/1.2 var(--serif);
+		color: var(--ink);
+	}
+
+	.spec {
+		display: flex;
+		justify-content: space-between;
+		gap: 16px;
+		padding: 9px 0;
+		border-top: 1px solid var(--rule-light);
+		font: 400 13px/1.4 var(--sans);
+	}
+
+	.spec__label {
+		color: var(--muted);
+	}
+
+	.spec__value {
+		color: var(--ink-2);
+		text-align: right;
+	}
+</style>

@@ -1,0 +1,57 @@
+---
+/**
+ * The one absent-image state that is designed rather than decorative: a pattern whose
+ * photography has not been shot, but whose instructions are written and free to use.
+ *
+ * This is a real fallback and should survive the placeholder cleanup — unlike
+ * PhotoPlaceholder.astro, it is meant to ship.
+ */
+interface Props {
+	/** e.g. "Shoot booked · September". Optional — omit if nothing is scheduled. */
+	note?: string;
+	ratio?: string;
+}
+
+const { note, ratio = '4/5' } = Astro.props;
+---
+
+<div class="pending" style={`aspect-ratio:${ratio}`}>
+	<span class="ring" aria-hidden="true"></span>
+	<p>Photography still to come — the pattern itself is written and free to use.</p>
+	{note && <span class="note">{note}</span>}
+</div>
+
+<style>
+	.pending {
+		width: 100%;
+		border: 1px dashed var(--border-dashed);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 14px;
+		padding: 24px;
+		text-align: center;
+	}
+
+	.ring {
+		width: 34px;
+		height: 34px;
+		border: 1px solid var(--border-dashed);
+		border-radius: 999px;
+	}
+
+	p {
+		margin: 0;
+		max-width: 30ch;
+		font: 400 13px/1.6 var(--sans);
+		color: var(--muted);
+	}
+
+	.note {
+		font: 600 10px/1 var(--sans);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--ochre);
+	}
+</style>

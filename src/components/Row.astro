@@ -1,0 +1,106 @@
+---
+/**
+ * One instruction row or round, rendered as a row card.
+ *
+ * Used inline inside a pattern's MDX body:
+ *
+ *   <Row label="Row 1" side="RS" counts={{ XS: 62, S: 68, M: 74 }}>
+ *     Ch 2, hdc in each st to end, turn.
+ *   </Row>
+ *
+ * Stitch counts vary by size, so `counts` takes a map of size name to count and
+ * renders them together. A single count can be passed as a plain string or number.
+ */
+interface Props {
+	/** e.g. "Row 1" or "Rnd 4–8". */
+	label: string;
+	/** Right side / wrong side marker, when it matters. */
+	side?: 'RS' | 'WS';
+	counts?: Record<string, number | string> | number | string;
+}
+
+const { label, side, counts } = Astro.props;
+
+const countEntries =
+	counts && typeof counts === 'object' ? Object.entries(counts) : null;
+const singleCount = counts && typeof counts !== 'object' ? String(counts) : null;
+---
+
+<div class="row">
+	<div class="row__head">
+		<span class="row__label">{label}</span>
+		{side && <span class="row__side">{side}</span>}
+	</div>
+
+	<div class="row__body">
+		<slot />
+	</div>
+
+	{
+		(countEntries || singleCount) && (
+			<div class="row__counts">
+				{singleCount && <span class="count">{singleCount} sts</span>}
+				{countEntries?.map(([sizeName, n]) => (
+					<span class="count">
+						<span class="count__size">{sizeName}</span> {n}
+					</span>
+				))}
+			</div>
+		)
+	}
+</div>
+
+<style>
+	.row {
+		border-top: 1px solid var(--rule-light);
+		padding: 16px 0;
+	}
+
+	.row__head {
+		display: flex;
+		align-items: baseline;
+		gap: 10px;
+		margin-bottom: 8px;
+	}
+
+	.row__label {
+		font: 600 11px/1 var(--sans);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	.row__side {
+		font: 600 9.5px/1 var(--sans);
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+
+	.row__body {
+		font: 400 clamp(15px, 1.5vw, 16.5px) / 1.7 var(--sans);
+		color: var(--ink-2);
+	}
+
+	/* Markdown inside the slot arrives wrapped in <p>. */
+	.row__body :global(p) {
+		margin: 0;
+	}
+
+	.row__counts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 14px;
+		margin-top: 10px;
+	}
+
+	.count {
+		font: 400 12px/1 var(--sans);
+		color: var(--muted);
+	}
+
+	.count__size {
+		font-weight: 600;
+		color: var(--ink-2);
+	}
+</style>

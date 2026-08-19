@@ -1,0 +1,168 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PhotoPlaceholder from '../../components/PhotoPlaceholder.astro';
+import { formatDate, readTime, slugify } from '../../lib/format';
+
+const posts = (await getCollection('posts')).sort(
+	(a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+
+const kinds = ['Yarn test', 'Stitch test', 'Fibre note'] as const;
+const available = kinds.filter((k) => posts.some((p) => p.data.kind === k));
+---
+
+<Base
+	title="Journal — yarn, fibre and stitch tests"
+	description="Everything gets swatched, washed and measured — including the results that were inconvenient. Write-ups of yarn, fibre and stitch tests."
+	active="journal"
+>
+	<div class="shell head">
+		<h1>Journal</h1>
+		<p class="standfirst">
+			Everything here gets swatched, washed and measured before it gets written about —
+			including the results that were inconvenient.
+		</p>
+
+		<div class="filters label">
+			<a href="/journal/" class="filter filter--active" aria-current="page">All</a>
+			{
+				available.map((k) => (
+					<a href={`/journal/c/${slugify(k)}/`} class="filter">
+						{k}s
+					</a>
+				))
+			}
+		</div>
+		<div class="hairline"></div>
+	</div>
+
+	<div class="shell list">
+		{
+			posts.map((post, i) => (
+				<a
+					href={`/journal/${post.id}/`}
+					class:list={['row', { 'row--first': i === 0 }]}
+				>
+					<div class="row__media">
+						<PhotoPlaceholder caption={`${post.data.title.toLowerCase()}, 3:2`} ratio="3/2" />
+					</div>
+
+					<div class="row__text hoverable">
+						<div class="row__meta">
+							<span class="row__kind">{post.data.kind}</span>
+							<span class="row__rest">
+								· {formatDate(post.data.date)} · {readTime(post.body)} min
+							</span>
+						</div>
+						<h2 class="hoverable__title">{post.data.title}</h2>
+						<p class="row__excerpt">{post.data.summary}</p>
+						{post.data.method && <p class="row__method">{post.data.method}</p>}
+					</div>
+				</a>
+			))
+		}
+	</div>
+</Base>
+
+<style>
+	.head {
+		padding-top: 44px;
+	}
+
+	h1 {
+		margin: 0 0 16px;
+		font: 400 clamp(32px, 5vw, 44px) / 1.05 var(--serif);
+		color: var(--ink);
+	}
+
+	.standfirst {
+		margin: 0 0 30px;
+		max-width: 600px;
+		font: 400 clamp(15px, 1.4vw, 17px) / 1.6 var(--sans);
+		color: var(--muted);
+	}
+
+	.filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 18px;
+		padding-bottom: 18px;
+	}
+
+	.filter {
+		color: var(--muted);
+		text-decoration: none;
+	}
+
+	.filter--active {
+		color: var(--ink);
+		border-bottom: 1px solid rgba(42, 35, 32, 0.4);
+		padding-bottom: 4px;
+	}
+
+	.row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: clamp(22px, 3vw, 40px);
+		align-items: center;
+		text-decoration: none;
+		color: inherit;
+		border-top: 1px solid var(--rule-light);
+		padding-block: clamp(30px, 4vw, 44px);
+	}
+
+	.row--first {
+		border-top: none;
+		padding-top: 34px;
+	}
+
+	/* The max-width is deliberate: without it the image column grows to half the shell
+	   and the row reads as a banner rather than a list item. */
+	.row__media {
+		flex: 1 1 240px;
+		max-width: 320px;
+	}
+
+	.row__text {
+		flex: 1 1 340px;
+		min-width: 0;
+	}
+
+	.row__meta {
+		font: 600 10.5px/1 var(--sans);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		margin-bottom: 12px;
+	}
+
+	.row__kind {
+		color: var(--ochre);
+	}
+
+	.row__rest {
+		font-weight: 400;
+		letter-spacing: 0.04em;
+		text-transform: none;
+		color: var(--muted);
+	}
+
+	.row__text h2 {
+		margin: 0 0 12px;
+		font: 400 clamp(24px, 3.2vw, 32px) / 1.18 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.row__excerpt {
+		margin: 0 0 12px;
+		font: 400 clamp(14.5px, 1.4vw, 16px) / 1.65 var(--sans);
+		color: var(--muted);
+	}
+
+	.row__method {
+		margin: 0;
+		font: 400 12px/1.5 var(--sans);
+		color: var(--muted);
+	}
+</style>
