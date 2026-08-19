@@ -1,4 +1,8 @@
-﻿# Hookd — personal crochet blog
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+# Hookd — personal crochet blog
 
 A static site publishing free crochet patterns and write-ups of yarn, fibre and stitch tests.
 Not a shop. Selling happens on Ravelry, never here.
@@ -6,19 +10,51 @@ Not a shop. Selling happens on Ravelry, never here.
 ## Stack — decided, do not substitute
 
 - Astro, TypeScript
-- Sveltia CMS at /admin for browser-based publishing
-- Cloudflare Pages hosting, free tier
+- Sveltia CMS at /admin for browser-based publishing (not built yet)
+- Cloudflare hosting, free tier
 - No database, no server, no auth
+
+The Cloudflare project is a **Workers** project (`hookd-blog.sklocheva.workers.dev`), not
+Pages. The dashboard flow now steers new projects to Workers; the decision was to stay there
+because push-to-deploy works and nothing here needs what Pages does differently. Hosting is
+still static assets only — there is no server process, and that constraint is load-bearing
+(see Deployment).
 
 ## Commands
 
-- `npm run dev` — local dev server
-- `npm run build` — production build; must pass before pushing
-- `npm run preview` — preview the build
+- `npm install` — first run only
+- `npm run dev` — local dev server at http://localhost:4321
+- `npm run build` — production build into `dist/`; must pass before pushing
+- `npm run preview` — serve the built `dist/` locally
+
+There are no tests and no linter. `npm run build` is the only gate.
+
+Note that `astro build` does **not** type-check. `tsconfig.json` extends
+`astro/tsconfigs/strict`, but nothing enforces it at build time — a type error in a `.astro`
+frontmatter block will build clean and only surface in the editor.
+
+## Architecture
+
+Small by design. The parts that matter are the ones that span files:
+
+**`src/layouts/Base.astro` is the single SEO chokepoint.** It owns `<head>`, and its `Props`
+interface makes `title` and `description` required, so a page cannot render without them.
+Every page goes through it. Meta description, canonical and the sitemap link live here and
+nowhere else.
+
+**`site` in `astro.config.mjs` is the source of truth for absolute URLs.** `@astrojs/sitemap`
+reads it to emit `<loc>` entries, and `Base.astro` derives the canonical `<link>` from it via
+`Astro.site`. It is duplicated by hand in one place — the `Sitemap:` line in
+`public/robots.txt`. **Changing the domain means editing both files together**, and this will
+have to happen again when a custom domain is attached.
+
+**Images are optimized at build time into static files.** `astro.config.mjs` pins
+`output: 'static'` and the sharp image service deliberately — see Deployment for why.
 
 ## Content model
 
-Two collections, both with Zod schemas in `src/content.config.ts`.
+Two collections, both with Zod schemas in `src/content.config.ts`. **Neither is built yet** —
+the site is currently one placeholder homepage.
 
 **patterns** carries structured data, not prose: yarn (brand, line, fibre content, ball
 weight and length, CYC weight category), hook size in mm and US, gauge as TWO separate
@@ -45,6 +81,30 @@ size range, yardage per size, US/UK terms.
 - Mobile first. Check at 375px.
 - Server-rendered HTML only. No client-side-only content — AI crawlers fetch JavaScript
   but do not execute it.
+
+## Deployment
+
+Pushing to `main` triggers a Cloudflare build and redeploy. It takes **roughly 60 seconds**.
+There is no manual deploy step and no deploy command.
+
+Things that have already gone wrong here, and cost real time:
+
+- **A failed build is silent.** Cloudflare reports nothing back to GitHub — no commit status,
+  no deployment record, no notification. The previous version keeps serving. The only way to
+  know a deploy landed is to fetch the live site and look for the change. Never assume a push
+  deployed; verify against something in the response that actually differs.
+- **Never trust that the host builds what this machine builds.** The same commit has produced
+  different output locally and on Cloudflare. A green local `npm run build` is necessary, not
+  sufficient.
+- **`output: 'static'` and the pinned sharp image service are load-bearing.** In server mode
+  Astro emits `/_image?href=...` URLs for `<Image>`. That is a runtime endpoint; on static
+  hosting it 404s and every image on the site breaks while the HTML still looks fine. If
+  images render locally but 404 live, check the `src` attribute for `/_image` first.
+- **Node version.** `.nvmrc` pins 24 so local and CI agree. Astro requires >= 22.12 and
+  rejects odd-numbered majors (23, 25).
+- **Pushing needs the gh credential helper**, configured local to this repo. It resolves in
+  PowerShell but **not** in Git Bash, where `git push` fails with "Invalid username or
+  token". Push from PowerShell.
 
 ## Out of scope
 

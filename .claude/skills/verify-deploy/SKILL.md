@@ -1,0 +1,117 @@
+---
+name: verify-deploy
+description: Verify that a push to main actually reached the live Hookd site, and catch the static-hosting failures that look fine locally. Use this whenever you push to main, change astro.config.mjs, change the site URL or domain, touch anything under src/assets/ or an <Image>, or are asked "is it live yet", "did the deploy work", "why is the image broken", or "the site looks wrong". Also use it before telling the user a deploy succeeded — on this project a failed build is silent and the old version keeps serving, so a push that appears to work is not evidence that it did.
+---
+
+# Verifying a deploy of Hookd
+
+This site is static assets on Cloudflare Workers, deployed by pushing to `main`. There is no
+deploy command and no CI to watch. That makes deploys feel effortless and makes failures
+invisible, which is the whole problem this skill exists to solve.
+
+Read `references/failures.md` when you hit something confusing — it records the specific
+failures that have already happened here, with the evidence that identified each one.
+
+## The two things that are actually true here
+
+**A failed build is silent.** Cloudflare reports nothing back to GitHub — no commit status,
+no deployment record, no notification. When a build fails, the previous version keeps serving
+happily. So "I pushed and the site still works" is exactly what a failed deploy looks like.
+The only way to know a deploy landed is to find something in the live response that differs
+from what was there before.
+
+**The host does not necessarily build what you build.** The same commit has produced different
+output locally and on Cloudflare. A green local `npm run build` tells you your source is
+valid. It does not tell you what the live site will contain. Verify against the deployed URL,
+never against `dist/`.
+
+## Workflow
+
+Run `npm run build` locally first. It's the cheapest way to catch a broken commit, and pushing
+something that can't build wastes a deploy cycle.
+
+Then capture a **marker** — something in the live response that will visibly change once your
+commit deploys. Without a marker you cannot distinguish "deployed" from "build failed, old
+version still up". The canonical URL, a heading, a piece of copy, an asset filename hash all
+work. If your change is invisible in the HTML (a config-only change, for instance), pick the
+thing it should affect — an image `src`, a sitemap `<loc>` — and check that.
+
+```bash
+curl -s https://hookd-blog.sklocheva.workers.dev/ | grep -o 'rel="canonical" href="[^"]*"'
+```
+
+Push, then poll. A normal deploy lands in about 60 seconds. Use the bundled script:
+
+```bash
+bash .claude/skills/verify-deploy/scripts/verify-deploy.sh
+```
+
+It polls until the site responds, then runs every check below and prints a pass/fail table.
+Pass `--expect <string>` to make it wait for your marker to appear rather than just checking
+current state. Read the script before trusting it on a new failure mode; it encodes the traps
+listed here, not every possible one.
+
+**If the marker hasn't appeared after roughly three minutes, treat the build as failed.** Say
+so plainly and get the build log — you cannot diagnose a Cloudflare build failure from
+outside, and guessing at it burns far more time than asking. Only the user has dashboard
+access.
+
+## What to check, and why each one exists
+
+**Images resolve.** This is the failure most likely to recur and the least visible. In server
+mode Astro emits `/_image?href=...&w=375&f=webp` for `<Image>`. That is a runtime endpoint. On
+static hosting nothing answers it, so it returns 404 and every image on the site is broken
+while the HTML still looks perfect. `astro.config.mjs` pins `output: 'static'` and the sharp
+image service to prevent this — if you see `/_image` in the live HTML, that pin is not taking
+effect on the host, and the site's images are broken right now.
+
+Check that image `src` values start with `/_astro/` and end in a real extension, then fetch
+each one and confirm a 200 with an image content-type.
+
+**The canonical host matches the real host.** `site` in `astro.config.mjs` feeds both the
+sitemap `<loc>` entries and the canonical `<link>`. `public/robots.txt` repeats the host by
+hand. These drift apart easily, and nothing in the build catches it. Confirm all three agree
+with the URL you actually fetched.
+
+**Sitemap and robots.txt serve.** `/sitemap-index.xml`, `/sitemap-0.xml`, `/robots.txt`, all
+200.
+
+**The page still meets the project's rules.** Exactly one `<h1>`, and zero `<script>` tags —
+the site is server-rendered HTML only because AI crawlers fetch JavaScript but don't execute
+it. A stray client-side island silently breaks that promise.
+
+## Writing checks that can't lie to you
+
+A verification check that matches its own failure mode is worse than no check, because it
+reports success and you stop looking.
+
+This has already happened here. Polling for a fixed image with `grep _astro` matched instantly
+and reported success — because the broken URL is `/_image?href=%2F_astro%2F...`, which contains
+`_astro` inside its query string. The check passed while the thing it was checking was still
+broken.
+
+Before relying on a check, ask what the failure looks like and confirm the check rejects it.
+Anchor patterns to structure rather than to a substring that could appear anywhere:
+`src="/_astro/` is safe, bare `_astro` is not. When a check passes suspiciously fast, that is
+a signal to distrust it, not to celebrate.
+
+## Reporting honestly
+
+Report what you observed, not what you expect follows from it. "The canonical flipped to the
+new host 62 seconds after the push" is a verified deploy. "I pushed and it should be live" is
+not, and on this project it's frequently wrong.
+
+If the site is partly broken, say which part and give the status codes. A working page with
+404ing images is not "deployed successfully".
+
+## Environment notes
+
+`git push` needs the gh credential helper, which is configured local to this repo. It resolves
+in **PowerShell** but not in Git Bash, where the push fails with `gh: command not found`
+followed by "Invalid username or token". Push from PowerShell; `curl` checks are fine in Bash.
+
+Node is not on the inherited PATH in fresh tool shells. In PowerShell, prepend:
+
+```powershell
+$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")
+```
