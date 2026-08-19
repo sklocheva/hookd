@@ -1,74 +1,107 @@
 # TODO
 
-Bullet points for now — we expand these into real commands and skills later.
+Mapped to the steps in `PLAN.md`. Steps 1, 2, 3 and 5 are done; 6 is nearly done.
 
-## Ground rules (to formalise)
-
-**Branching and deploys**
-
-- [ ] Work changes on a branch, never straight on `main`
-- [ ] `main` is the deploy branch — pushing to it publishes, so merging is the publish decision
-- [ ] Merge to `main` only with Sophia's explicit consent, once the page is reviewed and finished
-- [ ] No auto-merge, no "while I was in there" commits to `main`
-- [ ] Preview the branch before merging — decide how (local `npm run preview`, or Cloudflare preview deployments)
-
-**Making changes**
-
-- [ ] Always build locally first — `npm run build` must pass before anything is pushed
-- [ ] Write tests where feasible; decide what "feasible" means here, since there is no test runner yet
-- [ ] Verify the deployed result against the live site, not against `dist/` — see the `verify-deploy` skill
-- [ ] Check at 375px before calling a change done
-- [ ] One change per branch; keep diffs reviewable
-- [ ] Don't touch decided stack choices without asking
-
-**Still to work out**
-
-- [ ] Pick a test approach: schema//content validation is the obvious first target (the SEO
-      required-fields rule is already effectively a test), plus link checking and the
-      `verify-deploy` script as a smoke test
-- [ ] Decide whether a pre-push hook or a GitHub Action enforces the build gate
-- [ ] Turn these rules into a skill or slash command so they are applied, not just written down
+---
 
 ## Blocked on Sophia
 
-- [ ] **Sveltia CMS browser login.** The panel is built and served at `/admin`, but signing in
-      needs one of: a GitHub Personal Access Token (works today, no setup), or an OAuth app
-      plus an auth worker for proper "Sign in with GitHub". See README.
-- [ ] The site name — blocks buying the domain
-- [ ] The address for the Austrian legal page: home, Postfach, or service address
+- [ ] **Decision 9 — the site name.** Blocks buying the domain (step 4) and nothing else.
+      Front-runner in PLAN.md is `hookdlab.com`.
+- [ ] **Decision 10 — the address for the Austrian §25 disclosure.** Home, Postfach, or a
+      service address. Blocks the legal page content, not the page itself.
+- [ ] **Step 0 — dictate the Y2K skinny shawl stitch post.** Ten minutes, messy, no structure.
+      The method is: you dictate, Claude tidies the wording, your words and caveats stay.
+- [ ] Try adding a post through `/admin` and report anything that misbehaves.
 
-## Content and assets
+---
 
-- [ ] **Real photography.** Everything is placeholder. Aspect ratios are baked into the layouts:
-      | Screen | Slot | Ratio | Subject |
-      | --- | --- | --- | --- |
-      | Homepage | pinned hero | 4:5 | cowl styled / blanket folded / yarn haul, autumn tones |
-      | Homepage | feed thumbs ×4 | 1:1 | crop of each post's hero |
-      | Patterns | cards | 4:5 | cardigan worn · cowl styled · mitts flat lay · blanket folded · tote held |
-      | Pattern page | hero | 16:10 | cardigan, worn, outdoors |
-      | Journal | rows ×4 | 3:2 | six swatches · ball bands top-down · four stitch swatches in raking light · blocked vs unblocked |
-- [ ] **Social share images don't exist yet.** `socialImage` is required and every entry points
-      at a path under `/social/` that isn't there, so `og:image` currently 404s. Either add the
-      files or point them at a default.
+## Step 6 — Implement the design (nearly done)
+
+- [ ] **About page.** Not designed and not built; currently `href="#"` in both navs.
+- [ ] **Two stub legal pages** — privacy policy, and the Austrian §25 Mediengesetz disclosure.
+      Templates can be written now; the address is blocked on decision 10.
+- [ ] Pattern **instructions and charts** were explicitly not designed. `<Row>` exists and the
+      example pattern uses it, but the surrounding section needs a design. Written first,
+      chart repeated after.
+- [ ] Wire "Print / save as PDF" and "Add to Ravelry queue" on the pattern page, or remove them.
+- [ ] Empty states for `/patterns/` and `/journal/` when a collection is empty.
+
+## Step 7 — SEO, legal, analytics (mostly not started)
+
+Already in place: canonical URLs, unique title and meta description per page, Open Graph and
+Twitter Card basics, robots.txt, sitemap, one `<h1>` per page.
+
+- [ ] **`og:image:width` and `og:image:height`** as explicit values. These also power Pinterest
+      Rich Pins, which need no separate setup.
+- [ ] **JSON-LD**: BlogPosting for journal posts, Article for patterns, BreadcrumbList
+      site-wide, Person for Sophia. Skip HowTo — Google deprecated those rich results in 2023.
+- [ ] **robots.txt: name the AI crawlers explicitly** — Googlebot, GPTBot, ClaudeBot,
+      PerplexityBot, Google-Extended. Currently only a blanket `User-agent: *`.
+- [ ] **Cloudflare Web Analytics.** Cookieless, so no consent banner.
+- [ ] **Social share images do not exist.** `socialImage` is required and every entry points at
+      a `/social/…` path that 404s, so `og:image` is currently broken sitewide. Either add the
+      files or point them at one default image.
+
+## Step 8 — Launch
+
+- [ ] Publish the Y2K stitch post
+- [ ] Submit the sitemap in Google Search Console
+- [ ] Pinterest business account — Rich Pins validate automatically once Open Graph is live
+
+## Step 9 — Fill it out
+
+- [ ] Three more write-ups from findings that already exist: moss 3 mm vs 4 mm · Karisma vs
+      Snorre · swatch gauge vs piece gauge. Four posts is where the site stops looking empty.
+- [ ] **Photo session.** Side light at 90° to a window, matte mid-tone background, stills
+      separate from video, vertical framing for Pinterest. Aspect ratios are baked into the
+      layouts:
+      | Screen | Slot | Ratio |
+      | --- | --- | --- |
+      | Homepage | pinned hero | 4:5 |
+      | Homepage | feed thumbs | 1:1 |
+      | Patterns | cards | 4:5 |
+      | Pattern page | hero | 16:10 |
+      | Journal | rows | 3:2 |
+- [ ] First free pattern — the fingerless gloves. Write the pattern first, then make the second
+      of the pair as the test.
+- [ ] Ravelry listings, Instagram link, newsletter signup.
+- [ ] Replace the three example patterns and two example posts. They exist to exercise the
+      schemas, not to be published.
+
+## Step 10 — The calculator
+
+- [ ] Port the grading toolkit to one page: inputs for gauge, target measurements and ease;
+      outputs for stitch and row counts per size. One component, no backend. Do it after there
+      is content — it is likely the best traffic page on the site.
+
+---
+
+## Assets still missing
+
 - [ ] **Wordmark artwork.** Currently italic Lora in a dashed box — delete the box and its
-      caption in `Header.astro` and `Footer.astro` when real artwork lands.
-- [ ] **Social icons** for Instagram, YouTube, Pinterest, Ravelry. Currently text stubs.
-- [ ] Replace the example entries. They exist to exercise the schemas, not to be published.
-- [ ] Dictate the Y2K skinny shawl stitch post, and the two-colour fingerless gloves pattern.
+      monospace caption in `Header.astro` and `Footer.astro` when real artwork lands.
+- [ ] **Social icons** for Instagram, YouTube, Pinterest, Ravelry. Currently text stubs in
+      circles, with a caption to delete alongside them.
+- [ ] All photography. `PhotoPlaceholder.astro` is scaffolding and should eventually be
+      deleted; `PhotoPending.astro` is a real state and stays.
 
-## Site
+## Housekeeping
 
-- [ ] **About page.** Not designed; currently `href="#"` in both navs.
-- [ ] Pattern **instructions and charts** are not designed. `<Row>` exists and the example
-      pattern uses it; the surrounding section still needs a design. Written first, chart after.
-- [ ] Wire "Print / save as PDF" and "Add to Ravelry queue", or remove them.
-- [ ] Empty states: `/patterns/` and `/journal/` with nothing in them.
-- [ ] Cloudflare Web Analytics.
-- [ ] Custom domain. When it lands, update `site` in `astro.config.mjs` **and** the `Sitemap:`
-      line in `public/robots.txt` together.
+- [ ] **The image pipeline is unverified in CI** — there are no real images yet, so nothing
+      exercises `<Image>`. The `/_image` bug that cost a day can only recur once a real photo
+      lands, so re-run the `verify-deploy` skill the moment the first upload happens.
+- [ ] Delete merged branches `sveltia-cms` and `fix-cms-public-folder`.
+- [ ] Decide whether drafts should become pull requests (`publish_mode: editorial_workflow`).
+      Currently saving in the CMS commits straight to `main` and publishes in about a minute.
+- [ ] Run the skill-creator eval loop and description optimizer against
+      `.claude/skills/verify-deploy` (needs subagents — ask first).
 
-## Tooling
+## Ground rules — deferred until the build is finished
 
-- [ ] Run the skill-creator **eval loop** against `.claude/skills/verify-deploy` (needs
-      subagents — ask first).
-- [ ] Run the skill-creator **description optimizer** to tune when `verify-deploy` triggers.
+Agreed to write these up properly at the end, not now. The working rule in the meantime is:
+minimal tests before handing anything over, then push to `main`.
+
+The bullets to expand later: work on a branch; merge to `main` only with consent once a page is
+finished; build locally before pushing; write tests where feasible; verify against the live
+site, not `dist/`; check at 375px.
