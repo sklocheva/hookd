@@ -93,6 +93,18 @@ img {
 	background: var(--rule);
 }
 
+/* Label sizing floor.
+   Contrast passing is not the same as being legible: the spec-block labels passed at
+   4.66:1 and were still reported as hard to read, because small uppercase text with
+   wide letter-spacing is one of the hardest combinations there is. Sophia gets blurry
+   vision on 10px uppercase, so anyone with mild visual impairment would struggle.
+
+   For structural labels — spec labels, table headers, row markers — the floor is
+   11px, ideally 11.5–12px, in --ink-2 rather than --muted, with letter-spacing at
+   0.06–0.08em rather than 0.1em+. Wide tracking helps at display sizes and hurts here.
+
+   Below 11px is for scaffolding captions only, which get deleted with the placeholders. */
+
 /* One uppercase label style serves every eyebrow, filter and CTA. */
 .label {
 	font: 600 11px/1 var(--sans);

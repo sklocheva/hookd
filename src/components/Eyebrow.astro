@@ -13,14 +13,20 @@ interface Props {
 	/** Muted trailing text, e.g. "· 12 Aug 2026 · 14 min". Rendered as given. */
 	rest?: string;
 	tone?: 'pattern' | 'journal' | 'neutral';
-	/** The design uses 10–11px depending on context. */
+	/**
+	 * 11px is the floor for uppercase labels — see the note in global.css. Small
+	 * uppercase with wide tracking is the hardest thing on the page to read, and
+	 * passing contrast does not make it legible.
+	 */
 	size?: number;
 }
 
 const { kind, rest, tone = 'pattern', size = 11 } = Astro.props;
+
+const fontSize = Math.max(size, 11);
 ---
 
-<div class="eyebrow" style={`font-size:${size}px`}>
+<div class="eyebrow" style={`font-size:${fontSize}px`}>
 	<span class:list={['kind', `kind--${tone}`]}>{kind}</span>
 	{rest && <span class="rest"> {rest}</span>}
 </div>
