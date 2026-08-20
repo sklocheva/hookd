@@ -2,7 +2,9 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
+import Eyebrow from '../components/Eyebrow.astro';
 import { formatDate, patternSpecLine } from '../lib/format';
+import { byDateDesc } from '../lib/taxonomy';
 
 const [patterns, posts] = await Promise.all([
 	getCollection('patterns'),
@@ -45,6 +47,7 @@ const feed: FeedItem[] = [
 ]
 	.sort((a, b) => b.date.valueOf() - a.date.valueOf())
 	.slice(0, 4);
+
 
 // Editorially pinned, in rotation order. Deliberately hand-picked rather than derived —
 // this is the one editorial slot on the site.
@@ -138,15 +141,12 @@ const pinned = [
 					</div>
 					<div class="feed__text">
 						<div class="feed__meta">
-							<span
-								class:list={[
-									'feed__kind',
-									item.kind === 'Pattern' ? 'is-pattern' : 'is-journal',
-								]}
-							>
-								{item.kind}
-							</span>
-							<span class="feed__date">· {formatDate(item.date)}</span>
+							<Eyebrow
+								kind={item.kind}
+								rest={`· ${formatDate(item.date)}`}
+								tone={item.kind === 'Pattern' ? 'pattern' : 'journal'}
+								size={10}
+							/>
 						</div>
 						<h3 class="hoverable__title">{item.title}</h3>
 						<p class="feed__excerpt">{item.summary}</p>
@@ -337,17 +337,6 @@ const pinned = [
 		gap: 16px;
 	}
 
-	.filter {
-		color: var(--muted);
-		text-decoration: none;
-	}
-
-	.filter--active {
-		color: var(--ink);
-		border-bottom: 1px solid rgba(42, 35, 32, 0.4);
-		padding-bottom: 4px;
-	}
-
 	/* Feed */
 	.feed__row {
 		display: flex;
@@ -370,25 +359,7 @@ const pinned = [
 	}
 
 	.feed__meta {
-		font: 600 10px/1 var(--sans);
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
 		margin-bottom: 10px;
-	}
-
-	.feed__kind.is-pattern {
-		color: var(--terracotta);
-	}
-
-	.feed__kind.is-journal {
-		color: var(--ochre);
-	}
-
-	.feed__date {
-		font-weight: 400;
-		letter-spacing: 0.04em;
-		text-transform: none;
-		color: var(--muted);
 	}
 
 	.feed__text h3 {

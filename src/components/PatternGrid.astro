@@ -1,0 +1,24 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import PatternCard from './PatternCard.astro';
+
+/** The pattern card grid, shared by /patterns/ and /patterns/c/[category]/. */
+interface Props {
+	patterns: CollectionEntry<'patterns'>[];
+}
+
+const { patterns } = Astro.props;
+---
+
+<div class="shell grid">
+	{patterns.map((pattern) => <PatternCard pattern={pattern} />)}
+</div>
+
+<style>
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+		gap: 52px 36px;
+		padding-top: 40px;
+	}
+</style>

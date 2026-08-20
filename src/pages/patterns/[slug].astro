@@ -3,6 +3,7 @@ import { getCollection, getEntry, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
 import PatternLicence from '../../components/PatternLicence.astro';
 import {
 	formatDate,
@@ -74,10 +75,7 @@ const specs = [
 >
 	<article class="shell shell--narrow">
 		<div class="title-block">
-			<div class="eyebrow">
-				<span class="eyebrow__kind">Pattern</span>
-				<span class="eyebrow__rest">· {formatDate(d.date)} · free, always</span>
-			</div>
+			<Eyebrow kind="Pattern" rest={`· ${formatDate(d.date)} · free, always`} />
 			<h1>{d.title}</h1>
 			<p class="standfirst">{d.summary}</p>
 		</div>
@@ -179,22 +177,8 @@ const specs = [
 		padding-top: 44px;
 	}
 
-	.eyebrow {
-		font: 600 11px/1 var(--sans);
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
+	.title-block :global(.eyebrow) {
 		margin-bottom: 18px;
-	}
-
-	.eyebrow__kind {
-		color: var(--terracotta);
-	}
-
-	.eyebrow__rest {
-		font-weight: 400;
-		letter-spacing: 0.04em;
-		text-transform: none;
-		color: var(--muted);
 	}
 
 	h1 {

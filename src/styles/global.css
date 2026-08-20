@@ -112,3 +112,21 @@ img {
 		transition-duration: 0.01ms !important;
 	}
 }
+
+/* Filter links. Used by the index page heads and the homepage "Latest" bar, which
+   share the look but not the surrounding layout — so the link style lives here and
+   the layout stays with each component. */
+.filter {
+	color: var(--muted);
+	text-decoration: none;
+}
+
+.filter:hover {
+	color: var(--ink);
+}
+
+.filter--active {
+	color: var(--ink);
+	border-bottom: 1px solid rgba(42, 35, 32, 0.4);
+	padding-bottom: 4px;
+}

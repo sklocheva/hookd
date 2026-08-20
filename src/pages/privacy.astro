@@ -1,78 +1,52 @@
 ---
 import TextPage from '../layouts/TextPage.astro';
 
-// DRAFT — describes what the site actually does today: a static site with no forms,
-// no accounts, no cookies and no analytics. Every claim here must stay true; if
-// analytics or a newsletter is added later, this page changes in the same commit.
+// Deliberately short. Every sentence here must stay true of the site as built — if a
+// newsletter, comments or analytics are ever added, this page changes in the same commit.
 ---
 
 <TextPage
 	title="Privacy — Hookd"
-	description="What this site collects: essentially nothing. No accounts, no cookies, no tracking, no newsletter."
+	description="This site sets no cookies, has no accounts and no tracking. What little is processed, and by whom."
 	heading="Privacy"
-	standfirst="Short, because the site does very little. It is a set of static pages with no accounts, no forms and no tracking."
 	updated="Last updated 19 August 2026"
 >
-	<h2>What is collected</h2>
-
 	<p>
-		Nothing that identifies you. There are no accounts, no comment section, no contact form and
-		no newsletter signup. The site sets <strong>no cookies</strong> and stores nothing in your
-		browser.
+		This site is a set of static pages. There are no accounts, no comments, no contact form and
+		no newsletter, so there is nothing for you to sign up to and nothing of yours to store.
 	</p>
 
-	<h2>Hosting logs</h2>
-
 	<p>
-		The site is served as static files by Cloudflare. Like any web host, Cloudflare processes
-		technical request data — IP address, timestamp, the page requested, your browser's
-		user-agent — in order to deliver the page and to protect against abuse. I do not have
-		access to those logs as an identifiable record of individual visitors, and I do not combine
-		them with anything else.
+		<strong>No cookies are set and no analytics are used.</strong> You are not tracked here,
+		and nothing about your visit is stored in your browser.
 	</p>
 
-	<h2>Fonts</h2>
+	<h2>Who else is involved</h2>
 
 	<p>
-		Typefaces are loaded from Google Fonts, which means your browser makes a request to Google's
-		servers and Google receives your IP address as part of that request. This is worth knowing
-		because it is the one third party the site currently contacts.
+		The site is hosted by <strong>Cloudflare</strong>, which processes ordinary request data —
+		your IP address, the time, the page you asked for — in order to serve the page and to
+		block abuse. Every website has this.
 	</p>
 
-	<div class="placeholder">
-		<strong>Open question</strong>
-		Under GDPR, loading fonts from Google has been found problematic in some EU decisions.
-		Self-hosting the font files would remove this entirely and is a small change. Worth doing
-		before launch — noted in TODO.md.
-	</div>
-
-	<h2>Analytics</h2>
-
 	<p>
-		There are currently none. If analytics are added, it will be Cloudflare Web Analytics,
-		which is cookieless and does not fingerprint or track individuals across sites — and this
-		page will be updated to say so.
-	</p>
-
-	<h2>Links out</h2>
-
-	<p>
-		Links to Ravelry, Instagram, Pinterest, YouTube and yarn suppliers lead to sites with their
-		own privacy policies. This one does not cover them.
+		Typefaces load from <strong>Google Fonts</strong>, so your browser contacts Google and
+		Google sees your IP address as part of that request. It is the only third party this site
+		reaches out to.
 	</p>
 
 	<h2>Your rights</h2>
 
 	<p>
-		Under the GDPR you have the right to access, correct and erase personal data held about
-		you, and to complain to a supervisory authority. Since this site holds no personal data
-		about you, there is in practice nothing to access or erase — but if you believe otherwise,
-		get in touch and I will look into it.
+		Under the GDPR you can ask what personal data is held about you, have it corrected or
+		erased, and complain to your national data protection authority. In practice I hold none,
+		so there is nothing to send you — but if you think otherwise, ask and I will look.
 	</p>
 
-	<div class="placeholder">
-		<strong>Draft — pending review</strong>
-		Accurate as a description of what the site does today, but not checked by a lawyer, and the
-		contact route is not yet set up. Both to be resolved before the site is announced.
-	</div>
+	<h2>Links out</h2>
+
+	<p>
+		Links to Ravelry, Instagram, Pinterest and yarn suppliers lead to sites with their own
+		policies. This one does not cover them.
+	</p>
 </TextPage>

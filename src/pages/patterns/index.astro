@@ -1,15 +1,16 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import PatternCard from '../../components/PatternCard.astro';
+import PageHead from '../../components/PageHead.astro';
+import PatternGrid from '../../components/PatternGrid.astro';
+import { byDateDesc, categoryHref, patternCategoriesInUse } from '../../lib/taxonomy';
 
-const patterns = (await getCollection('patterns')).sort(
-	(a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
+const patterns = (await getCollection('patterns')).sort(byDateDesc);
 
-const categories = ['Garments', 'Accessories', 'Home'] as const;
-// Only offer a filter that leads somewhere — an empty category page is a dead end.
-const available = categories.filter((c) => patterns.some((p) => p.data.category === c));
+const filters = [
+	{ label: 'All', href: '/patterns/', active: true },
+	...patternCategoriesInUse(patterns).map((c) => ({ label: c, href: categoryHref(c) })),
+];
 ---
 
 <Base
@@ -17,71 +18,11 @@ const available = categories.filter((c) => patterns.some((p) => p.data.category 
 	description="Every pattern is free and written out in full — no video-only instructions, no paywall. Sizes and gauge stated the way the Craft Yarn Council defines them."
 	active="patterns"
 >
-	<div class="shell head">
-		<h1>Free patterns</h1>
-		<p class="standfirst">
-			Every pattern here is free and written out in full — no video-only instructions, no
-			paywall. Sizes and gauge are stated the way the Craft Yarn Council defines them.
-		</p>
+	<PageHead
+		heading="Free patterns"
+		standfirst="Every pattern here is free and written out in full — no video-only instructions, no paywall. Sizes and gauge are stated the way the Craft Yarn Council defines them."
+		filters={filters}
+	/>
 
-		<div class="filters label">
-			<a href="/patterns/" class="filter filter--active" aria-current="page">All</a>
-			{
-				available.map((c) => (
-					<a href={`/patterns/c/${c.toLowerCase()}/`} class="filter">
-						{c}
-					</a>
-				))
-			}
-		</div>
-		<div class="hairline"></div>
-	</div>
-
-	<div class="shell grid">
-		{patterns.map((p) => <PatternCard pattern={p} />)}
-	</div>
+	<PatternGrid patterns={patterns} />
 </Base>
-
-<style>
-	.head {
-		padding-top: 44px;
-	}
-
-	h1 {
-		margin: 0 0 16px;
-		font: 400 clamp(32px, 5vw, 44px) / 1.05 var(--serif);
-		color: var(--ink);
-	}
-
-	.standfirst {
-		margin: 0 0 30px;
-		max-width: 600px;
-		font: 400 clamp(15px, 1.4vw, 17px) / 1.6 var(--sans);
-		color: var(--muted);
-	}
-
-	.filters {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 18px;
-		padding-bottom: 18px;
-	}
-
-	.filter {
-		color: var(--muted);
-		text-decoration: none;
-	}
-
-	.filter--active {
-		color: var(--ink);
-		border-bottom: 1px solid rgba(42, 35, 32, 0.4);
-		padding-bottom: 4px;
-	}
-
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-		gap: 52px 36px;
-		padding-top: 40px;
-	}
-</style>

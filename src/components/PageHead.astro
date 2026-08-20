@@ -1,0 +1,72 @@
+---
+/**
+ * The head of an index page: title, standfirst, filter row, hairline.
+ *
+ * Shared by /patterns/, /journal/ and their category routes, which previously carried
+ * four near-identical copies of this markup and its styles.
+ */
+export interface FilterLink {
+	label: string;
+	href: string;
+	active?: boolean;
+}
+
+interface Props {
+	heading: string;
+	standfirst?: string;
+	/** Rendered in the order given — see src/lib/taxonomy.ts. */
+	filters?: FilterLink[];
+}
+
+const { heading, standfirst, filters } = Astro.props;
+---
+
+<div class="shell head">
+	<h1>{heading}</h1>
+	{standfirst && <p class="standfirst">{standfirst}</p>}
+
+	{
+		filters && filters.length > 0 && (
+			<nav class="filters label" aria-label="Filter">
+				{filters.map((f) => (
+					<a
+						href={f.href}
+						class:list={['filter', { 'filter--active': f.active }]}
+						aria-current={f.active ? 'page' : undefined}
+					>
+						{f.label}
+					</a>
+				))}
+			</nav>
+		)
+	}
+
+	<div class="hairline"></div>
+</div>
+
+<style>
+	.head {
+		padding-top: 44px;
+	}
+
+	h1 {
+		margin: 0 0 16px;
+		font: 400 clamp(32px, 5vw, 44px) / 1.05 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.standfirst {
+		margin: 0 0 30px;
+		max-width: 600px;
+		font: 400 clamp(15px, 1.4vw, 17px) / 1.6 var(--sans);
+		color: var(--muted);
+	}
+
+	.filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 18px;
+		padding-bottom: 18px;
+	}
+</style>

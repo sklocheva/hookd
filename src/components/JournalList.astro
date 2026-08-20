@@ -1,0 +1,102 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Hero from './Hero.astro';
+import Eyebrow from './Eyebrow.astro';
+import { formatDate, readTime } from '../lib/format';
+
+/**
+ * The journal list rows. Shared by /journal/ and /journal/c/[kind]/, which previously
+ * carried two copies of this markup and ~90 lines of identical CSS each.
+ */
+interface Props {
+	posts: CollectionEntry<'posts'>[];
+}
+
+const { posts } = Astro.props;
+---
+
+<div class="shell list">
+	{
+		posts.map((post, i) => (
+			<a href={`/journal/${post.id}/`} class:list={['row', { 'row--first': i === 0 }]}>
+				<div class="row__media">
+					<Hero
+						image={post.data.heroImage}
+						alt={post.data.heroImageAlt}
+						ratio="3/2"
+						caption={post.data.title.toLowerCase()}
+						widths={[320, 640]}
+						sizes="(min-width: 1160px) 320px, 100vw"
+					/>
+				</div>
+
+				<div class="row__text hoverable">
+					<div class="row__meta">
+						<Eyebrow
+							kind={post.data.kind}
+							rest={`· ${formatDate(post.data.date)} · ${readTime(post.body)} min`}
+							tone="journal"
+							size={10.5}
+						/>
+					</div>
+					<h2 class="hoverable__title">{post.data.title}</h2>
+					<p class="row__excerpt">{post.data.summary}</p>
+					{post.data.method && <p class="row__method">{post.data.method}</p>}
+				</div>
+			</a>
+		))
+	}
+</div>
+
+<style>
+	.row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: clamp(22px, 3vw, 40px);
+		align-items: center;
+		text-decoration: none;
+		color: inherit;
+		border-top: 1px solid var(--rule-light);
+		padding-block: clamp(30px, 4vw, 44px);
+	}
+
+	.row--first {
+		border-top: none;
+		padding-top: 34px;
+	}
+
+	/* The max-width is deliberate: without it the image column grows to half the shell
+	   and the row reads as a banner rather than a list item. */
+	.row__media {
+		flex: 1 1 240px;
+		max-width: 320px;
+	}
+
+	.row__text {
+		flex: 1 1 340px;
+		min-width: 0;
+	}
+
+	.row__meta {
+		margin-bottom: 12px;
+	}
+
+	.row__text h2 {
+		margin: 0 0 12px;
+		font: 400 clamp(24px, 3.2vw, 32px) / 1.18 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.row__excerpt {
+		margin: 0 0 12px;
+		font: 400 clamp(14.5px, 1.4vw, 16px) / 1.65 var(--sans);
+		color: var(--muted);
+	}
+
+	.row__method {
+		margin: 0;
+		font: 400 12px/1.5 var(--sans);
+		color: var(--muted);
+	}
+</style>

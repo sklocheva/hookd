@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
+import Eyebrow from '../../components/Eyebrow.astro';
 import { formatDate, readTime } from '../../lib/format';
 
 export const getStaticPaths = (async () => {
@@ -26,13 +27,11 @@ const { Content } = await render(post);
 >
 	<article class="shell shell--narrow">
 		<div class="title-block">
-			<div class="eyebrow">
-				<span class="eyebrow__kind">Journal</span>
-				<span class="eyebrow__rest">
-					· {d.kind} · {formatDate(d.date)} · {readTime(post.body)} min
-					{d.updated && <> · updated {formatDate(d.updated)}</>}
-				</span>
-			</div>
+			<Eyebrow
+				kind="Journal"
+				rest={`· ${d.kind} · ${formatDate(d.date)} · ${readTime(post.body)} min${d.updated ? ` · updated ${formatDate(d.updated)}` : ''}`}
+				tone="journal"
+			/>
 			<h1>{d.title}</h1>
 			<p class="standfirst">{d.summary}</p>
 		</div>
@@ -62,22 +61,8 @@ const { Content } = await render(post);
 		padding-top: 44px;
 	}
 
-	.eyebrow {
-		font: 600 11px/1 var(--sans);
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
+	.title-block :global(.eyebrow) {
 		margin-bottom: 18px;
-	}
-
-	.eyebrow__kind {
-		color: var(--ochre);
-	}
-
-	.eyebrow__rest {
-		font-weight: 400;
-		letter-spacing: 0.04em;
-		text-transform: none;
-		color: var(--muted);
 	}
 
 	h1 {

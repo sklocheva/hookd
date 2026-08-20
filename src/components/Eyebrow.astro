@@ -1,0 +1,56 @@
+---
+/**
+ * The small uppercase line above a title: a coloured kind, then muted trailing meta.
+ *
+ * Appears on the homepage feed, the journal list, and both article templates — four
+ * near-identical copies before this existed. The tone carries the meaning: terracotta
+ * for patterns, ochre for journal, so the two content types stay distinguishable
+ * everywhere they sit side by side.
+ */
+interface Props {
+	/** The coloured label, e.g. "Pattern" or "Yarn test". */
+	kind: string;
+	/** Muted trailing text, e.g. "· 12 Aug 2026 · 14 min". Rendered as given. */
+	rest?: string;
+	tone?: 'pattern' | 'journal' | 'neutral';
+	/** The design uses 10–11px depending on context. */
+	size?: number;
+}
+
+const { kind, rest, tone = 'pattern', size = 11 } = Astro.props;
+---
+
+<div class="eyebrow" style={`font-size:${size}px`}>
+	<span class:list={['kind', `kind--${tone}`]}>{kind}</span>
+	{rest && <span class="rest"> {rest}</span>}
+</div>
+
+<style>
+	.eyebrow {
+		font-family: var(--sans);
+		font-weight: 600;
+		line-height: 1;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	.kind--pattern {
+		color: var(--terracotta);
+	}
+
+	.kind--journal {
+		color: var(--ochre);
+	}
+
+	.kind--neutral {
+		color: var(--annotation);
+	}
+
+	/* The trailing meta drops out of the label style — same line, different voice. */
+	.rest {
+		font-weight: 400;
+		letter-spacing: 0.04em;
+		text-transform: none;
+		color: var(--muted);
+	}
+</style>
