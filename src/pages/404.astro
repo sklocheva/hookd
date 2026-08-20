@@ -1,0 +1,74 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+	title="Page not found — Hookd"
+	description="That page does not exist. The patterns and journal indexes are the quickest way back."
+	noindex
+>
+	<section class="shell notfound">
+		<p class="code">404</p>
+		<h1>That page isn't here</h1>
+		<p class="lede">
+			The link may be old, or the page may have moved. Nothing is lost — everything on this
+			site is reachable from the two indexes below.
+		</p>
+
+		<div class="ways label">
+			<a href="/patterns/" class="cta-terracotta">All free patterns →</a>
+			<a href="/journal/" class="cta-ochre">Read the journal →</a>
+			<a href="/" class="cta-quiet">Back to the homepage →</a>
+		</div>
+	</section>
+</Base>
+
+<style>
+	.notfound {
+		padding: clamp(56px, 9vw, 110px) var(--gutter) clamp(72px, 10vw, 130px);
+		max-width: 640px;
+	}
+
+	.code {
+		margin: 0 0 18px;
+		font: 600 11px/1 var(--sans);
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+
+	h1 {
+		margin: 0 0 20px;
+		font: 400 clamp(32px, 5vw, 46px) / 1.08 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.lede {
+		margin: 0 0 34px;
+		font: 400 clamp(15px, 1.5vw, 17px) / 1.7 var(--sans);
+		color: var(--muted);
+	}
+
+	.ways {
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+	}
+
+	.ways a {
+		text-decoration: none;
+	}
+
+	.cta-terracotta {
+		color: var(--terracotta);
+	}
+
+	.cta-ochre {
+		color: var(--ochre);
+	}
+
+	.cta-quiet {
+		color: var(--muted);
+	}
+</style>

@@ -3,9 +3,11 @@ import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 
 export async function GET(context: APIContext) {
+	// Drafts are invented example content. They stay on the site so it does not look
+	// empty, but they must not reach a subscriber's reader.
 	const [patterns, posts] = await Promise.all([
-		getCollection('patterns'),
-		getCollection('posts'),
+		getCollection('patterns', ({ data }) => !data.draft),
+		getCollection('posts', ({ data }) => !data.draft),
 	]);
 
 	// One feed for the whole site — the homepage mixes both, so the feed should too.

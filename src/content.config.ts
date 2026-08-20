@@ -1,5 +1,7 @@
 import { defineCollection, reference, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 /**
  * SEO fields are required on both collections and the build MUST fail without them.
@@ -9,8 +11,25 @@ const seoFields = {
 	metaDescription: z.string().max(160, 'metaDescription must be 160 characters or fewer'),
 	/** Alt text for the hero image. Required even when the image itself is not yet shot. */
 	heroImageAlt: z.string().min(1, 'heroImageAlt is required'),
-	/** Social share image, as a root-relative path under public/. */
-	socialImage: z.string().min(1, 'socialImage is required'),
+	/**
+	 * Social share image, as a root-relative path under public/.
+	 *
+	 * Required *and* checked to exist. It was required but unvalidated before, so three
+	 * entries happily pointed at files that were never created — the tag rendered, the
+	 * image 404'd, and every share and pin came out blank. A required field that is
+	 * never verified is not a guarantee.
+	 *
+	 * Use /og-default.png until the entry has its own artwork.
+	 */
+	socialImage: z
+		.string()
+		.min(1, 'socialImage is required')
+		.refine(
+			(p) => existsSync(fileURLToPath(new URL(`../public${p}`, import.meta.url))),
+			(p) => ({
+				message: `socialImage "${p}" does not exist in public/. Use /og-default.png until this entry has its own artwork.`,
+			})
+		),
 };
 
 /** Gauge is measured twice and the two numbers genuinely differ. Never collapse them. */
@@ -89,6 +108,14 @@ const patterns = defineCollection({
 			/** Patterns cite the test behind their yarn advice. Load-bearing cross-link. */
 			relatedPost: reference('posts').optional(),
 
+			/**
+			 * Example/scaffolding content. Draft entries still render and are still linked, so
+			 * the site does not look empty, but they are kept out of the sitemap and the RSS
+			 * feed and carry noindex — invented patterns must never reach Google or a
+			 * subscriber's reader.
+			 */
+			draft: z.boolean().default(false),
+
 			...seoFields,
 		}),
 });
@@ -107,6 +134,14 @@ const posts = defineCollection({
 			/** The muted line under the excerpt, e.g. "6 yarns · 32 sts × 24 rows hdc". */
 			method: z.string().optional(),
 			tags: z.array(z.string()).default([]),
+			/**
+			 * Example/scaffolding content. Draft entries still render and are still linked, so
+			 * the site does not look empty, but they are kept out of the sitemap and the RSS
+			 * feed and carry noindex — invented patterns must never reach Google or a
+			 * subscriber's reader.
+			 */
+			draft: z.boolean().default(false),
+
 			...seoFields,
 		}),
 });

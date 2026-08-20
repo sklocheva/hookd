@@ -55,6 +55,14 @@ collections:
         widget: text
         hint: The standfirst under the title. Two sentences at most.
 
+      - label: Draft
+        name: draft
+        widget: boolean
+        default: false
+        hint: >-
+          Draft entries still appear on the site but are kept out of Google, the sitemap
+          and the RSS feed. Use it for anything not ready to be found.
+
       # --- SEO. Required, deliberately. ---------------------------------
       - label: Meta description
         name: metaDescription
@@ -76,7 +84,8 @@ collections:
         name: socialImage
         widget: string
         required: true
-        hint: Root-relative path under public/, e.g. /social/oland-cardigan.jpg
+        default: /og-default.png
+        hint: Root-relative path under public/. Leave as /og-default.png until this entry has its own artwork — the build checks the file exists.
       - label: Shoot note
         name: heroImagePending
         widget: string
@@ -203,6 +212,14 @@ collections:
         options: ['Yarn test', 'Stitch test', 'Fibre note']
         hint: Drives the eyebrow colour and the journal filters.
 
+      - label: Draft
+        name: draft
+        widget: boolean
+        default: false
+        hint: >-
+          Draft entries still appear on the site but are kept out of Google, the sitemap
+          and the RSS feed. Use it for anything not ready to be found.
+
       # --- SEO. Required, deliberately. ---------------------------------
       - label: Meta description
         name: metaDescription
@@ -219,7 +236,8 @@ collections:
         name: socialImage
         widget: string
         required: true
-        hint: Root-relative path under public/, e.g. /social/six-dk-wools.jpg
+        default: /og-default.png
+        hint: Root-relative path under public/. Leave as /og-default.png until this entry has its own artwork — the build checks the file exists.
 
       - label: Method
         name: method

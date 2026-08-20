@@ -5,6 +5,8 @@ import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import PatternLicence from '../../components/PatternLicence.astro';
+import SizeTable from '../../components/SizeTable.astro';
+import Difficulty from '../../components/Difficulty.astro';
 import {
 	formatDate,
 	gaugeLine,
@@ -58,11 +60,15 @@ const specs = [
 		emphasis: true,
 	},
 	{
+		label: 'Difficulty',
+		value: d.difficulty,
+		note: `Craft Yarn Council level · ${d.terms} terms`,
+		difficulty: true,
+	},
+	{
 		label: 'Sizes',
 		value: d.sizes.map((s) => s.name).join(' · '),
-		note: d.ease
-			? `Finished bust ${d.sizes[0].finishedBustCm}–${d.sizes[d.sizes.length - 1].finishedBustCm} cm · ${d.ease}`
-			: undefined,
+		note: `${d.sizes.length} sizes · full measurements below`,
 	},
 ];
 ---
@@ -72,6 +78,8 @@ const specs = [
 	description={d.metaDescription}
 	active="patterns"
 	shareImage={d.socialImage}
+	ogType="article"
+	noindex={d.draft}
 >
 	<article class="shell shell--narrow">
 		<div class="title-block">
@@ -103,7 +111,7 @@ const specs = [
 								{s.label}
 							</div>
 							<div class="cell__value">
-								{s.value}
+								{s.difficulty ? <Difficulty level={d.difficulty} /> : s.value}
 								{s.note && (
 									<>
 										<br />
@@ -159,6 +167,8 @@ const specs = [
 				}
 			</div>
 		</section>
+
+		<SizeTable sizes={d.sizes} ease={d.ease} />
 
 		<div class="prose" id="instructions">
 			<Content />

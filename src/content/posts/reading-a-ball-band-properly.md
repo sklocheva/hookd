@@ -8,7 +8,8 @@ kind: Fibre note
 method: 14 ball bands compared · CYC categories vs stated metreage
 tags: ['yarn', 'cyc', 'labels']
 heroImageAlt: A dozen yarn ball bands photographed from directly above, arranged in a grid.
-socialImage: /social/ball-bands.jpg
+socialImage: /og-default.png
+draft: true  # invented example content — not for publication
 metaDescription: What a ball band actually promises, what it doesn't, and the one number worth more than the stated gauge.
 ---
 

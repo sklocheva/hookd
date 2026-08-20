@@ -5,7 +5,8 @@ summary: >-
   A circular-yoke pullover worked top down in DK, with short-row shaping across the back
   neck and a colourwork band at the yoke.
 heroImageAlt: A person wearing a blue DK pullover with a patterned circular yoke.
-socialImage: /social/fjord-yoke.jpg
+socialImage: /og-default.png
+draft: true  # invented example content — not for publication
 metaDescription: A free top-down circular-yoke pullover in DK, XS–3X, with short-row back neck shaping.
 
 # No heroImage: photography is not shot yet. This drives the designed

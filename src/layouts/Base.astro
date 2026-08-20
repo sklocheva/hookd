@@ -10,14 +10,34 @@ interface Props {
 	description: string;
 	/** Which nav item reads as current. Omit on the homepage. */
 	active?: 'patterns' | 'journal' | 'about';
-	/** Absolute or root-relative URL of the social share image, if the page has one. */
+	/** Root-relative share image. Falls back to the branded default card. */
 	shareImage?: string;
+	/** Article pages are og:type "article"; everything else is "website". */
+	ogType?: 'website' | 'article';
+	/**
+	 * Keep this page out of search results and the sitemap. Used by the example content,
+	 * which is invented and must not be indexed, and by the legal stubs.
+	 */
+	noindex?: boolean;
 }
 
-const { title, description, active, shareImage } = Astro.props;
+const {
+	title,
+	description,
+	active,
+	shareImage,
+	ogType = 'website',
+	noindex = false,
+} = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const shareImageUrl = shareImage ? new URL(shareImage, Astro.site) : undefined;
+
+// Every page gets an image: shares and pins render blank without one, and Pinterest is
+// the main discovery channel. Dimensions are stated explicitly because Rich Pins and
+// most crawlers read them rather than fetching the file to measure it.
+const OG_DEFAULT = { src: '/og-default.png', width: 1200, height: 630 };
+const ogImage = new URL(shareImage ?? OG_DEFAULT.src, Astro.site);
+const usingDefault = !shareImage;
 ---
 
 <!doctype html>
@@ -28,18 +48,29 @@ const shareImageUrl = shareImage ? new URL(shareImage, Astro.site) : undefined;
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonical} />
+		{noindex && <meta name="robots" content="noindex, follow" />}
 		<link rel="sitemap" href="/sitemap-index.xml" />
 		<link rel="alternate" type="application/rss+xml" title="Hookd" href="/rss.xml" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
 
-		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Hookd" />
+		<meta property="og:type" content={ogType} />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonical} />
-		{shareImageUrl && <meta property="og:image" content={shareImageUrl} />}
-		<meta name="twitter:card" content={shareImageUrl ? 'summary_large_image' : 'summary'} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:image:alt" content="Hookd — free crochet patterns and yarn tests" />
+		{
+			usingDefault && (
+				<>
+					<meta property="og:image:width" content={String(OG_DEFAULT.width)} />
+					<meta property="og:image:height" content={String(OG_DEFAULT.height)} />
+				</>
+			)
+		}
+		<meta name="twitter:card" content="summary_large_image" />
 
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -49,10 +80,38 @@ const shareImageUrl = shareImage ? new URL(shareImage, Astro.site) : undefined;
 		/>
 	</head>
 	<body>
+		<a href="#main" class="skip-link">Skip to content</a>
 		<Header active={active} />
-		<main>
+		<main id="main" tabindex="-1">
 			<slot />
 		</main>
 		<Footer />
 	</body>
 </html>
+
+<style>
+	/* Visible only once focused, so keyboard users can jump the nav on every page. */
+	.skip-link {
+		position: absolute;
+		left: 8px;
+		top: -60px;
+		z-index: 10;
+		padding: 12px 18px;
+		background: var(--ink);
+		color: var(--paper);
+		font: 600 12px/1 var(--sans);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		text-decoration: none;
+		transition: top 0.15s ease;
+	}
+
+	.skip-link:focus {
+		top: 8px;
+		color: var(--paper);
+	}
+
+	main:focus {
+		outline: none;
+	}
+</style>

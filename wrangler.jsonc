@@ -9,6 +9,9 @@
 	"name": "hookd-blog",
 	"compatibility_date": "2026-08-19",
 	"assets": {
-		"directory": "./dist"
+		"directory": "./dist",
+		// Without this, an unknown path returns an empty 404 body. Astro builds
+		// dist/404.html; this tells Workers to serve it.
+		"not_found_handling": "404-page"
 	}
 }

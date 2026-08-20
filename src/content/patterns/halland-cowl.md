@@ -5,7 +5,8 @@ summary: >-
   A single-skein cowl in a garter-look crochet fabric, worked in the round and doubled
   over. One evening, one ball, no shaping.
 heroImageAlt: A rust-coloured chunky cowl styled around the neck of a wool coat.
-socialImage: /social/halland-cowl.jpg
+socialImage: /og-default.png
+draft: true  # invented example content — not for publication
 metaDescription: A free single-skein cowl in garter-look crochet — one evening, one ball, no shaping.
 
 difficulty: Easy
