@@ -1,0 +1,127 @@
+---
+import Base from './Base.astro';
+
+/**
+ * Shared layout for the standing pages — about, licence, privacy, imprint.
+ * One measure, one heading scale, so they read as a set rather than four
+ * separately-styled one-offs.
+ */
+interface Props {
+	title: string;
+	description: string;
+	heading: string;
+	standfirst?: string;
+	active?: 'patterns' | 'journal' | 'about';
+	/** Shown under the heading, e.g. "Last updated 19 August 2026". */
+	updated?: string;
+}
+
+const { title, description, heading, standfirst, active, updated } = Astro.props;
+---
+
+<Base title={title} description={description} active={active}>
+	<article class="shell shell--narrow">
+		<div class="head">
+			<h1>{heading}</h1>
+			{standfirst && <p class="standfirst">{standfirst}</p>}
+			{updated && <p class="updated">{updated}</p>}
+		</div>
+
+		<div class="prose">
+			<slot />
+		</div>
+	</article>
+</Base>
+
+<style>
+	article {
+		padding-bottom: 20px;
+	}
+
+	.head {
+		padding-top: 44px;
+	}
+
+	h1 {
+		margin: 0 0 18px;
+		font: 400 clamp(32px, 5vw, 44px) / 1.05 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.standfirst {
+		margin: 0 0 14px;
+		max-width: var(--measure);
+		font: 400 clamp(15px, 1.6vw, 18px) / 1.6 var(--sans);
+		color: var(--ink-2);
+	}
+
+	.updated {
+		margin: 0;
+		font: 600 10px/1 var(--sans);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+
+	.prose {
+		padding-top: 34px;
+	}
+
+	.prose :global(p),
+	.prose :global(ul),
+	.prose :global(ol) {
+		max-width: var(--measure);
+		margin: 0 0 20px;
+		font: 400 clamp(16px, 1.6vw, 17.5px) / 1.8 var(--sans);
+		color: var(--ink);
+	}
+
+	.prose :global(li) {
+		margin-bottom: 10px;
+	}
+
+	.prose :global(h2) {
+		max-width: var(--measure);
+		margin: clamp(34px, 4vw, 46px) 0 16px;
+		font: 400 clamp(24px, 3vw, 30px) / 1.25 var(--serif);
+		color: var(--ink);
+	}
+
+	.prose :global(h3) {
+		max-width: var(--measure);
+		margin: 32px 0 12px;
+		font: 600 13px/1.4 var(--sans);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	.prose :global(strong) {
+		font-weight: 600;
+	}
+
+	.prose :global(a) {
+		color: var(--terracotta);
+	}
+
+	/* Marks a section that is deliberately unfinished and must be filled in before
+	   the site is announced. Same convention as the design's visible placeholders. */
+	.prose :global(.placeholder) {
+		max-width: var(--measure);
+		border: 1px dashed var(--border-dashed);
+		padding: 18px 20px;
+		margin: 0 0 20px;
+		font: 400 14px/1.7 var(--sans);
+		color: var(--muted);
+	}
+
+	.prose :global(.placeholder strong) {
+		display: block;
+		margin-bottom: 6px;
+		font: 600 10px/1 var(--sans);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--ochre);
+	}
+</style>

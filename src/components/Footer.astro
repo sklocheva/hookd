@@ -4,8 +4,15 @@ const year = new Date().getFullYear();
 const nav = [
 	{ label: 'Free patterns', href: '/patterns/' },
 	{ label: 'Journal', href: '/journal/' },
-	{ label: 'About', href: '#' },
+	{ label: 'About', href: '/about/' },
 	{ label: 'RSS', href: '/rss.xml' },
+];
+
+// Kept visually quieter than the main nav — present and findable, not competing.
+const legal = [
+	{ label: 'Pattern terms', href: '/licence/' },
+	{ label: 'Privacy', href: '/privacy/' },
+	{ label: 'Imprint', href: '/imprint/' },
 ];
 
 // Text stubs standing in for icon artwork. Ravelry carries the accent colour.
@@ -42,6 +49,10 @@ const social = [
 			}
 		</div>
 	</div>
+
+	<nav class="legal-nav">
+		{legal.map((item) => <a href={item.href}>{item.label}</a>)}
+	</nav>
 
 	<div class="copyright">
 		<span>
@@ -118,8 +129,25 @@ const social = [
 		color: var(--terracotta);
 	}
 
+	.legal-nav {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 18px;
+		padding-top: 22px;
+		font: 400 12px/1 var(--sans);
+	}
+
+	.legal-nav a {
+		color: var(--muted);
+		text-decoration: none;
+	}
+
+	.legal-nav a:hover {
+		color: var(--ink);
+	}
+
 	.copyright {
-		padding: 26px 0 46px;
+		padding: 18px 0 46px;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 12px;
