@@ -9,17 +9,20 @@
 	--ink: #2a2320;
 	--ink-2: #4a4038;
 	--muted: #7a6d63;
-	--faint: #c0b3a4;
+	--faint: #8a7c6e; /* was #c0b3a4 at 1.91:1 — illegible even for scaffolding */
 
-	--terracotta: #b1603f;
-	--terracotta-hover: #8f4a2f;
+	/* Measured against --paper: this is 4.61:1, just clear of the 4.5:1 AA threshold.
+	   The original #b1603f measured 4.23:1 and failed — it is the link colour, so it
+	   is the one accent that must pass. Darkened 5%, hue unchanged. */
+	--terracotta: #a85b3c;
+	--terracotta-hover: #8f4a2f; /* 6.13:1 */
 	--ochre: #8f6714;
 	--ochre-rule: #b88a2e;
 
 	/* Placeholder scaffolding — remove with the placeholders themselves */
 	--ph-stripe-a: #ecdfc9;
 	--ph-stripe-b: #e3d3b4;
-	--ph-caption: #8a7256;
+	--ph-caption: #7b6549; /* 5.16:1 — legible while the placeholders exist */
 	--annotation: #8a7c6e;
 
 	/* Hairlines */
@@ -119,6 +122,10 @@ img {
 .filter {
 	color: var(--muted);
 	text-decoration: none;
+	/* The text is 11px; padding lifts the hit area past the 24px minimum
+	   (WCAG 2.5.8) without changing how it looks. */
+	display: inline-block;
+	padding-block: 7px;
 }
 
 .filter:hover {
@@ -129,4 +136,20 @@ img {
 	color: var(--ink);
 	border-bottom: 1px solid rgba(42, 35, 32, 0.4);
 	padding-bottom: 4px;
+}
+
+
+/* Focus. :focus-visible so it appears for keyboard users but not on mouse clicks.
+   Defined once here rather than per component, so every control matches. */
+:focus-visible {
+	outline: 2px solid var(--terracotta);
+	outline-offset: 3px;
+	border-radius: 1px;
+}
+
+/* Hit areas. Text links in these designs are small by intent — the fix is padding on
+   the interactive area, not larger type, so the look is unchanged. */
+.tap {
+	display: inline-block;
+	padding-block: 6px;
 }

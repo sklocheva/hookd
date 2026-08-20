@@ -42,8 +42,10 @@ const { kind, rest, tone = 'pattern', size = 11 } = Astro.props;
 		color: var(--ochre);
 	}
 
+	/* --annotation is for scaffolding captions that get deleted; it is too light for
+	   text that ships. The "Pinned" eyebrow is real UI, so it uses --muted (4.66:1). */
 	.kind--neutral {
-		color: var(--annotation);
+		color: var(--muted);
 	}
 
 	/* The trailing meta drops out of the label style — same line, different voice. */

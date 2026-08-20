@@ -117,7 +117,9 @@ const pinned = [
 						role="tab"
 						aria-selected={i === 0 ? 'true' : 'false'}
 						aria-label={`Show pinned post: ${item.title}`}
-					/>
+					>
+						<span class="dot__mark" aria-hidden="true" />
+					</button>
 				))
 			}
 		</div>
@@ -269,7 +271,8 @@ const pinned = [
 		font: 600 10px/1 var(--sans);
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
-		color: var(--annotation);
+		/* --annotation is scaffolding-only (3.76:1). This label ships. */
+		color: var(--muted);
 		margin-bottom: 18px;
 	}
 
@@ -289,6 +292,8 @@ const pinned = [
 	}
 
 	.pinned__cta {
+		display: inline-block;
+		padding-block: 7px;
 		font: 600 12px/1 var(--sans);
 		letter-spacing: 0.07em;
 		text-transform: uppercase;
@@ -298,21 +303,34 @@ const pinned = [
 
 	.dots {
 		display: flex;
-		gap: 8px;
+		/* The visual gap stays 8px: each button is 24px around a 9px mark, so the
+		   marks sit 8px apart while the tap areas meet the 24px minimum. */
+		gap: 0;
 		margin-top: 32px;
+		margin-left: -7px;
 	}
 
+	/* The dot the design specifies is 9px. A 9px tap target is not usable on a phone,
+	   so the button is 24px and transparent, and the 9px mark is drawn inside it. */
 	.dot {
+		width: 24px;
+		height: 24px;
+		display: grid;
+		place-items: center;
+		border: none;
+		padding: 0;
+		background: none;
+		cursor: pointer;
+	}
+
+	.dot__mark {
 		width: 9px;
 		height: 9px;
 		border-radius: 50%;
-		border: none;
-		padding: 0;
-		cursor: pointer;
 		background: var(--dot-inactive);
 	}
 
-	.dot--on {
+	.dot--on .dot__mark {
 		background: var(--terracotta);
 	}
 
@@ -406,6 +424,8 @@ const pinned = [
 
 	.archive__ctas a {
 		text-decoration: none;
+		display: inline-block;
+		padding-block: 7px;
 	}
 
 	.cta-terracotta {
