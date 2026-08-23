@@ -18,7 +18,7 @@ interface Props {
 const { caption, ratio } = Astro.props;
 ---
 
-<div class="ph" style={`aspect-ratio:${ratio}`}>
+<div class="ph" data-scaffold style={`aspect-ratio:${ratio}`}>
 	<span>PHOTO — {caption}</span>
 </div>
 

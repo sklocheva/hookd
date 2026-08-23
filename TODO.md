@@ -30,18 +30,17 @@ Mapped to the steps in `PLAN.md`. Steps 1, 2, 3 and 5 are done; 6 is nearly done
 ## Step 7 — SEO, legal, analytics (mostly not started)
 
 Already in place: canonical URLs, unique title and meta description per page, Open Graph and
-Twitter Card basics, robots.txt, sitemap, one `<h1>` per page.
-
-- [ ] **`og:image:width` and `og:image:height`** as explicit values. These also power Pinterest
-      Rich Pins, which need no separate setup.
+Twitter Card including `og:image` with explicit width and height (which is what Pinterest Rich
+Pins read), robots.txt, sitemap, one `<h1>` per page.
 - [ ] **JSON-LD**: BlogPosting for journal posts, Article for patterns, BreadcrumbList
       site-wide, Person for Sophia. Skip HowTo — Google deprecated those rich results in 2023.
 - [ ] **robots.txt: name the AI crawlers explicitly** — Googlebot, GPTBot, ClaudeBot,
       PerplexityBot, Google-Extended. Currently only a blanket `User-agent: *`.
 - [ ] **Cloudflare Web Analytics.** Cookieless, so no consent banner.
-- [ ] **Social share images do not exist.** `socialImage` is required and every entry points at
-      a `/social/…` path that 404s, so `og:image` is currently broken sitewide. Either add the
-      files or point them at one default image.
+- [ ] **Per-entry share images.** Everything currently uses the branded `/og-default.png` card.
+      That works, but Pinterest performs far better with the actual photograph, so each entry
+      should get its own once photos exist. `socialImage` is validated to exist at build, so a
+      wrong path fails the build rather than shipping a blank pin.
 
 ## Step 8 — Launch
 
@@ -90,18 +89,36 @@ Twitter Card basics, robots.txt, sitemap, one `<h1>` per page.
 
 - [ ] **The image pipeline is unverified in CI** — there are no real images yet, so nothing
       exercises `<Image>`. The `/_image` bug that cost a day can only recur once a real photo
-      lands, so re-run the `verify-deploy` skill the moment the first upload happens.
+      lands, so run `verify-deploy` the moment the first upload happens.
+- [ ] When a placeholder is deleted, delete its `data-scaffold` attribute too — otherwise the
+      audit keeps ignoring an element that now ships.
 - [ ] Delete merged branches `sveltia-cms` and `fix-cms-public-folder`.
 - [ ] Decide whether drafts should become pull requests (`publish_mode: editorial_workflow`).
       Currently saving in the CMS commits straight to `main` and publishes in about a minute.
-- [ ] Run the skill-creator eval loop and description optimizer against
-      `.claude/skills/verify-deploy` (needs subagents — ask first).
+- [ ] Run the skill-creator eval loop and description optimizer against the two skills,
+      `verify-deploy` and `run-hookd` (needs subagents — ask first).
+- [ ] The audit's route list in `driver.mjs` is hand-maintained. Add new routes to it, or they
+      go unchecked.
 
-## Ground rules — deferred until the build is finished
+## Ground rules — split between tooling and agreement
 
-Agreed to write these up properly at the end, not now. The working rule in the meantime is:
-minimal tests before handing anything over, then push to `main`.
+**Now enforced by tooling** — these were rules on paper and are now checks that fail:
 
-The bullets to expand later: work on a branch; merge to `main` only with consent once a page is
-finished; build locally before pushing; write tests where feasible; verify against the live
-site, not `dist/`; check at 375px.
+- [x] Build locally before pushing — `run-hookd audit` builds first and refuses to continue
+      on a broken build
+- [x] Write tests where feasible — the audit is the test layer: overflow, one `<h1>`,
+      server-rendered content, tap targets, contrast, label floor, internal links, across 13
+      routes at 375px and 1280px
+- [x] Check at 375px — every audit run does both widths
+- [x] Verify against the live site, not `dist/` — `verify-deploy`
+- [x] CMS form and schema stay in step — `scripts/check-cms-config.py`
+
+**Still a working agreement, still deferred** — these are decisions about how we collaborate,
+not things a script can check:
+
+- [ ] Work on a branch rather than straight on `main`
+- [ ] Merge to `main` only with Sophia's consent, once a page is reviewed and finished
+- [ ] One change per branch; keep diffs reviewable
+- [ ] Don't change decided stack choices without asking
+- [ ] Decide whether a pre-push hook or a GitHub Action enforces the build gate — the checks
+      exist now, nothing runs them automatically
