@@ -16,9 +16,9 @@ import Base from '../layouts/Base.astro';
 		</p>
 
 		<div class="ways label">
-			<a href="/patterns/" class="cta-terracotta">All free patterns →</a>
-			<a href="/journal/" class="cta-ochre">Read the journal →</a>
-			<a href="/" class="cta-quiet">Back to the homepage →</a>
+			<a href="/patterns/" class="cta--terracotta">All free patterns →</a>
+			<a href="/journal/" class="cta--ochre">Read the journal →</a>
+			<a href="/" class="cta--quiet">Back to the homepage →</a>
 		</div>
 	</section>
 </Base>
@@ -31,7 +31,7 @@ import Base from '../layouts/Base.astro';
 
 	.code {
 		margin: 0 0 18px;
-		font: 600 11px/1 var(--sans);
+		font: var(--type-label);
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
 		color: var(--muted);
@@ -46,7 +46,7 @@ import Base from '../layouts/Base.astro';
 
 	.lede {
 		margin: 0 0 34px;
-		font: 400 clamp(15px, 1.5vw, 17px) / 1.7 var(--sans);
+		font: var(--type-lede);
 		color: var(--muted);
 	}
 
@@ -62,15 +62,15 @@ import Base from '../layouts/Base.astro';
 		padding-block: 7px;
 	}
 
-	.cta-terracotta {
+	.cta--terracotta {
 		color: var(--terracotta);
 	}
 
-	.cta-ochre {
+	.cta--ochre {
 		color: var(--ochre);
 	}
 
-	.cta-quiet {
+	.cta--quiet {
 		color: var(--muted);
 	}
 </style>

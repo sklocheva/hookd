@@ -10,7 +10,7 @@ Not a shop. Selling happens on Ravelry, never here.
 ## Stack — decided, do not substitute
 
 - Astro, TypeScript
-- Sveltia CMS at /admin for browser-based publishing (not built yet)
+- Sveltia CMS at /admin for browser-based publishing
 - Cloudflare hosting, free tier
 - No database, no server, no auth
 
@@ -27,7 +27,13 @@ still static assets only — there is no server process, and that constraint is 
 - `npm run build` — production build into `dist/`; must pass before pushing
 - `npm run preview` — serve the built `dist/` locally
 
-There are no tests and no linter. `npm run build` is the only gate.
+There is no linter, and no unit-test runner. The checks that exist are:
+
+- `node .claude/skills/run-hookd/driver.mjs audit` — builds, serves, and drives all routes
+  in headless Chrome at 375px and 1280px: overflow, one `<h1>`, content present without JS,
+  tap targets, contrast, the label floor, internal links. **Run this before pushing.**
+- `python scripts/check-cms-config.py` — the CMS form and the Zod schemas have not drifted.
+- `verify-deploy` skill — the deployed site, after a push.
 
 Note that `astro build` does **not** type-check. `tsconfig.json` extends
 `astro/tsconfigs/strict`, but nothing enforces it at build time — a type error in a `.astro`
@@ -90,6 +96,15 @@ size range, yardage per size, US/UK terms.
   binary forever.
 - One `<h1>` per page.
 - Mobile first. Check at 375px.
+- **Colour and type come from the tokens in `src/styles/global.css`.** No colour
+  literals in components — there are currently zero outside the token definitions, and
+  that is worth keeping. Sizes used in more than one place get a `--type-*` token, so a
+  change is one edit rather than seven.
+- **Uppercase labels have an 11px floor**, in `--ink-2` rather than `--muted`, with
+  letter-spacing at 0.06–0.08em. Small uppercase with wide tracking is the hardest thing
+  on a page to read, and passing contrast does not make it legible. Anything smaller is
+  scaffolding that gets deleted.
+- Class naming is BEM-ish: `block__element`, `block--modifier`.
 - Server-rendered HTML only. No client-side-only content — AI crawlers fetch JavaScript
   but do not execute it.
 

@@ -44,6 +44,29 @@
 	--sans: 'Work Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 	--mono: ui-monospace, Menlo, monospace;
 
+
+	/* Type scale.
+	   These are the design's existing sizes, lifted into tokens — not a new scale.
+	   The point is that a size lives in one place: when the spec labels turned out to
+	   be unreadable at 10px, fixing it meant editing seven files. Only roles that
+	   appear more than once are tokenised; genuinely one-off sizes stay inline, where
+	   a token would be indirection for its own sake. */
+	--type-page-title: 400 clamp(32px, 5vw, 44px) / 1.05 var(--serif);
+	--type-article-h2: 400 clamp(24px, 3vw, 30px) / 1.25 var(--serif);
+	--type-section-label: italic 400 22px/1.2 var(--serif);
+	--type-body: 400 clamp(16px, 1.6vw, 17.5px) / 1.8 var(--sans);
+	--type-standfirst: 400 clamp(15px, 1.6vw, 18px) / 1.6 var(--sans);
+	--type-lede: 400 clamp(15px, 1.5vw, 17px) / 1.7 var(--sans);
+	--type-label: 600 11px/1 var(--sans);
+	--type-label-sm: 600 11px/1.3 var(--sans);
+	--type-cta: 600 12px/1 var(--sans);
+	--type-table-head: 600 11.5px/1.3 var(--sans);
+	--type-table-cell: 400 13.5px/1.5 var(--sans);
+	--type-callout: 400 14px/1.7 var(--sans);
+	--type-note: 400 13px/1.6 var(--sans);
+	--type-meta: 400 12px/1 var(--sans);
+	--type-mono-caption: 9px/1.4 var(--mono);
+
 	/* Layout */
 	--shell: 1160px;
 	--shell-narrow: 1000px;
@@ -112,7 +135,7 @@ img {
 
 /* One uppercase label style serves every eyebrow, filter and CTA. */
 .label {
-	font: 600 11px/1 var(--sans);
+	font: var(--type-label);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 }

@@ -165,8 +165,8 @@ const pinned = [
 			You're looking at our latest posts — the rest live in the archive.
 		</p>
 		<div class="archive__ctas label">
-			<a href="/patterns/" class="cta-terracotta">All free patterns →</a>
-			<a href="/journal/" class="cta-ochre">Read the journal →</a>
+			<a href="/patterns/" class="cta--terracotta">All free patterns →</a>
+			<a href="/journal/" class="cta--ochre">Read the journal →</a>
 		</div>
 	</section>
 </Base>
@@ -268,7 +268,7 @@ const pinned = [
 	}
 
 	.pinned__eyebrow {
-		font: 600 11px/1 var(--sans);
+		font: var(--type-label);
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		/* --annotation is scaffolding-only (3.76:1). This label ships. */
@@ -285,7 +285,7 @@ const pinned = [
 
 	.pinned__text p {
 		margin: 0 0 30px;
-		font: 400 clamp(15px, 1.5vw, 17px) / 1.7 var(--sans);
+		font: var(--type-lede);
 		color: var(--muted);
 		max-width: 440px;
 		text-wrap: pretty;
@@ -294,7 +294,7 @@ const pinned = [
 	.pinned__cta {
 		display: inline-block;
 		padding-block: 7px;
-		font: 600 12px/1 var(--sans);
+		font: var(--type-cta);
 		letter-spacing: 0.07em;
 		text-transform: uppercase;
 		color: var(--terracotta);
@@ -428,11 +428,11 @@ const pinned = [
 		padding-block: 7px;
 	}
 
-	.cta-terracotta {
+	.cta--terracotta {
 		color: var(--terracotta);
 	}
 
-	.cta-ochre {
+	.cta--ochre {
 		color: var(--ochre);
 	}
 </style>
