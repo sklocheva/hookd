@@ -30,6 +30,11 @@
 	--rule: rgba(42, 35, 32, 0.14);
 	--rule-light: rgba(42, 35, 32, 0.11);
 	--border-dashed: rgba(42, 35, 32, 0.24);
+	/* Underline under the current nav item and filter — stronger than --rule-strong
+	   because it marks state, not structure. */
+	--rule-active: rgba(42, 35, 32, 0.4);
+	/* The neutral counterpart to --ochre-rule: a callout bar that carries no emphasis. */
+	--rule-bar: rgba(42, 35, 32, 0.24);
 	--bar-empty: rgba(42, 35, 32, 0.16);
 	--dot-inactive: rgba(42, 35, 32, 0.18);
 
@@ -146,7 +151,7 @@ img {
 
 .filter--active {
 	color: var(--ink);
-	border-bottom: 1px solid rgba(42, 35, 32, 0.4);
+	border-bottom: 1px solid var(--rule-active);
 	padding-bottom: 4px;
 }
 

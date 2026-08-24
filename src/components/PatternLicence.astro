@@ -1,4 +1,5 @@
 ---
+import SectionLabel from './SectionLabel.astro';
 /**
  * The short licence note that closes every pattern page.
  *
@@ -9,7 +10,7 @@
 ---
 
 <aside class="licence">
-	<h2>Using this pattern</h2>
+	<SectionLabel>Using this pattern</SectionLabel>
 
 	<p>
 		This pattern is free. <strong>Make it, gift it, and sell what you make</strong> — no
@@ -30,12 +31,6 @@
 		margin-top: clamp(40px, 5vw, 60px);
 		padding-top: 26px;
 		border-top: 1px solid var(--rule-strong);
-	}
-
-	h2 {
-		margin: 0 0 16px;
-		font: italic 400 22px/1 var(--serif);
-		color: var(--ink);
 	}
 
 	p {

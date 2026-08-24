@@ -1,0 +1,28 @@
+---
+/**
+ * The italic serif label that opens a block inside an article — "Before you start",
+ * "Finished measurements", "Read next", "Using this pattern".
+ *
+ * It was declared identically in four files. Extracted so the four stay in step, and
+ * so the level can be set per use: it is an <h2> inside an article, but the pattern
+ * page already spends its <h2> budget on the spec block, so callers say what they need.
+ */
+interface Props {
+	/** Heading level. One <h1> per page is a house rule; these are always h2 or h3. */
+	as?: 'h2' | 'h3';
+	/** For aria-labelledby on the section that owns it. */
+	id?: string;
+}
+
+const { as: Tag = 'h2', id } = Astro.props;
+---
+
+<Tag id={id} class="section-label"><slot /></Tag>
+
+<style>
+	.section-label {
+		margin: 0 0 22px;
+		font: italic 400 22px/1.2 var(--serif);
+		color: var(--ink);
+	}
+</style>

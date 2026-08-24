@@ -7,6 +7,7 @@ import Hero from '../../components/Hero.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import PatternLicence from '../../components/PatternLicence.astro';
 import SizeTable from '../../components/SizeTable.astro';
+import SectionLabel from '../../components/SectionLabel.astro';
 import Related from '../../components/Related.astro';
 import Difficulty from '../../components/Difficulty.astro';
 import {
@@ -112,7 +113,7 @@ const specs = [
 		/>
 
 		<section class="before">
-			<h2 class="before__title">Before you start</h2>
+			<SectionLabel>Before you start</SectionLabel>
 
 			<div class="before__grid">
 				{
@@ -226,12 +227,6 @@ const specs = [
 		margin-top: 40px;
 	}
 
-	.before__title {
-		margin: 0 0 26px;
-		font: italic 400 22px/1 var(--serif);
-		color: var(--ink);
-	}
-
 	.before__grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -279,7 +274,7 @@ const specs = [
 	}
 
 	.callout--sub .callout__bar {
-		background: rgba(42, 35, 32, 0.24);
+		background: var(--rule-bar);
 	}
 
 	.callout p {

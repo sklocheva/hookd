@@ -2,6 +2,7 @@
 import Hero from './Hero.astro';
 import Eyebrow from './Eyebrow.astro';
 import { formatDate } from '../lib/format';
+import SectionLabel from './SectionLabel.astro';
 import type { RelatedItem } from '../lib/related';
 
 /**
@@ -24,7 +25,7 @@ const { items, heading = 'Read next' } = Astro.props;
 {
 	items.length > 0 && (
 		<section class="related" aria-labelledby="read-next">
-			<h2 id="read-next">{heading}</h2>
+			<SectionLabel id="read-next">{heading}</SectionLabel>
 
 			<ul class="grid">
 				{items.map((item) => (
@@ -56,12 +57,6 @@ const { items, heading = 'Read next' } = Astro.props;
 		margin-top: clamp(44px, 6vw, 68px);
 		padding-top: clamp(28px, 4vw, 38px);
 		border-top: 1px solid var(--rule-strong);
-	}
-
-	h2 {
-		margin: 0 0 24px;
-		font: italic 400 22px/1 var(--serif);
-		color: var(--ink);
 	}
 
 	.grid {
