@@ -31,7 +31,13 @@ Run `npm run build` locally first. It's the cheapest way to catch a broken commi
 something that can't build wastes a deploy cycle.
 
 Then capture a **marker** — something in the live response that will visibly change once your
-commit deploys. Without a marker you cannot distinguish "deployed" from "build failed, old
+commit deploys. Pick something the change *creates*, and one that is anchored to structure
+rather than a loose substring. Three times on this project a marker was picked that the build
+never emits, and the check then polled to timeout reporting a failure that had not happened —
+so `--expect` now greps `dist/` first and refuses to poll for anything absent from it. `dist/`
+is exactly what gets uploaded, so absence proves the poll can never succeed.
+
+Without a marker you cannot distinguish "deployed" from "build failed, old
 version still up". The canonical URL, a heading, a piece of copy, an asset filename hash all
 work. If your change is invisible in the HTML (a config-only change, for instance), pick the
 thing it should affect — an image `src`, a sitemap `<loc>` — and check that.
