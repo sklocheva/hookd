@@ -64,6 +64,29 @@ and `commits/main/status` returns `state: pending, count: 0` — so the log is t
 of truth, and only the user can reach it. Ask early; guessing cost several cycles and one
 needless revert.
 
+## Polling for a marker the build never emits — three times
+
+**Symptom.** A deploy check reports "not yet" on every poll until timeout, so the deploy
+looks failed. It had landed each time, usually inside a minute.
+
+**Three separate causes, same mistake:**
+
+1. `_astro` — matched the *broken* URL too, because that is
+   `/_image?href=%2F_astro%2F…`. The check passed while the bug was still live.
+2. `font:600 12px` — Astro's minifier splits that shorthand, so the string never exists
+   in the output.
+3. `--type-page-title` — Astro tree-shakes unused custom properties per page, so the
+   token appears on the index that uses it and not on the article page being polled.
+
+**Lesson.** A marker is a hypothesis about the build output, and it is wrong more often
+than it feels. Before polling, confirm the string is in `dist/` — that is literally what
+gets uploaded. `verify-deploy.sh --expect` now refuses to poll for anything absent from
+`dist/`, which turns this from a rule nobody remembers into an error.
+
+Anchor to structure, not substrings: `src="/_astro/` rejects the broken form, bare
+`_astro` does not. And prefer a marker the change *creates* — a new file, a new route, a
+value that did not exist before.
+
 ## Predicting a hostname and baking it into config
 
 **Symptom.** `site` was set to `https://hookd.pages.dev` before the host existed, on the

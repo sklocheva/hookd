@@ -52,6 +52,20 @@ echo "Verifying $URL"
 # ---- optionally wait for the deploy to land -------------------------------------
 # Without a marker you cannot tell "deployed" from "build failed, old version still up".
 if [ -n "$EXPECT" ]; then
+  # Guard against the mistake this project keeps making: polling for a marker the build
+  # never emits. That reports "not deployed" forever while the deploy has already landed.
+  # If dist/ exists, the marker must be in it — dist/ is what gets uploaded.
+  ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+  if [ -d "$ROOT_DIR/dist" ]; then
+    if ! grep -rqF -- "$EXPECT" "$ROOT_DIR/dist" 2>/dev/null; then
+      echo "  '$EXPECT' does not appear anywhere in dist/."
+      echo "  A marker the build does not emit can never appear live, so this would poll"
+      echo "  until timeout and report a failure that has not happened. Pick something the"
+      echo "  change actually produces, and check it is in dist/ first."
+      exit 2
+    fi
+  fi
+
   echo "Waiting for '$EXPECT' (timeout ${TIMEOUT}s)"
   START=$(date +%s)
   while :; do
