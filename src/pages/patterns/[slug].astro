@@ -1,11 +1,13 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
+import { getRelated } from '../../lib/related';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import PatternLicence from '../../components/PatternLicence.astro';
 import SizeTable from '../../components/SizeTable.astro';
+import Related from '../../components/Related.astro';
 import Difficulty from '../../components/Difficulty.astro';
 import {
 	formatDate,
@@ -29,6 +31,15 @@ const { Content } = await render(pattern);
 
 const yarn = mainYarn(d);
 const related = d.relatedPost ? await getEntry(d.relatedPost) : undefined;
+
+const [allPatterns, allPosts] = await Promise.all([
+	getCollection('patterns'),
+	getCollection('posts'),
+]);
+const readNext = getRelated({ type: 'pattern', entry: pattern }, {
+	patterns: allPatterns,
+	posts: allPosts,
+});
 
 const hookValue = `${d.hookMm} mm · US ${d.hookUs} (main)`;
 const hookSecond = d.secondHookMm
@@ -175,6 +186,8 @@ const specs = [
 		</div>
 
 		<PatternLicence />
+
+		<Related items={readNext} heading="Next in the workbasket" />
 	</article>
 </Base>
 

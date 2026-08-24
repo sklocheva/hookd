@@ -188,6 +188,30 @@ collections:
         required: false
         hint: The test that justifies this pattern's yarn advice. Linked from the substitution note.
 
+      # --- Read next. Optional: leave empty and the site picks by shared tags. ------
+      - label: Related patterns
+        name: relatedPatterns
+        widget: relation
+        collection: patterns
+        search_fields: [title]
+        value_field: '{{slug}}'
+        display_fields: [title]
+        multiple: true
+        required: false
+        hint: >-
+          Shown at the foot of the page under "read next". Your picks come first, in this
+          order. Leave empty and the site fills the strip from shared tags.
+      - label: Related journal posts
+        name: relatedPosts
+        widget: relation
+        collection: posts
+        search_fields: [title]
+        value_field: '{{slug}}'
+        display_fields: [title]
+        multiple: true
+        required: false
+        hint: The test behind a pattern is the most useful thing to link here.
+
       - { label: Body, name: body, widget: markdown }
 
   # ---------------------------------------------------------------- posts
@@ -245,4 +269,28 @@ collections:
         required: false
         hint: 'The muted line under the excerpt, e.g. "6 yarns · 32 sts × 24 rows hdc".'
       - { label: Tags, name: tags, widget: list, required: false }
+      # --- Read next. Optional: leave empty and the site picks by shared tags. ------
+      - label: Related patterns
+        name: relatedPatterns
+        widget: relation
+        collection: patterns
+        search_fields: [title]
+        value_field: '{{slug}}'
+        display_fields: [title]
+        multiple: true
+        required: false
+        hint: >-
+          Shown at the foot of the page under "read next". Your picks come first, in this
+          order. Leave empty and the site fills the strip from shared tags.
+      - label: Related journal posts
+        name: relatedPosts
+        widget: relation
+        collection: posts
+        search_fields: [title]
+        value_field: '{{slug}}'
+        display_fields: [title]
+        multiple: true
+        required: false
+        hint: The test behind a pattern is the most useful thing to link here.
+
       - { label: Body, name: body, widget: markdown }

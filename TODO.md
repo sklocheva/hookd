@@ -18,9 +18,8 @@ Mapped to the steps in `PLAN.md`. Steps 1, 2, 3 and 5 are done; 6 is nearly done
 
 ## Step 6 — Implement the design (nearly done)
 
-- [ ] **About page.** Not designed and not built; currently `href="#"` in both navs.
-- [ ] **Two stub legal pages** — privacy policy, and the Austrian §25 Mediengesetz disclosure.
-      Templates can be written now; the address is blocked on decision 10.
+- [ ] Legal pages exist (`/privacy/`, `/licence/`, `/imprint/`) but need Sophia's review, and
+      the §25 disclosure needs the address decision.
 - [ ] Pattern **instructions and charts** were explicitly not designed. `<Row>` exists and the
       example pattern uses it, but the surrounding section needs a design. Written first,
       chart repeated after.

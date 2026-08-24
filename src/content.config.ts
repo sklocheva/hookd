@@ -109,6 +109,16 @@ const patterns = defineCollection({
 			relatedPost: reference('posts').optional(),
 
 			/**
+			 * Hand-picked "read this next" links, shown at the foot of the page.
+			 *
+			 * Explicit picks always win and appear in the order given. When fewer than
+			 * three are set, the rest are filled by shared tags — see src/lib/related.ts.
+			 * That way the section is never half-empty, and never needs maintaining.
+			 */
+			relatedPatterns: z.array(reference('patterns')).default([]),
+			relatedPosts: z.array(reference('posts')).default([]),
+
+			/**
 			 * Example/scaffolding content. Draft entries still render and are still linked, so
 			 * the site does not look empty, but they are kept out of the sitemap and the RSS
 			 * feed and carry noindex — invented patterns must never reach Google or a
@@ -134,6 +144,16 @@ const posts = defineCollection({
 			/** The muted line under the excerpt, e.g. "6 yarns · 32 sts × 24 rows hdc". */
 			method: z.string().optional(),
 			tags: z.array(z.string()).default([]),
+
+			/**
+			 * Hand-picked "read this next" links, shown at the foot of the page.
+			 *
+			 * Explicit picks always win and appear in the order given. When fewer than
+			 * three are set, the rest are filled by shared tags — see src/lib/related.ts.
+			 * That way the section is never half-empty, and never needs maintaining.
+			 */
+			relatedPatterns: z.array(reference('patterns')).default([]),
+			relatedPosts: z.array(reference('posts')).default([]),
 			/**
 			 * Example/scaffolding content. Draft entries still render and are still linked, so
 			 * the site does not look empty, but they are kept out of the sitemap and the RSS

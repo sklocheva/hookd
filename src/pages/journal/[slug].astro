@@ -1,9 +1,11 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { getRelated } from '../../lib/related';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
+import Related from '../../components/Related.astro';
 import { formatDate, readTime } from '../../lib/format';
 
 export const getStaticPaths = (async () => {
@@ -17,6 +19,15 @@ export const getStaticPaths = (async () => {
 const { post } = Astro.props;
 const d = post.data;
 const { Content } = await render(post);
+
+const [allPatterns, allPosts] = await Promise.all([
+	getCollection('patterns'),
+	getCollection('posts'),
+]);
+const readNext = getRelated({ type: 'post', entry: post }, {
+	patterns: allPatterns,
+	posts: allPosts,
+});
 ---
 
 <Base
@@ -51,6 +62,8 @@ const { Content } = await render(post);
 		<div class="prose">
 			<Content />
 		</div>
+
+		<Related items={readNext} heading="Read next" />
 	</article>
 </Base>
 
