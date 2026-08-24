@@ -1,0 +1,16 @@
+# Normalise line endings.
+#
+# core.autocrlf is on for this machine, so files are stored LF and checked out CRLF.
+# That works until a tool rewrites endings, at which point whole files show as modified
+# for no reason. Pinning it here makes the repo's storage explicit and machine-independent,
+# rather than depending on each clone's local git config.
+* text=auto eol=lf
+
+# Binary — never touch these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary

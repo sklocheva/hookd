@@ -91,7 +91,6 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
       lands, so run `verify-deploy` the moment the first upload happens.
 - [ ] When a placeholder is deleted, delete its `data-scaffold` attribute too — otherwise the
       audit keeps ignoring an element that now ships.
-- [ ] Delete merged branches `sveltia-cms` and `fix-cms-public-folder`.
 - [ ] Decide whether drafts should become pull requests (`publish_mode: editorial_workflow`).
       Currently saving in the CMS commits straight to `main` and publishes in about a minute.
 - [ ] Run the skill-creator eval loop and description optimizer against the two skills,
