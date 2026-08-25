@@ -24,12 +24,13 @@ const seoFields = {
 	socialImage: z
 		.string()
 		.min(1, 'socialImage is required')
-		.refine(
-			(p) => existsSync(fileURLToPath(new URL(`../public${p}`, import.meta.url))),
-			(p) => ({
-				message: `socialImage "${p}" does not exist in public/. Use /og-default.png until this entry has its own artwork.`,
-			})
-		),
+		.refine((p) => existsSync(fileURLToPath(new URL(`../public${p}`, import.meta.url))), {
+			// Zod 4 takes the message as `error`, not a second function. Passing a function
+			// here is the Zod 3 signature: it type-checks as a params object, silently
+			// discards the text, and the author gets "Invalid input" instead.
+			error: (issue) =>
+				`socialImage "${issue.input}" does not exist in public/. Use /og-default.png until this entry has its own artwork.`,
+		}),
 };
 
 /**

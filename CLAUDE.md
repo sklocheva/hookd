@@ -24,6 +24,7 @@ still static assets only — there is no server process, and that constraint is 
 
 - `npm install` — first run only
 - `npm run dev` — local dev server at http://localhost:4321
+- `npm run check` — `astro check`; type-checks what the build does not. Must pass before pushing
 - `npm run build` — production build into `dist/`; must pass before pushing
 - `npm run preview` — serve the built `dist/` locally
 
@@ -35,9 +36,16 @@ There is no linter, and no unit-test runner. The checks that exist are:
 - `python scripts/check-cms-config.py` — the CMS form and the Zod schemas have not drifted.
 - `verify-deploy` skill — the deployed site, after a push.
 
-Note that `astro build` does **not** type-check. `tsconfig.json` extends
-`astro/tsconfigs/strict`, but nothing enforces it at build time — a type error in a `.astro`
-frontmatter block will build clean and only surface in the editor.
+Note that `astro build` does **not** type-check — `npm run check` is what does. `tsconfig.json`
+extends `astro/tsconfigs/strict`, but nothing enforced it until that script existed, and its
+first run found four real errors on a green build. Errors are the gate; the ~65 *hints* are
+mostly `z is deprecated` noise from Zod 4 and are not worth chasing.
+
+**Zod here is version 4, and its API differs from the Zod 3 examples in the wild.** A custom
+message is `.refine(check, { error: (issue) => '...' })`. The Zod 3 form — a second *function*
+argument — still type-checks as a params object, silently drops the message, and the author
+gets `Invalid input` instead. That defeats the point of the required-SEO-field errors, which
+exist to tell the author exactly what to fix.
 
 ## Architecture
 

@@ -1,6 +1,6 @@
 ---
 name: run-hookd
-description: Build, serve, screenshot and audit the Hookd site locally. Use this to run or start the site, preview it, take a screenshot of any page, check a change before pushing, or answer "how does it look", "does this still build", "check it at 375px", "is this accessible". Run the audit before every push — it catches the contrast, tap-target, layout-overflow and broken-link failures that this project has actually shipped, none of which are visible in the source. For checking the *deployed* site after a push, use verify-deploy instead.
+description: Build, serve, screenshot and audit the Hookd site locally. Use this to run or start the site, preview it, take a screenshot of any page, check a change before pushing, or answer "how does it look", "does this still build", "check it at 375px", "is this accessible". Run `npm run check` and the audit before every push — together they catch the type errors and the contrast, tap-target, layout-overflow and broken-link failures that this project has actually shipped, none of which `astro build` reports. For checking the *deployed* site after a push, use verify-deploy instead.
 ---
 
 # Running Hookd locally
@@ -77,16 +77,34 @@ npx astro preview stop                           # stop it
 Or the plain human path: `npm run dev` → http://localhost:4321, Ctrl-C to stop. Useful for
 hot reload while editing; useless for anything an agent needs to observe.
 
-## Other checks worth running
+## Type-check — the gate `astro build` does not give you
 
 ```bash
-npm run build                        # the only build gate; there is no linter
+npm run check
+```
+
+`astro build` does **not** type-check, so a type error in `.astro` frontmatter builds clean
+and ships. `tsconfig.json` extends `astro/tsconfigs/strict` and nothing enforced it until
+this script existed; the first run found four real errors, including a Zod 3 `.refine`
+signature that type-checked as a params object and silently threw away every custom
+validation message — authors saw `Invalid input` instead of the text written for them.
+
+Errors are the gate. **Hints are not** — there are ~65, mostly `z is deprecated` from Zod 4,
+and chasing them is not the point. Read them when you touch a file, ignore them otherwise.
+
+## The rest, in order
+
+```bash
+npm run check                        # types — fails on things the build ignores
+npm run build                        # required; a missing SEO field fails here by design
+node .claude/skills/run-hookd/driver.mjs audit
 python scripts/check-cms-config.py   # CMS form vs Zod schema parity
 ```
 
-Run `check-cms-config.py` whenever `src/content.config.ts` changes. The CMS form and the
-schema drift apart silently otherwise, and the author finds out from a failed deploy rather
-than from the form.
+`check` before `build` because it is faster and its errors are more specific. Run
+`check-cms-config.py` whenever `src/content.config.ts` changes — the CMS form and the schema
+drift apart silently otherwise, and the author finds out from a failed deploy rather than
+from the form.
 
 ## Gotchas
 
@@ -120,3 +138,4 @@ than from the form.
 | `No Chrome or Edge found` | Same — the driver prints every path it tried. |
 | Audit fails only on `data-scaffold` elements | It should not: those are skipped. If they are reported, the attribute was lost in an edit. |
 | `DeprecationWarning: Passing args ... shell option` | Harmless Node 24 warning from spawning npm on Windows. Ignore. |
+| `npm run check` reports errors but `npm run build` passes | Expected. The build does not type-check; that is the whole reason `check` exists. Fix the errors. |

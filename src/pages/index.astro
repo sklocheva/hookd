@@ -4,7 +4,6 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import { formatDate, patternSpecLine } from '../lib/format';
-import { byDateDesc } from '../lib/taxonomy';
 
 const [patterns, posts] = await Promise.all([
 	getCollection('patterns'),

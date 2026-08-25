@@ -112,8 +112,12 @@ export function getRelated(
 
 	// A pattern's yarn-test citation is a strong relation already stated — use it
 	// before falling back to guessing from tags.
-	if (source.type === 'pattern' && d.relatedPost) {
-		const match = all.posts.find((p) => p.id === (d.relatedPost as { id: string }).id);
+	// Narrow through `source`, not `d`: `d` is the union of both collections' data, and
+	// testing source.type cannot narrow a value already pulled out of it. Going via
+	// source.entry keeps relatedPost properly typed and drops the cast.
+	if (source.type === 'pattern') {
+		const ref = source.entry.data.relatedPost;
+		const match = ref && all.posts.find((p) => p.id === ref.id);
 		if (match) add(fromPost(match, true));
 	}
 
