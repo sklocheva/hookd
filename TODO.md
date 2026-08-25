@@ -1,7 +1,28 @@
 # TODO
 
-Mapped to the steps in `PLAN.md`. Steps 1, 2, 3 and 5 are done; 6 is nearly done.
+## Start here if you are new to this repo
 
+| To find out | Read |
+| --- | --- |
+| What this project is, and the rules that are decided | `CLAUDE.md` |
+| How to build, preview, screenshot and audit it | `.claude/skills/run-hookd/SKILL.md` |
+| How to check a deploy actually landed | `.claude/skills/verify-deploy/SKILL.md` |
+| How to write and format an article | `WRITING.md` |
+| What has already gone wrong, and why | `.claude/skills/verify-deploy/references/failures.md` |
+
+The planning documents — `PLAN.md`, `OVERVIEW.md`, `RESEARCH.md` — live outside the repo in
+`D:\_Sophie\_docs\_Crochet blog\`. They are deliberately not committed: this repo is public
+and they hold domain research, costs and personal notes. Where this file says "step N", it
+means a step in that `PLAN.md`.
+
+Steps 1, 2, 3 and 5 are done; 6 is nearly done.
+
+## Next up
+
+- [ ] **Decide whether drafts should be hidden from listings.** `draft: true` currently keeps
+      an entry out of Google, the sitemap and RSS, but it still shows on the homepage and the
+      indexes. Filtering them out is a few lines — but every entry is a draft today, so doing
+      it now would empty the site. Worth doing once real content exists.
 ---
 
 ## Blocked on Sophia
@@ -12,7 +33,6 @@ Mapped to the steps in `PLAN.md`. Steps 1, 2, 3 and 5 are done; 6 is nearly done
       service address. Blocks the legal page content, not the page itself.
 - [ ] **Step 0 — dictate the Y2K skinny shawl stitch post.** Ten minutes, messy, no structure.
       The method is: you dictate, Claude tidies the wording, your words and caveats stay.
-- [ ] Try adding a post through `/admin` and report anything that misbehaves.
 
 ---
 
@@ -123,9 +143,6 @@ not things a script can check:
       and never appear. An Action that builds on push and emails on failure is the only
       "validation before publishing" that is actually possible; the CMS cannot run Astro.
       This would also enforce the build gate the checks currently only offer.
-- [ ] **Decide whether drafts should be hidden from listings.** `draft: true` currently keeps
-      an entry out of Google, the sitemap and RSS, but it still shows on the homepage and the
-      indexes. Filtering them out is a few lines — but every entry is a draft today, so doing
-      it now would empty the site. Worth doing once real content exists.
+
 - [ ] Optional image captions. The markdown title slot now carries the size hint
       (`"wide"`, `"narrow"`); captions would need a `<figure>` wrapper.
