@@ -6,6 +6,7 @@
 #
 #   bash verify-deploy.sh                        # check current live state
 #   bash verify-deploy.sh --expect workers.dev   # poll until that string appears, then check
+#   bash verify-deploy.sh --expect How-tos --path /journal/   # poll a specific page
 #   bash verify-deploy.sh --url https://... --timeout 240
 #
 # Exit codes: 0 all checks passed, 1 a check failed, 2 timed out waiting for --expect.
@@ -14,6 +15,7 @@ set -uo pipefail
 
 URL=""
 EXPECT=""
+EXPECT_PATH="/"
 TIMEOUT=180
 INTERVAL=15
 
@@ -21,6 +23,7 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --url)      URL="$2";     shift 2 ;;
     --expect)   EXPECT="$2";  shift 2 ;;
+    --path)     EXPECT_PATH="$2"; shift 2 ;;
     --timeout)  TIMEOUT="$2"; shift 2 ;;
     --interval) INTERVAL="$2"; shift 2 ;;
     -h|--help)  sed -n '2,12p' "$0"; exit 0 ;;
@@ -56,12 +59,18 @@ if [ -n "$EXPECT" ]; then
   # never emits. That reports "not deployed" forever while the deploy has already landed.
   # If dist/ exists, the marker must be in it — dist/ is what gets uploaded.
   ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
-  if [ -d "$ROOT_DIR/dist" ]; then
-    if ! grep -rqF -- "$EXPECT" "$ROOT_DIR/dist" 2>/dev/null; then
-      echo "  '$EXPECT' does not appear anywhere in dist/."
-      echo "  A marker the build does not emit can never appear live, so this would poll"
-      echo "  until timeout and report a failure that has not happened. Pick something the"
-      echo "  change actually produces, and check it is in dist/ first."
+  BUILT="$ROOT_DIR/dist${EXPECT_PATH%/}/index.html"
+  [ "$EXPECT_PATH" = "/" ] && BUILT="$ROOT_DIR/dist/index.html"
+
+  if [ -f "$BUILT" ]; then
+    if ! grep -qF -- "$EXPECT" "$BUILT"; then
+      echo "  '$EXPECT' is not in the built page this would poll ($EXPECT_PATH)."
+      if grep -rqF -- "$EXPECT" "$ROOT_DIR/dist" 2>/dev/null; then
+        echo "  It IS elsewhere in dist/ — so pass --path <route> to poll the page that has it."
+      else
+        echo "  It is nowhere in dist/, so the build does not emit it at all."
+      fi
+      echo "  Polling anyway would run to timeout and report a failure that has not happened."
       exit 2
     fi
   fi
@@ -69,7 +78,7 @@ if [ -n "$EXPECT" ]; then
   echo "Waiting for '$EXPECT' (timeout ${TIMEOUT}s)"
   START=$(date +%s)
   while :; do
-    BODY=$(curl -s "$URL/")
+    BODY=$(curl -s "$URL$EXPECT_PATH")
     EL=$(( $(date +%s) - START ))
     case "$BODY" in
       *"$EXPECT"*) echo "  marker appeared after ${EL}s"; break ;;
