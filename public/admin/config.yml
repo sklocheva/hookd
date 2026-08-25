@@ -233,7 +233,7 @@ collections:
       - label: Kind
         name: kind
         widget: select
-        options: ['Yarn test', 'Stitch test', 'Fibre note']
+        options: ['Garment making', 'Yarn and fibres', 'How-tos']
         hint: Drives the eyebrow colour and the journal filters.
 
       - label: Draft

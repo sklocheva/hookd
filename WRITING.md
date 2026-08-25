@@ -1,0 +1,177 @@
+# Writing for Hookd
+
+What you can put in the body box in `/admin`, and how. Everything here is plain Markdown —
+type it into the same box you type paragraphs into.
+
+The body box has no toolbar for most of this. That is normal: Markdown is text, and the
+formatting is the punctuation around it.
+
+---
+
+## The basics
+
+```markdown
+## A section heading
+
+A normal paragraph. Leave a blank line between paragraphs, or they run together.
+
+**Bold** for a term that matters. *Italic* for emphasis or a yarn name.
+
+- A bullet
+- Another bullet
+
+1. A numbered step
+2. The next step
+
+> A quote, or a caveat you want set apart.
+
+[A link to something](https://example.com), or [to a page here](/patterns/oland-cardigan/).
+```
+
+**Start headings at `##`, never `#`.** The page already has one `#` — the article title —
+and a second breaks the page structure. The build checks this.
+
+`##` is a section, `###` a step within it, `####` a small aside. All three are styled.
+**Don't bold a heading** — `## **What you need**` — the heading is already styled, and the
+bold does nothing but clutter the source.
+
+---
+
+## Images
+
+Insert one with the image button, or type it:
+
+```markdown
+![Describe the photo for someone who cannot see it](/src/assets/photo.webp)
+```
+
+The part in `[square brackets]` is the alt text. **Always write it properly** — it is what a
+blind reader hears and what Google reads. "Photo" is not alt text.
+
+### Sizing
+
+Add a size in quotes after the path:
+
+```markdown
+![alt](/src/assets/photo.webp)            aligned with the text — the default
+![alt](/src/assets/photo.webp "wide")     full width of the content column
+![alt](/src/assets/photo.webp "narrow")   about half width, for a detail or a swatch
+```
+
+Use `wide` for anything with detail to read — a step-by-step grid, a comparison, a chart.
+Use `narrow` for a single small object. Default suits most photos.
+
+### Before you upload
+
+The panel converts to WebP and caps the long edge at 2000px in your browser, so **upload
+the full-size file** — it handles the rest. Nothing oversized reaches the repository.
+
+---
+
+## Tables
+
+Plain Markdown tables work and are styled to match the site:
+
+```markdown
+| Yarn | Dry | After wash | Change |
+| --- | ---: | ---: | ---: |
+| Hillesvåg Vestlandsgarn | 20.0 | 19.6 | −2.0% |
+| Drops Karisma | 20.1 | 21.2 | +5.5% |
+```
+
+The `---:` on a column right-aligns it. **Right-align numbers, left-align text** — it makes a
+column of figures readable down its edge.
+
+Wide tables scroll sideways on a phone rather than squashing, so you do not have to keep
+them narrow.
+
+---
+
+## Pattern instructions
+
+Only in patterns, and only in `.mdx` files. Add this line once at the top of the body:
+
+```
+import Row from '../../components/Row.astro';
+```
+
+Then for each row or round:
+
+```markdown
+<Row label="Row 1" side="RS" counts={{ XS: 62, M: 79, "3X": 115 }}>
+  Ch 2, hdc in the 3rd ch from hook and in each ch to end, turn.
+</Row>
+
+<Row label="Rows 2–4" counts={{ XS: 62, M: 79, "3X": 115 }}>
+  Ch 2, hdc in each st to end, turn.
+</Row>
+```
+
+- `label` — "Row 1", "Rnds 4–8", whatever you would say
+- `side` — `RS` or `WS`, optional, only when it matters
+- `counts` — stitch count per size, optional. One number works too: `counts={62}`
+
+---
+
+## Data tables in journal posts
+
+For a results table you want to keep tidy, the `DataTable` component takes the rows as data
+so the formatting stays out of your hands. Import once:
+
+```
+import DataTable from '../../components/DataTable.astro';
+```
+
+```markdown
+<DataTable
+  columns={['Yarn', 'Drape', 'Pilling']}
+  align={['left', 'left', 'left']}
+  rows={[
+    ['Hillesvåg Vestlandsgarn', 'Firm, holds a shape', 'None visible'],
+    ['Drops Karisma', 'Soft, a little limp', 'Moderate'],
+  ]}
+/>
+```
+
+A plain Markdown table (above) is easier and looks the same. Use `DataTable` when you want
+column alignment controlled, or the table is long enough that Markdown pipes get unwieldy.
+
+---
+
+## Saving and publishing
+
+**There is no publish button — Save is publish.** Saving commits to the site and it goes
+live in about a minute.
+
+To work on something without publishing it, tick **Draft** before saving. A draft:
+
+- still saves, so nothing is lost
+- still appears on the site if you know the URL
+- is kept out of Google, the sitemap and the RSS feed
+
+Untick Draft and save again when it is ready. That is the "save now, publish later" flow.
+
+---
+
+## The fields that are required, and why
+
+The panel will not let you save without these, and the build fails without them:
+
+| Field | Why |
+| --- | --- |
+| **Meta description**, max 160 chars | What Google shows under your title. Written by you, or written badly by Google |
+| **Hero image alt text** | Required even before the photo exists, so it is never forgotten afterwards |
+| **Social share image** | Leave as `/og-default.png` until the post has its own — otherwise every share and pin renders blank |
+
+This is deliberate. It replaces an SEO plugin nagging you with an error you cannot ignore.
+
+---
+
+## Common mistakes
+
+| Symptom | Cause |
+| --- | --- |
+| Editing an existing post by accident | Use **New Journal post**, not a click on an entry in the list |
+| Image does not appear | Check the path starts `/src/assets/` — that is what the panel writes |
+| Table is not a table | Every row needs leading and trailing `|`, and the `| --- |` separator line |
+| Post saved but not on the site | The build failed. Ask Claude to check — Cloudflare does not report failures anywhere |

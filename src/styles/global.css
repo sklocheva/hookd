@@ -193,3 +193,29 @@ img {
 	display: inline-block;
 	padding-block: 6px;
 }
+
+
+/* Article images, sized from markdown.
+   Markdown's optional title slot doubles as a size hint, so an author can scale an
+   image from the CMS's plain text box without any component syntax:
+
+     ![alt](/src/assets/photo.webp)           default — aligned with the text column
+     ![alt](/src/assets/photo.webp "wide")    breaks out to the full content column
+     ![alt](/src/assets/photo.webp "narrow")  half width, for a detail or a swatch
+
+   Default is the text measure because an image that lines up with the prose reads as
+   part of the article; full-bleed is a deliberate choice, not the fallback. */
+.prose img {
+	display: block;
+	max-width: min(100%, var(--measure));
+	height: auto;
+	margin: 30px 0;
+}
+
+.prose img[title~='wide'] {
+	max-width: 100%;
+}
+
+.prose img[title~='narrow'] {
+	max-width: min(100%, calc(var(--measure) * 0.55));
+}

@@ -13,7 +13,7 @@ import { slugify } from './format';
  * These must stay in step with the enums in src/content.config.ts.
  */
 export const PATTERN_CATEGORIES = ['Garments', 'Accessories', 'Home'] as const;
-export const POST_KINDS = ['Yarn test', 'Stitch test', 'Fibre note'] as const;
+export const POST_KINDS = ['Garment making', 'Yarn and fibres', 'How-tos'] as const;
 
 export type PatternCategory = (typeof PATTERN_CATEGORIES)[number];
 export type PostKind = (typeof POST_KINDS)[number];
@@ -21,8 +21,6 @@ export type PostKind = (typeof POST_KINDS)[number];
 export const categoryHref = (c: string) => `/patterns/c/${slugify(c)}/`;
 export const kindHref = (k: string) => `/journal/c/${slugify(k)}/`;
 
-/** Journal filters read as plurals: "Yarn tests", "Fibre notes". */
-export const kindLabel = (k: string) => `${k}s`;
 
 /** Newest first. The sort every listing uses. */
 export function byDateDesc<T extends { data: { date: Date } }>(a: T, b: T): number {

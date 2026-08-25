@@ -4,7 +4,7 @@ date: 2026-07-10
 summary: >-
   What the numbers on a ball band actually commit the manufacturer to, which ones are
   marketing, and the one figure worth more than the recommended gauge.
-kind: Fibre note
+kind: Yarn and fibres
 method: 14 ball bands compared · CYC categories vs stated metreage
 tags: ['yarn', 'cyc', 'labels']
 heroImageAlt: A dozen yarn ball bands photographed from directly above, arranged in a grid.

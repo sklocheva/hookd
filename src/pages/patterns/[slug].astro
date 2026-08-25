@@ -334,6 +334,31 @@ const specs = [
 		color: var(--ink);
 	}
 
+
+	/* Markdown wraps a lone image in a <p>, and that wrapper is capped to the text
+	   measure like any other paragraph — so a "wide" image was still limited to 640px.
+	   Release the wrapper when it holds nothing but the image. */
+	.prose :global(p:has(> img:only-child)) {
+		max-width: 100%;
+	}
+
+	/* The design only ever showed h2, so h3 and h4 fell back to the browser default —
+	   Work Sans at 18.72px, visibly not part of the page. Authors reach for them in
+	   any how-to, so they get proper steps in the same serif voice. */
+	.prose :global(h3) {
+		margin: clamp(28px, 3vw, 36px) 0 12px;
+		font: 400 clamp(19px, 2.1vw, 22px) / 1.3 var(--serif);
+		color: var(--ink);
+	}
+
+	.prose :global(h4) {
+		margin: clamp(22px, 2.5vw, 28px) 0 10px;
+		font: 600 13px/1.4 var(--sans);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink-2);
+	}
+
 	.prose :global(strong) {
 		font-weight: 600;
 	}

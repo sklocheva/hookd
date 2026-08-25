@@ -3,13 +3,13 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
 import JournalList from '../../components/JournalList.astro';
-import { byDateDesc, kindHref, kindLabel, postKindsInUse } from '../../lib/taxonomy';
+import { byDateDesc, kindHref, postKindsInUse } from '../../lib/taxonomy';
 
 const posts = (await getCollection('posts')).sort(byDateDesc);
 
 const filters = [
 	{ label: 'All', href: '/journal/', active: true },
-	...postKindsInUse(posts).map((k) => ({ label: kindLabel(k), href: kindHref(k) })),
+	...postKindsInUse(posts).map((k) => ({ label: k, href: kindHref(k) })),
 ];
 ---
 

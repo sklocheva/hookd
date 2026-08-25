@@ -5,7 +5,7 @@ import Base from '../../../layouts/Base.astro';
 import PageHead from '../../../components/PageHead.astro';
 import JournalList from '../../../components/JournalList.astro';
 import { slugify } from '../../../lib/format';
-import { byDateDesc, kindHref, kindLabel, postKindsInUse } from '../../../lib/taxonomy';
+import { byDateDesc, kindHref, postKindsInUse } from '../../../lib/taxonomy';
 
 // Real static routes rather than client-side filtering, because of the no-JS rule.
 export const getStaticPaths = (async () => {
@@ -26,7 +26,7 @@ const allPosts = await getCollection('posts');
 const filters = [
 	{ label: 'All', href: '/journal/' },
 	...postKindsInUse(allPosts).map((k) => ({
-		label: kindLabel(k),
+		label: k,
 		href: kindHref(k),
 		active: k === kind,
 	})),
@@ -34,13 +34,13 @@ const filters = [
 ---
 
 <Base
-	title={`${kindLabel(kind)} — Hookd journal`}
-	description={`Write-ups filed under ${kind.toLowerCase()} — swatched, washed and measured, including the inconvenient results.`}
+	title={`${kind} — Hookd journal`}
+	description={`Journal posts filed under ${kind.toLowerCase()} — written up from work actually done, including the inconvenient results.`}
 	active="journal"
 >
 	<PageHead
-		heading={kindLabel(kind)}
-		standfirst={`${posts.length} ${posts.length === 1 ? 'write-up' : 'write-ups'} filed under ${kind.toLowerCase()}.`}
+		heading={kind}
+		standfirst={`${posts.length} ${posts.length === 1 ? 'post' : 'posts'} filed under ${kind.toLowerCase()}.`}
 		filters={filters}
 	/>
 

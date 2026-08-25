@@ -156,7 +156,7 @@ const posts = defineCollection({
 			summary: z.string(),
 			heroImage: optionalString,
 			/** Drives the eyebrow and the journal filters. */
-			kind: z.enum(['Yarn test', 'Stitch test', 'Fibre note']),
+			kind: z.enum(['Garment making', 'Yarn and fibres', 'How-tos']),
 			/** The muted line under the excerpt, e.g. "6 yarns · 32 sts × 24 rows hdc". */
 			method: optionalString,
 			tags: z.array(z.string()).default([]),
