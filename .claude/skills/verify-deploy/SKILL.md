@@ -27,8 +27,10 @@ never against `dist/`.
 
 ## Workflow
 
-Run `npm run build` locally first. It's the cheapest way to catch a broken commit, and pushing
-something that can't build wastes a deploy cycle.
+Run `npm run check` then `npm run build` locally first. They are the cheapest way to catch a
+broken commit, and pushing something that cannot build wastes a deploy cycle. `check` is not
+optional cover for `build`: the build does not type-check, so it will happily ship a type
+error that `check` catches in seconds.
 
 Then capture a **marker** — something in the live response that will visibly change once your
 commit deploys. Pick something the change *creates*, anchored to structure rather than a loose

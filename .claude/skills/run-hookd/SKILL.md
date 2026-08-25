@@ -32,7 +32,7 @@ npm install
 node .claude/skills/run-hookd/driver.mjs audit
 ```
 
-Builds, serves, then loads all 13 routes at **375px and 1280px** and checks each render for:
+Builds, serves, then loads **every route it finds in `dist/`** at **375px and 1280px** — so new entries are covered the moment they build — and checks each render for:
 
 | Check | Why it exists |
 | --- | --- |
@@ -47,9 +47,12 @@ Builds, serves, then loads all 13 routes at **375px and 1280px** and checks each
 Exit code 0 clean, 1 on findings, 2 if it could not start. Output ends with:
 
 ```
-26 page-renders checked, 0 issue(s)
-52 known scaffolding element(s) skipped — they go when the placeholders do
+34 page-renders checked, 0 issue(s)
+68 known scaffolding element(s) skipped — they go when the placeholders do
 ```
+
+Both counts move as content is added — two renders per route — so read them as a shape, not
+a target. What matters is the issue count, and that the skipped count is not silently rising.
 
 The skipped count is real. Elements marked `data-scaffold` — the dashed wordmark caption,
 the social-stub caption, the striped photo placeholders — fail contrast on purpose and are
@@ -71,6 +74,7 @@ measurement would ever have flagged.
 
 ```bash
 node .claude/skills/run-hookd/driver.mjs serve   # build + preview, leaves it running
+npx astro preview status                         # is one already up, and since when?
 npx astro preview stop                           # stop it
 ```
 
@@ -113,7 +117,8 @@ from the form.
   not Ctrl-C. The driver handles this; you will hit it if you spawn preview yourself.
 - **Reuse the running preview.** The driver skips build+serve if 4321 already answers. If you
   changed source and the audit looks stale, stop the preview first — otherwise you are
-  auditing the previous build.
+  auditing the previous build. `npx astro preview status` prints the pid and uptime, which is
+  the quickest way to tell whether what you are looking at predates your edit.
 - **`--hide-scrollbars` is load-bearing.** Without it Chrome's scrollbar eats ~15px of the
   viewport and the overflow check reports false positives at 375px.
 - **Poll `document.readyState`, don't trust `Page.loadEventFired`.** It can fire before the
