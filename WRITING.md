@@ -146,8 +146,13 @@ live in about a minute.
 To work on something without publishing it, tick **Draft** before saving. A draft:
 
 - still saves, so nothing is lost
-- still appears on the site if you know the URL
 - is kept out of Google, the sitemap and the RSS feed
+- **is still visible on the site** — it appears in the journal or patterns list and on the
+  homepage, exactly like anything else
+
+So "draft" here means *not findable*, not *not visible*. Nobody will stumble on it through
+a search engine or a feed reader, but a person browsing the site will see it. If you want
+drafts hidden from the listings as well, that is a change worth making deliberately — ask.
 
 Untick Draft and save again when it is ready. That is the "save now, publish later" flow.
 

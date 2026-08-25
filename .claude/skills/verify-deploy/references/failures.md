@@ -29,19 +29,6 @@ cosmetic. It was the root cause. Read warnings on green builds.
 **How to spot it fast.** If images render locally but not live, look at the `src` attribute
 before anything else. `/_image` means server-mode output on a static host.
 
-## A verification check that matched its own failure mode
-
-**Symptom.** A poll for "images are fixed now" reported success instantly, while the images
-were still broken.
-
-**Cause.** The check was `grep _astro`. The broken URL is `/_image?href=%2F_astro%2F...` — it
-contains `_astro` inside its URL-encoded query string. The check matched the failure it was
-written to detect.
-
-**Lesson.** Anchor patterns to structure, not to a substring that can appear anywhere:
-`src="/_astro/` rejects the broken form, bare `_astro` does not. A check that passes
-suspiciously fast deserves distrust, not celebration. Before relying on a check, state what
-the failure looks like and confirm the check rejects it.
 
 ## Concluding "the build failed" from a site that didn't change — wrongly
 
@@ -64,28 +51,25 @@ and `commits/main/status` returns `state: pending, count: 0` — so the log is t
 of truth, and only the user can reach it. Ask early; guessing cost several cycles and one
 needless revert.
 
-## Polling for a marker the build never emits — three times
+## Markers that cannot tell you anything — four times
 
-**Symptom.** A deploy check reports "not yet" on every poll until timeout, so the deploy
-looks failed. It had landed each time, usually inside a minute.
+**Symptom.** A deploy check either passes instantly while the bug is still live, or polls to
+timeout while the deploy already landed. Either way the result means nothing.
 
-**Three separate causes, same mistake:**
+**Four causes, one mistake — treating a marker as fact when it is a guess about output:**
 
-1. `_astro` — matched the *broken* URL too, because that is
-   `/_image?href=%2F_astro%2F…`. The check passed while the bug was still live.
-2. `font:600 12px` — Astro's minifier splits that shorthand, so the string never exists
-   in the output.
-3. `--type-page-title` — Astro tree-shakes unused custom properties per page, so the
-   token appears on the index that uses it and not on the article page being polled.
+1. `_astro` also matched the *broken* URL, `/_image?href=%2F_astro%2F…`, so the check
+   passed while the thing it checked was still broken.
+2. `font:600 12px` — the minifier splits that shorthand, so the string never exists.
+3. `--type-page-title` — Astro tree-shakes unused custom properties per page.
+4. `How-tos` existed in the build, but on `/journal/`, while the poll only fetched `/`.
 
-**Lesson.** A marker is a hypothesis about the build output, and it is wrong more often
-than it feels. Before polling, confirm the string is in `dist/` — that is literally what
-gets uploaded. `verify-deploy.sh --expect` now refuses to poll for anything absent from
-`dist/`, which turns this from a rule nobody remembers into an error.
+**Now enforced, not remembered.** `--expect` checks the built page it would poll, and says
+which case it is: absent from the build entirely, or present elsewhere (use `--path`).
 
-Anchor to structure, not substrings: `src="/_astro/` rejects the broken form, bare
-`_astro` does not. And prefer a marker the change *creates* — a new file, a new route, a
-value that did not exist before.
+**Still your judgement:** anchor to structure, not substrings — `src="/_astro/` rejects the
+broken form, bare `_astro` does not — and prefer something the change *creates*.
+
 
 ## Predicting a hostname and baking it into config
 

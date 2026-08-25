@@ -31,11 +31,9 @@ Run `npm run build` locally first. It's the cheapest way to catch a broken commi
 something that can't build wastes a deploy cycle.
 
 Then capture a **marker** — something in the live response that will visibly change once your
-commit deploys. Pick something the change *creates*, and one that is anchored to structure
-rather than a loose substring. Three times on this project a marker was picked that the build
-never emits, and the check then polled to timeout reporting a failure that had not happened —
-so `--expect` now greps `dist/` first and refuses to poll for anything absent from it. `dist/`
-is exactly what gets uploaded, so absence proves the poll can never succeed.
+commit deploys. Pick something the change *creates*, anchored to structure rather than a loose
+substring. `--expect` refuses markers the built page does not contain, so a bad one fails in a
+second instead of at timeout — see `references/failures.md` for why that guard exists.
 
 Without a marker you cannot distinguish "deployed" from "build failed, old
 version still up". The canonical URL, a heading, a piece of copy, an asset filename hash all
@@ -104,20 +102,6 @@ non-executing crawler sees — so checking for real headings and links in that H
 actual requirement. Counting `<script>` tags does not, and an earlier version of this skill
 got that wrong and failed on a correct page.
 
-## Writing checks that can't lie to you
-
-A verification check that matches its own failure mode is worse than no check, because it
-reports success and you stop looking.
-
-This has already happened here. Polling for a fixed image with `grep _astro` matched instantly
-and reported success — because the broken URL is `/_image?href=%2F_astro%2F...`, which contains
-`_astro` inside its query string. The check passed while the thing it was checking was still
-broken.
-
-Before relying on a check, ask what the failure looks like and confirm the check rejects it.
-Anchor patterns to structure rather than to a substring that could appear anywhere:
-`src="/_astro/` is safe, bare `_astro` is not. When a check passes suspiciously fast, that is
-a signal to distrust it, not to celebrate.
 
 ## Reporting honestly
 

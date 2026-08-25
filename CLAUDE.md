@@ -64,6 +64,17 @@ its caption doubles as the shot list — it is scaffolding, to be deleted when r
 not yet shot, triggered by omitting `heroImage`, and it ships. Same for the dashed wordmark box
 in `Header.astro` and the social stubs in `Footer.astro`, both marked in the source.
 
+**The CMS and Astro disagree about paths, and two files reconcile them.** Sveltia requires an
+absolute `public_folder`, so it writes `/src/assets/photo.webp` — which Astro treats as a
+public URL and leaves alone, so the image 404s. `src/lib/images.ts` translates that for
+`heroImage` in frontmatter; `src/lib/remark-cms-images.mjs` does the same for images in the
+body. Both exist for one reason and break the same way. Sveltia also formats dates with
+**Day.js** tokens (`YYYY-MM-DD`) — date-fns style silently writes garbage like `yyyy-08-We`.
+
+**Drafts are hidden from search, not from visitors.** `draft: true` keeps an entry out of the
+sitemap, the RSS feed, and adds `noindex` — but it still renders and is still listed on the
+homepage and the indexes. No listing filters drafts.
+
 **Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
 `/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real
 static routes rather than client-side filtering, because of the no-JS rule.

@@ -118,5 +118,14 @@ not things a script can check:
 - [ ] Merge to `main` only with Sophia's consent, once a page is reviewed and finished
 - [ ] One change per branch; keep diffs reviewable
 - [ ] Don't change decided stack choices without asking
-- [ ] Decide whether a pre-push hook or a GitHub Action enforces the build gate — the checks
-      exist now, nothing runs them automatically
+- [ ] **GitHub Action to catch failed builds.** Publishing from `/admin` pushes straight from
+      the browser, so nothing runs locally and a failed build is silent — a post can save fine
+      and never appear. An Action that builds on push and emails on failure is the only
+      "validation before publishing" that is actually possible; the CMS cannot run Astro.
+      This would also enforce the build gate the checks currently only offer.
+- [ ] **Decide whether drafts should be hidden from listings.** `draft: true` currently keeps
+      an entry out of Google, the sitemap and RSS, but it still shows on the homepage and the
+      indexes. Filtering them out is a few lines — but every entry is a draft today, so doing
+      it now would empty the site. Worth doing once real content exists.
+- [ ] Optional image captions. The markdown title slot now carries the size hint
+      (`"wide"`, `"narrow"`); captions would need a `<figure>` wrapper.

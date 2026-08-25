@@ -107,12 +107,8 @@ than from the form.
   PowerShell. `node`, `curl` and the driver are fine in either.
 - **Node is not on the inherited PATH** in fresh tool shells. In PowerShell, prepend:
   `$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")`
-- **Pick a marker that did not exist before, and that the build actually emits.** Not a
-  driver issue, but the recurring mistake on this project — three times now. `_astro` also
-  matched the broken `/_image?href=%2F_astro%2F…`; `font:600 12px` is a shorthand the
-  minifier splits; `--type-page-title` is tree-shaken off pages that do not use it. Each
-  reported a result that meant nothing. `verify-deploy.sh --expect` now greps `dist/` first
-  and refuses markers that are not there, but the judgement is still yours.
+- **Verifying a deploy is `verify-deploy`'s job, not this one.** Its `--expect` guard exists
+  because markers that cannot match have wasted time here four times over.
 
 ## Troubleshooting
 
