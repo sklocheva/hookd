@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
+import { remarkCmsImages } from './src/lib/remark-cms-images.mjs';
 import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -44,6 +45,9 @@ export default defineConfig({
 	// Absolute URL of the deployed site. @astrojs/sitemap needs this at build time
 	// to emit absolute <loc> entries. Keep in sync with public/robots.txt.
 	site: 'https://hookd-blog.sklocheva.workers.dev',
+	// The CMS writes body images as /src/assets/… ; Astro only optimizes relative
+	// markdown paths, so this rewrites them before the asset pipeline runs.
+	markdown: { remarkPlugins: [remarkCmsImages] },
 	integrations: [
 		mdx(),
 		sitemap({

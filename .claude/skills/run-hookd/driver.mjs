@@ -19,7 +19,7 @@
  */
 
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, rmSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -27,23 +27,29 @@ const ROOT = new URL('../../../', import.meta.url).pathname.replace(/^\/([A-Za-z
 const PREVIEW = 'http://localhost:4321';
 const SHOT_DIR = join(ROOT, '.screenshots');
 
-// Routes worth checking. Kept explicit rather than crawled: a crawl would follow
-// whatever exists, and the point is to assert the set that should exist.
-const ROUTES = [
-	'/',
-	'/patterns/',
-	'/patterns/oland-cardigan/',
-	'/patterns/fjord-yoke-pullover/',
-	'/patterns/c/garments/',
-	'/journal/',
-	'/journal/six-dk-wools-swatched-and-washed/',
-	'/journal/c/yarn-test/',
-	'/about/',
-	'/privacy/',
-	'/licence/',
-	'/imprint/',
-	'/404.html',
-];
+// Routes are discovered from dist/ rather than hand-listed. A hand-list goes stale the
+// moment content is added or renamed — it named two posts that no longer existed after a
+// single CMS edit, and the audit then failed on pages that were correctly gone.
+// CORE is the part worth asserting: these must exist, whatever the content is doing.
+const CORE = ['/', '/patterns/', '/journal/', '/about/', '/privacy/', '/licence/', '/imprint/', '/404.html'];
+
+function discoverRoutes() {
+	const dist = join(ROOT, 'dist');
+	const found = [];
+	const walk = (dir, prefix) => {
+		let entries = [];
+		try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return; }
+		for (const e of entries) {
+			if (e.name === '_astro' || e.name === 'admin') continue;
+			if (e.isDirectory()) walk(join(dir, e.name), `${prefix}${e.name}/`);
+			else if (e.name === 'index.html' && prefix) found.push(prefix);
+		}
+	};
+	walk(dist, '/');
+	if (!found.length) return CORE;
+	const all = [...new Set([...CORE, ...found])];
+	return all.filter((r) => r === '/404.html' || existsSync(join(dist, r, 'index.html')) || r === '/');
+}
 
 const CHROME_CANDIDATES = [
 	'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -319,13 +325,15 @@ function pageAudit() {
 async function cmdAudit() {
 	await ensurePreview();
 	const b = await browser();
+	const routes = discoverRoutes();
+	log(`auditing ${routes.length} routes`);
 	let failed = 0, checked = 0, totalSkipped = 0;
 
 	try {
 		for (const width of [375, 1280]) {
 			log(`\n─── ${width}px ───`);
 			await b.setViewport(width);
-			for (const route of ROUTES) {
+			for (const route of routes) {
 				await b.goto(PREVIEW + route);
 				const { issues, skipped } = await b.eval(pageAudit);
 				checked++;

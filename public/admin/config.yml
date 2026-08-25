@@ -49,7 +49,7 @@ collections:
     preview_path: patterns/{{slug}}
     fields:
       - { label: Title, name: title, widget: string }
-      - { label: Publish date, name: date, widget: datetime, format: yyyy-MM-dd, time_format: false }
+      - { label: Publish date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
       - label: Summary
         name: summary
         widget: text
@@ -227,8 +227,8 @@ collections:
     preview_path: journal/{{slug}}
     fields:
       - { label: Title, name: title, widget: string }
-      - { label: Date, name: date, widget: datetime, format: yyyy-MM-dd, time_format: false }
-      - { label: Updated, name: updated, widget: datetime, format: yyyy-MM-dd, time_format: false, required: false }
+      - { label: Date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
+      - { label: Updated, name: updated, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, required: false }
       - { label: Summary, name: summary, widget: text }
       - label: Kind
         name: kind

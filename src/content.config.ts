@@ -32,6 +32,22 @@ const seoFields = {
 		),
 };
 
+/**
+ * The CMS writes an empty string for an optional field the author never touched, and
+ * `z.coerce.date()` rejects `''` outright — a post saved with no "updated" date failed
+ * the build even though the field is optional. These normalise empty to undefined so
+ * the schema accepts what the panel actually produces.
+ */
+const optionalDate = z.preprocess(
+	(v) => (v === '' || v === null ? undefined : v),
+	z.coerce.date().optional()
+);
+
+const optionalString = z.preprocess(
+	(v) => (v === '' || v === null ? undefined : v),
+	z.string().optional()
+);
+
 /** Gauge is measured twice and the two numbers genuinely differ. Never collapse them. */
 const gauge = z.object({
 	stitches: z.number(),
@@ -77,9 +93,9 @@ const patterns = defineCollection({
 			date: z.coerce.date(),
 			summary: z.string(),
 			/** Optional: absent triggers the designed "photography still to come" state. */
-			heroImage: z.string().optional(),
+			heroImage: optionalString,
 			/** Shown on the no-photo card, e.g. "Shoot booked · September". */
-			heroImagePending: z.string().optional(),
+			heroImagePending: optionalString,
 
 			yarns: z.array(yarn).min(1),
 
@@ -136,13 +152,13 @@ const posts = defineCollection({
 		z.object({
 			title: z.string(),
 			date: z.coerce.date(),
-			updated: z.coerce.date().optional(),
+			updated: optionalDate,
 			summary: z.string(),
-			heroImage: z.string().optional(),
+			heroImage: optionalString,
 			/** Drives the eyebrow and the journal filters. */
 			kind: z.enum(['Yarn test', 'Stitch test', 'Fibre note']),
 			/** The muted line under the excerpt, e.g. "6 yarns · 32 sts × 24 rows hdc". */
-			method: z.string().optional(),
+			method: optionalString,
 			tags: z.array(z.string()).default([]),
 
 			/**
