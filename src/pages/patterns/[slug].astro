@@ -17,6 +17,7 @@ import {
 	sizeRange,
 	yardageRangeBoth,
 } from '../../lib/format';
+import { hookLabel } from '../../lib/hooks';
 
 export const getStaticPaths = (async () => {
 	const patterns = await getCollection('patterns');
@@ -42,9 +43,10 @@ const readNext = getRelated({ type: 'pattern', entry: pattern }, {
 	posts: allPosts,
 });
 
-const hookValue = `${d.hookMm} mm · US ${d.hookUs} (main)`;
+// US sizes are looked up from the mm, never typed — see src/lib/hooks.ts.
+const hookValue = `${hookLabel(d.hookMm)} (main)`;
 const hookSecond = d.secondHookMm
-	? `${d.secondHookMm} mm · US ${d.secondHookUs} for ${d.secondHookFor}`
+	? `${hookLabel(d.secondHookMm)} for ${d.secondHookFor}`
 	: undefined;
 
 const specs = [
@@ -60,15 +62,10 @@ const specs = [
 	},
 	{ label: 'Hook', value: hookValue, note: hookSecond },
 	{
-		label: 'Swatch gauge',
-		value: gaugeLine(d.swatchGauge),
-		note: d.swatchGauge.note,
-	},
-	{
-		// The one intentional emphasis in the grid: piece gauge is the number people skip.
-		label: 'Piece gauge',
-		value: gaugeLine(d.pieceGauge),
-		note: d.pieceGauge.note,
+		// The one intentional emphasis in the grid: gauge is the number people skip.
+		label: 'Gauge',
+		value: gaugeLine(d.gauge),
+		note: d.gauge.note,
 		emphasis: true,
 	},
 	{
@@ -80,7 +77,10 @@ const specs = [
 	{
 		label: 'Sizes',
 		value: d.sizes.map((s) => s.name).join(' · '),
-		note: `${d.sizes.length} sizes · full measurements below`,
+		note:
+			d.sizes.length === 1
+				? 'One size · measurements below'
+				: `${d.sizes.length} sizes · how to choose, below`,
 	},
 ];
 ---
@@ -139,10 +139,13 @@ const specs = [
 			<div class="callout callout--gauge">
 				<span class="callout__bar" aria-hidden="true"></span>
 				<p>
-					Match the <strong>piece gauge</strong>, not the swatch. A 10 cm square held flat
-					on a table behaves nothing like a 60 cm panel hanging off a shoulder — the
-					fabric drops under its own weight, and the difference between those two numbers
-					is where most fit problems begin.
+					<strong>This gauge was measured on the blocked piece</strong>, not on a swatch
+					pinned flat. A 10 cm square on a table behaves nothing like a 60 cm panel
+					hanging off a shoulder — the fabric drops under its own weight, and that
+					difference is where most fit problems begin. So make your swatch big, block it
+					the way you will block the garment, and hang it up before you measure. A
+					swatch measured flat will read tighter than this number, and you will size up
+					for no reason.
 				</p>
 			</div>
 
@@ -180,7 +183,12 @@ const specs = [
 			</div>
 		</section>
 
-		<SizeTable sizes={d.sizes} ease={d.ease} />
+		<SizeTable
+			sizes={d.sizes}
+			ease={d.ease}
+			sizeNote={d.sizeNote}
+			bodyChartUrl={d.bodyChartUrl}
+		/>
 
 		<div class="prose" id="instructions">
 			<Content />

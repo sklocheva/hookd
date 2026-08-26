@@ -93,9 +93,9 @@ Two collections, both with Zod schemas in `src/content.config.ts`. Example entri
 `src/content/` — they exist to exercise the schemas and should be replaced by real ones.
 
 **patterns** carries structured data, not prose: yarn (brand, line, fibre content, ball
-weight and length, CYC weight category), hook size in mm and US, gauge as TWO separate
-objects — swatch gauge and piece gauge — difficulty (Basic/Easy/Intermediate/Complex),
-size range, yardage per size, US/UK terms.
+weight and length, CYC weight category), hook size in mm only, one gauge, difficulty
+(Basic/Easy/Intermediate/Complex), sizes with free-form finished measurements and the body
+measurement each size is cut for, yardage per size, US/UK terms.
 
 **posts** is looser: title, date, summary, hero image, tags.
 
@@ -104,8 +104,22 @@ size range, yardage per size, US/UK terms.
 - **SEO fields are required on both collections**: meta description (max 160 chars), hero
   image alt text, social share image. The build MUST fail if any is missing. This is
   deliberate — it replaces an SEO plugin with an error.
-- **Swatch gauge and piece gauge are separate fields and both matter.** They differ in
-  reality and almost no published pattern says so. Never collapse them into one.
+- **One gauge, measured on the actual piece after blocking.** This was two fields — swatch
+  and piece — on the grounds that they genuinely differ, which they do. But only the piece
+  number is ever measured here, and a field filled in by copying the other one is worse than
+  no field. What the pair was carrying is a *warning*, not data: a 10 cm square held flat
+  behaves nothing like a panel hanging off a shoulder. That now lives in the gauge `note` and
+  in the callout on the pattern page. **Keep the warning.** A maker cannot measure a piece
+  they have not made yet, so the pattern has to tell them how to swatch to match the number.
+- **Hook size is typed in mm only; the US size is derived** in `src/lib/hooks.ts` from the
+  Craft Yarn Council table. US letters vary by manufacturer, and 2.5, 7 and 12 mm have **no
+  US equivalent at all** — an input field for it invites an invented answer. `usHook` returns
+  undefined for those and the page shows just the mm.
+- **Finished measurements are author-named label/value pairs, not fixed bust/length columns.**
+  A hat needs circumference and depth; a blanket needs nothing. The size table builds its
+  columns from the labels used, so keep a label spelled identically across every size or it
+  becomes two columns. Each size also carries `fitsBodyCm`, the body it is cut for, shown
+  next to the finished numbers so a maker sees the ease instead of calculating it.
 - US crochet terms throughout.
 
 ## Conventions

@@ -39,17 +39,9 @@ yarns:
     role: contrast
 
 hookMm: 4
-hookUs: G-6
 
-swatchGauge:
-  stitches: 19
-  rows: 14
-  overCm: 10
-  stitchPattern: Single crochet, worked in the round
-  blocked: true
-  note: Blocked flat, measured at the centre
 
-pieceGauge:
+gauge:
   stitches: 18
   rows: 13
   overCm: 10
@@ -58,19 +50,27 @@ pieceGauge:
   note: Measured on the body below the yoke, under its own weight
 
 ease: worn with 8–12 cm ease
+sizeNote: >-
+  Go by your bust measurement. The yoke is worked top down, so you can try it on at the underarm and adjust the body length before you commit.
 
 sizes:
   - name: XS
-    finishedBustCm: 84
-    finishedLengthCm: 58
+    fitsBodyCm: 72–76
+    measurements:
+      - { label: Finished bust, value: 84 }
+      - { label: Finished length, value: 58 }
     yardageM: 1100
   - name: M
-    finishedBustCm: 108
-    finishedLengthCm: 62
+    fitsBodyCm: 96–100
+    measurements:
+      - { label: Finished bust, value: 108 }
+      - { label: Finished length, value: 62 }
     yardageM: 1420
   - name: 3X
-    finishedBustCm: 155
-    finishedLengthCm: 68
+    fitsBodyCm: 143–147
+    measurements:
+      - { label: Finished bust, value: 155 }
+      - { label: Finished length, value: 68 }
     yardageM: 1880
 ---
 

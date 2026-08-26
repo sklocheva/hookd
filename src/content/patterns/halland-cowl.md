@@ -11,6 +11,8 @@ metaDescription: A free single-skein cowl in garter-look crochet — one evening
 
 difficulty: Easy
 category: Accessories
+sizeNote: >-
+  One size. The tube is worked to a fixed circumference — if you want it longer, add rounds and buy an extra ball.
 terms: US
 tags: ['cowl', 'accessory', 'beginner', 'one-skein']
 
@@ -26,17 +28,9 @@ yarns:
     role: main
 
 hookMm: 5.5
-hookUs: I-9
 
-swatchGauge:
-  stitches: 12
-  rows: 9
-  overCm: 10
-  stitchPattern: Half double crochet, back loop only
-  blocked: true
-  note: Blocked flat, measured at the centre
 
-pieceGauge:
+gauge:
   stitches: 11.5
   rows: 8.5
   overCm: 10
@@ -46,8 +40,9 @@ pieceGauge:
 
 sizes:
   - name: One size
-    finishedBustCm: 58
-    finishedLengthCm: 28
+    measurements:
+      - { label: Circumference, value: 58 }
+      - { label: Height, value: 28 }
     yardageM: 180
 ---
 

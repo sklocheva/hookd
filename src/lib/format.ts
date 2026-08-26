@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
+import { hookLabel } from './hooks';
 
 type Pattern = CollectionEntry<'patterns'>;
 type Post = CollectionEntry<'posts'>;
@@ -38,24 +39,30 @@ export function sizeRange(p: Pattern['data']): string {
 	return `${p.sizes[0].name}–${p.sizes[p.sizes.length - 1].name}`;
 }
 
-/** e.g. "81–152 cm" from finished bust, falling back to length for non-garments. */
+/**
+ * The headline measurement across every size, e.g. "81–152 cm".
+ *
+ * Measurement labels are free text now, so there is no fixed "bust" field to reach for.
+ * The first label a pattern lists is the one it considers primary — bust for a sweater,
+ * circumference for a hat — so that is the row summarised here.
+ */
 export function finishedMeasurements(p: Pattern['data']): string {
-	const busts = p.sizes.map((s) => s.finishedBustCm).filter((n): n is number => n != null);
-	if (busts.length) {
-		const [lo, hi] = range(busts);
-		return lo === hi ? `${lo} cm` : `${lo}–${hi} cm`;
-	}
-	const first = p.sizes[0];
-	if (first.finishedLengthCm && first.finishedBustCm) {
-		return `${first.finishedBustCm} × ${first.finishedLengthCm} cm`;
-	}
-	if (first.finishedLengthCm) return `${first.finishedLengthCm} cm`;
-	return '—';
+	const primary = p.sizes.find((s) => s.measurements.length)?.measurements[0]?.label;
+	if (!primary) return '—';
+
+	const values = p.sizes
+		.map((s) => s.measurements.find((m) => m.label === primary))
+		.filter((m): m is NonNullable<typeof m> => m != null);
+	if (!values.length) return '—';
+
+	const [lo, hi] = range(values.map((m) => m.value));
+	const unit = values[0].unit;
+	return lo === hi ? `${lo} ${unit}` : `${lo}–${hi} ${unit}`;
 }
 
-/** e.g. "4.5 mm · US 7" */
+/** e.g. "4.5 mm · US 7", or just "7 mm" where no US size exists. */
 export function hook(p: Pattern['data']): string {
-	return `${p.hookMm} mm · US ${p.hookUs}`;
+	return hookLabel(p.hookMm);
 }
 
 /** The main yarn drives the card's Yarn row. */
@@ -64,7 +71,7 @@ export function mainYarn(p: Pattern['data']) {
 }
 
 /** e.g. "16 sts × 11 rows = 10 × 10 cm" */
-export function gaugeLine(g: Pattern['data']['swatchGauge']): string {
+export function gaugeLine(g: Pattern['data']['gauge']): string {
 	return `${g.stitches} sts × ${g.rows} rows = ${g.overCm} × ${g.overCm} cm`;
 }
 

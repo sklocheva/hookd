@@ -3,80 +3,107 @@ import type { CollectionEntry } from 'astro:content';
 import SectionLabel from './SectionLabel.astro';
 
 /**
- * The finished-measurements table CYC requires, generated from the per-size data.
+ * Choosing a size, then the finished measurements that justify the choice.
  *
- * This is the reason `sizes` is structured rather than prose: every pattern gets the
- * same table, in the same order, with the same units, without anyone retyping it. The
- * spec block above states the size *range*; this states the actual numbers.
+ * Ordered the way the work actually happens: a maker has the yarn and has swatched, and
+ * now has to decide which size to make. That decision needs three things side by side —
+ * the body the size is cut for, what the finished piece will measure, and therefore how
+ * much ease there is. Splitting them across two tables makes the reader hold a number in
+ * their head and subtract; keeping them in one row means they can just look.
  *
- * Columns are dropped when no size supplies them, so an accessory with only a length
- * does not show an empty bust column.
+ * Columns come from the measurement labels the author used, in the order the first size
+ * lists them, so a hat gets circumference and depth without anyone editing this file.
+ * Columns nothing supplies are dropped, and a pattern with no measurements at all still
+ * gets a usable size-and-yardage table.
  */
 interface Props {
 	sizes: CollectionEntry<'patterns'>['data']['sizes'];
-	/** e.g. "worn with 10–15 cm ease" — stated once, under the table. */
+	/** e.g. "worn with 10–15 cm ease" — stated once, above the table. */
 	ease?: string;
+	/** The author's own guidance on picking between sizes. */
+	sizeNote?: string;
+	bodyChartUrl: string;
 }
 
-const { sizes, ease } = Astro.props;
+const { sizes, ease, sizeNote, bodyChartUrl } = Astro.props;
 
-const hasBust = sizes.some((s) => s.finishedBustCm != null);
-const hasLength = sizes.some((s) => s.finishedLengthCm != null);
-
-const columns = [
-	{ key: 'name', label: 'Size', align: 'left' as const, show: true },
-	{ key: 'bust', label: 'Finished bust', align: 'right' as const, show: hasBust },
-	{ key: 'length', label: 'Finished length', align: 'right' as const, show: hasLength },
-	{ key: 'yardage', label: 'Yarn needed', align: 'right' as const, show: true },
-].filter((c) => c.show);
-
-const cell = (s: (typeof sizes)[number], key: string) => {
-	switch (key) {
-		case 'name':
-			return s.name;
-		case 'bust':
-			return s.finishedBustCm != null ? `${s.finishedBustCm} cm` : '—';
-		case 'length':
-			return s.finishedLengthCm != null ? `${s.finishedLengthCm} cm` : '—';
-		default:
-			return `${s.yardageM} m`;
+// First-seen order across every size, so a measurement only some sizes carry still
+// gets a column rather than being silently dropped.
+const labels: string[] = [];
+for (const s of sizes) {
+	for (const m of s.measurements) {
+		if (!labels.includes(m.label)) labels.push(m.label);
 	}
+}
+
+const hasBody = sizes.some((s) => s.fitsBodyCm);
+
+const measurementFor = (s: (typeof sizes)[number], label: string) => {
+	const m = s.measurements.find((x) => x.label === label);
+	return m ? `${m.value} ${m.unit}` : '—';
 };
 ---
 
-<section class="sizes">
-	<SectionLabel>Finished measurements</SectionLabel>
+<section class="sizing">
+	<SectionLabel>Choosing your size</SectionLabel>
 
-	<div class="scroller">
+	<p class="sizing__note">
+		{sizeNote ? sizeNote : 'Go by the finished measurements, not the size name.'}
+		{ease && <> This one is {ease}.</>}
+		{' '}If you are unsure what to compare against, the{' '}
+		<a href={bodyChartUrl} rel="noopener">Craft Yarn Council's body measurement charts</a>
+		{' '}list standard measurements by size, and how much ease each kind of fit needs.
+	</p>
+
+	<div class="sizing__scroller">
 		<table>
 			<thead>
 				<tr>
-					{columns.map((c) => <th style={`text-align:${c.align}`}>{c.label}</th>)}
+					<th scope="col" style="text-align:left">Size</th>
+					{hasBody && <th scope="col" style="text-align:right">Fits body</th>}
+					{labels.map((l) => <th scope="col" style="text-align:right">{l}</th>)}
+					<th scope="col" style="text-align:right">Yarn needed</th>
 				</tr>
 			</thead>
 			<tbody>
 				{
 					sizes.map((s) => (
 						<tr>
-							{columns.map((c) => (
-								<td style={`text-align:${c.align}`}>{cell(s, c.key)}</td>
+							<th scope="row" class="sizing__name">
+								{s.name}
+							</th>
+							{hasBody && <td style="text-align:right">{s.fitsBodyCm ?? '—'}</td>}
+							{labels.map((l) => (
+								<td style="text-align:right">{measurementFor(s, l)}</td>
 							))}
+							<td style="text-align:right">{s.yardageM} m</td>
 						</tr>
 					))
 				}
 			</tbody>
 		</table>
 	</div>
-
-	{ease && <p class="ease">Sized to be {ease}.</p>}
 </section>
 
 <style>
-	.sizes {
+	.sizing {
 		margin-top: clamp(34px, 4vw, 46px);
 	}
 
-	.scroller {
+	.sizing__note {
+		max-width: 640px;
+		margin: 0 0 20px;
+		font: var(--type-note);
+		color: var(--ink-2);
+	}
+
+	.sizing__note a {
+		color: inherit;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	.sizing__scroller {
 		overflow-x: auto;
 	}
 
@@ -102,14 +129,20 @@ const cell = (s: (typeof sizes)[number], key: string) => {
 		padding: 10px 14px 10px 0;
 	}
 
+	/* The size name is the row's heading, but it reads as data — not as another
+	   uppercase column label. */
+	.sizing__name {
+		font: var(--type-table-cell);
+		letter-spacing: normal;
+		text-transform: none;
+		text-align: left;
+		color: var(--ink);
+		border-bottom: 1px solid var(--rule-light);
+		padding: 10px 14px 10px 0;
+	}
+
 	th:last-child,
 	td:last-child {
 		padding-right: 0;
-	}
-
-	.ease {
-		margin: 14px 0 0;
-		font: var(--type-note);
-		color: var(--muted);
 	}
 </style>

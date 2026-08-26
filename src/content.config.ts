@@ -49,7 +49,16 @@ const optionalString = z.preprocess(
 	z.string().optional()
 );
 
-/** Gauge is measured twice and the two numbers genuinely differ. Never collapse them. */
+/**
+ * One gauge, measured on the actual piece after blocking.
+ *
+ * This used to be two fields — swatch and piece — on the grounds that they genuinely
+ * differ. They do, but only one of them is a number this author ever measures, and a
+ * field that gets filled in by copying the other one is worse than no field. What the
+ * pair was really carrying is a warning, not data: a 10 cm square held flat behaves
+ * nothing like a panel hanging off a shoulder. That belongs in `note` and in the
+ * callout on the pattern page, where a maker will actually read it.
+ */
 const gauge = z.object({
 	stitches: z.number(),
 	rows: z.number(),
@@ -57,7 +66,12 @@ const gauge = z.object({
 	overCm: z.number().default(10),
 	stitchPattern: z.string(),
 	blocked: z.boolean(),
-	/** How and where it was measured — shown as the muted second line. */
+	/**
+	 * How and where it was measured — shown as the muted second line.
+	 *
+	 * Load-bearing now that there is only one gauge: a maker cannot measure a piece
+	 * they have not made yet, so this is what tells them how to swatch to match it.
+	 */
 	note: z.string().optional(),
 });
 
@@ -75,10 +89,32 @@ const yarn = z.object({
 	role: z.string().default('main'),
 });
 
+/**
+ * One finished measurement. The label is free text because different garments need
+ * different measurements — bust and length for a sweater, circumference and depth for a
+ * hat, nothing at all for a blanket. Fixed `finishedBustCm` / `finishedLengthCm` columns
+ * forced every pattern through a sweater-shaped hole.
+ *
+ * Labels are matched across sizes to build the table's columns, so keep them identical
+ * from one size to the next — "Finished bust" in every row, not "Bust" in one of them.
+ */
+const measurement = z.object({
+	label: z.string(),
+	value: z.number(),
+	/** Defaults to cm. Only set this for the rare measurement that is not a length. */
+	unit: z.string().default('cm'),
+});
+
 const size = z.object({
 	name: z.string(),
-	finishedBustCm: z.number().optional(),
-	finishedLengthCm: z.number().optional(),
+	/** Empty is fine: an accessory that comes in one size has nothing to tabulate. */
+	measurements: z.array(measurement).default([]),
+	/**
+	 * The body this size is cut for, e.g. "76–81". Free text because it is nearly always
+	 * a range. Shown beside the finished measurements so a maker can see the ease rather
+	 * than having to work it out.
+	 */
+	fitsBodyCm: optionalString,
 	yardageM: z.number(),
 });
 
@@ -100,20 +136,35 @@ const patterns = defineCollection({
 
 			yarns: z.array(yarn).min(1),
 
+			// US sizes are derived from the mm — see src/lib/hooks.ts. They vary between
+			// manufacturers, and three common sizes have no US equivalent, so a second
+			// input field only creates a chance to type something untrue.
 			hookMm: z.number(),
-			hookUs: z.string(),
 			/** Bands and cuffs often use a smaller hook. */
 			secondHookMm: z.number().optional(),
-			secondHookUs: z.string().optional(),
 			secondHookFor: z.string().optional(),
 
-			swatchGauge: gauge,
-			pieceGauge: gauge,
+			gauge: gauge,
 
 			difficulty: z.enum(['Basic', 'Easy', 'Intermediate', 'Complex']),
 			sizes: z.array(size).min(1),
 			/** e.g. "worn with 10–15 cm ease" */
 			ease: z.string().optional(),
+			/**
+			 * How to pick a size, in the author's words — which measurement to go by, and
+			 * what to do when someone falls between two. Sits above the size table, because
+			 * that is the point in the process where a maker has to decide.
+			 */
+			sizeNote: optionalString,
+			/**
+			 * Where to look up body measurements. Defaults to the Craft Yarn Council's chart,
+			 * which is the industry reference and includes an ease table. Overridable so a
+			 * pattern can point somewhere more specific.
+			 */
+			bodyChartUrl: z
+				.string()
+				.url()
+				.default('https://www.craftyarncouncil.com/standards/body-sizing'),
 			terms: z.enum(['US', 'UK']).default('US'),
 
 			category: z.enum(['Garments', 'Accessories', 'Home']),

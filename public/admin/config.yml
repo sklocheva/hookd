@@ -129,37 +129,37 @@ collections:
           - { label: Role, name: role, widget: string, default: main, hint: 'main, contrast, optional…' }
 
       # --- Hook ----------------------------------------------------------
-      - { label: Hook (mm), name: hookMm, widget: number, value_type: float }
-      - { label: Hook (US), name: hookUs, widget: string, hint: 'e.g. 7, G-6, I-9' }
+      # Only the mm is typed. The US size is looked up from it at build time
+      # (src/lib/hooks.ts) because letters vary by manufacturer, and 2.5, 7 and 12 mm
+      # have no US equivalent at all — a field for it invites an invented answer.
+      - label: Hook (mm)
+        name: hookMm
+        widget: number
+        value_type: float
+        hint: The US size is added automatically. Nothing to look up.
       - { label: Second hook (mm), name: secondHookMm, widget: number, value_type: float, required: false }
-      - { label: Second hook (US), name: secondHookUs, widget: string, required: false }
       - { label: Second hook used for, name: secondHookFor, widget: string, required: false, hint: 'e.g. bands and cuffs' }
 
-      # --- Gauge. Two objects, never one. --------------------------------
-      - label: Swatch gauge
-        name: swatchGauge
-        widget: object
-        hint: Measured flat on a blocked swatch.
-        fields:
-          - { label: Stitches, name: stitches, widget: number, value_type: float }
-          - { label: Rows, name: rows, widget: number, value_type: float }
-          - { label: Measured over (cm), name: overCm, widget: number, value_type: int, default: 10 }
-          - { label: Stitch pattern, name: stitchPattern, widget: string }
-          - { label: Blocked, name: blocked, widget: boolean, default: true }
-          - { label: Note, name: note, widget: string, required: false, hint: How and where it was measured. }
-      - label: Piece gauge
-        name: pieceGauge
+      # --- Gauge. Measured on the actual piece, after blocking. -----------
+      - label: Gauge
+        name: gauge
         widget: object
         hint: >-
-          Measured on the actual piece, under its own weight. This differs from the swatch
-          gauge and both matter — it is the number people skip. Never copy one into the other.
+          Measured on the actual piece after blocking, under its own weight — not on a
+          swatch pinned flat.
         fields:
           - { label: Stitches, name: stitches, widget: number, value_type: float }
           - { label: Rows, name: rows, widget: number, value_type: float }
           - { label: Measured over (cm), name: overCm, widget: number, value_type: int, default: 10 }
           - { label: Stitch pattern, name: stitchPattern, widget: string }
           - { label: Blocked, name: blocked, widget: boolean, default: true }
-          - { label: Note, name: note, widget: string, required: false }
+          - label: Note
+            name: note
+            widget: string
+            required: false
+            hint: >-
+              Where on the piece you measured. Worth writing: it is what tells a maker how
+              to swatch so their number matches yours.
 
       # --- Sizes. Structured, so the table is generated. ------------------
       - label: Sizes
@@ -170,10 +170,44 @@ collections:
         hint: The finished-measurements table is generated from this, so it must be data, not prose.
         fields:
           - { label: Size name, name: name, widget: string, hint: 'XS, M, 3X, One size…' }
-          - { label: Finished bust (cm), name: finishedBustCm, widget: number, value_type: float, required: false }
-          - { label: Finished length (cm), name: finishedLengthCm, widget: number, value_type: float, required: false }
+          - label: Fits body (cm)
+            name: fitsBodyCm
+            widget: string
+            required: false
+            hint: >-
+              The body this size is cut for, e.g. 76–81. Shown next to the finished
+              measurements so a maker can see the ease instead of working it out.
+          - label: Finished measurements
+            name: measurements
+            widget: list
+            required: false
+            label_singular: Measurement
+            summary: '{{fields.label}} — {{fields.value}}'
+            hint: >-
+              Name each one yourself: bust and length for a sweater, circumference and
+              depth for a hat, nothing at all for a blanket. Use the same labels in every
+              size — they become the table columns.
+            fields:
+              - { label: Label, name: label, widget: string, hint: 'e.g. Finished bust' }
+              - { label: Value, name: value, widget: number, value_type: float }
+              - { label: Unit, name: unit, widget: string, default: cm, required: false }
           - { label: Yardage (m), name: yardageM, widget: number, value_type: int }
       - { label: Ease, name: ease, widget: string, required: false, hint: 'e.g. worn with 10–15 cm ease' }
+      - label: How to choose a size
+        name: sizeNote
+        widget: text
+        required: false
+        hint: >-
+          Your own guidance — which measurement to go by, what to do between two sizes.
+          Shown above the size table. Leave empty for a sensible default.
+      - label: Body measurement chart
+        name: bodyChartUrl
+        widget: string
+        required: false
+        default: https://www.craftyarncouncil.com/standards/body-sizing
+        hint: >-
+          Linked from the sizing note. The Craft Yarn Council chart is the industry
+          reference and includes an ease table — change it only to point somewhere better.
 
       # --- Links ----------------------------------------------------------
       - { label: Ravelry URL, name: ravelryUrl, widget: string, required: false }

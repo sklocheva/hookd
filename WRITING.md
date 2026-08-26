@@ -158,6 +158,27 @@ Untick Draft and save again when it is ready. That is the "save now, publish lat
 
 ---
 
+## Filling in a pattern's sizes
+
+**Name the measurements yourself.** A sweater wants Finished bust and Finished length; a hat
+wants Circumference and Depth; a blanket wants nothing at all — leave the list empty and the
+table still shows sizes and yarn.
+
+Use the **same label in every size**. "Finished bust" in one row and "Bust" in another makes
+two columns with holes in them, because the labels are what the columns are built from.
+
+**Fits body** is the body measurement the size is cut for, e.g. `76–81`. It sits next to the
+finished numbers so a maker can see the ease rather than doing the subtraction. If you state
+an ease, make the two agree — finished minus body should land in the range you claim.
+
+**You do not type the US hook size.** Enter the mm and the US size is added for you. Some
+sizes — 2.5, 7 and 12 mm — have no US equivalent, and those correctly show nothing.
+
+**Gauge is measured on the blocked piece**, not on a swatch pinned flat. Use the note field
+to say where on the piece you measured: that is what lets someone else swatch to match it.
+
+---
+
 ## The fields that are required, and why
 
 The panel will not let you save without these, and the build fails without them:
