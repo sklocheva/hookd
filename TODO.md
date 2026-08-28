@@ -136,13 +136,12 @@ not things a script can check:
 - [ ] One change per branch; keep diffs reviewable
 - [ ] Don't change decided stack choices without asking
 - [ ] **GitHub Action to catch failed builds.** `.github/workflows/build.yml` is written and
-      sitting uncommitted locally, but **GitHub refuses the push**: pushes are authenticated by
-      Git Credential Manager (system-level `credential.helper = manager`), and its stored token
-      has no `workflow` scope. `gh` is installed but not logged in, so `gh auth refresh` does
-      not apply. Two ways out, both Sophia's call:
-      **(a)** create the file through the GitHub web UI and `git pull` — no credential changes;
-      **(b)** `gh auth login --hostname github.com --git-protocol https --web --scopes workflow`
-      then `gh auth setup-git`, which switches pushes to `gh`'s token.
+      sitting uncommitted locally; **GitHub refuses the push** because no token in play carries
+      the `workflow` scope. Git authenticates through Git Credential Manager; `gh` is logged in
+      separately with `gist, read:org, repo`. Sophia runs
+      `gh auth refresh -h github.com -s workflow` (browser flow), then git is pointed at gh for
+      this repo only — `git config --local credential.https://github.com.helper "!gh auth
+      git-credential"` — which is reversible and leaves other repos on GCM.
 
 - [ ] Optional image captions. The markdown title slot now carries the size hint
       (`"wide"`, `"narrow"`); captions would need a `<figure>` wrapper.

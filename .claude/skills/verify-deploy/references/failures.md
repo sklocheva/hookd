@@ -101,9 +101,14 @@ actually looks like.
 
 **Credentials come from Git Credential Manager, not `gh`.** For a long time these notes said a
 `gh` credential helper was configured local to this repo. It is not: `git config --local
-credential.helper` is empty, the *system* helper is `manager` (GCM 2.4.1), and `gh` — though
-installed — reports "not logged in to any hosts". The wrong explanation survived because the
-advice attached to it (push from PowerShell) happened to work.
+credential.helper` is empty and the *system* helper is `manager` (GCM 2.4.1). `gh` is installed
+and logged in, but git never asks it. The wrong explanation survived because the advice attached
+to it — push from PowerShell — happened to work, so nothing contradicted it.
+
+**`gh auth status` can lie once, coming out of sleep.** It reported "not logged in to any hosts"
+here, which led to a confident and wrong conclusion that gh was unauthenticated; minutes later
+the same command showed a valid keyring login. The token is in the Windows keyring and that
+lookup can fail transiently. Re-run it before building an explanation on top of it.
 
 **A push touching `.github/workflows/` is rejected.** GitHub returns "refusing to allow an
 OAuth App to create or update workflow ... without `workflow` scope". GCM's stored token lacks

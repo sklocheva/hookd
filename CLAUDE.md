@@ -189,13 +189,16 @@ Things that have already gone wrong here, and cost real time:
 - **Node version.** `.nvmrc` pins 24 so local and CI agree. Astro requires >= 22.12 and
   rejects odd-numbered majors (23, 25).
 - **Pushing uses Git Credential Manager**, set at the *system* level (`credential.helper =
-  manager`). There is no repo-local helper and `gh` is installed but not logged in — an
-  earlier note here claimed the opposite and was wrong. Push from PowerShell; that is where
-  it has been observed to work.
-- **GCM's token has no `workflow` scope**, so a push that adds or edits anything under
-  `.github/workflows/` is rejected by GitHub with "refusing to allow an OAuth App to create
-  or update workflow ... without `workflow` scope". Nothing else is affected. Fixing it means
-  re-authenticating, which is Sophia's call — see TODO.
+  manager`). There is no repo-local helper, so the long-standing note about a `gh` helper
+  "configured local to this repo" was wrong. `gh` *is* logged in (account `sklocheva`, via
+  keyring) but git does not use it. Push from PowerShell.
+- **Neither token carries the `workflow` scope**, so a push that adds or edits anything under
+  `.github/workflows/` is rejected with "refusing to allow an OAuth App to create or update
+  workflow ... without `workflow` scope". Nothing else is affected. `gh auth status` lists
+  gh's scopes as `gist, read:org, repo`.
+- **`gh` can report "not logged in to any hosts" spuriously** — its token lives in the Windows
+  keyring, and coming out of sleep that lookup can fail. It said exactly that once here and
+  was fine minutes later. Re-run before concluding anything from it.
 
 ## Out of scope
 
