@@ -188,9 +188,14 @@ Things that have already gone wrong here, and cost real time:
   project. It looked cosmetic and was the root cause.
 - **Node version.** `.nvmrc` pins 24 so local and CI agree. Astro requires >= 22.12 and
   rejects odd-numbered majors (23, 25).
-- **Pushing needs the gh credential helper**, configured local to this repo. It resolves in
-  PowerShell but **not** in Git Bash, where `git push` fails with "Invalid username or
-  token". Push from PowerShell.
+- **Pushing uses Git Credential Manager**, set at the *system* level (`credential.helper =
+  manager`). There is no repo-local helper and `gh` is installed but not logged in — an
+  earlier note here claimed the opposite and was wrong. Push from PowerShell; that is where
+  it has been observed to work.
+- **GCM's token has no `workflow` scope**, so a push that adds or edits anything under
+  `.github/workflows/` is rejected by GitHub with "refusing to allow an OAuth App to create
+  or update workflow ... without `workflow` scope". Nothing else is affected. Fixing it means
+  re-authenticating, which is Sophia's call — see TODO.
 
 ## Out of scope
 

@@ -99,10 +99,15 @@ actually looks like.
 
 ## Environment traps on this machine
 
-**`git push` fails in Git Bash.** The gh credential helper (`!gh auth git-credential`) is
-configured local to this repo, and `gh` resolves in PowerShell but not in Git Bash. In Bash the
-push fails with `gh: command not found` then "Invalid username or token. Password
-authentication is not supported". Push from PowerShell.
+**Credentials come from Git Credential Manager, not `gh`.** For a long time these notes said a
+`gh` credential helper was configured local to this repo. It is not: `git config --local
+credential.helper` is empty, the *system* helper is `manager` (GCM 2.4.1), and `gh` — though
+installed — reports "not logged in to any hosts". The wrong explanation survived because the
+advice attached to it (push from PowerShell) happened to work.
+
+**A push touching `.github/workflows/` is rejected.** GitHub returns "refusing to allow an
+OAuth App to create or update workflow ... without `workflow` scope". GCM's stored token lacks
+that scope. Nothing else about pushing is affected, so this only bites when adding CI.
 
 **Node isn't on the inherited PATH.** Fresh tool shells inherit a stale environment. Prepend in
 PowerShell:

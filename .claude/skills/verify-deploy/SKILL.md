@@ -116,9 +116,10 @@ If the site is partly broken, say which part and give the status codes. A workin
 
 ## Environment notes
 
-`git push` needs the gh credential helper, which is configured local to this repo. It resolves
-in **PowerShell** but not in Git Bash, where the push fails with `gh: command not found`
-followed by "Invalid username or token". Push from PowerShell; `curl` checks are fine in Bash.
+`git push` uses Git Credential Manager, configured at the **system** level — not `gh`, and not
+per-repo. Push from **PowerShell**, which is where it is known to work; `curl` checks are fine
+in Bash. A push that adds or edits `.github/workflows/*` is rejected: the stored token has no
+`workflow` scope.
 
 Node is not on the inherited PATH in fresh tool shells. In PowerShell, prepend:
 

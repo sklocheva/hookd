@@ -135,9 +135,10 @@ from the form.
   starts loading and comes out blank. A gallery screenshot was entirely empty while every
   image served 200. The wait for those images is capped at 3s — an image that never enters
   the viewport never fires `load`, and waiting on it unconditionally hangs forever.
-- **Git Bash cannot push.** The gh credential helper resolves in PowerShell only; in Bash the
-  push fails with `gh: command not found` then "Invalid username or token". Push from
-  PowerShell. `node`, `curl` and the driver are fine in either.
+- **Push from PowerShell.** Credentials come from Git Credential Manager at the system level.
+  Pushes have only ever been made to work from PowerShell here; `node`, `curl` and the driver
+  are fine in either shell. A push touching `.github/workflows/` is rejected outright — the
+  stored token has no `workflow` scope.
 - **Node is not on the inherited PATH** in fresh tool shells. In PowerShell, prepend:
   `$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")`
 - **Verifying a deploy is `verify-deploy`'s job, not this one.** Its `--expect` guard exists

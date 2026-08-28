@@ -136,8 +136,13 @@ not things a script can check:
 - [ ] One change per branch; keep diffs reviewable
 - [ ] Don't change decided stack choices without asking
 - [ ] **GitHub Action to catch failed builds.** `.github/workflows/build.yml` is written and
-      committed locally, but **GitHub refused the push**: the `gh` OAuth token has no
-      `workflow` scope. Run `gh auth refresh -h github.com -s workflow`, then it can go up.
+      sitting uncommitted locally, but **GitHub refuses the push**: pushes are authenticated by
+      Git Credential Manager (system-level `credential.helper = manager`), and its stored token
+      has no `workflow` scope. `gh` is installed but not logged in, so `gh auth refresh` does
+      not apply. Two ways out, both Sophia's call:
+      **(a)** create the file through the GitHub web UI and `git pull` — no credential changes;
+      **(b)** `gh auth login --hostname github.com --git-protocol https --web --scopes workflow`
+      then `gh auth setup-git`, which switches pushes to `gh`'s token.
 
 - [ ] Optional image captions. The markdown title slot now carries the size hint
       (`"wide"`, `"narrow"`); captions would need a `<figure>` wrapper.
