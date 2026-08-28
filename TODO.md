@@ -67,10 +67,6 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
 
 - [ ] Three more write-ups from findings that already exist: moss 3 mm vs 4 mm · Karisma vs
       Snorre · swatch gauge vs piece gauge. Four posts is where the site stops looking empty.
-- [ ] **Gallery thumbnails should be separate crops, not the main image scaled down.** The
-      design asks for each exported at ~400 × 500, cropped to its subject — a full-frame
-      garment at 100px wide is unreadable. The build currently scales the same file, which is
-      right until real photography exists. Needs a `thumb` field per gallery image then.
 - [ ] **Photo session.** Side light at 90° to a window, matte mid-tone background, stills
       separate from video, vertical framing for Pinterest. Aspect ratios are baked into the
       layouts:
@@ -109,9 +105,9 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
 - [ ] **Thumbnails should be separate crops**, not the main photo scaled down — the design asks
       for ~400×500 exports cropped to each subject, because a whole garment at 100px is
       unreadable. Needs a `thumb` field once real photos exist.
-- [ ] **The image pipeline is unverified in CI** — there are no real images yet, so nothing
-      exercises `<Image>`. The `/_image` bug that cost a day can only recur once a real photo
-      lands, so run `verify-deploy` the moment the first upload happens.
+- [x] ~~The image pipeline is unverified~~ — six real photographs now ship on the cat-toy post
+      and the Halland Cowl, and `verify-deploy` confirms them serving as `image/webp` from
+      `/_astro/` on the live host. The `/_image` bug cannot hide any more.
 - [ ] When a placeholder is deleted, delete its `data-scaffold` attribute too — otherwise the
       audit keeps ignoring an element that now ships.
 - [ ] Decide whether drafts should become pull requests (`publish_mode: editorial_workflow`).
