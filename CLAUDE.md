@@ -66,7 +66,14 @@ have to happen again when a custom domain is attached.
 `assets.directory: ./dist`. Without it Cloudflare infers a config and builds Astro in server
 mode, which breaks every image. Do not delete it. See Deployment.
 
-**All photography is placeholder.** `PhotoPlaceholder.astro` draws the striped stand-in and
+**Both collections take a `gallery`** — extra photographs shown as a swap gallery, additional
+to the required `heroImage`. Every photo renders in the HTML and the script only *hides* the
+inactive ones, so with JavaScript off the reader still sees all of them. `Gallery.astro` holds
+a `GALLERY_LAYOUT` constant with two layouts to compare; delete the loser once one is chosen.
+
+**Photography is placeholder apart from the cat-toy post**, which carries five real photographs
+and is the only end-to-end proof that the image pipeline works on real files.
+`PhotoPlaceholder.astro` draws the striped stand-in and
 its caption doubles as the shot list — it is scaffolding, to be deleted when real images land.
 `PhotoPending.astro` is different: it is the *designed* state for a pattern that is written but
 not yet shot, triggered by omitting `heroImage`, and it ships. Same for the dashed wordmark box

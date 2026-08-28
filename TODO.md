@@ -102,6 +102,9 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
 
 ## Housekeeping
 
+- [ ] **Choose a gallery layout** — `GALLERY_LAYOUT` in `Gallery.astro`. `below` keeps the main
+      image aligned with the article text; `beside` shifts it right by the thumbnail column.
+      Delete the loser and the constant once decided.
 - [ ] **The image pipeline is unverified in CI** — there are no real images yet, so nothing
       exercises `<Image>`. The `/_image` bug that cost a day can only recur once a real photo
       lands, so run `verify-deploy` the moment the first upload happens.

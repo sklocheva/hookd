@@ -86,6 +86,22 @@ collections:
         required: true
         default: /og-default.png
         hint: Root-relative path under public/. Leave as /og-default.png until this entry has its own artwork — the build checks the file exists.
+      - label: More photographs
+        name: gallery
+        widget: list
+        required: false
+        label_singular: Photograph
+        summary: '{{fields.alt}}'
+        hint: >-
+          Extra shots, shown as a gallery below the pattern. The hero image stays separate
+          and is always the first thing anyone sees.
+        fields:
+          - { label: Image, name: image, widget: image }
+          - label: Alt text
+            name: alt
+            widget: string
+            required: true
+            hint: Describe the photo for someone who cannot see it. Required, like the hero's.
       - label: Shoot note
         name: heroImagePending
         widget: string
@@ -302,6 +318,22 @@ collections:
         name: heroImageAlt
         widget: string
         required: true
+      - label: More photographs
+        name: gallery
+        widget: list
+        required: false
+        label_singular: Photograph
+        summary: '{{fields.alt}}'
+        hint: >-
+          Extra shots, shown as a gallery on the entry page. The hero image stays separate
+          and is always the first thing anyone sees.
+        fields:
+          - { label: Image, name: image, widget: image }
+          - label: Alt text
+            name: alt
+            widget: string
+            required: true
+            hint: Describe the photo for someone who cannot see it. Required, like the hero's.
       - label: Social share image
         name: socialImage
         widget: string

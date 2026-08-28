@@ -63,8 +63,13 @@ attribute too**, or the audit will stop watching something that now ships.
 
 ```bash
 node .claude/skills/run-hookd/driver.mjs shot / --width 375
-node .claude/skills/run-hookd/driver.mjs shot /patterns/oland-cardigan/ --width 1280
+MSYS_NO_PATHCONV=1 node .claude/skills/run-hookd/driver.mjs shot /patterns/oland-cardigan/ --width 1280
 ```
+
+**In Git Bash, prefix with `MSYS_NO_PATHCONV=1`.** A route argument starting with `/` gets
+rewritten into a Windows path before Node sees it, and the driver fails with
+`Cannot navigate to invalid URL` — which reads like a driver bug and is not one. PowerShell
+does not need the prefix.
 
 Full-page PNG into `.screenshots/` (gitignored), path printed on stdout. **Then open it and
 look.** Reading a screenshot found the duplicated `"cowl styled, 4:5, 4:5"` caption that no
@@ -125,6 +130,11 @@ from the form.
   stylesheet applies, and every measurement then comes back wrong.
 - **CDP needs `flatten: true`** on `Target.attachToTarget`, or page-session commands go
   nowhere on one socket.
+- **The shot command scrolls the page before capturing.** `captureBeyondViewport` photographs
+  the whole page but does not scroll it, so anything `loading="lazy"` below the fold never
+  starts loading and comes out blank. A gallery screenshot was entirely empty while every
+  image served 200. The wait for those images is capped at 3s — an image that never enters
+  the viewport never fires `load`, and waiting on it unconditionally hangs forever.
 - **Git Bash cannot push.** The gh credential helper resolves in PowerShell only; in Bash the
   push fails with `gh: command not found` then "Invalid username or token". Push from
   PowerShell. `node`, `curl` and the driver are fine in either.

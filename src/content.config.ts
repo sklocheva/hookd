@@ -75,6 +75,22 @@ const gauge = z.object({
 	note: z.string().optional(),
 });
 
+/**
+ * Extra photographs, shown as a swap gallery on the entry page.
+ *
+ * Additional to `heroImage`, never a replacement — the hero stays what cards and shares
+ * use. Alt text is required per image for the same reason it is on the hero: it is the
+ * only description a blind reader gets, and it never gets added retrospectively.
+ */
+const galleryField = z
+	.array(
+		z.object({
+			image: z.string(),
+			alt: z.string().min(1, { error: 'every gallery image needs alt text' }),
+		})
+	)
+	.default([]);
+
 const yarn = z.object({
 	brand: z.string(),
 	line: z.string(),
@@ -133,6 +149,16 @@ const patterns = defineCollection({
 			heroImage: optionalString,
 			/** Shown on the no-photo card, e.g. "Shoot booked · September". */
 			heroImagePending: optionalString,
+
+			/**
+			 * Extra photographs, shown as a swap gallery below the instructions.
+			 *
+			 * Additional to `heroImage`, never a replacement — the hero stays required and
+			 * is what cards and shares use. Alt text is required per image for the same
+			 * reason it is on the hero: it is the only description a blind reader gets, and
+			 * it never gets added retrospectively.
+			 */
+			gallery: galleryField,
 
 			yarns: z.array(yarn).min(1),
 
@@ -214,6 +240,7 @@ const posts = defineCollection({
 			updated: optionalDate,
 			summary: z.string(),
 			heroImage: optionalString,
+			gallery: galleryField,
 			/** Drives the eyebrow and the journal filters. */
 			kind: z.enum(['Garment making', 'Yarn and fibres', 'How-tos']),
 			/** The muted line under the excerpt, e.g. "6 yarns · 32 sts × 24 rows hdc". */

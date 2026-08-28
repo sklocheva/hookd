@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import Gallery from '../../components/Gallery.astro';
 import { articleSchema } from '../../lib/schema';
 import { getRelated } from '../../lib/related';
 import type { GetStaticPaths } from 'astro';
@@ -77,6 +78,8 @@ const schema = articleSchema({
 		<div class="prose">
 			<Content />
 		</div>
+
+		<Gallery images={d.gallery} />
 
 		<Related items={readNext} heading="Read next" />
 	</article>

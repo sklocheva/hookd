@@ -10,6 +10,7 @@ import SizeTable from '../../components/SizeTable.astro';
 import SectionLabel from '../../components/SectionLabel.astro';
 import Related from '../../components/Related.astro';
 import Difficulty from '../../components/Difficulty.astro';
+import Gallery from '../../components/Gallery.astro';
 import {
 	formatDate,
 	gaugeLine,
@@ -211,6 +212,8 @@ const specs = [
 		<div class="prose" id="instructions">
 			<Content />
 		</div>
+
+		<Gallery images={d.gallery} />
 
 		<PatternLicence />
 

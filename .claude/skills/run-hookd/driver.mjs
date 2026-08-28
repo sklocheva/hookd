@@ -376,6 +376,37 @@ async function cmdShot(route, width) {
 	try {
 		await b.setViewport(width);
 		await b.goto(PREVIEW + route);
+
+		// captureBeyondViewport photographs the whole page, but it does not scroll it — so
+		// anything loading="lazy" below the fold never starts loading and comes out blank.
+		// A gallery screenshot was entirely empty because of this, and the images were fine.
+		// Walk the page to trigger them, wait, then return to the top so the shot starts
+		// where the reader would.
+		await b.eval(async () => {
+			const step = window.innerHeight;
+			for (let y = 0; y < document.body.scrollHeight; y += step) {
+				window.scrollTo(0, y);
+				await new Promise((r) => setTimeout(r, 60));
+			}
+			window.scrollTo(0, 0);
+
+			// Bounded: an image that never enters the viewport never starts loading, so
+			// waiting on its load event unconditionally hangs forever. Wait, but give up.
+			await Promise.race([
+				Promise.all(
+					[...document.images]
+						.filter((i) => !i.complete)
+						.map(
+							(i) =>
+								new Promise((r) => {
+									i.addEventListener('load', r, { once: true });
+									i.addEventListener('error', r, { once: true });
+								})
+						)
+				),
+				new Promise((r) => setTimeout(r, 3000)),
+			]);
+		});
 		const name = (route.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'home') + `-${width}.png`;
 		const out = await b.screenshot(name);
 		log(out);
