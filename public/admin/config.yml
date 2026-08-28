@@ -50,6 +50,15 @@ collections:
     fields:
       - { label: Title, name: title, widget: string }
       - { label: Publish date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
+      - label: Last corrected
+        name: updated
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        required: false
+        hint: >-
+          Set this when you fix something in a published pattern — a stitch count, a
+          measurement. Leave empty until then.
       - label: Summary
         name: summary
         widget: text

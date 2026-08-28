@@ -60,8 +60,7 @@ const schema = articleSchema({
 	headline: d.title,
 	description: d.metaDescription,
 	datePublished: d.date,
-	// Patterns carry no `updated` field — only posts do — so dateModified falls back to
-	// the publish date inside articleSchema. Worth an errata date here eventually.
+	dateModified: d.updated,
 	image: d.socialImage,
 	keywords: [...d.category.map(categoryLabel), ...d.tags],
 });

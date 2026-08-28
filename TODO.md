@@ -29,8 +29,6 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
 
 - [ ] **Decision 9 — the site name.** Blocks buying the domain (step 4) and nothing else.
       Front-runner in PLAN.md is `hookdlab.com`.
-- [ ] **Decision 10 — the address for the Austrian §25 disclosure.** Home, Postfach, or a
-      service address. Blocks the legal page content, not the page itself.
 - [ ] **Step 0 — dictate the Y2K skinny shawl stitch post.** Ten minutes, messy, no structure.
       The method is: you dictate, Claude tidies the wording, your words and caveats stay.
 
@@ -38,13 +36,15 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
 
 ## Step 6 — Implement the design (nearly done)
 
-- [ ] Legal pages exist (`/privacy/`, `/licence/`, `/imprint/`) but need Sophia's review, and
-      the §25 disclosure needs the address decision.
+- [ ] Legal pages exist (`/privacy/`, `/licence/`, `/imprint/`) and need Sophia's review.
+      The Austrian §5 ECG / §§24–25 Mediengesetz duties do **not** apply — she is not resident
+      in Austria — and `imprint.astro` already says so. Revisit only if that changes.
 - [ ] Pattern **instructions and charts** were explicitly not designed. `<Row>` exists and the
       example pattern uses it, but the surrounding section needs a design. Written first,
       chart repeated after.
-- [ ] Patterns have no `updated` field, so JSON-LD reports `dateModified` as the publish date.
-      Worth adding one when the first errata happens.
+- [x] ~~Patterns have no `updated` field~~ — added as **Last corrected** in the CMS. Set it
+      when you fix something in a published pattern; JSON-LD then reports it as `dateModified`
+      instead of repeating the publish date. Verified: with it set, the two dates differ.
 
 ## Step 7 — SEO, legal, analytics (mostly not started)
 
@@ -135,11 +135,9 @@ not things a script can check:
 - [ ] Merge to `main` only with Sophia's consent, once a page is reviewed and finished
 - [ ] One change per branch; keep diffs reviewable
 - [ ] Don't change decided stack choices without asking
-- [ ] **GitHub Action to catch failed builds.** Publishing from `/admin` pushes straight from
-      the browser, so nothing runs locally and a failed build is silent — a post can save fine
-      and never appear. An Action that builds on push and emails on failure is the only
-      "validation before publishing" that is actually possible; the CMS cannot run Astro.
-      This would also enforce the build gate the checks currently only offer.
+- [ ] **GitHub Action to catch failed builds.** `.github/workflows/build.yml` is written and
+      committed locally, but **GitHub refused the push**: the `gh` OAuth token has no
+      `workflow` scope. Run `gh auth refresh -h github.com -s workflow`, then it can go up.
 
 - [ ] Optional image captions. The markdown title slot now carries the size hint
       (`"wide"`, `"narrow"`); captions would need a `<figure>` wrapper.

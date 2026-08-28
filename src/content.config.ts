@@ -150,6 +150,12 @@ const patterns = defineCollection({
 		z.object({
 			title: z.string(),
 			date: z.coerce.date(),
+			/**
+			 * When the pattern was last corrected. Patterns get errata in a way posts do not
+			 * — a wrong stitch count matters years after publication — and this is what
+			 * JSON-LD reports as dateModified. Absent means it has not been revised.
+			 */
+			updated: optionalDate,
 			summary: z.string(),
 			/** Optional: absent triggers the designed "photography still to come" state. */
 			heroImage: optionalString,
