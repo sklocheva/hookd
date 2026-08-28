@@ -102,6 +102,18 @@ collections:
             widget: string
             required: true
             hint: Describe the photo for someone who cannot see it. Required, like the hero's.
+          - label: Caption
+            name: caption
+            widget: string
+            required: false
+            hint: >-
+              The line shown under the photo, e.g. "Size M, worn with 12 cm ease". Say
+              something the photo cannot — not a repeat of the alt text.
+      - label: Hero caption
+        name: heroImageCaption
+        widget: string
+        required: false
+        hint: Caption for the hero photo, which is the gallery's first frame.
       - label: Shoot note
         name: heroImagePending
         widget: string
@@ -126,6 +138,7 @@ collections:
           - { label: Clothing, value: clothing }
           - { label: Accessories, value: accessories }
           - { label: Pets, value: pets }
+          - { label: Home, value: home }
         hint: Tick every one that applies. At least one — the build fails on none.
       - label: Terms
         name: terms
@@ -334,6 +347,13 @@ collections:
             widget: string
             required: true
             hint: Describe the photo for someone who cannot see it. Required, like the hero's.
+          - label: Caption
+            name: caption
+            widget: string
+            required: false
+            hint: >-
+              The line shown under the photo. Say something the photo cannot — not a repeat
+              of the alt text.
       - label: Social share image
         name: socialImage
         widget: string

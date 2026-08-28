@@ -1,115 +1,124 @@
 ---
 import { Image } from 'astro:assets';
-import SectionLabel from './SectionLabel.astro';
+import Hero from './Hero.astro';
 import { resolveImage } from '../lib/images';
 
 /**
- * Extra photographs of one project: a large image with thumbnails that swap it.
+ * The pattern's photographs: one large frame with a strip of thumbnails that swap it.
  *
- * The point is not decoration — it is a place to put the other photos without having to
- * decide where each one belongs in the article. No lightbox, no modal, no carousel
- * library: a click swaps an image, and that is the whole mechanic.
+ * This is the top of the pattern page and the thing that sells it, so the first frame is
+ * the hero — the same image cards and shares use — and the gallery follows on from it.
  *
- * **Without JavaScript every photo is still visible.** All of them render as a plain
- * stacked list; the script collapses that into the swap view on load and only then
- * reveals the thumbnails. Nothing is created by the script, so a crawler that fetches but
- * does not execute still sees every image and its alt text.
+ * **Without JavaScript every photo is still visible.** They render as a plain stack and
+ * the script collapses that into the swap view on load, only then revealing the strip.
+ * Nothing is created by the script, so a crawler that fetches but does not execute still
+ * sees every image and its alt text.
  *
- * TWO LAYOUTS, one constant. Flip GALLERY_LAYOUT and compare on a real pattern page.
- * When one wins, delete the other and this constant — see TODO.md.
+ * No lightbox, no modal, no carousel library, and deliberately no "2 / 5" counter — the
+ * active thumbnail border is the position indicator.
  */
-const GALLERY_LAYOUT: 'below' | 'beside' = 'below';
-//                     ^^^^^^^^^^^^^^^^
-//  'below'  — thumbnails in a row under the main image, at every width.
-//  'beside' — thumbnails in a column to the left of the image on wide screens,
-//             collapsing to a row underneath on narrow ones.
-
-export interface GalleryImage {
-	image: string;
+export interface Frame {
+	image?: string;
 	alt: string;
+	caption?: string;
 }
 
 interface Props {
-	images: GalleryImage[];
-	/** Fixed so the page cannot jump when the main image changes. */
+	frames: Frame[];
+	/** Portrait: garment shots need the height, and it keeps the mobile stack off letterbox. */
 	ratio?: string;
-	heading?: string;
+	/** Passed through to the hero's designed "photography still to come" state. */
+	pendingNote?: string;
 }
 
-const { images, ratio = '1/1', heading = 'More photographs' } = Astro.props;
+const { frames, ratio = '4/5', pendingNote } = Astro.props;
 
-// resolveImage throws on a missing file, which is the behaviour we want at build time —
-// but only for entries that exist. An empty gallery renders nothing at all.
-const resolved = images
-	.map((g) => ({ ...g, asset: resolveImage(g.image) }))
-	.filter((g) => g.asset);
+// A frame with no file is the hero before its photo exists — Hero renders the designed
+// pending state for it. Gallery entries always have a file, so they resolve or throw.
+const shots = frames.filter((f) => f.image || f === frames[0]);
+const swappable = shots.length > 1;
+
+// The strip is always five columns wide so it lines up with the frame above it. With
+// fewer shots the trailing cells stay empty rather than four thumbnails stretching.
+const COLUMNS = 5;
 ---
 
-{
-	resolved.length > 0 && (
-		<section class="gallery" data-gallery data-layout={GALLERY_LAYOUT}>
-			<SectionLabel>{heading}</SectionLabel>
+<div class="gallery" data-gallery={swappable ? '' : undefined}>
+	<div class="gallery__stage" style={`--ratio:${ratio}`}>
+		{
+			shots.map((f, i) => (
+				<figure
+					class="gallery__slide"
+					data-slide
+					data-index={i}
+					data-caption={f.caption ?? ''}
+				>
+					{i === 0 && !f.image ? (
+						<Hero
+							image={f.image}
+							alt={f.alt}
+							ratio={ratio}
+							caption="pattern"
+							pending
+							pendingNote={pendingNote}
+						/>
+					) : (
+						<Image
+							src={resolveImage(f.image)!}
+							alt={f.alt}
+							widths={[420, 840, 1120]}
+							sizes="(min-width: 900px) 560px, 100vw"
+							loading={i === 0 ? 'eager' : 'lazy'}
+						/>
+					)}
+				</figure>
+			))
+		}
+	</div>
 
-			<div class="gallery__inner">
-				<div class="gallery__stage" style={`--ratio:${ratio}`}>
-					{resolved.map((g, i) => (
-						<figure class="gallery__slide" data-slide data-index={i}>
-							<Image
-								src={g.asset!}
-								alt={g.alt}
-								widths={[400, 800, 1200]}
-								sizes="(min-width: 1000px) 700px, 100vw"
-								loading={i === 0 ? 'eager' : 'lazy'}
-							/>
-						</figure>
-					))}
-				</div>
-
-				{/* Hidden until the script can make it work — a control that does nothing is
-				    worse than no control. */}
-				<div class="gallery__thumbs" role="tablist" aria-label={heading} hidden>
-					{resolved.map((g, i) => (
-						<button
-							type="button"
-							class="thumb"
-							role="tab"
-							data-thumb
-							data-index={i}
-							aria-selected={i === 0 ? 'true' : 'false'}
-							tabindex={i === 0 ? 0 : -1}
-						>
-							<Image
-								src={g.asset!}
-								alt={`Show: ${g.alt}`}
-								widths={[120, 240]}
-								sizes="80px"
-								loading="lazy"
-							/>
-						</button>
-					))}
-				</div>
+	{
+		swappable && (
+			<div
+				class="gallery__thumbs"
+				style={`--columns:${COLUMNS}`}
+				role="tablist"
+				aria-label="Photographs"
+				hidden
+			>
+				{shots.map((f, i) => (
+					<button
+						type="button"
+						class="thumb"
+						role="tab"
+						data-thumb
+						data-index={i}
+						aria-label={f.alt}
+						aria-selected={i === 0 ? 'true' : 'false'}
+						tabindex={i === 0 ? 0 : -1}
+					>
+						{f.image && (
+							<Image src={resolveImage(f.image)!} alt="" widths={[200, 400]} sizes="110px" loading="lazy" />
+						)}
+					</button>
+				))}
 			</div>
-		</section>
-	)
-}
+		)
+	}
+
+	{
+		shots.some((f) => f.caption) && (
+			<p class="gallery__caption" data-caption>
+				{shots[0].caption ?? ''}
+			</p>
+		)
+	}
+</div>
 
 <style>
-	.gallery {
-		margin-top: clamp(34px, 4vw, 46px);
-	}
-
-	/* Capped to the text measure. Unconstrained, a 1:1 image at the full article width is
-	   about a screen tall on desktop and dominates the page it is meant to support. */
-	.gallery__inner {
-		max-width: var(--measure);
-	}
-
 	.gallery__stage {
 		display: grid;
 	}
 
-	/* Every slide occupies the same grid cell, so switching cannot reflow the page.
-	   Without JS they are all visible and simply stack — see below. */
 	.gallery__slide {
 		margin: 0;
 	}
@@ -122,12 +131,12 @@ const resolved = images
 		display: block;
 	}
 
-	/* No-JS: a plain stack, every photo visible, spaced so they read as separate images. */
+	/* No JS: a plain stack, every photo visible and separated. */
 	.gallery__slide + .gallery__slide {
 		margin-top: 14px;
 	}
 
-	/* JS on: one cell, one visible slide, no page jump on swap. */
+	/* JS on: every slide shares one grid cell, so a swap cannot reflow the page. */
 	.gallery[data-ready] .gallery__stage {
 		grid-template-areas: 'stage';
 	}
@@ -141,19 +150,20 @@ const resolved = images
 		display: none;
 	}
 
+	/* Exactly as wide as the frame above it — the alignment is the point. */
 	.gallery__thumbs {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 10px;
-		margin-top: 14px;
+		display: grid;
+		grid-template-columns: repeat(var(--columns), 1fr);
+		gap: clamp(8px, 1.2vw, 12px);
+		margin-top: clamp(8px, 1.2vw, 12px);
 	}
 
 	.thumb {
-		width: 72px;
-		height: 72px;
+		display: block;
+		width: 100%;
+		aspect-ratio: var(--ratio, 4/5);
 		padding: 0;
-		border: 1px solid var(--rule-light);
-		border-radius: 2px;
+		border: 1px solid var(--rule);
 		background: none;
 		cursor: pointer;
 		overflow: hidden;
@@ -171,10 +181,8 @@ const resolved = images
 		border-color: var(--ink-2);
 	}
 
-	/* The current one has to be obvious at a glance, not a one-pixel difference. */
 	.thumb[aria-selected='true'] {
 		border-color: var(--terracotta);
-		box-shadow: 0 0 0 2px var(--terracotta);
 	}
 
 	.thumb:focus-visible {
@@ -182,24 +190,15 @@ const resolved = images
 		outline-offset: 3px;
 	}
 
-	/* --- layout 2: thumbnails beside the image on wide screens ------------------ */
-	@media (min-width: 900px) {
-		.gallery[data-layout='beside'] .gallery__inner {
-			display: grid;
-			/* The thumbnail column is extra, so it sits outside the measure rather than
-			   stealing width from the image. */
-			max-width: calc(var(--measure) + 88px);
-			grid-template-columns: 72px minmax(0, 1fr);
-			gap: 16px;
-			align-items: start;
-		}
+	.gallery__caption {
+		margin: 14px 0 0;
+		font: 400 12.5px/1.5 var(--sans);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
 
-		.gallery[data-layout='beside'] .gallery__thumbs {
-			order: -1;
-			flex-direction: column;
-			flex-wrap: nowrap;
-			margin-top: 0;
-		}
+	.gallery__caption:empty {
+		display: none;
 	}
 </style>
 
@@ -208,14 +207,15 @@ const resolved = images
 		const slides = [...gallery.querySelectorAll<HTMLElement>('[data-slide]')];
 		const thumbs = [...gallery.querySelectorAll<HTMLButtonElement>('[data-thumb]')];
 		const strip = gallery.querySelector<HTMLElement>('.gallery__thumbs');
-		// One photo needs no swapping, so leave it as the plain image it already is.
+		const caption = gallery.querySelector<HTMLElement>('[data-caption]');
 		if (slides.length < 2 || thumbs.length !== slides.length || !strip) return;
 
-		// Collapse the stack into the swap view. Doing this here rather than in CSS is what
-		// keeps the no-JS case honest: until this runs, every photo is on the page.
+		// Collapsing the stack here rather than in CSS is what keeps the no-JS case honest:
+		// until this runs, every photo is on the page.
 		gallery.setAttribute('data-ready', '');
 		strip.hidden = false;
 
+		const captions = slides.map((s) => s.dataset.caption ?? '');
 		let current = 0;
 
 		function select(next: number, moveFocus: boolean) {
@@ -225,6 +225,7 @@ const resolved = images
 				t.setAttribute('aria-selected', String(i === current));
 				t.tabIndex = i === current ? 0 : -1;
 			});
+			if (caption) caption.textContent = captions[current];
 			if (moveFocus) thumbs[current].focus();
 		}
 
@@ -232,15 +233,15 @@ const resolved = images
 
 		// Roving tabindex: the strip is one stop in the tab order, arrows move within it.
 		strip.addEventListener('keydown', (e) => {
-			const keys: Record<string, number> = {
+			const step: Record<string, number> = {
 				ArrowLeft: -1,
 				ArrowUp: -1,
 				ArrowRight: 1,
 				ArrowDown: 1,
 			};
-			if (e.key in keys) {
+			if (e.key in step) {
 				e.preventDefault();
-				select(current + keys[e.key], true);
+				select(current + step[e.key], true);
 			} else if (e.key === 'Home') {
 				e.preventDefault();
 				select(0, true);

@@ -181,11 +181,15 @@ to say where on the piece you measured: that is what lets someone else swatch to
 
 ## More photographs
 
-Both patterns and journal posts have a **More photographs** list. Add as many as you like and
-they become a gallery: one large image with thumbnails under it that swap what is shown.
+Both patterns and journal posts have a **More photographs** list. On a pattern it sits at the
+very top of the page, because the photographs are what sell a free pattern.
 
-It exists so you do not have to decide where every photo belongs in the article. The hero
-image stays separate and is still what cards and shares use — the gallery is extra.
+The **hero is the first frame** — the same photo cards and shares use — and these follow it,
+with a row of thumbnails that swap the big image. It exists so you do not have to decide where
+every photo belongs in the article.
+
+Each photo takes an optional **caption**, the line under the thumbnails. Say something the photo
+cannot — "Size M, worn with 12 cm ease" — rather than repeating the alt text.
 
 **Alt text is required on each one**, for the same reason it is on the hero: it is the only
 description a blind reader gets, and it never gets added later. With JavaScript off every

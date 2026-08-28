@@ -3,11 +3,17 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
 import PatternGrid from '../../components/PatternGrid.astro';
-import CategoryFilter from '../../components/CategoryFilter.astro';
 import EmptyState from '../../components/EmptyState.astro';
-import { byDateDesc } from '../../lib/taxonomy';
+import { byDateDesc, categoryHref, categoryLabel, patternCategoriesInUse } from '../../lib/taxonomy';
 
 const patterns = (await getCollection('patterns')).sort(byDateDesc);
+
+// Text links, matching the journal index. Two index pages with two different filter
+// treatments was the problem the pill toggles introduced.
+const filters = [
+	{ label: 'All', href: '/patterns/', active: true },
+	...patternCategoriesInUse(patterns).map((c) => ({ label: categoryLabel(c), href: categoryHref(c) })),
+];
 ---
 
 <Base
@@ -18,9 +24,8 @@ const patterns = (await getCollection('patterns')).sort(byDateDesc);
 	<PageHead
 		heading="Free patterns"
 		standfirst="Every pattern here is free and written out in full — no video-only instructions, no paywall. Sizes and gauge are stated the way the Craft Yarn Council defines them."
-	>
-		<CategoryFilter patterns={patterns} />
-	</PageHead>
+		filters={filters}
+	/>
 
 	{
 		patterns.length ? (

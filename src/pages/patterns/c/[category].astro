@@ -4,12 +4,10 @@ import type { GetStaticPaths } from 'astro';
 import Base from '../../../layouts/Base.astro';
 import PageHead from '../../../components/PageHead.astro';
 import PatternGrid from '../../../components/PatternGrid.astro';
-import CategoryFilter from '../../../components/CategoryFilter.astro';
-import { byDateDesc, categoryLabel, patternCategoriesInUse } from '../../../lib/taxonomy';
+import { byDateDesc, categoryHref, categoryLabel, patternCategoriesInUse } from '../../../lib/taxonomy';
 
 // Real static routes rather than client-side filtering, because of the no-JS rule. The
-// multi-select toggles on /patterns/ are a convenience layer on top of these pages, not a
-// replacement for them: these are what a crawler and a reader without JS get.
+// index links here rather than filtering in place, which is also what the journal does.
 export const getStaticPaths = (async () => {
 	const patterns = await getCollection('patterns');
 
@@ -26,6 +24,15 @@ export const getStaticPaths = (async () => {
 const { category, patterns } = Astro.props;
 const allPatterns = await getCollection('patterns');
 const label = categoryLabel(category);
+
+const filters = [
+	{ label: 'All', href: '/patterns/' },
+	...patternCategoriesInUse(allPatterns).map((c) => ({
+		label: categoryLabel(c),
+		href: categoryHref(c),
+		active: c === category,
+	})),
+];
 ---
 
 <Base
@@ -36,9 +43,8 @@ const label = categoryLabel(category);
 	<PageHead
 		heading={label}
 		standfirst={`${patterns.length} ${patterns.length === 1 ? 'free pattern' : 'free patterns'} filed under ${label.toLowerCase()}. Every one is written out in full, with the gauge measured on the blocked piece.`}
-	>
-		<CategoryFilter patterns={allPatterns} active={[category]} />
-	</PageHead>
+		filters={filters}
+	/>
 
 	<PatternGrid patterns={patterns} />
 </Base>

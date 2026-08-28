@@ -87,6 +87,12 @@ const galleryField = z
 		z.object({
 			image: z.string(),
 			alt: z.string().min(1, { error: 'every gallery image needs alt text' }),
+			/**
+			 * The line under the thumbnails, which changes with the selected shot. It carries
+			 * information the photo cannot — "Size M, worn with 12 cm ease" — so it is not a
+			 * second copy of the alt text, which describes what is visible.
+			 */
+			caption: z.string().optional(),
 		})
 	)
 	.default([]);
@@ -149,6 +155,8 @@ const patterns = defineCollection({
 			heroImage: optionalString,
 			/** Shown on the no-photo card, e.g. "Shoot booked · September". */
 			heroImagePending: optionalString,
+			/** Caption for the hero, which is the gallery's first frame. See `caption` above. */
+			heroImageCaption: optionalString,
 
 			/**
 			 * Extra photographs, shown as a swap gallery below the instructions.
@@ -199,8 +207,10 @@ const patterns = defineCollection({
 			 * a reader sees live in src/lib/taxonomy.ts.
 			 */
 			category: z
-				.array(z.enum(['clothing', 'accessories', 'pets']))
-				.min(1, { error: 'category needs at least one of: clothing, accessories, pets' }),
+				.array(z.enum(['clothing', 'accessories', 'pets', 'home']))
+				.min(1, {
+					error: 'category needs at least one of: clothing, accessories, pets, home',
+				}),
 			tags: z.array(z.string()).default([]),
 
 			ravelryUrl: z.string().url().optional(),

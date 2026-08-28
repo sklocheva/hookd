@@ -66,10 +66,11 @@ have to happen again when a custom domain is attached.
 `assets.directory: ./dist`. Without it Cloudflare infers a config and builds Astro in server
 mode, which breaks every image. Do not delete it. See Deployment.
 
-**Both collections take a `gallery`** — extra photographs shown as a swap gallery, additional
-to the required `heroImage`. Every photo renders in the HTML and the script only *hides* the
-inactive ones, so with JavaScript off the reader still sees all of them. `Gallery.astro` holds
-a `GALLERY_LAYOUT` constant with two layouts to compare; delete the loser once one is chosen.
+**The gallery is the top of the pattern page**, because the photographs are what sell a free
+pattern. `heroImage` is frame one — the same image cards and shares use — and `gallery` follows
+it, with a five-column thumbnail strip exactly as wide as the frame. Every photo renders in the
+HTML and the script only *hides* the inactive ones, so with JavaScript off the reader still sees
+all of them. Posts carry the same field; the design only specifies it for patterns.
 
 **Photography is placeholder apart from the cat-toy post**, which carries five real photographs
 and is the only end-to-end proof that the image pipeline works on real files.
@@ -92,9 +93,9 @@ homepage and the indexes. No listing filters drafts.
 
 **Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
 `/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real
-static routes rather than client-side filtering, because of the no-JS rule. On `/patterns/`
-those same links are upgraded by a script into multi-select toggles — the script only *hides*
-cards that are already in the HTML, so nothing depends on JavaScript to exist.
+static routes rather than client-side filtering, because of the no-JS rule. Both indexes use
+the **same text-link treatment** — pill toggles with counts were tried and reverted, because
+two index pages with two different filter treatments is worse than the thing it solved.
 
 **`Base.astro` also owns JSON-LD.** Pages pass `jsonLd` (Article, BlogPosting); breadcrumbs are
 derived from the path there. Anything `noindex` emits none, so a draft never ships structured
@@ -129,10 +130,10 @@ measurement each size is cut for, yardage per size, US/UK terms.
   US equivalent at all** — an input field for it invites an invented answer. `usHook` returns
   undefined for those and the page shows just the mm.
 - **A pattern has several categories, stored as lowercase slugs** (`clothing`, `accessories`,
-  `pets`). A hooded scarf is genuinely both clothing and an accessory, and a single-select
+  `pets`, `home`). A hooded scarf is genuinely both clothing and an accessory, and a single-select
   field files it wrong either way. Display labels live in `src/lib/taxonomy.ts`, never in
-  content, so renaming one touches no entry and no URL. `home` is absent until a homeware
-  pattern exists — unused values are hidden from filters anyway, so it can be added freely.
+  content, so renaming one touches no entry and no URL. Unused values are hidden from the filter
+  row, so a category with no patterns can never be a dead end.
 - **Finished measurements are author-named label/value pairs, not fixed bust/length columns.**
   A hat needs circumference and depth; a blanket needs nothing. The size table builds its
   columns from the labels used, so keep a label spelled identically across every size or it

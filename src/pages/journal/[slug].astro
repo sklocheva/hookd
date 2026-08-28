@@ -79,7 +79,12 @@ const schema = articleSchema({
 			<Content />
 		</div>
 
-		<Gallery images={d.gallery} />
+		{
+			/* Posts keep a gallery too. The design scopes it to patterns, but this is where
+			   the only real multi-photo content lives, and it is the same component. The post
+			   already shows its hero above, so here the gallery is the extra shots alone. */
+			d.gallery.length > 0 && <Gallery frames={d.gallery} ratio="1/1" />
+		}
 
 		<Related items={readNext} heading="Read next" />
 	</article>

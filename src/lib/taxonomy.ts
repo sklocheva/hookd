@@ -19,11 +19,10 @@ import { slugify } from './format';
  * A pattern carries **several** of these. A hooded scarf is genuinely both clothing and an
  * accessory, and making the author pick one files it wrong whichever they choose.
  *
- * `home` is deliberately absent until a homeware pattern exists — adding it is this line
- * plus a label. Unused values are hidden from filters anyway (see `present`), so an empty
- * category cannot become a dead end.
+ * Unused values are hidden from the filter row by `present`, so a category with no patterns
+ * can never become a dead end — which is why the full set can live here from the start.
  */
-export const PATTERN_CATEGORIES = ['clothing', 'accessories', 'pets'] as const;
+export const PATTERN_CATEGORIES = ['clothing', 'accessories', 'pets', 'home'] as const;
 export const POST_KINDS = ['Garment making', 'Yarn and fibres', 'How-tos'] as const;
 
 export type PatternCategory = (typeof PATTERN_CATEGORIES)[number];
@@ -34,6 +33,7 @@ export const CATEGORY_LABELS: Record<PatternCategory, string> = {
 	clothing: 'Clothing',
 	accessories: 'Accessories',
 	pets: 'Pets',
+	home: 'Home',
 };
 
 export const categoryLabel = (c: string) =>
@@ -43,11 +43,6 @@ export const categoryLabel = (c: string) =>
 export const categoryHref = (c: string) => `/patterns/c/${c}/`;
 export const kindHref = (k: string) => `/journal/c/${slugify(k)}/`;
 
-/**
- * Below this many patterns the filter bar is hidden. Filtering two patterns is noise, and
- * an empty-looking control reads as broken. Raise or lower in one place.
- */
-export const MIN_PATTERNS_TO_FILTER = 6;
 
 
 /** Newest first. The sort every listing uses. */
@@ -69,17 +64,6 @@ function present<T extends string>(
 
 export const patternCategoriesInUse = (patterns: CollectionEntry<'patterns'>[]) =>
 	present(PATTERN_CATEGORIES, patterns.flatMap((p) => p.data.category));
-
-/** How many patterns carry each category, for the counts on the filter toggles. */
-export function patternCategoryCounts(
-	patterns: CollectionEntry<'patterns'>[]
-): Map<PatternCategory, number> {
-	const counts = new Map<PatternCategory, number>();
-	for (const p of patterns) {
-		for (const c of p.data.category) counts.set(c, (counts.get(c) ?? 0) + 1);
-	}
-	return counts;
-}
 
 export const postKindsInUse = (posts: CollectionEntry<'posts'>[]) =>
 	present(POST_KINDS, posts.map((p) => p.data.kind));

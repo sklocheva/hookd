@@ -102,9 +102,9 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
 
 ## Housekeeping
 
-- [ ] **Choose a gallery layout** — `GALLERY_LAYOUT` in `Gallery.astro`. `below` keeps the main
-      image aligned with the article text; `beside` shifts it right by the thumbnail column.
-      Delete the loser and the constant once decided.
+- [ ] **Thumbnails should be separate crops**, not the main photo scaled down — the design asks
+      for ~400×500 exports cropped to each subject, because a whole garment at 100px is
+      unreadable. Needs a `thumb` field once real photos exist.
 - [ ] **The image pipeline is unverified in CI** — there are no real images yet, so nothing
       exercises `<Image>`. The `/_image` bug that cost a day can only recur once a real photo
       lands, so run `verify-deploy` the moment the first upload happens.
@@ -114,8 +114,6 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
       Currently saving in the CMS commits straight to `main` and publishes in about a minute.
 - [ ] Run the skill-creator eval loop and description optimizer against the two skills,
       `verify-deploy` and `run-hookd` (needs subagents — ask first).
-- [ ] Delete the loser once the gallery layout is chosen (step 9f) — two layouts behind one
-      constant is fine while comparing, dead code afterwards.
 
 ## Ground rules — split between tooling and agreement
 
