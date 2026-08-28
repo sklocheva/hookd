@@ -48,7 +48,7 @@ sizes:
 
 Worked in the round in back-loop half double crochet, which gives a ridged, garter-like
 fabric with far more vertical stretch than it looks like it should have. That stretch is
-the reason the piece gauge is looser than the swatch: hung as a tube, it drops.
+why the gauge below was measured on the finished tube rather than flat: hung up, it drops.
 
 Make it deeper than feels right. A cowl that sits exactly at the collar looks unfinished;
 one that folds over twice looks deliberate.
