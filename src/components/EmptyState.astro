@@ -1,0 +1,70 @@
+---
+import SectionLabel from './SectionLabel.astro';
+
+/**
+ * What an index shows when it has nothing to list.
+ *
+ * A bare heading over blank space reads as a broken page rather than an empty one, so this
+ * says what is missing, why, and where to go instead. It matters most right now: the site
+ * launches with few entries, and a visitor who lands on an empty index and leaves does not
+ * come back.
+ */
+interface Props {
+	heading: string;
+	body: string;
+	actionHref?: string;
+	actionLabel?: string;
+}
+
+const { heading, body, actionHref, actionLabel } = Astro.props;
+---
+
+<div class="shell empty">
+	<SectionLabel>Nothing here yet</SectionLabel>
+	<h2>{heading}</h2>
+	<p>{body}</p>
+	{
+		actionHref && actionLabel && (
+			<a href={actionHref} class="empty__action">
+				{actionLabel}
+			</a>
+		)
+	}
+</div>
+
+<style>
+	.empty {
+		padding: 40px 0 20px;
+		max-width: 560px;
+	}
+
+	h2 {
+		margin: 14px 0 12px;
+		font: 400 clamp(22px, 3vw, 28px) / 1.2 var(--serif);
+		color: var(--ink);
+	}
+
+	p {
+		margin: 0 0 24px;
+		font: var(--type-body);
+		color: var(--ink-2);
+	}
+
+	.empty__action {
+		display: inline-block;
+		min-height: 34px;
+		border: 1px solid var(--terracotta);
+		border-radius: 999px;
+		padding: 12px 24px;
+		font: var(--type-label);
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--terracotta);
+		text-decoration: none;
+	}
+
+	.empty__action:hover {
+		background: var(--terracotta);
+		color: var(--paper);
+	}
+</style>

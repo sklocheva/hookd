@@ -98,7 +98,19 @@ collections:
         widget: select
         options: [Basic, Easy, Intermediate, Complex]
         hint: Craft Yarn Council's four levels. Drawn as four bars on the card.
-      - { label: Category, name: category, widget: select, options: [Garments, Accessories, Home] }
+      # Several per pattern — a hooded scarf is both clothing and an accessory. Stored as
+      # lowercase slugs; the labels a reader sees live in src/lib/taxonomy.ts.
+      - label: Type
+        name: category
+        widget: select
+        multiple: true
+        required: true
+        min: 1
+        options:
+          - { label: Clothing, value: clothing }
+          - { label: Accessories, value: accessories }
+          - { label: Pets, value: pets }
+        hint: Tick every one that applies. At least one — the build fails on none.
       - label: Terms
         name: terms
         widget: select

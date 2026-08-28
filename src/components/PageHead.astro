@@ -14,7 +14,10 @@ export interface FilterLink {
 interface Props {
 	heading: string;
 	standfirst?: string;
-	/** Rendered in the order given — see src/lib/taxonomy.ts. */
+	/**
+	 * Simple link filters, used by the journal. Patterns pass <CategoryFilter> through the
+	 * default slot instead, because they filter on several values at once.
+	 */
 	filters?: FilterLink[];
 }
 
@@ -24,6 +27,8 @@ const { heading, standfirst, filters } = Astro.props;
 <div class="shell head">
 	<h1>{heading}</h1>
 	{standfirst && <p class="standfirst">{standfirst}</p>}
+
+	<slot />
 
 	{
 		filters && filters.length > 0 && (

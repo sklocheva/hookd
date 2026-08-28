@@ -3,14 +3,11 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
 import PatternGrid from '../../components/PatternGrid.astro';
-import { byDateDesc, categoryHref, patternCategoriesInUse } from '../../lib/taxonomy';
+import CategoryFilter from '../../components/CategoryFilter.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import { byDateDesc } from '../../lib/taxonomy';
 
 const patterns = (await getCollection('patterns')).sort(byDateDesc);
-
-const filters = [
-	{ label: 'All', href: '/patterns/', active: true },
-	...patternCategoriesInUse(patterns).map((c) => ({ label: c, href: categoryHref(c) })),
-];
 ---
 
 <Base
@@ -21,8 +18,20 @@ const filters = [
 	<PageHead
 		heading="Free patterns"
 		standfirst="Every pattern here is free and written out in full — no video-only instructions, no paywall. Sizes and gauge are stated the way the Craft Yarn Council defines them."
-		filters={filters}
-	/>
+	>
+		<CategoryFilter patterns={patterns} />
+	</PageHead>
 
-	<PatternGrid patterns={patterns} />
+	{
+		patterns.length ? (
+			<PatternGrid patterns={patterns} />
+		) : (
+			<EmptyState
+				heading="No patterns yet"
+				body="The first free pattern is being written and tested. Until then, the journal has the yarn and stitch tests the patterns are built on."
+				actionHref="/journal/"
+				actionLabel="Read the journal"
+			/>
+		)
+	}
 </Base>

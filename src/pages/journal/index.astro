@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
 import JournalList from '../../components/JournalList.astro';
+import EmptyState from '../../components/EmptyState.astro';
 import { byDateDesc, kindHref, postKindsInUse } from '../../lib/taxonomy';
 
 const posts = (await getCollection('posts')).sort(byDateDesc);
@@ -24,5 +25,16 @@ const filters = [
 		filters={filters}
 	/>
 
-	<JournalList posts={posts} />
+	{
+		posts.length ? (
+			<JournalList posts={posts} />
+		) : (
+			<EmptyState
+				heading="No write-ups yet"
+				body="The first tests are being swatched, washed and measured. Nothing gets written up here until there is a result worth reporting."
+				actionHref="/patterns/"
+				actionLabel="See the patterns"
+			/>
+		)
+	}
 </Base>

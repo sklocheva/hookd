@@ -43,18 +43,14 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
 - [ ] Pattern **instructions and charts** were explicitly not designed. `<Row>` exists and the
       example pattern uses it, but the surrounding section needs a design. Written first,
       chart repeated after.
-- [ ] Wire "Print / save as PDF" and "Add to Ravelry queue" on the pattern page, or remove them.
-- [ ] Empty states for `/patterns/` and `/journal/` when a collection is empty.
+- [ ] Patterns have no `updated` field, so JSON-LD reports `dateModified` as the publish date.
+      Worth adding one when the first errata happens.
 
 ## Step 7 — SEO, legal, analytics (mostly not started)
 
 Already in place: canonical URLs, unique title and meta description per page, Open Graph and
 Twitter Card including `og:image` with explicit width and height (which is what Pinterest Rich
 Pins read), robots.txt, sitemap, one `<h1>` per page.
-- [ ] **JSON-LD**: BlogPosting for journal posts, Article for patterns, BreadcrumbList
-      site-wide, Person for Sophia. Skip HowTo — Google deprecated those rich results in 2023.
-- [ ] **robots.txt: name the AI crawlers explicitly** — Googlebot, GPTBot, ClaudeBot,
-      PerplexityBot, Google-Extended. Currently only a blanket `User-agent: *`.
 - [ ] **Cloudflare Web Analytics.** Cookieless, so no consent banner.
 - [ ] **Per-entry share images.** Everything currently uses the branded `/og-default.png` card.
       That works, but Pinterest performs far better with the actual photograph, so each entry
@@ -115,8 +111,8 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
       Currently saving in the CMS commits straight to `main` and publishes in about a minute.
 - [ ] Run the skill-creator eval loop and description optimizer against the two skills,
       `verify-deploy` and `run-hookd` (needs subagents — ask first).
-- [ ] The audit's route list in `driver.mjs` is hand-maintained. Add new routes to it, or they
-      go unchecked.
+- [ ] Delete the loser once the gallery layout is chosen (step 9f) — two layouts behind one
+      constant is fine while comparing, dead code afterwards.
 
 ## Ground rules — split between tooling and agreement
 

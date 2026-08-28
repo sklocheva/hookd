@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
+import { breadcrumbSchema, jsonLdToString, type JsonLd } from '../lib/schema';
 
 interface Props {
 	/** Page title. Rendered in <title> — the <h1> is set separately by the page. */
@@ -19,6 +20,13 @@ interface Props {
 	 * which is invented and must not be indexed, and by the legal stubs.
 	 */
 	noindex?: boolean;
+	/**
+	 * Page-specific structured data (Article, BlogPosting…). Breadcrumbs are added here
+	 * automatically, so a page only supplies what it alone knows.
+	 */
+	jsonLd?: JsonLd[];
+	/** The last breadcrumb's readable name, when the slug would not do. */
+	breadcrumbName?: string;
 }
 
 const {
@@ -28,9 +36,18 @@ const {
 	shareImage,
 	ogType = 'website',
 	noindex = false,
+	jsonLd = [],
+	breadcrumbName,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
+
+// Structured data lives here for the same reason the canonical does: one chokepoint, so
+// no page can ship without it and none can contradict another. Drafts are noindex, so
+// emitting a graph for them would describe a page search engines are told to ignore.
+const site = Astro.site!;
+const crumbs = noindex ? undefined : breadcrumbSchema(Astro.url.pathname, site, breadcrumbName);
+const graph = noindex ? [] : [...jsonLd, ...(crumbs ? [crumbs] : [])];
 
 // Every page gets an image: shares and pins render blank without one, and Pinterest is
 // the main discovery channel. Dimensions are stated explicitly because Rich Pins and
@@ -54,6 +71,12 @@ const usingDefault = !shareImage;
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
+
+		{
+			graph.length > 0 && (
+				<script type="application/ld+json" set:html={jsonLdToString(graph)} />
+			)
+		}
 
 		<meta property="og:site_name" content="Hookd" />
 		<meta property="og:type" content={ogType} />

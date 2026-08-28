@@ -19,7 +19,11 @@ const specs = [
 ];
 ---
 
-<a href={`/patterns/${pattern.id}/`} class="card hoverable">
+<a
+	href={`/patterns/${pattern.id}/`}
+	class="card hoverable"
+	data-pattern-categories={d.category.join(' ')}
+>
 	<Hero
 		image={d.heroImage}
 		alt={d.heroImageAlt}

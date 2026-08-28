@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { articleSchema } from '../../lib/schema';
 import { getRelated } from '../../lib/related';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
@@ -28,6 +29,18 @@ const readNext = getRelated({ type: 'post', entry: post }, {
 	patterns: allPatterns,
 	posts: allPosts,
 });
+
+const schema = articleSchema({
+	type: 'BlogPosting',
+	url: new URL(Astro.url.pathname, Astro.site),
+	site: Astro.site!,
+	headline: d.title,
+	description: d.metaDescription,
+	datePublished: d.date,
+	dateModified: d.updated,
+	image: d.socialImage,
+	keywords: [d.kind, ...d.tags],
+});
 ---
 
 <Base
@@ -37,6 +50,8 @@ const readNext = getRelated({ type: 'post', entry: post }, {
 	shareImage={d.socialImage}
 	ogType="article"
 	noindex={d.draft}
+	jsonLd={[schema]}
+	breadcrumbName={d.title}
 >
 	<article class="shell shell--narrow">
 		<div class="title-block">

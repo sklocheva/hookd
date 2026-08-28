@@ -85,7 +85,13 @@ homepage and the indexes. No listing filters drafts.
 
 **Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
 `/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real
-static routes rather than client-side filtering, because of the no-JS rule.
+static routes rather than client-side filtering, because of the no-JS rule. On `/patterns/`
+those same links are upgraded by a script into multi-select toggles — the script only *hides*
+cards that are already in the HTML, so nothing depends on JavaScript to exist.
+
+**`Base.astro` also owns JSON-LD.** Pages pass `jsonLd` (Article, BlogPosting); breadcrumbs are
+derived from the path there. Anything `noindex` emits none, so a draft never ships structured
+data describing a page crawlers are told to ignore. Builders live in `src/lib/schema.ts`.
 
 ## Content model
 
@@ -115,6 +121,11 @@ measurement each size is cut for, yardage per size, US/UK terms.
   Craft Yarn Council table. US letters vary by manufacturer, and 2.5, 7 and 12 mm have **no
   US equivalent at all** — an input field for it invites an invented answer. `usHook` returns
   undefined for those and the page shows just the mm.
+- **A pattern has several categories, stored as lowercase slugs** (`clothing`, `accessories`,
+  `pets`). A hooded scarf is genuinely both clothing and an accessory, and a single-select
+  field files it wrong either way. Display labels live in `src/lib/taxonomy.ts`, never in
+  content, so renaming one touches no entry and no URL. `home` is absent until a homeware
+  pattern exists — unused values are hidden from filters anyway, so it can be added freely.
 - **Finished measurements are author-named label/value pairs, not fixed bust/length columns.**
   A hat needs circumference and depth; a blanket needs nothing. The size table builds its
   columns from the labels used, so keep a label spelled identically across every size or it

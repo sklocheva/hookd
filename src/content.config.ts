@@ -167,7 +167,14 @@ const patterns = defineCollection({
 				.default('https://www.craftyarncouncil.com/standards/body-sizing'),
 			terms: z.enum(['US', 'UK']).default('US'),
 
-			category: z.enum(['Garments', 'Accessories', 'Home']),
+			/**
+			 * Several per pattern — a hooded scarf is both clothing and an accessory, and
+			 * forcing one files it wrong either way. Stored as lowercase slugs; the labels
+			 * a reader sees live in src/lib/taxonomy.ts.
+			 */
+			category: z
+				.array(z.enum(['clothing', 'accessories', 'pets']))
+				.min(1, { error: 'category needs at least one of: clothing, accessories, pets' }),
 			tags: z.array(z.string()).default([]),
 
 			ravelryUrl: z.string().url().optional(),

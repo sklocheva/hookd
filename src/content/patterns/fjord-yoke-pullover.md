@@ -14,7 +14,7 @@ metaDescription: A free top-down circular-yoke pullover in DK, XS–3X, with sho
 heroImagePending: Shoot booked · September
 
 difficulty: Complex
-category: Garments
+category: [clothing]
 terms: US
 tags: ['pullover', 'garment', 'yoke', 'colourwork', 'top-down']
 

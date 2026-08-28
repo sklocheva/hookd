@@ -58,13 +58,15 @@ function fromPost(p: Post, picked: boolean): RelatedItem {
  * dormant post does not outrank a fresh one on an equal score.
  */
 function score(
-	source: { tags: string[]; category?: string; kind?: string },
-	candidate: { tags: string[]; category?: string; kind?: string; date: Date }
+	source: { tags: string[]; category?: readonly string[]; kind?: string },
+	candidate: { tags: string[]; category?: readonly string[]; kind?: string; date: Date }
 ): number {
 	const tags = new Set(source.tags);
 	let n = candidate.tags.filter((t) => tags.has(t)).length * 3;
 
-	if (source.category && source.category === candidate.category) n += 1;
+	// Categories are lists now, so this is an overlap test. As a plain `===` it compared
+	// two arrays by identity, was always false, and the nudge silently stopped working.
+	if (source.category?.some((c) => candidate.category?.includes(c))) n += 1;
 	if (source.kind && source.kind === candidate.kind) n += 1;
 
 	// Tiny recency nudge — never enough to beat a single shared tag.

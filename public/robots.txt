@@ -1,6 +1,25 @@
-User-agent: *
-Allow: /
+# Everything here is free and meant to be found — by search engines and by the AI
+# assistants people increasingly ask for patterns.
+#
+# The named agents are listed so the decision is on the record and so the ones that only
+# honour their own token (Google-Extended, Applebot-Extended) are actually addressed.
+# They share one group with the wildcard because the rules are the same for all of them.
+#
+# Careful with this file: a crawler obeys only the most specific group that names it, so
+# giving an agent its own group would silently exempt it from the /admin rule below.
 
+User-agent: *
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: Google-Extended
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Applebot-Extended
+Allow: /
 # The CMS is a tool, not content, and it is behind a login anyway.
 Disallow: /admin
 

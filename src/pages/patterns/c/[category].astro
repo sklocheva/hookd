@@ -4,45 +4,41 @@ import type { GetStaticPaths } from 'astro';
 import Base from '../../../layouts/Base.astro';
 import PageHead from '../../../components/PageHead.astro';
 import PatternGrid from '../../../components/PatternGrid.astro';
-import { slugify } from '../../../lib/format';
-import { byDateDesc, categoryHref, patternCategoriesInUse } from '../../../lib/taxonomy';
+import CategoryFilter from '../../../components/CategoryFilter.astro';
+import { byDateDesc, categoryLabel, patternCategoriesInUse } from '../../../lib/taxonomy';
 
-// Real static routes rather than client-side filtering, because of the no-JS rule.
+// Real static routes rather than client-side filtering, because of the no-JS rule. The
+// multi-select toggles on /patterns/ are a convenience layer on top of these pages, not a
+// replacement for them: these are what a crawler and a reader without JS get.
 export const getStaticPaths = (async () => {
 	const patterns = await getCollection('patterns');
 
 	return patternCategoriesInUse(patterns).map((category) => ({
-		params: { category: slugify(category) },
+		params: { category },
 		props: {
 			category,
-			patterns: patterns.filter((p) => p.data.category === category).sort(byDateDesc),
+			// A pattern carries several categories, so this is a membership test.
+			patterns: patterns.filter((p) => p.data.category.includes(category)).sort(byDateDesc),
 		},
 	}));
 }) satisfies GetStaticPaths;
 
 const { category, patterns } = Astro.props;
 const allPatterns = await getCollection('patterns');
-
-const filters = [
-	{ label: 'All', href: '/patterns/' },
-	...patternCategoriesInUse(allPatterns).map((c) => ({
-		label: c,
-		href: categoryHref(c),
-		active: c === category,
-	})),
-];
+const label = categoryLabel(category);
 ---
 
 <Base
-	title={`${category} — free crochet patterns`}
-	description={`Free crochet patterns in the ${category.toLowerCase()} category, written out in full with sizes and gauge stated.`}
+	title={`${label} — free crochet patterns`}
+	description={`Free crochet patterns filed under ${label.toLowerCase()}, written out in full with sizes and gauge stated.`}
 	active="patterns"
 >
 	<PageHead
-		heading={category}
-		standfirst={`${patterns.length} ${patterns.length === 1 ? 'free pattern' : 'free patterns'} in this category. Every one is written out in full, with both gauges stated.`}
-		filters={filters}
-	/>
+		heading={label}
+		standfirst={`${patterns.length} ${patterns.length === 1 ? 'free pattern' : 'free patterns'} filed under ${label.toLowerCase()}. Every one is written out in full, with the gauge measured on the blocked piece.`}
+	>
+		<CategoryFilter patterns={allPatterns} active={[category]} />
+	</PageHead>
 
 	<PatternGrid patterns={patterns} />
 </Base>

@@ -18,6 +18,8 @@ import {
 	yardageRangeBoth,
 } from '../../lib/format';
 import { hookLabel } from '../../lib/hooks';
+import { categoryLabel } from '../../lib/taxonomy';
+import { articleSchema } from '../../lib/schema';
 
 export const getStaticPaths = (async () => {
 	const patterns = await getCollection('patterns');
@@ -49,6 +51,19 @@ const hookSecond = d.secondHookMm
 	? `${hookLabel(d.secondHookMm)} for ${d.secondHookFor}`
 	: undefined;
 
+const schema = articleSchema({
+	type: 'Article',
+	url: new URL(Astro.url.pathname, Astro.site),
+	site: Astro.site!,
+	headline: d.title,
+	description: d.metaDescription,
+	datePublished: d.date,
+	// Patterns carry no `updated` field — only posts do — so dateModified falls back to
+	// the publish date inside articleSchema. Worth an errata date here eventually.
+	image: d.socialImage,
+	keywords: [...d.category.map(categoryLabel), ...d.tags],
+});
+
 const specs = [
 	{
 		label: 'Yarn',
@@ -75,6 +90,11 @@ const specs = [
 		difficulty: true,
 	},
 	{
+		label: 'Type',
+		value: d.category.map(categoryLabel).join(' · '),
+		note: d.category.length > 1 ? 'Filed under both' : undefined,
+	},
+	{
 		label: 'Sizes',
 		value: d.sizes.map((s) => s.name).join(' · '),
 		note:
@@ -92,6 +112,8 @@ const specs = [
 	shareImage={d.socialImage}
 	ogType="article"
 	noindex={d.draft}
+	jsonLd={[schema]}
+	breadcrumbName={d.title}
 >
 	<article class="shell shell--narrow">
 		<div class="title-block">
@@ -168,14 +190,10 @@ const specs = [
 
 			<div class="actions">
 				<a href="#instructions" class="pill">Jump to the pattern</a>
-				<a href="#" class="quiet">Print / save as PDF</a>
+				<button type="button" class="quiet" data-print hidden>Print / save as PDF</button>
 				{
-					d.ravelryUrl ? (
-						<a href={d.ravelryUrl} class="quiet">
-							Add to Ravelry queue
-						</a>
-					) : (
-						<a href="#" class="quiet">
+					d.ravelryUrl && (
+						<a href={d.ravelryUrl} class="quiet" rel="noopener">
 							Add to Ravelry queue
 						</a>
 					)
@@ -195,6 +213,15 @@ const specs = [
 		</div>
 
 		<PatternLicence />
+
+		<script>
+			// Progressive enhancement: the button is hidden until the script can make it
+			// work, so nothing on the page is a control that does nothing.
+			document.querySelectorAll<HTMLButtonElement>('[data-print]').forEach((b) => {
+				b.hidden = false;
+				b.addEventListener('click', () => window.print());
+			});
+		</script>
 
 		<Related items={readNext} heading="Next in the workbasket" />
 	</article>
@@ -317,6 +344,9 @@ const specs = [
 
 	.quiet {
 		display: inline-block;
+		background: none;
+		border: 0;
+		cursor: pointer;
 		padding-block: 6px;
 		font: 400 13px/1 var(--sans);
 		color: var(--muted);

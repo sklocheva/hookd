@@ -10,7 +10,7 @@ draft: true  # invented example content — not for publication
 metaDescription: A free single-skein cowl in garter-look crochet — one evening, one ball, no shaping.
 
 difficulty: Easy
-category: Accessories
+category: [accessories]
 sizeNote: >-
   One size. The tube is worked to a fixed circumference — if you want it longer, add rounds and buy an extra ball.
 terms: US
