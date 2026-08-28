@@ -10,10 +10,17 @@ const patterns = (await getCollection('patterns')).sort(byDateDesc);
 
 // Text links, matching the journal index. Two index pages with two different filter
 // treatments was the problem the pill toggles introduced.
-const filters = [
-	{ label: 'All', href: '/patterns/', active: true },
-	...patternCategoriesInUse(patterns).map((c) => ({ label: categoryLabel(c), href: categoryHref(c) })),
-];
+// With nothing to list the row would collapse to a lone "All", which is a filter offering
+// one option — quieter to leave it out until there is something to filter.
+const filters = patterns.length
+	? [
+			{ label: 'All', href: '/patterns/', active: true },
+			...patternCategoriesInUse(patterns).map((c) => ({
+				label: categoryLabel(c),
+				href: categoryHref(c),
+			})),
+		]
+	: undefined;
 ---
 
 <Base
@@ -32,8 +39,9 @@ const filters = [
 			<PatternGrid patterns={patterns} />
 		) : (
 			<EmptyState
-				heading="No patterns yet"
-				body="The first free pattern is being written and tested. Until then, the journal has the yarn and stitch tests the patterns are built on."
+				label="Nothing here yet"
+				heading="No patterns published"
+				body="The first free pattern is being written and tested. The journal is already running if you want the yarn tests in the meantime."
 				actionHref="/journal/"
 				actionLabel="Read the journal"
 			/>

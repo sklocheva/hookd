@@ -107,7 +107,7 @@ const COLUMNS = 5;
 
 	{
 		shots.some((f) => f.caption) && (
-			<p class="gallery__caption" data-caption>
+			<p class="gallery__caption" data-caption-out>
 				{shots[0].caption ?? ''}
 			</p>
 		)
@@ -207,7 +207,10 @@ const COLUMNS = 5;
 		const slides = [...gallery.querySelectorAll<HTMLElement>('[data-slide]')];
 		const thumbs = [...gallery.querySelectorAll<HTMLButtonElement>('[data-thumb]')];
 		const strip = gallery.querySelector<HTMLElement>('.gallery__thumbs');
-		const caption = gallery.querySelector<HTMLElement>('[data-caption]');
+		// Not '[data-caption]': every slide carries that attribute as its own caption *data*,
+		// so querySelector returned slide 0 and writing textContent to it destroyed the main
+		// image. The output element gets a distinct marker.
+		const caption = gallery.querySelector<HTMLElement>('[data-caption-out]');
 		if (slides.length < 2 || thumbs.length !== slides.length || !strip) return;
 
 		// Collapsing the stack here rather than in CSS is what keeps the no-JS case honest:

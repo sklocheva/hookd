@@ -67,6 +67,10 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
 
 - [ ] Three more write-ups from findings that already exist: moss 3 mm vs 4 mm · Karisma vs
       Snorre · swatch gauge vs piece gauge. Four posts is where the site stops looking empty.
+- [ ] **Gallery thumbnails should be separate crops, not the main image scaled down.** The
+      design asks for each exported at ~400 × 500, cropped to its subject — a full-frame
+      garment at 100px wide is unreadable. The build currently scales the same file, which is
+      right until real photography exists. Needs a `thumb` field per gallery image then.
 - [ ] **Photo session.** Side light at 90° to a window, matte mid-tone background, stills
       separate from video, vertical framing for Pinterest. Aspect ratios are baked into the
       layouts:

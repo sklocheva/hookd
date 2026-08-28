@@ -1,63 +1,72 @@
 ---
-import SectionLabel from './SectionLabel.astro';
-
 /**
  * What an index shows when it has nothing to list.
  *
- * A bare heading over blank space reads as a broken page rather than an empty one, so this
- * says what is missing, why, and where to go instead. It matters most right now: the site
- * launches with few entries, and a visitor who lands on an empty index and leaves does not
- * come back.
+ * The page head and chrome stay; only the grid is replaced. No illustration and no card
+ * outline — a bare heading over blank space reads as a broken page, but so does a drawing
+ * apologising for one. This says what is missing, why, and where to go instead.
+ *
+ * Two deliberate departures from the design, both house rules that outrank it:
+ * the label is 11px rather than 10px (small uppercase with wide tracking is the hardest
+ * thing on a page to read, and the floor exists because of it), and it is `--ink-2` rather
+ * than the design's `#8a7c6e` — that value is `--faint`, reserved for scaffolding captions
+ * that get deleted. This ships, so it gets a colour that ships.
  */
 interface Props {
+	/** The small uppercase line, e.g. "Nothing here yet" or "No matches". */
+	label: string;
 	heading: string;
 	body: string;
-	actionHref?: string;
-	actionLabel?: string;
+	actionHref: string;
+	actionLabel: string;
 }
 
-const { heading, body, actionHref, actionLabel } = Astro.props;
+const { label, heading, body, actionHref, actionLabel } = Astro.props;
 ---
 
 <div class="shell empty">
-	<SectionLabel>Nothing here yet</SectionLabel>
-	<h2>{heading}</h2>
-	<p>{body}</p>
-	{
-		actionHref && actionLabel && (
-			<a href={actionHref} class="empty__action">
-				{actionLabel}
-			</a>
-		)
-	}
+	<p class="empty__label">{label}</p>
+	<h2 class="empty__heading">{heading}</h2>
+	<p class="empty__body">{body}</p>
+	<a href={actionHref} class="empty__action">{actionLabel}</a>
 </div>
 
 <style>
 	.empty {
-		padding: 40px 0 20px;
-		max-width: 560px;
+		border-top: 1px solid var(--rule);
+		padding-top: 34px;
+		padding-bottom: 20px;
 	}
 
-	h2 {
-		margin: 14px 0 12px;
-		font: 400 clamp(22px, 3vw, 28px) / 1.2 var(--serif);
+	.empty__label {
+		margin: 0 0 14px;
+		font: var(--type-label);
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--ink-2);
+	}
+
+	.empty__heading {
+		margin: 0 0 12px;
+		font: 400 clamp(22px, 2.6vw, 28px) / 1.2 var(--serif);
 		color: var(--ink);
 	}
 
-	p {
-		margin: 0 0 24px;
-		font: var(--type-body);
+	.empty__body {
+		margin: 0 0 26px;
+		max-width: 420px;
+		font: 400 15px/1.7 var(--sans);
 		color: var(--ink-2);
+		text-wrap: pretty;
 	}
 
 	.empty__action {
 		display: inline-block;
-		min-height: 34px;
 		border: 1px solid var(--terracotta);
 		border-radius: 999px;
-		padding: 12px 24px;
-		font: var(--type-label);
-		letter-spacing: 0.09em;
+		padding: 14px 26px;
+		font: 600 11.5px/1 var(--sans);
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		color: var(--terracotta);
 		text-decoration: none;

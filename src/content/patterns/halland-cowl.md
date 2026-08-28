@@ -4,7 +4,22 @@ date: 2026-06-28
 summary: >-
   A single-skein cowl in a garter-look crochet fabric, worked in the round and doubled
   over. One evening, one ball, no shaping.
-heroImageAlt: A rust-coloured chunky cowl styled around the neck of a wool coat.
+heroImage: /src/assets/step-4-felted.webp
+heroImageCaption: Stand-in photography — the felted wool shots, until the cowl is shot
+gallery:
+  - image: /src/assets/step-1-wool.webp
+    alt: A loose coil of pale blush non-superwash wool on a sage green woven cloth
+    caption: The wool before anything is done to it
+  - image: /src/assets/step-2-wind.webp
+    alt: The same wool wound into a tight small ball, with the tail still trailing
+    caption: Wound tight, tail left out
+  - image: /src/assets/step-3-weave.webp
+    alt: A blue crochet hook pulling the loose tail back through the wound ball
+    caption: The tail woven back through with a 4 mm hook
+  - image: /src/assets/cat-ball-pinterest.webp
+    alt: The four steps laid out as a titled graphic, "Leftover wool into a cat toy"
+    caption: All four steps together
+heroImageAlt: Three small felted wool balls, fuzzy and pale pink, on a sage green woven cloth
 socialImage: /og-default.png
 draft: true  # invented example content — not for publication
 metaDescription: A free single-skein cowl in garter-look crochet — one evening, one ball, no shaping.
