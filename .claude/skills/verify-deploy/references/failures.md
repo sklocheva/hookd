@@ -99,16 +99,29 @@ actually looks like.
 
 ## Environment traps on this machine
 
-**Credentials come from Git Credential Manager, not `gh`.** For a long time these notes said a
-`gh` credential helper was configured local to this repo. It is not: `git config --local
-credential.helper` is empty and the *system* helper is `manager` (GCM 2.4.1). `gh` is installed
-and logged in, but git never asks it. The wrong explanation survived because the advice attached
-to it — push from PowerShell — happened to work, so nothing contradicted it.
+**Reading the wrong config key, twice, to produce two wrong conclusions.** These notes said a
+`gh` credential helper was configured local to this repo. That was correct. I checked it with
+`git config --local --get-all credential.helper`, got nothing, and rewrote the docs to say the
+helper was Git Credential Manager. The real setting is URL-scoped —
+`credential.https://github.com.helper = !gh auth git-credential`, with an empty first value to
+clear the inherited helper — and the bare key is empty by design. **Query
+`credential.https://github.com.helper`, or `git config --list` and read, before concluding
+anything about how this repo authenticates.**
 
-**`gh auth status` can lie once, coming out of sleep.** It reported "not logged in to any hosts"
-here, which led to a confident and wrong conclusion that gh was unauthenticated; minutes later
-the same command showed a valid keyring login. The token is in the Windows keyring and that
-lookup can fail transiently. Re-run it before building an explanation on top of it.
+Then, on one `gh auth status` failure, I recorded "gh is not logged in" as fact. It was logged
+in; the command had failed once coming out of sleep. Two documented "corrections" were pushed
+before either was checked a second time. The pattern is the one this file exists for: a single
+observation, treated as settled, built on immediately.
+
+**`gh auth refresh` is unusable on this machine.** It reports "not logged in to any hosts" while
+`gh auth status` shows a valid login, because the token lives in the Windows keyring rather than
+inline in `hosts.yml`. `gh auth login --hostname github.com --git-protocol https --web --scopes
+workflow` works instead, and git picks the new token up with no config change — the helper is
+already pointed at gh.
+
+**A push touching `.github/workflows/` is rejected** until that scope exists: "refusing to allow
+an OAuth App to create or update workflow ... without `workflow` scope". Nothing else about
+pushing is affected, so it only bites when adding CI.
 
 **A push touching `.github/workflows/` is rejected.** GitHub returns "refusing to allow an
 OAuth App to create or update workflow ... without `workflow` scope". GCM's stored token lacks

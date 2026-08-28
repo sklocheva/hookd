@@ -137,11 +137,11 @@ not things a script can check:
 - [ ] Don't change decided stack choices without asking
 - [ ] **GitHub Action to catch failed builds.** `.github/workflows/build.yml` is written and
       sitting uncommitted locally; **GitHub refuses the push** because no token in play carries
-      the `workflow` scope. Git authenticates through Git Credential Manager; `gh` is logged in
-      separately with `gist, read:org, repo`. Sophia runs
-      `gh auth refresh -h github.com -s workflow` (browser flow), then git is pointed at gh for
-      this repo only — `git config --local credential.https://github.com.helper "!gh auth
-      git-credential"` — which is reversible and leaves other repos on GCM.
+      the `workflow` scope. Pushes already authenticate through `gh` (repo-local URL-scoped
+      helper), so **no git config change is needed** — only a token with the scope.
+      `gh auth refresh` does not work here: it reports "not logged in to any hosts" because the
+      token is in the Windows keyring rather than in `hosts.yml`. Use instead:
+      `gh auth login --hostname github.com --git-protocol https --web --scopes workflow`
 
 - [ ] Optional image captions. The markdown title slot now carries the size hint
       (`"wide"`, `"narrow"`); captions would need a `<figure>` wrapper.

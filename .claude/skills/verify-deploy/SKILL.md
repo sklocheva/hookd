@@ -116,10 +116,10 @@ If the site is partly broken, say which part and give the status codes. A workin
 
 ## Environment notes
 
-`git push` uses Git Credential Manager, configured at the **system** level — not `gh`, and not
-per-repo. Push from **PowerShell**, which is where it is known to work; `curl` checks are fine
-in Bash. A push that adds or edits `.github/workflows/*` is rejected: the stored token has no
-`workflow` scope.
+`git push` to GitHub authenticates through `gh`, via a repo-local URL-scoped helper
+(`credential.https://github.com.helper = !gh auth git-credential`). `gh` is not on Git Bash's
+PATH, so push from **PowerShell**; `curl` checks are fine in Bash. A push that adds or edits
+`.github/workflows/*` is rejected regardless — gh's token has no `workflow` scope.
 
 Node is not on the inherited PATH in fresh tool shells. In PowerShell, prepend:
 

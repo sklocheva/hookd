@@ -188,17 +188,20 @@ Things that have already gone wrong here, and cost real time:
   project. It looked cosmetic and was the root cause.
 - **Node version.** `.nvmrc` pins 24 so local and CI agree. Astro requires >= 22.12 and
   rejects odd-numbered majors (23, 25).
-- **Pushing uses Git Credential Manager**, set at the *system* level (`credential.helper =
-  manager`). There is no repo-local helper, so the long-standing note about a `gh` helper
-  "configured local to this repo" was wrong. `gh` *is* logged in (account `sklocheva`, via
-  keyring) but git does not use it. Push from PowerShell.
-- **Neither token carries the `workflow` scope**, so a push that adds or edits anything under
-  `.github/workflows/` is rejected with "refusing to allow an OAuth App to create or update
-  workflow ... without `workflow` scope". Nothing else is affected. `gh auth status` lists
-  gh's scopes as `gist, read:org, repo`.
-- **`gh` can report "not logged in to any hosts" spuriously** — its token lives in the Windows
-  keyring, and coming out of sleep that lookup can fail. It said exactly that once here and
-  was fine minutes later. Re-run before concluding anything from it.
+- **Pushing to GitHub uses `gh`, per-repo.** `credential.https://github.com.helper` is set
+  locally to `!gh auth git-credential` (preceded by an empty value, which clears the inherited
+  helper). Everything else on this machine goes through Git Credential Manager, the *system*
+  helper. Check the URL-scoped key, not bare `credential.helper` — the bare key is empty here,
+  and reading only that produced a confidently wrong conclusion once.
+- **Push from PowerShell.** `gh` is not on Git Bash's PATH, so the helper cannot run there and
+  the push fails with `gh: command not found` then "Invalid username or token".
+- **The gh token has no `workflow` scope** (`gist, read:org, repo`), so any push that adds or
+  edits `.github/workflows/` is rejected: "refusing to allow an OAuth App to create or update
+  workflow ... without `workflow` scope". Nothing else is affected.
+- **`gh auth refresh` does not work here** — it reports "not logged in to any hosts" even
+  though `gh auth status` shows a valid login, because the token is in the Windows keyring
+  rather than in `hosts.yml`. Use `gh auth login ... --scopes workflow` instead, which
+  re-runs the OAuth flow and writes a token that git picks up immediately.
 
 ## Out of scope
 
