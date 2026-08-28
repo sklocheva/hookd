@@ -135,13 +135,13 @@ not things a script can check:
 - [ ] Merge to `main` only with Sophia's consent, once a page is reviewed and finished
 - [ ] One change per branch; keep diffs reviewable
 - [ ] Don't change decided stack choices without asking
-- [ ] **GitHub Action to catch failed builds.** `.github/workflows/build.yml` is written and
-      sitting uncommitted locally; **GitHub refuses the push** because no token in play carries
-      the `workflow` scope. Pushes already authenticate through `gh` (repo-local URL-scoped
-      helper), so **no git config change is needed** — only a token with the scope.
-      `gh auth refresh` does not work here: it reports "not logged in to any hosts" because the
-      token is in the Windows keyring rather than in `hosts.yml`. Use instead:
-      `gh auth login --hostname github.com --git-protocol https --web --scopes workflow`
+- [ ] ~~GitHub Action to catch failed builds~~ — **parked, Aug 2026.** The workflow was written
+      and works, but it could not be pushed: nothing would attach the `workflow` scope to the gh
+      token, even after the GitHub CLI app grant was confirmed to include it. Not worth more
+      time. If wanted later, the file is a dozen lines and the reliable route is GitHub's web
+      UI (**Add file → Create new file**, path `.github/workflows/build.yml`), which needs no
+      token. Until then the build gate is local: `npm run check` and `npm run build` before a
+      push, and `verify-deploy` after one.
 
 - [ ] Optional image captions. The markdown title slot now carries the size hint
       (`"wide"`, `"narrow"`); captions would need a `<figure>` wrapper.

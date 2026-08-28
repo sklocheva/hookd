@@ -119,9 +119,16 @@ inline in `hosts.yml`. `gh auth login --hostname github.com --git-protocol https
 workflow` works instead, and git picks the new token up with no config change — the helper is
 already pointed at gh.
 
-**A push touching `.github/workflows/` is rejected** until that scope exists: "refusing to allow
-an OAuth App to create or update workflow ... without `workflow` scope". Nothing else about
-pushing is affected, so it only bites when adding CI.
+**A push touching `.github/workflows/` is rejected**: "refusing to allow an OAuth App to create
+or update workflow ... without `workflow` scope". Nothing else about pushing is affected, so it
+only bites when adding CI.
+
+**Do not try to fix that scope again.** It was attempted at length: `gh auth refresh` is unusable
+here (keyring storage), `gh auth login --scopes workflow` completed and the GitHub CLI app grant
+was confirmed on github.com to include "Update github action workflows" — and the issued token
+still came back `gist, read:org, repo` from GitHub's own `X-Oauth-Scopes` header, twice, after a
+full logout and re-login. Cause unknown. **If CI is ever wanted, add the file through the GitHub
+web UI**, which uses the browser session rather than the token, and pull it down.
 
 **A push touching `.github/workflows/` is rejected.** GitHub returns "refusing to allow an
 OAuth App to create or update workflow ... without `workflow` scope". GCM's stored token lacks
