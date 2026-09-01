@@ -15,7 +15,7 @@ swatchImageCaption: ''
 yarn:
   brand: Drops
   line: Cotton Merino
-  content: A soft tweed of half superwash wool and half cotton. Perfect for transitional garments.
+  content: 50% cotton, 50% merino wool
   weightLabel: Worsted
   ballWeightG: 50
   ballLengthM: 110

@@ -14,7 +14,7 @@ socialImage: /og-default.png
 yarn:
   brand: Nordfjord Garn
   line: Fjellull DK
-  content: 100% Norwegian wool, single ply · not superwash
+  content: 100% Norwegian wool
   weightLabel: DK / 8 ply
   ballWeightG: 50
   ballLengthM: 105

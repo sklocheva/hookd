@@ -244,12 +244,15 @@ wrap the yarn round a ruler for an inch and count: that is **WPI**.
 yarn was spun. Fill in whichever the band tells you.
 
 **OEKO-TEX** takes the class number from the band: 1 babies to 3 · 2 direct skin contact ·
-3 no direct skin contact · 4 decoration. It means the yarn was tested for harmful
-substances. It does **not** mean organic or eco, and the page says so, so don't use it as
-one.
+3 no direct skin contact · 4 decoration. It shows as a badge with a line explaining what it
+covers — it means tested for harmful substances, not organic or eco.
 
-**Mulesing** is animal fibres only, and only what the label states. If it says nothing,
-choose "Not stated" — that is the truthful answer and the usual one.
+**Mulesing** is animal fibres only, and only what the label states. Pick "Mulesing-free"
+and it becomes a badge; pick "Not stated" or leave it empty and nothing is shown. Only the
+positive claim appears, so an absent badge never implies an accusation.
+
+**Content** is just the fibres — "50% cotton, 50% merino wool". Ply goes in Strand
+construction, and superwash is already implied by the care line.
 
 **Photographs are optional.** A review with none is a finished page — the two image blocks
 simply drop out. Publish without them rather than waiting for a shoot.

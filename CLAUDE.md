@@ -182,11 +182,17 @@ measurement each size is cut for, yardage per size, US/UK terms.
   the build with a line naming each gap. Rows with no value are simply absent from the
   page, which is the same rule the design already used for measurements never taken.
 - **Provenance is two facts, not one.** `fibreOrigin` is where the fibre grew, `madeIn`
-  where it was spun — frequently different countries. **OEKO-TEX is named, never badged**:
-  it certifies the article was tested for harmful substances, not that it is organic or
-  environmentally made, and it is widely misread as the latter, so the row spells out what
-  the class covers. **`mulesing` records only what the label states**, and "Not stated" is
-  the honest and most common answer — silence is not a claim either way.
+  where it was spun — frequently different countries. Both live on `origin`, its own object,
+  because five provenance fields at the bottom of a twenty-field `yarn` block could not be
+  found.
+- **Certifications are badges, and only ever positive ones.** OEKO-TEX and mulesing-free show
+  as badges under the yarn table, or not at all — "Not stated" earns nothing, so silence on
+  the label is silence on the page. **The OEKO-TEX badge always carries a line saying what it
+  means**: it certifies the article was tested for harmful substances, not that it is organic
+  or environmentally made, and it is routinely misread as the latter. A bare logo would be
+  the misreading. That line is the reason this is a badge and not an image.
+- **`content` is the fibres and nothing else.** Ply belongs to the construction row, and
+  superwash is implied by the care line; saying either twice invites them to disagree.
 - **A review records the weight the label claims, plus WPI — no CYC number.** Bands disagree
   with the CYC scale and with each other (the first real review was sold as DK and printed
   "Worsted"), so storing a category meant deciding which was right. `weightLabel` quotes the

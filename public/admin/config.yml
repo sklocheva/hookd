@@ -500,7 +500,9 @@ collections:
             name: content
             widget: string
             required: false
-            hint: e.g. 100% Norwegian wool, single ply · not superwash
+            hint: >-
+              Just the fibres, e.g. "50% cotton, 50% merino wool". Ply belongs in Strand
+              construction, and superwash is already implied by the care line.
           - label: Weight, as the label says
             name: weightLabel
             widget: string

@@ -1,0 +1,94 @@
+---
+/**
+ * Certification marks, shown only when there is something to show.
+ *
+ * These were table rows. As rows they had to render *something* on every review, so a
+ * yarn with no certification printed "Not stated" twice — two lines of nothing, on a page
+ * whose rule is that a fact not recorded is simply absent. As badges they either exist or
+ * they do not, which is what these facts actually are.
+ *
+ * **OEKO-TEX is spelled out, not just marked.** It certifies that the finished article was
+ * tested for harmful substances. It is not an organic or an environmental label, and it is
+ * routinely read as one — so where a badge alone would mislead, the line underneath says
+ * what the class covers. That is the whole reason this is not a logo.
+ */
+interface Props {
+	oekoTexClass?: number;
+	oekoTexNote?: string;
+	mulesing?: string;
+}
+
+const { oekoTexClass, oekoTexNote, mulesing } = Astro.props;
+
+const OEKO_TEX_CLASSES: Record<number, string> = {
+	1: 'babies and children to 3',
+	2: 'direct skin contact',
+	3: 'no direct skin contact',
+	4: 'decoration',
+};
+
+const badges = [
+	oekoTexClass
+		? { label: `OEKO-TEX® STANDARD 100 · Class ${oekoTexClass}`, title: oekoTexNote }
+		: undefined,
+	// Only the positive claim. "Not stated" is the usual answer and is not a claim, so it
+	// earns no badge — silence on the label becomes silence on the page.
+	mulesing === 'Mulesing-free' ? { label: 'Mulesing-free' } : undefined,
+].filter((b): b is { label: string; title?: string } => b != null);
+---
+
+{
+	badges.length > 0 && (
+		<div class="badges">
+			<ul class="badges__list">
+				{badges.map((b) => (
+					<li class="badge" title={b.title}>
+						{b.label}
+					</li>
+				))}
+			</ul>
+
+			{oekoTexClass && (
+				<p class="badges__note">
+					STANDARD 100 means the finished yarn was tested for harmful substances, in the
+					class shown — {OEKO_TEX_CLASSES[oekoTexClass]}. It is not an organic or
+					environmental certification.
+				</p>
+			)}
+		</div>
+	)
+}
+
+<style>
+	.badges {
+		max-width: 760px;
+		margin-top: 18px;
+	}
+
+	.badges__list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.badge {
+		border: 1px solid var(--rule-strong);
+		border-radius: 999px;
+		padding: 6px 13px;
+		/* 11px floor, --ink-2 not --muted — the house rule for small uppercase. */
+		font: 600 11px/1.3 var(--sans);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink-2);
+	}
+
+	.badges__note {
+		margin: 10px 0 0;
+		font: 400 12.5px/1.55 var(--sans);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+</style>
