@@ -33,7 +33,6 @@ origin:
   fibreOrigin: Wool from South America, cotton from Turkey
   madeIn: EU
   oekoTexClass: null
-  oekoTexNote: ''
   mulesing: Mulesing-free
 price:
   level: 2
@@ -61,8 +60,8 @@ inTheHand:
     score: 3
     note: Good drape for a cotton containing yarn.
   frogging:
-    score: null
-    note: ''
+    score: 4
+    note: No problem frogging, but does make the split much worse.
 ---
 
 Splits more but I would prefer the split for a good drape. If it is spun tighter it will have a much worse drape. Avoid for tricky stitches because of the split. Crochet/knit tighter as it will expand a bit after washed. Also has a risk of sagging when dried vertical. To avoid sagging do plan for garments with more tension points to hold it up.

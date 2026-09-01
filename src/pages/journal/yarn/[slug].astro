@@ -106,8 +106,9 @@ const handRows: ReviewRow[] = (
 		['Frogging', d.inTheHand.frogging],
 	] as const
 )
-	.filter(([, r]) => r)
-	.map(([label, r]) => ({ label, score: r!.score, text: r!.note }));
+	// A bar needs a score; a judgement with only a note has nothing to draw.
+	.filter(([, r]) => r?.score != null)
+	.map(([label, r]) => ({ label, score: r!.score!, text: r!.note }));
 
 const hasGauge = Boolean(d.gauge.unblocked || d.gauge.blocked);
 

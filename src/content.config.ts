@@ -303,8 +303,14 @@ const posts = defineCollection({
  * useful alone — a score with no reason is an opinion with a number stuck on it.
  */
 const rated = z.object({
-	score: z.number().int().min(1).max(5),
-	note: z.string().min(1),
+	// Both optional so a cleared or half-filled judgement still saves. The CMS writes
+	// `score: null, note: ''` when a field is emptied, and requiring them here meant a save
+	// from /admin could — and did — break the build for the whole site.
+	score: z.preprocess(
+		(v) => (v === '' || v === null ? undefined : v),
+		z.number().int().min(1).max(5).optional()
+	),
+	note: optionalString,
 });
 
 const reviews = defineCollection({
@@ -533,8 +539,12 @@ const reviews = defineCollection({
 				'drape',
 				'frogging',
 			] as const) {
-				if (!d.inTheHand[key]) {
-					miss(['inTheHand', key], `"${key}" is required to publish — all six, or none compare`);
+				const r = d.inTheHand[key];
+				if (r?.score == null || !r?.note) {
+					miss(
+						['inTheHand', key],
+						`"${key}" needs a score and a note to publish — all six, or none compare`
+					);
 				}
 			}
 		}),

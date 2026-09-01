@@ -41,6 +41,13 @@ extends `astro/tsconfigs/strict`, but nothing enforced it until that script exis
 first run found four real errors on a green build. Errors are the gate; the ~65 *hints* are
 mostly `z is deprecated` noise from Zod 4 and are not worth chasing.
 
+**A cleared field is not an absent one.** Emptying something in `/admin` writes `null` or
+`''` rather than dropping the key, so a schema that requires the value rejects the entry — and
+a save from the browser can break the whole build. It has happened: clearing one judgement on
+a review failed the build, Cloudflare deployed nothing, and the old site kept serving. Every
+optional field must accept blank as absent. **The Action caught that one** — it is the only
+thing that does.
+
 **The CMS writes `''` for a blank text field and `null` for a blank number.** `optionalString`
 and `optionalNumber` in `src/content.config.ts` normalise both to undefined. Without the
 number one, `z.number().optional()` rejects `null` and the entry fails to build — which is
