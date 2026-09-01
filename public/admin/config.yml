@@ -620,17 +620,22 @@ collections:
               contact · 4 = decoration. It means the article was tested for harmful
               substances — it is NOT an organic or environmental label. Leave empty if the
               band does not say.
-          - label: Mulesing
-            name: mulesing
+          - label: Also claimed
+            name: certifications
             widget: select
+            multiple: true
             required: false
             options:
+              - GOTS
+              - RWS
               - Mulesing-free
-              - Not stated
+              - Recycled
+              - Undyed
             hint: >-
-              Animal fibres only, and only what the band or maker actually states. Most
-              labels are silent — "Not stated" is the honest answer, and is not a claim
-              either way. Leave empty for plant fibres.
+              Tick only what the label or the shop listing actually says. Most labels are
+              silent about most of this, and an unticked box shows nothing — it never reads
+              as an accusation. GOTS, RWS and mulesing-free are third-party certifications;
+              recycled and undyed are the maker's word, and the page says so underneath.
 
       # --- Price as a position, never a figure. --------------------------
       - label: Price

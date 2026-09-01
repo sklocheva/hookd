@@ -30,6 +30,27 @@ export const PATTERN_CATEGORIES = ['clothing', 'accessories', 'pets', 'home'] as
  */
 export const POST_KINDS = ['Garment making', 'Yarn notes', 'How-tos'] as const;
 
+/**
+ * Badges a yarn note can carry, in the order they are shown — so two notes list them the
+ * same way regardless of the order the author ticked them.
+ *
+ * The first three are third-party certifications. **Recycled and Undyed are not**: they are
+ * what the label or the shop listing says, and the note under the badges says so. Keeping
+ * them in one row was Sophia's call; keeping the distinction visible is why that line exists.
+ */
+export const YARN_CERTIFICATIONS = [
+	'GOTS',
+	'RWS',
+	'Mulesing-free',
+	'Recycled',
+	'Undyed',
+] as const;
+
+export type YarnCertification = (typeof YARN_CERTIFICATIONS)[number];
+
+/** Which of them are certified by a third party, and which are simply stated. */
+export const CERTIFIED = new Set<string>(['GOTS', 'RWS', 'Mulesing-free']);
+
 /** The kind that yarn entries file under. They carry no `kind` field of their own. */
 export const YARN_KIND = 'Yarn notes';
 

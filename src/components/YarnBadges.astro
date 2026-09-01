@@ -1,27 +1,31 @@
 ---
+import { YARN_CERTIFICATIONS } from '../lib/taxonomy';
+
 /**
- * Certification marks, shown only when there is one.
+ * What a yarn's label and listing claim, shown only when there is something to show.
  *
- * These were table rows. As rows they had to print something on every review, so a yarn
- * with nothing certified said "Not stated" twice — two lines of nothing, on a page whose
- * rule is that an unrecorded fact is simply absent. As badges they exist or they do not,
- * which is what these facts are.
+ * These were table rows. As rows they printed something on every note, so a yarn with
+ * nothing claimed said "Not stated" — a line of nothing, on a page whose rule is that an
+ * unrecorded fact is absent. As badges they exist or they do not.
  *
- * Only positive claims appear. "Not stated" earns no badge, so silence on the label is
- * silence on the page and a missing badge never reads as an accusation.
+ * **Only positive claims.** An absent badge is silence, not an accusation: most labels say
+ * nothing about most of this.
  *
- * The component renders in two parts, because they belong in different places: the badges
- * sit at the top with the lede where they are a quick signal, and `note` explains OEKO-TEX
- * at the foot of the page where fine print belongs.
+ * **Only OEKO-TEX, GOTS and RWS get a footnote.** Those three are routinely misread as
+ * covering more than they do. Mulesing-free, recycled and undyed say what they mean, and
+ * explaining them would be padding.
+ *
+ * Two parts, because they belong in different places: the badges sit with the lede where
+ * they are a quick signal, the note sits at the foot where fine print belongs.
  */
 interface Props {
 	oekoTexClass?: number;
-	mulesing?: string;
+	certifications?: readonly string[];
 	/** 'badges' at the top of the page, 'note' at the bottom. */
 	part: 'badges' | 'note';
 }
 
-const { oekoTexClass, mulesing, part } = Astro.props;
+const { oekoTexClass, certifications = [], part } = Astro.props;
 
 const OEKO_TEX_CLASSES: Record<number, string> = {
 	1: 'babies and children up to three',
@@ -30,10 +34,20 @@ const OEKO_TEX_CLASSES: Record<number, string> = {
 	4: 'decoration',
 };
 
+// Only the three marks a reader is likely to misread get a gloss. Mulesing-free, recycled
+// and undyed say what they mean; explaining them would be padding.
+const MEANINGS: Record<string, string> = {
+	GOTS: 'GOTS certifies organic fibre and every step after it — the chemicals used, the wastewater, and working conditions along the chain.',
+	RWS: 'The Responsible Wool Standard certifies the farm: animal welfare against the Five Freedoms, land management, and the welfare of the people working there.',
+};
+
+// Shown in a fixed order so two notes read the same way, whatever order they were ticked in.
+const claimed = YARN_CERTIFICATIONS.filter((c) => certifications.includes(c));
 const badges = [
 	oekoTexClass ? `OEKO-TEX® STANDARD 100 · Class ${oekoTexClass}` : undefined,
-	mulesing === 'Mulesing-free' ? 'Mulesing-free' : undefined,
+	...claimed,
 ].filter((b): b is string => b != null);
+
 ---
 
 {
@@ -47,11 +61,16 @@ const badges = [
 }
 
 {
-	part === 'note' && oekoTexClass && (
-		<p class="badges__note">
-			OEKO-TEX® STANDARD 100 means every component of the yarn was tested against limits for
-			harmful substances, in the class shown — {OEKO_TEX_CLASSES[oekoTexClass]}.
-		</p>
+	part === 'note' && (oekoTexClass || claimed.some((c) => MEANINGS[c])) && (
+		<div class="badges__note">
+			{oekoTexClass && (
+				<p>
+					OEKO-TEX® STANDARD 100 means every component of the yarn was tested against limits
+					for harmful substances, in the class shown — {OEKO_TEX_CLASSES[oekoTexClass]}.
+				</p>
+			)}
+			{claimed.filter((c) => MEANINGS[c]).map((c) => <p>{MEANINGS[c]}</p>)}
+		</div>
 	)
 }
 
@@ -78,9 +97,17 @@ const badges = [
 
 	.badges__note {
 		max-width: 640px;
-		margin: 0 0 16px;
+		margin-bottom: 16px;
+	}
+
+	.badges__note p {
+		margin: 0 0 8px;
 		font: 400 12.5px/1.55 var(--sans);
 		color: var(--muted);
 		text-wrap: pretty;
+	}
+
+	.badges__note p:last-child {
+		margin-bottom: 0;
 	}
 </style>

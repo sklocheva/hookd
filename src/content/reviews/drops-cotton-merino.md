@@ -33,7 +33,8 @@ origin:
   fibreOrigin: Wool from South America, cotton from Turkey
   madeIn: EU
   oekoTexClass: null
-  mulesing: Mulesing-free
+  certifications:
+    - Mulesing-free
 price:
   level: 2
   note: Good quality and price. It can often be found on sale

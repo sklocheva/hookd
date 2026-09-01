@@ -251,9 +251,13 @@ line at the foot explaining what the class covers.
 added to yours automatically — except for 2.5, 3, 7 and 12 mm, which have no US equivalent
 in the Craft Yarn Council table and correctly show the millimetres alone.
 
-**Mulesing** is animal fibres only, and only what the label states. Pick "Mulesing-free"
-and it becomes a badge; pick "Not stated" or leave it empty and nothing is shown. Only the
-positive claim appears, so an absent badge never implies an accusation.
+**Also claimed** is a tick list: GOTS · RWS · Mulesing-free · Recycled · Undyed. Tick only
+what the label or the shop listing actually says. Each ticked one becomes a badge; anything
+unticked shows nothing, so an absent badge never reads as an accusation — most labels are
+silent about most of this.
+
+GOTS and RWS get a line at the foot explaining what they cover, as OEKO-TEX does. The other
+three say what they mean and get none.
 
 **Content** is just the fibres — "50% cotton, 50% merino wool". Ply goes in Strand
 construction, and superwash is already implied by the care line.

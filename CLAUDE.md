@@ -203,6 +203,10 @@ measurement each size is cut for, yardage per size, US/UK terms.
   where it was spun — frequently different countries. Both live on `origin`, its own object,
   because five provenance fields at the bottom of a twenty-field `yarn` block could not be
   found.
+- **The badge list is fixed and ordered** in `src/lib/taxonomy.ts` — OEKO-TEX class, then
+  GOTS, RWS, Mulesing-free, Recycled, Undyed — so two notes list them the same way whatever
+  order they were ticked in. **Only OEKO-TEX, GOTS and RWS carry a footnote**: those three
+  are routinely read as covering more than they do. The rest say what they mean.
 - **Certifications are badges, and only ever positive ones.** OEKO-TEX and mulesing-free sit
   with the lede at the top; "Not stated" earns nothing, so silence on the label is silence on
   the page and a missing badge never reads as an accusation. The OEKO-TEX explanation sits at

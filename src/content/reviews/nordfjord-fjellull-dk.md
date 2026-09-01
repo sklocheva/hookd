@@ -34,7 +34,9 @@ origin:
   fibreOrigin: Norwegian flocks, Rogaland and Hordaland
   madeIn: Norway
   oekoTexClass: 2
-  mulesing: Not stated
+  certifications:
+    - RWS
+    - Undyed
 
 price:
   level: 3

@@ -1,5 +1,6 @@
 import { defineCollection, reference, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { YARN_CERTIFICATIONS } from './lib/taxonomy';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -425,13 +426,16 @@ const reviews = defineCollection({
 					),
 
 					/**
-					 * Animal fibres only, and only what the band or maker actually states.
-					 * "Not stated" is the honest and most common answer — most labels are silent,
-					 * and silence is not the same as a claim either way.
+					 * Everything else the label or listing claims, as badges.
+					 *
+					 * Only positive claims exist here, so an absent badge is silence rather than
+					 * an accusation — most labels say nothing about most of this. GOTS, RWS and
+					 * mulesing-free are third-party certified; recycled and undyed are the
+					 * maker's word, and the page says which is which.
 					 */
-					mulesing: z.enum(['Mulesing-free', 'Not stated']).optional(),
+					certifications: z.array(z.enum([...YARN_CERTIFICATIONS])).default([]),
 				})
-				.default({}),
+				.default({ certifications: [] }),
 
 			/**
 			 * Where the yarn sits in the market, 1–5, never a currency figure. Prices change and
