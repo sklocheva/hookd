@@ -156,6 +156,15 @@ drafts hidden from the listings as well, that is a change worth making deliberat
 
 Untick Draft and save again when it is ready. That is the "save now, publish later" flow.
 
+### Checking a draft before you publish it
+
+Save it, then open the page — the panel links to it, and a draft renders on the site like
+anything else. At the top you will see a **Draft** box with the time the page was built. If
+that time is before your save, the deploy has not landed yet; wait a few seconds and reload.
+
+That is the whole preview loop. No commands, and what you are looking at is the real page,
+not an approximation of it.
+
 ---
 
 ## Filling in a pattern's sizes

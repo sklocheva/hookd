@@ -5,6 +5,18 @@
 # form. Fields marked `required: true` here are the ones Zod would reject, so the panel
 # asks at write time instead of the build failing afterwards.
 
+# The deployed site. Without this the panel has nowhere to link an entry to, which is why
+# there was no way out of /admin to look at a page.
+#
+# Drafts render on the site — they are only kept out of search, the sitemap and the feed —
+# so this link is a real preview: save, follow it, and the draft banner at the top of the
+# page tells you whether the build has caught up with your save yet.
+#
+# ⚠ Changing the domain means changing this, `site` in astro.config.mjs, and the Sitemap:
+# line in public/robots.txt. All three, together.
+site_url: https://hookd-blog.sklocheva.workers.dev
+display_url: https://hookd-blog.sklocheva.workers.dev
+
 backend:
   name: github
   repo: sklocheva/hookd

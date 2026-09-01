@@ -27,10 +27,12 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
 
 ## Blocked on Sophia
 
-- [ ] **Decision 9 — the site name.** Blocks buying the domain (step 4) and nothing else.
-      Front-runner in PLAN.md is `hookdlab.com`.
-- [ ] **Step 0 — dictate the Y2K skinny shawl stitch post.** Ten minutes, messy, no structure.
-      The method is: you dictate, Claude tidies the wording, your words and caveats stay.
+- [x] ~~Decision 9 — the site name~~ — **hookdworks**, settled 1 Sep 2026.
+- [ ] **Buy hookdworks.com**, then attach it to the Cloudflare Worker. Nothing in the repo
+      changes until the domain actually resolves: `site` in `astro.config.mjs`, the
+      `Sitemap:` line in `public/robots.txt` and `site_url` in `public/admin/config.yml` all
+      carry the host and must change together, **once**. Predicting a hostname and baking it
+      in cost real time before — see `failures.md`.
 
 ---
 
@@ -59,7 +61,6 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
 
 ## Step 8 — Launch
 
-- [ ] Publish the Y2K stitch post
 - [ ] Submit the sitemap in Google Search Console
 - [ ] Pinterest business account — Rich Pins validate automatically once Open Graph is live
 

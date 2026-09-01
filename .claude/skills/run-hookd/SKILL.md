@@ -120,6 +120,11 @@ from the form.
 - **`astro preview` daemonises.** The npm process exits immediately while the server keeps
   running, so never wait on the child — poll the port. Stop it with `npx astro preview stop`,
   not Ctrl-C. The driver handles this; you will hit it if you spawn preview yourself.
+- **Killing the preview process leaves `astro preview` thinking it is still running.** Its
+  own bookkeeping survives, so the next `npm run preview` prints "already running" and exits
+  without starting anything — and the driver then waits for a server nobody will start. It
+  failed three audits in a row before it was understood. The driver now runs
+  `astro preview stop` before spawning; do the same by hand if you kill it.
 - **"Preview did not come up" can be a lie.** `astro preview` has been seen to bind **::1
   only**: `curl http://[::1]:4321/` returns 200 while `127.0.0.1` refuses, and Node's `fetch`
   resolved `localhost` to IPv4 — so the driver reported the server missing while it was

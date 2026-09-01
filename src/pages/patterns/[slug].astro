@@ -1,5 +1,6 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
+import DraftNotice from '../../components/DraftNotice.astro';
 import { getRelated } from '../../lib/related';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
@@ -133,6 +134,8 @@ const specs = [
 	breadcrumbName={d.title}
 >
 	<article class="shell shell--narrow">
+		{d.draft && <DraftNotice />}
+
 		<div class="title-block">
 			<Eyebrow kind="Pattern" rest={`· ${formatDate(d.date)} · free, always`} />
 			<h1>{d.title}</h1>

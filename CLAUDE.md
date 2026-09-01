@@ -92,6 +92,12 @@ public URL and leaves alone, so the image 404s. `src/lib/images.ts` translates t
 body. Both exist for one reason and break the same way. Sveltia also formats dates with
 **Day.js** tokens (`YYYY-MM-DD`) — date-fns style silently writes garbage like `yyyy-08-We`.
 
+**A draft says so on the page.** `DraftNotice.astro` renders at the top of any entry still
+marked draft, with the time the page was built. That timestamp is what makes a draft usable as
+a preview: save in `/admin`, follow the link to the page, and the stamp says whether the build
+has caught up with the save yet. It also stops a half-finished entry looking published, which
+matters because drafts are visible.
+
 **Drafts are hidden from search, not from visitors.** `draft: true` keeps an entry out of the
 sitemap, the RSS feed, and adds `noindex` — but it still renders and is still listed on the
 homepage and the indexes. No listing filters drafts.

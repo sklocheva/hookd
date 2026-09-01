@@ -109,17 +109,27 @@ async function ensurePreview() {
 	}
 	log('build ok');
 
+	// Clear any stale bookkeeping first. `astro preview` records that a server is running;
+	// if that process died without `astro preview stop` — killed to free the port, or gone
+	// with a closed terminal — the record survives, the next `npm run preview` prints
+	// "already running" and exits without starting anything, and this then waits for a
+	// server nobody is going to start. That failed three audits in a row before it was
+	// understood. `stop` is harmless when nothing is running.
+	spawnSync('npx', ['astro', 'preview', 'stop'], { cwd: ROOT, shell: true, stdio: 'ignore' });
+
 	// astro preview daemonises and the parent exits, so don't wait on the child.
 	spawn('npm', ['run', 'preview'], { cwd: ROOT, shell: true, stdio: 'ignore', detached: true }).unref();
 
-	for (let i = 0; i < 40; i++) {
+	for (let i = 0; i < 60; i++) {
 		await sleep(500);
 		if (await isUp(PREVIEW)) {
 			log('preview up on 4321');
 			return true;
 		}
 	}
-	console.error('Preview did not come up within 20s.');
+	console.error('Preview did not come up within 30s.');
+	console.error('Check `npx astro preview status`, and what holds 4321:');
+	console.error('  Get-NetTCPConnection -LocalPort 4321   (PowerShell)');
 	process.exit(2);
 }
 

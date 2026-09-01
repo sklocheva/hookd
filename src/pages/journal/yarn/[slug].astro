@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import DraftNotice from '../../../components/DraftNotice.astro';
 import type { GetStaticPaths } from 'astro';
 import { Image } from 'astro:assets';
 import Base from '../../../layouts/Base.astro';
@@ -153,6 +154,8 @@ const schema = articleSchema({
 	breadcrumbName={d.title}
 >
 	<article class="shell review">
+		{d.draft && <DraftNotice />}
+
 		<div class="review__title">
 			<Eyebrow kind="Yarn review" tone="journal" rest={`· ${formatDate(d.date)}`} />
 			<h1>{d.title}</h1>

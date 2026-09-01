@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import DraftNotice from '../../components/DraftNotice.astro';
 import Gallery from '../../components/Gallery.astro';
 import { articleSchema } from '../../lib/schema';
 import { getRelated } from '../../lib/related';
@@ -55,6 +56,8 @@ const schema = articleSchema({
 	breadcrumbName={d.title}
 >
 	<article class="shell shell--narrow">
+		{d.draft && <DraftNotice />}
+
 		<div class="title-block">
 			<Eyebrow
 				kind="Journal"
