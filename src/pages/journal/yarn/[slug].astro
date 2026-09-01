@@ -8,6 +8,7 @@ import ReviewTable, { type ReviewRow } from '../../../components/ReviewTable.ast
 import GaugePanel from '../../../components/GaugePanel.astro';
 import { formatDate } from '../../../lib/format';
 import { hookLabel } from '../../../lib/hooks';
+import { cycWeightName } from '../../../lib/yarn';
 import { resolveImage } from '../../../lib/images';
 import { articleSchema } from '../../../lib/schema';
 
@@ -69,7 +70,7 @@ const yarnRows: ReviewRow[] = [
 	...row('Content', y.content),
 	...row(
 		'Weight category',
-		[y.cycWeight != null ? `CYC ${y.cycWeight}` : undefined, y.cycWeightName, y.ply]
+		[y.cycWeight != null ? `CYC ${y.cycWeight}` : undefined, cycWeightName(y.cycWeight), y.ply]
 			.filter(Boolean)
 			.join(' · ')
 	),

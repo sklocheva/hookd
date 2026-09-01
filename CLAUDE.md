@@ -41,6 +41,11 @@ extends `astro/tsconfigs/strict`, but nothing enforced it until that script exis
 first run found four real errors on a green build. Errors are the gate; the ~65 *hints* are
 mostly `z is deprecated` noise from Zod 4 and are not worth chasing.
 
+**The CMS writes `''` for a blank text field and `null` for a blank number.** `optionalString`
+and `optionalNumber` in `src/content.config.ts` normalise both to undefined. Without the
+number one, `z.number().optional()` rejects `null` and the entry fails to build — which is
+how Sophia's first real review broke, on two fields she had never touched.
+
 **Zod here is version 4, and its API differs from the Zod 3 examples in the wild.** A custom
 message is `.refine(check, { error: (issue) => '...' })`. The Zod 3 form — a second *function*
 argument — still type-checks as a params object, silently drops the message, and the author
@@ -165,6 +170,9 @@ measurement each size is cut for, yardage per size, US/UK terms.
   environmentally made, and it is widely misread as the latter, so the row spells out what
   the class covers. **`mulesing` records only what the label states**, and "Not stated" is
   the honest and most common answer — silence is not a claim either way.
+- **CYC weight name is derived from the number** in `src/lib/yarn.ts`, never typed — the
+  same reasoning as hook sizes. The first real review proved it: it carried "CYC 3" and
+  "Worsted", and Worsted is category 4's name. CYC 3 is Light.
 - **Strand construction is a fixed type plus a free line.** The type (Singles, Plied,
   Cabled, Chainette, Roving) is what lets two reviews be compared; the line carries what
   the author sees on untwisting a length, which no category expresses.

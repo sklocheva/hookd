@@ -7,7 +7,7 @@ standfirst: Soft and colorful, safe for baby and adult garments.
 metaDescription: cotton merino drops
 socialImage: /og-default.png
 heroImage: ''
-heroImageAlt: no
+heroImageAlt: ''
 heroImageCaption: ''
 swatchImage: ''
 swatchImageAlt: ''
@@ -17,25 +17,30 @@ yarn:
   line: Cotton Merino
   content: A soft tweed of half superwash wool and half cotton. Perfect for transitional garments.
   cycWeight: 3
-  cycWeightName: Worsted
   ply: DK
   ballWeightG: 50
   ballLengthM: 110
-  ballBandGauge: no
+  ballBandGauge: ''
   hookMm: 3
   hookNote: band suggests 4
   gramsPer10cm: null
   metresPer10cm: null
+  construction:
+    type: Cabled
+    note: >-
+      Split it and it is a tweed of cotton and merino — two strands twisted together. Six
+      of those tweedy strands are then twisted around each other again.
   care: Machine wash on gentle cycle max. 40°C / 104F. Dry flat or it will stretch!
-  madeIn: 'EU, Raw material origin: Wool from South America, cotton from Turkey'
+  fibreOrigin: Wool from South America, cotton from Turkey
+  madeIn: EU
 price:
   level: 2
   note: Good quality and price. It can often be found on sale
 gauge:
-  unblocked: '0'
-  blocked: '0'
-  method: '0'
-  note: '0'
+  unblocked: ''
+  blocked: ''
+  method: ''
+  note: ''
 inTheHandBasis: ''
 inTheHand:
   stitchDefinition:

@@ -489,8 +489,16 @@ collections:
             widget: string
             required: false
             hint: e.g. 100% Norwegian wool, single ply · not superwash
-          - { label: CYC weight number, name: cycWeight, widget: number, value_type: int, min: 0, max: 7, required: false }
-          - { label: CYC weight name, name: cycWeightName, widget: string, required: false, hint: 'e.g. Light' }
+          - label: CYC weight number
+            name: cycWeight
+            widget: number
+            value_type: int
+            min: 0
+            max: 7
+            required: false
+            hint: >-
+              0–7. The category name (Lace, Light, Medium…) is added for you — there is no
+              second field to disagree with.
           - { label: Ply, name: ply, widget: string, required: false, hint: 'e.g. DK / 8 ply' }
 
           # How the strand is built. The type is a short fixed list so two reviews can be

@@ -44,6 +44,18 @@ const optionalDate = z.preprocess(
 	z.coerce.date().optional()
 );
 
+/**
+ * The number counterpart of `optionalString`.
+ *
+ * Sveltia writes `null` — not an empty string, not a missing key — for a number field the
+ * author left blank, and `z.number().optional()` rejects null. Sophia's first real review
+ * failed the build on exactly this, in two fields she had never touched.
+ */
+const optionalNumber = z.preprocess(
+	(v) => (v === '' || v === null ? undefined : v),
+	z.number().optional()
+);
+
 const optionalString = z.preprocess(
 	(v) => (v === '' || v === null ? undefined : v),
 	z.string().optional()
@@ -334,19 +346,18 @@ const reviews = defineCollection({
 					brand: optionalString,
 					line: optionalString,
 					content: optionalString,
-					cycWeight: z.number().int().min(0).max(7).optional(),
-					cycWeightName: optionalString,
+					cycWeight: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.number().int().min(0).max(7).optional()),
 					/** e.g. "DK / 8 ply". */
 					ply: optionalString,
-					ballWeightG: z.number().optional(),
-					ballLengthM: z.number().optional(),
+					ballWeightG: optionalNumber,
+					ballLengthM: optionalNumber,
 					/** As printed on the band. */
 					ballBandGauge: optionalString,
-					hookMm: z.number().optional(),
+					hookMm: optionalNumber,
 					hookNote: optionalString,
 					/** Measured, not calculated: what one 10 × 10 cm square actually ate. */
-					gramsPer10cm: z.number().optional(),
-					metresPer10cm: z.number().optional(),
+					gramsPer10cm: optionalNumber,
+					metresPer10cm: optionalNumber,
 
 					/**
 					 * How the strand is built. The type is a short fixed list so two reviews can
@@ -375,7 +386,7 @@ const reviews = defineCollection({
 					 * routinely read as one — so the page says what it means rather than just
 					 * showing a badge.
 					 */
-					oekoTexClass: z.number().int().min(1).max(4).optional(),
+					oekoTexClass: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.number().int().min(1).max(4).optional()),
 					/** Certificate number or institute, if the band prints one. */
 					oekoTexNote: optionalString,
 
@@ -394,7 +405,7 @@ const reviews = defineCollection({
 			 */
 			price: z
 				.object({
-					level: z.number().int().min(1).max(5).optional(),
+					level: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.number().int().min(1).max(5).optional()),
 					note: optionalString,
 				})
 				.default({}),
