@@ -48,10 +48,12 @@ a review failed the build, Cloudflare deployed nothing, and the old site kept se
 optional field must accept blank as absent. **The Action caught that one** — it is the only
 thing that does.
 
-**The CMS writes `''` for a blank text field and `null` for a blank number.** `optionalString`
-and `optionalNumber` in `src/content.config.ts` normalise both to undefined. Without the
-number one, `z.number().optional()` rejects `null` and the entry fails to build — which is
-how Sophia's first real review broke, on two fields she had never touched.
+**The CMS writes blank three different ways, and every one of them has broken a build.**
+`''` for an untouched text field, `null` for a number, and `null` for an *object* the author
+never opened. `optionalString`, `optionalNumber` and `blankToUndefined` in
+`src/content.config.ts` normalise all three to undefined. The rule that generalises them:
+**if the panel can leave a field blank, the schema has to accept blank** — a required field
+in front of unfinished work does not protect the data, it stops the site building.
 
 **Zod here is version 4, and its API differs from the Zod 3 examples in the wild.** A custom
 message is `.refine(check, { error: (issue) => '...' })`. The Zod 3 form — a second *function*

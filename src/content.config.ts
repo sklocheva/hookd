@@ -57,6 +57,17 @@ const optionalNumber = z.preprocess(
 	z.number().optional()
 );
 
+/**
+ * A nested object the author may never open.
+ *
+ * The CMS writes `null` for an untouched object — not an empty object, and not a missing
+ * key — so every nested object has to treat null as absent or the entry will not build.
+ * This is the third time the same shape of bug has appeared: `''` for text, `null` for
+ * numbers, and now `null` for objects. If the panel can leave it blank, the schema has to
+ * accept blank.
+ */
+const blankToUndefined = (v: unknown) => (v === null || v === '' ? undefined : v);
+
 const optionalString = z.preprocess(
 	(v) => (v === '' || v === null ? undefined : v),
 	z.string().optional()
@@ -303,16 +314,19 @@ const posts = defineCollection({
  * The bar is comparable across reviews; the sentence is what actually helps. Neither is
  * useful alone — a score with no reason is an opinion with a number stuck on it.
  */
-const rated = z.object({
-	// Both optional so a cleared or half-filled judgement still saves. The CMS writes
-	// `score: null, note: ''` when a field is emptied, and requiring them here meant a save
-	// from /admin could — and did — break the build for the whole site.
-	score: z.preprocess(
-		(v) => (v === '' || v === null ? undefined : v),
-		z.number().int().min(1).max(5).optional()
-	),
-	note: optionalString,
-});
+const rated = z.preprocess(
+	blankToUndefined,
+	z.object({
+		// Both optional so a cleared or half-filled judgement still saves. The CMS writes
+		// `score: null, note: ''` when a field is emptied, and requiring them here meant a
+		// save from /admin could — and did — break the build for the whole site.
+		score: z.preprocess(
+			(v) => (v === '' || v === null ? undefined : v),
+			z.number().int().min(1).max(5).optional()
+		),
+		note: optionalString,
+	}).optional()
+);
 
 const reviews = defineCollection({
 	loader: glob({ base: './src/content/reviews', pattern: '**/*.{md,mdx}' }),
@@ -386,12 +400,15 @@ const reviews = defineCollection({
 					 * be compared on it; the note carries what you actually see when you untwist
 					 * a length, which no category can express.
 					 */
-					construction: z
-						.object({
-							type: z.enum(['Singles', 'Plied', 'Cabled', 'Chainette', 'Roving']),
-							note: optionalString,
-						})
-						.optional(),
+					construction: z.preprocess(
+						blankToUndefined,
+						z
+							.object({
+								type: z.enum(['Singles', 'Plied', 'Cabled', 'Chainette', 'Roving']).optional(),
+								note: optionalString,
+							})
+							.optional()
+					),
 
 					care: optionalString,
 				})
