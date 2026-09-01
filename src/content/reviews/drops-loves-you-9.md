@@ -22,19 +22,22 @@ yarn:
   ballWeightG: null
   ballLengthM: null
   ballBandGauge: ''
+  hookOnLabel: ''
   hookMm: null
-  hookNote: ''
   gramsPer10cm: null
   metresPer10cm: null
   care: ''
+  hookNote: ''
 origin:
   fibreOrigin: ''
   madeIn: ''
-  oekoTexClass: null
-  oekoTexNote: ''
+  oekoTexClass: 1
+  certifications:
+    - Recycled
   mulesing: ''
+  oekoTexNote: ''
 price:
-  level: null
+  level: 1
   note: ''
 gauge:
   unblocked: ''
@@ -43,10 +46,22 @@ gauge:
   note: ''
 inTheHandBasis: ''
 inTheHand:
-  stitchDefinition: null
-  splitResistance: null
-  softness: null
-  nextToSkin: null
-  drape: null
-  frogging: null
+  stitchDefinition:
+    score: 5
+    note: dfhf
+  splitResistance:
+    score: 2
+    note: ydyfd
+  softness:
+    score: 2
+    note: hfd
+  nextToSkin:
+    score: 5
+    note: dh
+  drape:
+    score: 3
+    note: hhdfh
+  frogging:
+    score: 5
+    note: dfhdhd
 ---
