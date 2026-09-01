@@ -167,10 +167,9 @@ measurement each size is cut for, yardage per size, US/UK terms.
 - **A pattern has several categories, stored as lowercase slugs** (`clothing`, `accessories`,
   `pets`, `home`). A hooded scarf is genuinely both clothing and an accessory, and a single-select
   field files it wrong either way. Display labels live in `src/lib/taxonomy.ts`, never in
-  content, so renaming one touches no entry and no URL. **Every category is shown, used or
-  not** — Pets and Home are planned sections, and hiding them made the site look like it had
-  no intention of filling them. An empty category renders the designed empty state rather
-  than a blank grid.
+  content, so renaming one touches no entry and no URL. Unused values are hidden from the
+  filter row on both indexes, so a section is offered only when there is something behind it.
+  `pets` and `home` stay in the enum and appear the moment a pattern is filed under them.
 - **Finished measurements are author-named label/value pairs, not fixed bust/length columns.**
   A hat needs circumference and depth; a blanket needs nothing. The size table builds its
   columns from the labels used, so keep a label spelled identically across every size or it

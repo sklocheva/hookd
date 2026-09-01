@@ -71,16 +71,14 @@ function present<T extends string>(
 }
 
 /**
- * Every category, whether or not anything is filed under it.
+ * Only categories that have patterns in them.
  *
- * They used to be hidden until used, on the grounds that a filter leading nowhere is a dead
- * end. That was true while there was no designed empty state; there is one now, and hiding
- * Pets and Home made the site look like it had no plans for them. An empty category is a
- * page that says so.
+ * Both indexes work this way: a section is offered when there is something behind it, and
+ * is otherwise silent. `pets` and `home` stay in the enum so a pattern can be filed under
+ * them — they appear the moment one is.
  */
-export const patternCategoriesInUse = (_patterns: CollectionEntry<'patterns'>[]) => [
-	...PATTERN_CATEGORIES,
-];
+export const patternCategoriesInUse = (patterns: CollectionEntry<'patterns'>[]) =>
+	present(PATTERN_CATEGORIES, patterns.flatMap((p) => p.data.category));
 
 /** Kinds that actually have entries — counted across both collections. */
 export const kindsInUse = (kinds: Iterable<string>) => present(POST_KINDS, kinds);
