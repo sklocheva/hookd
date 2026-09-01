@@ -29,6 +29,7 @@ const d = review.data;
 const { Content } = await render(review);
 
 const y = d.yarn;
+const o = d.origin;
 const M_PER_YD = 1.09361;
 
 // Derived rather than typed: how many 10 cm squares a ball holds follows from the two
@@ -54,14 +55,14 @@ const perSquare = [
 const row = (label: string, text?: string | false, extra: Partial<ReviewRow> = {}): ReviewRow[] =>
 	text ? [{ label, text, ...extra }] : [];
 
-const oekoTex = y.oekoTexClass
-	? `STANDARD 100, Class ${y.oekoTexClass} — ${
+const oekoTex = o.oekoTexClass
+	? `STANDARD 100, Class ${o.oekoTexClass} — ${
 			{
 				1: 'babies and children to 3',
 				2: 'direct skin contact',
 				3: 'no direct skin contact',
 				4: 'decoration',
-			}[y.oekoTexClass]
+			}[o.oekoTexClass]
 		}`
 	: undefined;
 
@@ -93,13 +94,13 @@ const yarnRows: ReviewRow[] = [
 		aside: squaresPerBall ? `(one ball ≈ ${squaresPerBall} squares)` : undefined,
 	}),
 	...row('Care', y.care),
-	...row('Fibre from', y.fibreOrigin),
-	...row('Made in', y.madeIn),
+	...row('Fibre from', o.fibreOrigin),
+	...row('Made in', o.madeIn),
 	// Named rather than badged: OEKO-TEX certifies the finished article was tested for
 	// harmful substances. It is not an organic or environmental label and is widely read as
 	// one, so the row says what the class actually covers.
-	...row('OEKO-TEX®', oekoTex, { aside: y.oekoTexNote }),
-	...row('Mulesing', y.mulesing),
+	...row('OEKO-TEX®', oekoTex, { aside: o.oekoTexNote }),
+	...row('Mulesing', o.mulesing),
 	...(d.price.level != null
 		? [
 				{

@@ -385,10 +385,22 @@ const reviews = defineCollection({
 						.optional(),
 
 					care: optionalString,
+				})
+				.default({}),
+
+			/**
+			 * Where it comes from and what it is certified for.
+			 *
+			 * Its own object rather than five more fields on `yarn`, which had grown to twenty
+			 * and buried exactly the rows that prompted it — provenance is a different question
+			 * from the ball band, and it is easier to find when it is asked separately.
+			 */
+			origin: z
+				.object({
+					/** Where the fibre grew, which is often not where the yarn was spun. */
+					fibreOrigin: optionalString,
 					/** Where it was spun and milled. */
 					madeIn: optionalString,
-					/** Where the fibre itself came from, which is often not where it was spun. */
-					fibreOrigin: optionalString,
 
 					/**
 					 * OEKO-TEX STANDARD 100 product class, 1–4, read from the band.
@@ -399,7 +411,10 @@ const reviews = defineCollection({
 					 * routinely read as one — so the page says what it means rather than just
 					 * showing a badge.
 					 */
-					oekoTexClass: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.number().int().min(1).max(4).optional()),
+					oekoTexClass: z.preprocess(
+						(v) => (v === '' || v === null ? undefined : v),
+						z.number().int().min(1).max(4).optional()
+					),
 					/** Certificate number or institute, if the band prints one. */
 					oekoTexNote: optionalString,
 

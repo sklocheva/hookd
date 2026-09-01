@@ -578,22 +578,27 @@ collections:
           - { label: Metres per 10 × 10 cm, name: metresPer10cm, widget: number, value_type: float, required: false }
           - { label: Care, name: care, widget: string, required: false }
 
-          # --- Provenance. Two separate facts: where the fibre grew, and where
-          #     the yarn was spun. They are frequently different countries.
+
+      # --- Where it comes from. Its own section, not five more fields buried at the
+      #     bottom of a twenty-field yarn block where nobody could find them. ---
+      - label: Where it comes from
+        name: origin
+        widget: object
+        collapsed: false
+        hint: Fill in whatever the band actually says. Anything left empty is simply absent from the page.
+        fields:
           - label: Fibre from
             name: fibreOrigin
             widget: string
             required: false
             hint: >-
-              Where the raw material came from, if the band says. e.g. "Wool from Norwegian
-              flocks" or "Cotton from Turkey". Often different from where it was spun.
+              Where the raw material came from. e.g. "Wool from South America, cotton from
+              Turkey". Often a different country from where it was spun.
           - label: Made in
             name: madeIn
             widget: string
             required: false
             hint: Where it was spun and milled.
-
-          # --- Certifications. Only what the band actually states. ----------
           - label: OEKO-TEX® STANDARD 100 class
             name: oekoTexClass
             widget: number

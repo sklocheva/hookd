@@ -29,6 +29,8 @@ yarn:
       Two singles twisted together, loosely enough that they separate under a fingernail.
       Nothing else on top — no cable, no tube.
   care: Hand wash 30 °C · dry flat · no tumble
+
+origin:
   fibreOrigin: Norwegian flocks, Rogaland and Hordaland
   madeIn: Norway
   oekoTexClass: 2

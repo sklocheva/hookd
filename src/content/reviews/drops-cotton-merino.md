@@ -30,8 +30,10 @@ yarn:
       Split it and it is a tweed of cotton and merino — two strands twisted together. Six
       of those tweedy strands are then twisted around each other again.
   care: Machine wash on gentle cycle max. 40°C / 104F. Dry flat or it will stretch!
+origin:
   fibreOrigin: Wool from South America, cotton from Turkey
   madeIn: EU
+
 price:
   level: 2
   note: Good quality and price. It can often be found on sale
