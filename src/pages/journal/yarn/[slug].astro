@@ -76,10 +76,8 @@ const yarnRows: ReviewRow[] = [
 			: undefined
 	),
 	...row('Ball-band gauge', y.ballBandGauge),
-	...row(
-		'Hook I used',
-		y.hookMm != null ? hookLabel(y.hookMm) + (y.hookNote ? ` (${y.hookNote})` : '') : undefined
-	),
+	...row('Hook on label', y.hookOnLabel),
+	...row('Hook I used', y.hookMm != null ? hookLabel(y.hookMm) : undefined),
 	...row('Yarn per 10 × 10 cm', perSquare, {
 		aside: squaresPerBall ? `(one ball ≈ ${squaresPerBall} squares)` : undefined,
 	}),
@@ -146,6 +144,8 @@ const schema = articleSchema({
 			<Eyebrow kind="Yarn review" tone="journal" rest={`· ${formatDate(d.date)}`} />
 			<h1>{d.title}</h1>
 			{d.standfirst && <p class="review__standfirst">{d.standfirst}</p>}
+
+			<YarnBadges part="badges" oekoTexClass={o.oekoTexClass} mulesing={o.mulesing} />
 		</div>
 
 		{
@@ -167,12 +167,6 @@ const schema = articleSchema({
 		{yarnRows.length > 0 && (
 			<ReviewTable heading="The yarn" subheading="Ball band and shop data" rows={yarnRows} />
 		)}
-
-		<YarnBadges
-			oekoTexClass={o.oekoTexClass}
-			oekoTexNote={o.oekoTexNote}
-			mulesing={o.mulesing}
-		/>
 
 		{
 			hasGauge && (
@@ -219,6 +213,8 @@ const schema = articleSchema({
 		{/* Standing site policy. On every review, so it belongs to the template rather than
 		    to something an author has to remember to type. Kept outside .review__prose so it
 		    does not have to fight that block's paragraph styling. */}
+		<YarnBadges part="note" oekoTexClass={o.oekoTexClass} mulesing={o.mulesing} />
+
 		<p class="review__disclosure">
 			Bought at full price. No yarn on this site is supplied by a brand, and reviews are
 			never shown to a brand before publishing.

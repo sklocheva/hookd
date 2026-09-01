@@ -366,8 +366,10 @@ const reviews = defineCollection({
 					ballLengthM: optionalNumber,
 					/** As printed on the band. */
 					ballBandGauge: optionalString,
+					/** The hook actually used. */
 					hookMm: optionalNumber,
-					hookNote: optionalString,
+					/** What the band suggests, e.g. "3.5–4.5 mm". Its own row, not a parenthesis. */
+					hookOnLabel: optionalString,
 					/** Measured, not calculated: what one 10 × 10 cm square actually ate. */
 					gramsPer10cm: optionalNumber,
 					metresPer10cm: optionalNumber,
@@ -415,8 +417,6 @@ const reviews = defineCollection({
 						(v) => (v === '' || v === null ? undefined : v),
 						z.number().int().min(1).max(4).optional()
 					),
-					/** Certificate number or institute, if the band prints one. */
-					oekoTexNote: optionalString,
 
 					/**
 					 * Animal fibres only, and only what the band or maker actually states.

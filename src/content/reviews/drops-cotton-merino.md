@@ -25,7 +25,7 @@ yarn:
   ballLengthM: 110
   ballBandGauge: ''
   hookMm: 3
-  hookNote: band suggests 4
+  hookOnLabel: 4 mm
   gramsPer10cm: null
   metresPer10cm: null
   care: Machine wash on gentle cycle max. 40°C / 104F. Dry flat or it will stretch!

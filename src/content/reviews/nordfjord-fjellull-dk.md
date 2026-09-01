@@ -20,7 +20,7 @@ yarn:
   ballLengthM: 105
   ballBandGauge: 22 sts × 28 rows = 10 × 10 cm, knitted, 4 mm
   hookMm: 4
-  hookNote: band suggests 3.5–4.5 mm
+  hookOnLabel: 3.5–4.5 mm
   gramsPer10cm: 8.4
   metresPer10cm: 17.6
   construction:

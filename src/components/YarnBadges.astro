@@ -1,75 +1,66 @@
 ---
 /**
- * Certification marks, shown only when there is something to show.
+ * Certification marks, shown only when there is one.
  *
- * These were table rows. As rows they had to render *something* on every review, so a
- * yarn with no certification printed "Not stated" twice — two lines of nothing, on a page
- * whose rule is that a fact not recorded is simply absent. As badges they either exist or
- * they do not, which is what these facts actually are.
+ * These were table rows. As rows they had to print something on every review, so a yarn
+ * with nothing certified said "Not stated" twice — two lines of nothing, on a page whose
+ * rule is that an unrecorded fact is simply absent. As badges they exist or they do not,
+ * which is what these facts are.
  *
- * **OEKO-TEX is spelled out, not just marked.** It certifies that the finished article was
- * tested for harmful substances. It is not an organic or an environmental label, and it is
- * routinely read as one — so where a badge alone would mislead, the line underneath says
- * what the class covers. That is the whole reason this is not a logo.
+ * Only positive claims appear. "Not stated" earns no badge, so silence on the label is
+ * silence on the page and a missing badge never reads as an accusation.
+ *
+ * The component renders in two parts, because they belong in different places: the badges
+ * sit at the top with the lede where they are a quick signal, and `note` explains OEKO-TEX
+ * at the foot of the page where fine print belongs.
  */
 interface Props {
 	oekoTexClass?: number;
-	oekoTexNote?: string;
 	mulesing?: string;
+	/** 'badges' at the top of the page, 'note' at the bottom. */
+	part: 'badges' | 'note';
 }
 
-const { oekoTexClass, oekoTexNote, mulesing } = Astro.props;
+const { oekoTexClass, mulesing, part } = Astro.props;
 
 const OEKO_TEX_CLASSES: Record<number, string> = {
-	1: 'babies and children to 3',
+	1: 'babies and children up to three',
 	2: 'direct skin contact',
 	3: 'no direct skin contact',
 	4: 'decoration',
 };
 
 const badges = [
-	oekoTexClass
-		? { label: `OEKO-TEX® STANDARD 100 · Class ${oekoTexClass}`, title: oekoTexNote }
-		: undefined,
-	// Only the positive claim. "Not stated" is the usual answer and is not a claim, so it
-	// earns no badge — silence on the label becomes silence on the page.
-	mulesing === 'Mulesing-free' ? { label: 'Mulesing-free' } : undefined,
-].filter((b): b is { label: string; title?: string } => b != null);
+	oekoTexClass ? `OEKO-TEX® STANDARD 100 · Class ${oekoTexClass}` : undefined,
+	mulesing === 'Mulesing-free' ? 'Mulesing-free' : undefined,
+].filter((b): b is string => b != null);
 ---
 
 {
-	badges.length > 0 && (
-		<div class="badges">
-			<ul class="badges__list">
-				{badges.map((b) => (
-					<li class="badge" title={b.title}>
-						{b.label}
-					</li>
-				))}
-			</ul>
+	part === 'badges' && badges.length > 0 && (
+		<ul class="badges">
+			{badges.map((b) => (
+				<li class="badge">{b}</li>
+			))}
+		</ul>
+	)
+}
 
-			{oekoTexClass && (
-				<p class="badges__note">
-					STANDARD 100 means the finished yarn was tested for harmful substances, in the
-					class shown — {OEKO_TEX_CLASSES[oekoTexClass]}. It is not an organic or
-					environmental certification.
-				</p>
-			)}
-		</div>
+{
+	part === 'note' && oekoTexClass && (
+		<p class="badges__note">
+			OEKO-TEX® STANDARD 100 means every component of the yarn was tested against limits for
+			harmful substances, in the class shown — {OEKO_TEX_CLASSES[oekoTexClass]}.
+		</p>
 	)
 }
 
 <style>
 	.badges {
-		max-width: 760px;
-		margin-top: 18px;
-	}
-
-	.badges__list {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 8px;
-		margin: 0;
+		margin: 18px 0 0;
 		padding: 0;
 		list-style: none;
 	}
@@ -86,7 +77,8 @@ const badges = [
 	}
 
 	.badges__note {
-		margin: 10px 0 0;
+		max-width: 640px;
+		margin: 0 0 16px;
 		font: 400 12.5px/1.55 var(--sans);
 		color: var(--muted);
 		text-wrap: pretty;

@@ -6,7 +6,7 @@
  * second input field for the US size is a place to make a mistake, not a place to add
  * information. This table derives it instead.
  *
- * Three sizes in common use have **no US equivalent at all**: 2.5 mm, 7 mm and 12 mm.
+ * Several sizes in common use have **no US equivalent at all**: 2.5, 3, 7 and 12 mm.
  * That is the interesting case, and the reason `usHook` returns undefined rather than
  * guessing: a hand-typed field invites someone to invent "US 7" for a 7 mm hook.
  *
@@ -16,6 +16,10 @@ const US_BY_MM = new Map<number, string | null>([
 	[2.25, 'B-1'],
 	[2.5, null],
 	[2.75, 'C-2'],
+	// CYC's table jumps 2.75 → 3.125 → 3.25, so a 3 mm hook has no US size at all. Listed
+	// explicitly because it is a common European size and its absence otherwise looks like
+	// an oversight in this map rather than in the standard.
+	[3, null],
 	[3.125, 'D'],
 	[3.25, 'D-3'],
 	[3.5, 'E-4'],

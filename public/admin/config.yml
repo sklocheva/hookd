@@ -564,13 +564,20 @@ collections:
             widget: string
             required: false
             hint: Copy it as printed, knitted figures and all.
-          - label: Hook used (mm)
+          - label: Hook on label
+            name: hookOnLabel
+            widget: string
+            required: false
+            hint: What the band suggests, e.g. "3.5–4.5 mm".
+          - label: Hook I used
             name: hookMm
             widget: number
             value_type: float
             required: false
-            hint: The US size is added automatically.
-          - { label: Hook note, name: hookNote, widget: string, required: false, hint: 'e.g. band suggests 3.5–4.5 mm' }
+            hint: >-
+              The US size is added automatically where one exists. Several common sizes have
+              no US equivalent in the Craft Yarn Council table — 2.5, 3, 7 and 12 mm — and
+              those show the millimetres alone rather than an invented letter.
           - label: Grams per 10 × 10 cm
             name: gramsPer10cm
             widget: number
@@ -613,7 +620,6 @@ collections:
               contact · 4 = decoration. It means the article was tested for harmful
               substances — it is NOT an organic or environmental label. Leave empty if the
               band does not say.
-          - { label: OEKO-TEX® certificate number, name: oekoTexNote, widget: string, required: false }
           - label: Mulesing
             name: mulesing
             widget: select
@@ -677,7 +683,6 @@ collections:
           - label: Stitch definition
             name: stitchDefinition
             widget: object
-            required: false
             collapsed: true
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
@@ -685,7 +690,6 @@ collections:
           - label: Split resistance
             name: splitResistance
             widget: object
-            required: false
             collapsed: true
             hint: More bars = splits less. A yarn that splits badly scores 1.
             fields:
@@ -694,7 +698,6 @@ collections:
           - label: Softness
             name: softness
             widget: object
-            required: false
             collapsed: true
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
@@ -702,7 +705,6 @@ collections:
           - label: Next to skin
             name: nextToSkin
             widget: object
-            required: false
             collapsed: true
             hint: More bars = kinder on skin. Prickly scores 1. This is not the same as Softness — a yarn can feel soft in the hand and still scratch a neck.
             fields:
@@ -711,7 +713,6 @@ collections:
           - label: Drape
             name: drape
             widget: object
-            required: false
             collapsed: true
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
@@ -719,7 +720,6 @@ collections:
           - label: Frogging
             name: frogging
             widget: object
-            required: false
             collapsed: true
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }

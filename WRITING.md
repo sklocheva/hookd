@@ -244,8 +244,12 @@ wrap the yarn round a ruler for an inch and count: that is **WPI**.
 yarn was spun. Fill in whichever the band tells you.
 
 **OEKO-TEX** takes the class number from the band: 1 babies to 3 · 2 direct skin contact ·
-3 no direct skin contact · 4 decoration. It shows as a badge with a line explaining what it
-covers — it means tested for harmful substances, not organic or eco.
+3 no direct skin contact · 4 decoration. It becomes a badge at the top of the page, with a
+line at the foot explaining what the class covers.
+
+**Hook** is two fields: what the band suggests, and what you actually used. The US size is
+added to yours automatically — except for 2.5, 3, 7 and 12 mm, which have no US equivalent
+in the Craft Yarn Council table and correctly show the millimetres alone.
 
 **Mulesing** is animal fibres only, and only what the label states. Pick "Mulesing-free"
 and it becomes a badge; pick "Not stated" or leave it empty and nothing is shown. Only the

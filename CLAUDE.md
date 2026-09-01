@@ -143,10 +143,15 @@ measurement each size is cut for, yardage per size, US/UK terms.
   behaves nothing like a panel hanging off a shoulder. That now lives in the gauge `note` and
   in the callout on the pattern page. **Keep the warning.** A maker cannot measure a piece
   they have not made yet, so the pattern has to tell them how to swatch to match the number.
+- **A review states the hook twice: what the band says, and what the author used.** They
+  differ often and the difference is the useful part, so they are two rows rather than one
+  with a parenthesis.
 - **Hook size is typed in mm only; the US size is derived** in `src/lib/hooks.ts` from the
   Craft Yarn Council table. US letters vary by manufacturer, and 2.5, 7 and 12 mm have **no
   US equivalent at all** — an input field for it invites an invented answer. `usHook` returns
-  undefined for those and the page shows just the mm.
+  undefined for those and the page shows just the mm. **3 mm is one of them**: CYC's table
+  jumps 2.75 → 3.125 → 3.25, so a 3 mm hook correctly shows no US letter. It is listed in the
+  map as an explicit null, because otherwise its absence looks like a gap in the map.
 - **A pattern has several categories, stored as lowercase slugs** (`clothing`, `accessories`,
   `pets`, `home`). A hooded scarf is genuinely both clothing and an accessory, and a single-select
   field files it wrong either way. Display labels live in `src/lib/taxonomy.ts`, never in
@@ -185,12 +190,11 @@ measurement each size is cut for, yardage per size, US/UK terms.
   where it was spun — frequently different countries. Both live on `origin`, its own object,
   because five provenance fields at the bottom of a twenty-field `yarn` block could not be
   found.
-- **Certifications are badges, and only ever positive ones.** OEKO-TEX and mulesing-free show
-  as badges under the yarn table, or not at all — "Not stated" earns nothing, so silence on
-  the label is silence on the page. **The OEKO-TEX badge always carries a line saying what it
-  means**: it certifies the article was tested for harmful substances, not that it is organic
-  or environmentally made, and it is routinely misread as the latter. A bare logo would be
-  the misreading. That line is the reason this is a badge and not an image.
+- **Certifications are badges, and only ever positive ones.** OEKO-TEX and mulesing-free sit
+  with the lede at the top; "Not stated" earns nothing, so silence on the label is silence on
+  the page and a missing badge never reads as an accusation. The OEKO-TEX explanation sits at
+  the foot of the page — badge as signal, fine print as fine print — and says what the mark
+  covers rather than listing what it does not. A reader who wants the caveats can look it up.
 - **`content` is the fibres and nothing else.** Ply belongs to the construction row, and
   superwash is implied by the care line; saying either twice invites them to disagree.
 - **A review records the weight the label claims, plus WPI — no CYC number.** Bands disagree
