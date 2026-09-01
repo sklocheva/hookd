@@ -1,0 +1,54 @@
+# Catch a broken commit before it becomes a silently broken site.
+#
+# Cloudflare builds this repo on every push to main and reports nothing back to GitHub —
+# no commit status, no deployment record, no email. When its build fails the previous
+# version keeps serving, so the site looks fine and nobody finds out. That has already
+# cost real time here.
+#
+# This does not deploy anything and cannot stop Cloudflare. What it does is put a red X
+# on the commit, which is the notification Cloudflare never sends. It matters most for
+# commits made from /admin: those are pushed straight to main by Sveltia with nobody
+# watching a terminal, and a missing required field fails the build by design.
+#
+# It runs the same gates as a local push — see CLAUDE.md.
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # .nvmrc pins the version so CI, Cloudflare and this machine agree. Astro needs
+          # >= 22.12 and rejects odd-numbered majors.
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # check-cms-config.py parses the CMS yaml; PyYAML is not guaranteed on the runner.
+      - run: pip install pyyaml
+
+      # astro build does NOT type-check, so this is a separate gate rather than a nicety.
+      - name: Type-check
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      # The CMS form and the Zod schemas drift apart silently otherwise, and the author
+      # finds out from a failed deploy rather than from the form.
+      - name: CMS form matches the schemas
+        run: python3 scripts/check-cms-config.py

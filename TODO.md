@@ -135,13 +135,13 @@ not things a script can check:
 - [ ] Merge to `main` only with Sophia's consent, once a page is reviewed and finished
 - [ ] One change per branch; keep diffs reviewable
 - [ ] Don't change decided stack choices without asking
-- [ ] ~~GitHub Action to catch failed builds~~ — **parked, Aug 2026.** The workflow was written
-      and works, but it could not be pushed: nothing would attach the `workflow` scope to the gh
-      token, even after the GitHub CLI app grant was confirmed to include it. Not worth more
-      time. If wanted later, the file is a dozen lines and the reliable route is GitHub's web
-      UI (**Add file → Create new file**, path `.github/workflows/build.yml`), which needs no
-      token. Until then the build gate is local: `npm run check` and `npm run build` before a
-      push, and `verify-deploy` after one.
+- [x] ~~GitHub Action to catch failed builds~~ — `.github/workflows/build.yml` runs
+      `npm run check`, `npm run build` and the CMS parity script on every push to `main` and on
+      pull requests. It cannot stop Cloudflare, but it puts a red X on the commit, which is the
+      notification Cloudflare never sends — and it matters most for `/admin` commits, which go
+      straight to `main` from the browser with nobody watching a terminal.
+      **GitHub emails on a failed run by default**; change that in notification settings if you
+      would rather it did not.
 
 - [ ] Optional image captions. The markdown title slot now carries the size hint
       (`"wide"`, `"narrow"`); captions would need a `<figure>` wrapper.

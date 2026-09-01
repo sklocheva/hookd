@@ -123,12 +123,18 @@ already pointed at gh.
 or update workflow ... without `workflow` scope". Nothing else about pushing is affected, so it
 only bites when adding CI.
 
-**Do not try to fix that scope again.** It was attempted at length: `gh auth refresh` is unusable
-here (keyring storage), `gh auth login --scopes workflow` completed and the GitHub CLI app grant
-was confirmed on github.com to include "Update github action workflows" — and the issued token
-still came back `gist, read:org, repo` from GitHub's own `X-Oauth-Scopes` header, twice, after a
-full logout and re-login. Cause unknown. **If CI is ever wanted, add the file through the GitHub
-web UI**, which uses the browser session rather than the token, and pull it down.
+**Adding that scope takes longer to propagate than it takes to check.** `gh auth refresh` is
+unusable here — the token lives in the Windows keyring rather than in `hosts.yml`, so it reports
+"not logged in to any hosts" while `gh auth status` shows a valid login. The route that works is
+`gh auth login --hostname github.com --git-protocol https --web --scopes workflow`.
+
+The trap is what happened next: the app grant on github.com showed "Update github action
+workflows" while `X-Oauth-Scopes` still returned `gist, read:org, repo` — because **the grant and
+the token are separate**, and a token's scopes are frozen when it is issued. I read the header
+three times over several minutes, concluded the scope could not be attached, wrote "do not retry"
+into this file and deleted the workflow. It attached. **Re-check `gh api -i user` later rather
+than declaring a cause unknown**, and if it is genuinely stuck, the GitHub web UI writes workflow
+files from the browser session with no token involved.
 
 **A push touching `.github/workflows/` is rejected.** GitHub returns "refusing to allow an
 OAuth App to create or update workflow ... without `workflow` scope". GCM's stored token lacks
