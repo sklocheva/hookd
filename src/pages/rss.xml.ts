@@ -31,9 +31,10 @@ export async function GET(context: APIContext) {
 			title: r.data.title,
 			pubDate: r.data.date,
 			// The standfirst is written to work alone, which is exactly what a feed shows.
-			description: r.data.standfirst,
+			// Published reviews always have one; the fallback is only for the type.
+			description: r.data.standfirst ?? '',
 			link: `/journal/yarn/${r.id}/`,
-			categories: ['Yarn review', r.data.yarn.brand],
+			categories: ['Yarn review', r.data.yarn.brand].filter((c): c is string => !!c),
 		})),
 	].sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf());
 

@@ -29,14 +29,16 @@ const { Content } = await render(review);
 
 const y = d.yarn;
 const M_PER_YD = 1.09361;
-const yards = Math.round(y.ballLengthM * M_PER_YD);
 
 // Derived rather than typed: how many 10 cm squares a ball holds follows from the two
-// numbers above it, so it can never disagree with them.
+// numbers above it, so it can never disagree with them. Both are optional on a draft, so
+// this is undefined until each exists.
 // Rounded, not floored: 50 / 8.4 is 5.95, and the label already says "≈". Flooring it to
 // 5 understates by more than rounding overstates, and the design shows 6.
 const squaresPerBall =
-	y.gramsPer10cm && y.gramsPer10cm > 0 ? Math.round(y.ballWeightG / y.gramsPer10cm) : undefined;
+	y.gramsPer10cm && y.gramsPer10cm > 0 && y.ballWeightG != null
+		? Math.round(y.ballWeightG / y.gramsPer10cm)
+		: undefined;
 
 const perSquare = [
 	y.gramsPer10cm != null ? `${y.gramsPer10cm} g` : undefined,
@@ -45,33 +47,68 @@ const perSquare = [
 	.filter(Boolean)
 	.join(' · ');
 
+// Every row is conditional. A draft holds whatever has been transcribed so far, and the
+// design's rule already is that a fact not recorded is simply absent — no dashes, no
+// "not tested" placeholders.
+const row = (label: string, text?: string | false, extra: Partial<ReviewRow> = {}): ReviewRow[] =>
+	text ? [{ label, text, ...extra }] : [];
+
+const oekoTex = y.oekoTexClass
+	? `STANDARD 100, Class ${y.oekoTexClass} — ${
+			{
+				1: 'babies and children to 3',
+				2: 'direct skin contact',
+				3: 'no direct skin contact',
+				4: 'decoration',
+			}[y.oekoTexClass]
+		}`
+	: undefined;
+
 const yarnRows: ReviewRow[] = [
-	{ label: 'Brand & line', text: `${y.brand} · ${y.line}` },
-	{ label: 'Content', text: y.content },
-	{ label: 'Weight category', text: `CYC ${y.cycWeight} · ${y.cycWeightName} · ${y.ply}` },
-	{ label: 'Length', text: `${y.ballWeightG} g = ${y.ballLengthM} m / ${yards} yd` },
-	{ label: 'Ball-band gauge', text: y.ballBandGauge },
-	{
-		label: 'Hook I used',
-		text: hookLabel(y.hookMm) + (y.hookNote ? ` (${y.hookNote})` : ''),
-	},
-	...(perSquare
+	...row('Brand & line', [y.brand, y.line].filter(Boolean).join(' · ')),
+	...row('Content', y.content),
+	...row(
+		'Weight category',
+		[y.cycWeight != null ? `CYC ${y.cycWeight}` : undefined, y.cycWeightName, y.ply]
+			.filter(Boolean)
+			.join(' · ')
+	),
+	...row(
+		'Construction',
+		y.construction && [y.construction.type, y.construction.note].filter(Boolean).join(' · ')
+	),
+	...row(
+		'Length',
+		y.ballWeightG != null && y.ballLengthM != null
+			? `${y.ballWeightG} g = ${y.ballLengthM} m / ${Math.round(y.ballLengthM * M_PER_YD)} yd`
+			: undefined
+	),
+	...row('Ball-band gauge', y.ballBandGauge),
+	...row(
+		'Hook I used',
+		y.hookMm != null ? hookLabel(y.hookMm) + (y.hookNote ? ` (${y.hookNote})` : '') : undefined
+	),
+	...row('Yarn per 10 × 10 cm', perSquare, {
+		aside: squaresPerBall ? `(one ball ≈ ${squaresPerBall} squares)` : undefined,
+	}),
+	...row('Care', y.care),
+	...row('Fibre from', y.fibreOrigin),
+	...row('Made in', y.madeIn),
+	// Named rather than badged: OEKO-TEX certifies the finished article was tested for
+	// harmful substances. It is not an organic or environmental label and is widely read as
+	// one, so the row says what the class actually covers.
+	...row('OEKO-TEX®', oekoTex, { aside: y.oekoTexNote }),
+	...row('Mulesing', y.mulesing),
+	...(d.price.level != null
 		? [
 				{
-					label: 'Yarn per 10 × 10 cm',
-					text: perSquare,
-					aside: squaresPerBall ? `(one ball ≈ ${squaresPerBall} squares)` : undefined,
+					label: 'Price',
+					score: d.price.level,
+					endLabels: ['Budget', 'Premium'] as [string, string],
+					text: d.price.note,
 				},
 			]
 		: []),
-	{ label: 'Care', text: y.care },
-	{ label: 'Made in', text: y.madeIn },
-	{
-		label: 'Price',
-		score: d.price.level,
-		endLabels: ['Budget', 'Premium'] as [string, string],
-		text: d.price.note,
-	},
 ];
 
 const handRows: ReviewRow[] = (
@@ -83,7 +120,11 @@ const handRows: ReviewRow[] = (
 		['Drape', d.inTheHand.drape],
 		['Frogging', d.inTheHand.frogging],
 	] as const
-).map(([label, r]) => ({ label, score: r.score, text: r.note }));
+)
+	.filter(([, r]) => r)
+	.map(([label, r]) => ({ label, score: r!.score, text: r!.note }));
+
+const hasGauge = Boolean(d.gauge.unblocked || d.gauge.blocked);
 
 const hero = resolveImage(d.heroImage);
 const swatch = resolveImage(d.swatchImage);
@@ -93,19 +134,19 @@ const schema = articleSchema({
 	url: new URL(Astro.url.pathname, Astro.site),
 	site: Astro.site!,
 	headline: d.title,
-	description: d.metaDescription,
+	description: d.metaDescription ?? d.standfirst ?? d.title,
 	datePublished: d.date,
 	dateModified: d.updated,
 	image: d.socialImage,
-	keywords: ['yarn review', y.brand, y.line],
+	keywords: ['yarn review', y.brand, y.line].filter((k): k is string => !!k),
 });
 ---
 
 <Base
 	title={`${d.title} — yarn review`}
-	description={d.metaDescription}
+	description={d.metaDescription ?? d.standfirst ?? d.title}
 	active="journal"
-	shareImage={d.socialImage}
+	shareImage={d.socialImage ?? undefined}
 	ogType="article"
 	noindex={d.draft}
 	jsonLd={[schema]}
@@ -115,7 +156,7 @@ const schema = articleSchema({
 		<div class="review__title">
 			<Eyebrow kind="Yarn review" tone="journal" rest={`· ${formatDate(d.date)}`} />
 			<h1>{d.title}</h1>
-			<p class="review__standfirst">{d.standfirst}</p>
+			{d.standfirst && <p class="review__standfirst">{d.standfirst}</p>}
 		</div>
 
 		{
@@ -123,7 +164,7 @@ const schema = articleSchema({
 				<figure class="review__photo">
 					<Image
 						src={hero}
-						alt={d.heroImageAlt}
+						alt={d.heroImageAlt ?? ''}
 						widths={[600, 1000, 1600]}
 						sizes="(min-width: 1000px) 1000px, 100vw"
 						loading="eager"
@@ -134,21 +175,27 @@ const schema = articleSchema({
 			)
 		}
 
-		<ReviewTable heading="The yarn" subheading="Ball band and shop data" rows={yarnRows} />
+		{yarnRows.length > 0 && (
+			<ReviewTable heading="The yarn" subheading="Ball band and shop data" rows={yarnRows} />
+		)}
 
-		<GaugePanel
-			unblocked={d.gauge.unblocked}
-			blocked={d.gauge.blocked}
-			method={d.gauge.method}
-			note={d.gauge.note}
-		/>
+		{
+			hasGauge && (
+				<GaugePanel
+					unblocked={d.gauge.unblocked}
+					blocked={d.gauge.blocked}
+					method={d.gauge.method}
+					note={d.gauge.note}
+				/>
+			)
+		}
 
 		{
 			swatch && (
 				<figure class="review__photo review__photo--swatch">
 					<Image
 						src={swatch}
-						alt={d.swatchImageAlt ?? d.heroImageAlt}
+						alt={d.swatchImageAlt ?? d.heroImageAlt ?? ''}
 						widths={[400, 760, 1140]}
 						sizes="(min-width: 800px) 760px, 100vw"
 						loading="lazy"
@@ -159,12 +206,16 @@ const schema = articleSchema({
 			)
 		}
 
-		<ReviewTable
-			heading="In the hand"
-			subheading={d.inTheHandBasis}
-			rows={handRows}
-			footnote="Five bars, my judgement, same scale on every review."
-		/>
+		{
+			handRows.length > 0 && (
+				<ReviewTable
+					heading="In the hand"
+					subheading={d.inTheHandBasis}
+					rows={handRows}
+					footnote="Five bars, my judgement, same scale on every review."
+				/>
+			)
+		}
 
 		<div class="review__prose">
 			<Content />

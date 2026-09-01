@@ -25,8 +25,16 @@ yarn:
   hookNote: band suggests 3.5–4.5 mm
   gramsPer10cm: 8.4
   metresPer10cm: 17.6
+  construction:
+    type: Plied
+    note: >-
+      Two singles twisted together, loosely enough that they separate under a fingernail.
+      Nothing else on top — no cable, no tube.
   care: Hand wash 30 °C · dry flat · no tumble
-  madeIn: Norway · wool from Norwegian flocks
+  fibreOrigin: Norwegian flocks, Rogaland and Hordaland
+  madeIn: Norway
+  oekoTexClass: 2
+  mulesing: Not stated
 
 price:
   level: 3

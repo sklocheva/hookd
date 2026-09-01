@@ -154,6 +154,20 @@ measurement each size is cut for, yardage per size, US/UK terms.
   position in the market does not.
 - **A review's gauge is only ever unblocked vs blocked.** Washed and hung figures were tried and
   cut — they duplicate the blocked number and bury the comparison, which is the whole point.
+- **A review's required fields are required to *publish*, not to save.** The CMS marks
+  nothing required; a `superRefine` on the reviews schema enforces the list only when
+  `draft` is false. A half-transcribed ball band saves and renders; unticking Draft fails
+  the build with a line naming each gap. Rows with no value are simply absent from the
+  page, which is the same rule the design already used for measurements never taken.
+- **Provenance is two facts, not one.** `fibreOrigin` is where the fibre grew, `madeIn`
+  where it was spun — frequently different countries. **OEKO-TEX is named, never badged**:
+  it certifies the article was tested for harmful substances, not that it is organic or
+  environmentally made, and it is widely misread as the latter, so the row spells out what
+  the class covers. **`mulesing` records only what the label states**, and "Not stated" is
+  the honest and most common answer — silence is not a claim either way.
+- **Strand construction is a fixed type plus a free line.** The type (Singles, Plied,
+  Cabled, Chainette, Roving) is what lets two reviews be compared; the line carries what
+  the author sees on untwisting a length, which no category expresses.
 - **A review with no photographs is a finished page**, not a broken one. Both image blocks drop
   out and nothing else moves. No placeholder art, no empty frame.
 - US crochet terms throughout.

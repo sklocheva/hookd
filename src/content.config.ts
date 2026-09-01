@@ -297,89 +297,196 @@ const rated = z.object({
 
 const reviews = defineCollection({
 	loader: glob({ base: './src/content/reviews', pattern: '**/*.{md,mdx}' }),
-	schema: z.object({
-		title: z.string(),
-		date: z.coerce.date(),
-		updated: optionalDate,
+	schema: z
+		.object({
+			title: z.string().min(1),
+			date: z.coerce.date(),
+			updated: optionalDate,
+			draft: z.boolean().default(false),
+
+			/**
+			 * One or two sentences giving the answer, set in italic serif under the title. It
+			 * replaces a verdict section: someone who reads only this should know whether to
+			 * buy the yarn.
+			 */
+			standfirst: optionalString,
+
+			/**
+			 * Both photographs are optional, and a review with neither is a finished page, not
+			 * a broken one — early reviews publish before anything is shot. Nothing is
+			 * substituted in their place: no placeholder art, no empty frame.
+			 */
+			heroImage: optionalString,
+			heroImageCaption: optionalString,
+			swatchImage: optionalString,
+			swatchImageAlt: optionalString,
+			swatchImageCaption: optionalString,
+
+			/**
+			 * Ball-band and shop facts. Everything here is transcribed, not judged.
+			 *
+			 * Every field is optional so a half-filled draft can be saved. A row whose value
+			 * is missing is simply not rendered, which is the same rule the design already
+			 * uses for measurements that were never taken.
+			 */
+			yarn: z
+				.object({
+					brand: optionalString,
+					line: optionalString,
+					content: optionalString,
+					cycWeight: z.number().int().min(0).max(7).optional(),
+					cycWeightName: optionalString,
+					/** e.g. "DK / 8 ply". */
+					ply: optionalString,
+					ballWeightG: z.number().optional(),
+					ballLengthM: z.number().optional(),
+					/** As printed on the band. */
+					ballBandGauge: optionalString,
+					hookMm: z.number().optional(),
+					hookNote: optionalString,
+					/** Measured, not calculated: what one 10 × 10 cm square actually ate. */
+					gramsPer10cm: z.number().optional(),
+					metresPer10cm: z.number().optional(),
+
+					/**
+					 * How the strand is built. The type is a short fixed list so two reviews can
+					 * be compared on it; the note carries what you actually see when you untwist
+					 * a length, which no category can express.
+					 */
+					construction: z
+						.object({
+							type: z.enum(['Singles', 'Plied', 'Cabled', 'Chainette', 'Roving']),
+							note: optionalString,
+						})
+						.optional(),
+
+					care: optionalString,
+					/** Where it was spun and milled. */
+					madeIn: optionalString,
+					/** Where the fibre itself came from, which is often not where it was spun. */
+					fibreOrigin: optionalString,
+
+					/**
+					 * OEKO-TEX STANDARD 100 product class, 1–4, read from the band.
+					 *
+					 * 1 = babies and children to 3 · 2 = direct skin contact · 3 = no direct skin
+					 * contact · 4 = decoration. It certifies the finished article was tested for
+					 * harmful substances. It is **not** an organic or environmental label, and is
+					 * routinely read as one — so the page says what it means rather than just
+					 * showing a badge.
+					 */
+					oekoTexClass: z.number().int().min(1).max(4).optional(),
+					/** Certificate number or institute, if the band prints one. */
+					oekoTexNote: optionalString,
+
+					/**
+					 * Animal fibres only, and only what the band or maker actually states.
+					 * "Not stated" is the honest and most common answer — most labels are silent,
+					 * and silence is not the same as a claim either way.
+					 */
+					mulesing: z.enum(['Mulesing-free', 'Not stated']).optional(),
+				})
+				.default({}),
+
+			/**
+			 * Where the yarn sits in the market, 1–5, never a currency figure. Prices change and
+			 * vary by country; the position does not, and a number would be wrong within a year.
+			 */
+			price: z
+				.object({
+					level: z.number().int().min(1).max(5).optional(),
+					note: optionalString,
+				})
+				.default({}),
+
+			/** Only ever unblocked vs blocked — the whole point is the comparison. */
+			gauge: z
+				.object({
+					unblocked: optionalString,
+					blocked: optionalString,
+					method: optionalString,
+					note: optionalString,
+				})
+				.default({}),
+
+			/**
+			 * The same six judgements on every review, so two reviews can be read against each
+			 * other. Fixed keys rather than a free list precisely so the set cannot drift.
+			 */
+			inTheHand: z
+				.object({
+					stitchDefinition: rated,
+					splitting: rated,
+					softness: rated,
+					itch: rated,
+					drape: rated,
+					frogging: rated,
+				})
+				.partial()
+				.default({}),
+			inTheHandBasis: optionalString,
+
+			metaDescription: z
+				.string()
+				.max(160, 'metaDescription must be 160 characters or fewer')
+				.optional(),
+			heroImageAlt: optionalString,
+			socialImage: optionalString,
+		})
 		/**
-		 * One or two sentences giving the answer, set in italic serif under the title. It
-		 * replaces a verdict section: someone who reads only this should know whether to
-		 * buy the yarn.
+		 * Required only at publish.
+		 *
+		 * A draft has to be saveable with whatever exists so far — half a ball band and
+		 * nothing else. The build gate is about what reaches a reader, so it applies when
+		 * `draft` is unticked, not while the work is in progress.
 		 */
-		standfirst: z.string(),
+		.superRefine((d, ctx) => {
+			if (d.draft) return;
 
-		/**
-		 * Both photographs are optional, and a review with neither is a finished page, not a
-		 * broken one — early reviews publish before anything is shot. Nothing is substituted
-		 * in their place: no placeholder art, no empty frame.
-		 */
-		heroImage: optionalString,
-		heroImageCaption: optionalString,
-		swatchImage: optionalString,
-		swatchImageAlt: optionalString,
-		swatchImageCaption: optionalString,
+			const miss = (path: (string | number)[], message: string) =>
+				ctx.addIssue({ code: 'custom', path, message });
 
-		/** Ball-band and shop facts. Everything here is transcribed, not judged. */
-		yarn: z.object({
-			brand: z.string(),
-			line: z.string(),
-			content: z.string(),
-			cycWeight: z.number().int().min(0).max(7),
-			cycWeightName: z.string(),
-			/** e.g. "DK / 8 ply". */
-			ply: z.string(),
-			ballWeightG: z.number(),
-			ballLengthM: z.number(),
-			/** As printed on the band, e.g. "22 sts × 28 rows = 10 × 10 cm, knitted, 4 mm". */
-			ballBandGauge: z.string(),
-			hookMm: z.number(),
-			/** e.g. "band suggests 3.5–4.5 mm". */
-			hookNote: optionalString,
-			/** Measured, not calculated: how much yarn one 10 × 10 cm square actually ate. */
-			gramsPer10cm: z.number().optional(),
-			metresPer10cm: z.number().optional(),
-			care: z.string(),
-			madeIn: z.string(),
+			if (!d.standfirst) miss(['standfirst'], 'standfirst is required to publish');
+			if (!d.metaDescription) miss(['metaDescription'], 'metaDescription is required to publish');
+			if (!d.heroImageAlt) miss(['heroImageAlt'], 'heroImageAlt is required to publish');
+
+			if (!d.socialImage) {
+				miss(['socialImage'], 'socialImage is required to publish — use /og-default.png');
+			} else if (!existsSync(fileURLToPath(new URL(`../public${d.socialImage}`, import.meta.url)))) {
+				miss(['socialImage'], `socialImage "${d.socialImage}" does not exist in public/`);
+			}
+
+			for (const [key, label] of [
+				['brand', 'brand'],
+				['line', 'line'],
+				['content', 'fibre content'],
+				['ballWeightG', 'ball weight'],
+				['ballLengthM', 'ball length'],
+				['hookMm', 'the hook you used'],
+				['care', 'care'],
+			] as const) {
+				if (d.yarn[key] == null || d.yarn[key] === '') {
+					miss(['yarn', key], `yarn ${label} is required to publish`);
+				}
+			}
+
+			if (d.price.level == null) miss(['price', 'level'], 'a price level is required to publish');
+			if (!d.gauge.blocked) miss(['gauge', 'blocked'], 'a blocked gauge is required to publish');
+
+			// The six are the comparison. A review missing one cannot be read against another.
+			for (const key of [
+				'stitchDefinition',
+				'splitting',
+				'softness',
+				'itch',
+				'drape',
+				'frogging',
+			] as const) {
+				if (!d.inTheHand[key]) {
+					miss(['inTheHand', key], `"${key}" is required to publish — all six, or none compare`);
+				}
+			}
 		}),
-
-		/**
-		 * Where the yarn sits in the market, 1–5, never a currency figure. Prices change and
-		 * vary by country; the position does not, and a number would be wrong within a year.
-		 */
-		price: z.object({
-			level: z.number().int().min(1).max(5),
-			note: z.string().min(1),
-		}),
-
-		/** Only ever unblocked vs blocked — the whole point is the comparison between them. */
-		gauge: z.object({
-			unblocked: z.string(),
-			blocked: z.string(),
-			/** e.g. "Over 10 × 10 cm · half double crochet · 4 mm hook". */
-			method: z.string(),
-			/** What the change means, in plain words. */
-			note: z.string(),
-		}),
-
-		/**
-		 * The same six judgements on every review, so two reviews can be read against each
-		 * other. Fixed keys rather than a free list precisely so the set cannot drift.
-		 */
-		inTheHand: z.object({
-			stitchDefinition: rated,
-			splitting: rated,
-			softness: rated,
-			itch: rated,
-			drape: rated,
-			frogging: rated,
-		}),
-		/** e.g. "My notes, one swatch and one hat" — what the judgements are based on. */
-		inTheHandBasis: optionalString,
-
-		draft: z.boolean().default(false),
-
-		...seoFields,
-	}),
 });
 
 export const collections = { patterns, posts, reviews };

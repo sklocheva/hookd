@@ -30,6 +30,11 @@ SCHEMA_ONLY: set[str] = set()
 # Required on every collection, deliberately — see CLAUDE.md.
 SEO_REQUIRED = {'metaDescription', 'heroImageAlt', 'socialImage'}
 
+# Collections whose required-ness is enforced at publish rather than at save, so that a
+# half-filled draft can be saved. The panel marks nothing required; the schema refuses to
+# build a non-draft entry that is missing anything.
+DRAFT_GATED = {'reviews'}
+
 
 def collection_block(src: str, collection: str) -> str:
     """The source of one `const <name> = defineCollection(...)` statement."""
@@ -45,7 +50,9 @@ def collection_block(src: str, collection: str) -> str:
 def schema_fields(src: str, collection: str) -> set[str]:
     """Field names at the top level of a collection's z.object({...})."""
     block = collection_block(src, collection)
-    body = block[block.index('z.object({') + len('z.object({') :]
+    # Match `.object({`, not `z.object({`: the reviews schema puts `z` and `.object({` on
+    # separate lines so it can chain .superRefine(), and the joined form never matched.
+    body = block[block.index('.object({') + len('.object({') :]
 
     names: set[str] = set()
     depth = 0  # depth relative to the inside of the top-level z.object
@@ -88,15 +95,21 @@ def main() -> int:
                 f'{name}: in the CMS form but not in the schema: {sorted(extra_in_form)}'
             )
 
-        # The SEO fields must be marked required in the form, so the panel asks at
-        # write time instead of the build failing later.
-        not_required = [
-            f['name']
-            for f in coll['fields']
-            if f['name'] in SEO_REQUIRED and f.get('required') is not True
-        ]
-        if not_required:
-            failures.append(f'{name}: SEO fields not marked required in the form: {not_required}')
+        # The SEO fields must be marked required in the form, so the panel asks at write
+        # time instead of the build failing later.
+        #
+        # Reviews are exempt: there the same fields are required *to publish* and not to
+        # save, enforced by a superRefine on `draft`. Marking them required in the panel
+        # would block saving a half-written draft, which is the whole point of the
+        # exemption. See the reviews schema in src/content.config.ts.
+        if name not in DRAFT_GATED:
+            not_required = [
+                f['name']
+                for f in coll['fields']
+                if f['name'] in SEO_REQUIRED and f.get('required') is not True
+            ]
+            if not_required:
+                failures.append(f'{name}: SEO fields not marked required in the form: {not_required}')
 
         print(f'{name:9} form={len(form):3} schema={len(schema):3}  ok' if not failures else f'{name}: checked')
 

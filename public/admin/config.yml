@@ -406,6 +406,10 @@ collections:
   # A yarn review is a spec sheet with a short essay at the end — the mirror of a test
   # note, which is an essay with tables in it. Hence its own collection: almost none of
   # the fields overlap.
+  #
+  # NOTHING here is required by the panel, so a half-filled draft always saves. What a
+  # *published* review needs is enforced by the schema instead — see the superRefine in
+  # src/content.config.ts. Untick Draft and the build names anything still missing.
   - name: reviews
     label: Yarn reviews
     label_singular: Yarn review
@@ -428,33 +432,41 @@ collections:
         date_format: 'YYYY-MM-DD'
         time_format: false
         required: false
-      - { label: Draft, name: draft, widget: boolean, default: false }
+      - label: Draft
+        name: draft
+        widget: boolean
+        default: true
+        hint: >-
+          Leave ticked while you work — a draft saves with whatever you have. Untick it
+          when the review is ready, and the build will tell you if anything is missing.
       - label: Standfirst
         name: standfirst
         widget: text
+        required: false
         hint: >-
           One or two sentences giving the answer. Someone who reads only this should know
           whether to buy the yarn — it replaces a verdict section.
 
-      # --- SEO. Required, deliberately. ---------------------------------
+      # --- SEO. Required to publish, not to save. -----------------------
       - label: Meta description
         name: metaDescription
         widget: string
-        required: true
-        pattern: ['^.{1,160}$', 'Must be 160 characters or fewer.']
+        required: false
+        pattern: ['^.{0,160}$', 'Must be 160 characters or fewer.']
       - label: Social share image
         name: socialImage
         widget: string
-        required: true
+        required: false
         default: /og-default.png
 
-      # --- Photos. Both optional: a review with neither is a finished page. ---
+      # --- Photos. Both optional even when published: a review with neither
+      #     is a finished page, and early reviews go out before any shoot. ---
       - { label: Yarn photo, name: heroImage, widget: image, required: false }
       - label: Yarn photo alt text
         name: heroImageAlt
         widget: string
-        required: true
-        hint: Required even before the photo exists, so it is never forgotten afterwards.
+        required: false
+        hint: Describe it for someone who cannot see it. Needed to publish, even before the photo exists.
       - label: Yarn photo caption
         name: heroImageCaption
         widget: string
@@ -465,33 +477,69 @@ collections:
       - { label: Swatch photo caption, name: swatchImageCaption, widget: string, required: false }
 
       # --- Table 1: transcribed from the ball band and the shop. ---------
+      #     Any row left empty simply does not appear on the page.
       - label: The yarn
         name: yarn
         widget: object
         fields:
-          - { label: Brand, name: brand, widget: string }
-          - { label: Line, name: line, widget: string }
+          - { label: Brand, name: brand, widget: string, required: false }
+          - { label: Line, name: line, widget: string, required: false }
           - label: Content
             name: content
             widget: string
+            required: false
             hint: e.g. 100% Norwegian wool, single ply · not superwash
-          - { label: CYC weight number, name: cycWeight, widget: number, value_type: int, min: 0, max: 7 }
-          - { label: CYC weight name, name: cycWeightName, widget: string, hint: 'e.g. Light' }
-          - { label: Ply, name: ply, widget: string, hint: 'e.g. DK / 8 ply' }
-          - { label: Ball weight (g), name: ballWeightG, widget: number, value_type: int }
+          - { label: CYC weight number, name: cycWeight, widget: number, value_type: int, min: 0, max: 7, required: false }
+          - { label: CYC weight name, name: cycWeightName, widget: string, required: false, hint: 'e.g. Light' }
+          - { label: Ply, name: ply, widget: string, required: false, hint: 'e.g. DK / 8 ply' }
+
+          # How the strand is built. The type is a short fixed list so two reviews can be
+          # compared on it; the note carries what you actually see when you untwist it.
+          - label: Strand construction
+            name: construction
+            widget: object
+            required: false
+            collapsed: true
+            fields:
+              - label: Type
+                name: type
+                widget: select
+                required: false
+                options:
+                  - Singles
+                  - Plied
+                  - Cabled
+                  - Chainette
+                  - Roving
+                hint: >-
+                  Singles — one unplied strand. Plied — strands twisted together. Cabled —
+                  plied yarns plied together again. Chainette — fine plies braided into a
+                  hollow tube. Roving — barely twisted at all.
+              - label: What you see
+                name: note
+                widget: text
+                required: false
+                hint: >-
+                  Untwist a length and describe it. e.g. "Two strands, cotton and merino,
+                  twisted into a tweedy 2-ply; six of those twisted together again."
+
+          - { label: Ball weight (g), name: ballWeightG, widget: number, value_type: int, required: false }
           - label: Ball length (m)
             name: ballLengthM
             widget: number
             value_type: int
+            required: false
             hint: Yards are worked out for you.
           - label: Ball-band gauge
             name: ballBandGauge
             widget: string
+            required: false
             hint: Copy it as printed, knitted figures and all.
           - label: Hook used (mm)
             name: hookMm
             widget: number
             value_type: float
+            required: false
             hint: The US size is added automatically.
           - { label: Hook note, name: hookNote, widget: string, required: false, hint: 'e.g. band suggests 3.5–4.5 mm' }
           - label: Grams per 10 × 10 cm
@@ -501,8 +549,48 @@ collections:
             required: false
             hint: Measured from your swatch. Squares per ball is worked out from it.
           - { label: Metres per 10 × 10 cm, name: metresPer10cm, widget: number, value_type: float, required: false }
-          - { label: Care, name: care, widget: string }
-          - { label: Made in, name: madeIn, widget: string }
+          - { label: Care, name: care, widget: string, required: false }
+
+          # --- Provenance. Two separate facts: where the fibre grew, and where
+          #     the yarn was spun. They are frequently different countries.
+          - label: Fibre from
+            name: fibreOrigin
+            widget: string
+            required: false
+            hint: >-
+              Where the raw material came from, if the band says. e.g. "Wool from Norwegian
+              flocks" or "Cotton from Turkey". Often different from where it was spun.
+          - label: Made in
+            name: madeIn
+            widget: string
+            required: false
+            hint: Where it was spun and milled.
+
+          # --- Certifications. Only what the band actually states. ----------
+          - label: OEKO-TEX® STANDARD 100 class
+            name: oekoTexClass
+            widget: number
+            value_type: int
+            min: 1
+            max: 4
+            required: false
+            hint: >-
+              1 = babies and children to 3 · 2 = direct skin contact · 3 = no direct skin
+              contact · 4 = decoration. It means the article was tested for harmful
+              substances — it is NOT an organic or environmental label. Leave empty if the
+              band does not say.
+          - { label: OEKO-TEX® certificate number, name: oekoTexNote, widget: string, required: false }
+          - label: Mulesing
+            name: mulesing
+            widget: select
+            required: false
+            options:
+              - Mulesing-free
+              - Not stated
+            hint: >-
+              Animal fibres only, and only what the band or maker actually states. Most
+              labels are silent — "Not stated" is the honest answer, and is not a claim
+              either way. Leave empty for plant fibres.
 
       # --- Price as a position, never a figure. --------------------------
       - label: Price
@@ -512,10 +600,11 @@ collections:
           Where it sits in the market, 1 budget to 5 premium. Never a currency figure —
           prices change and vary by country, the position does not.
         fields:
-          - { label: Level, name: level, widget: number, value_type: int, min: 1, max: 5 }
+          - { label: Level, name: level, widget: number, value_type: int, min: 1, max: 5, required: false }
           - label: Why
             name: note
             widget: string
+            required: false
             hint: One line, e.g. Mid — about what a plain undyed wool of this quality costs.
 
       # --- The gauge panel: only ever unblocked vs blocked. --------------
@@ -526,13 +615,14 @@ collections:
           Only these two figures. Washed and hung numbers were tried and cut — they
           duplicate the blocked figure and bury the comparison.
         fields:
-          - { label: Unblocked, name: unblocked, widget: string, hint: 'Stitches × rows, e.g. 17.5 × 11' }
-          - { label: Blocked, name: blocked, widget: string, hint: 'e.g. 16.5 × 10.5' }
+          - { label: Unblocked, name: unblocked, widget: string, required: false, hint: 'Stitches × rows, e.g. 17.5 × 11' }
+          - { label: Blocked, name: blocked, widget: string, required: false, hint: 'e.g. 16.5 × 10.5' }
           - label: Method
             name: method
             widget: string
+            required: false
             hint: e.g. Over 10 × 10 cm · half double crochet · 4 mm hook
-          - { label: What the change means, name: note, widget: text }
+          - { label: What the change means, name: note, widget: text, required: false }
 
       # --- Table 2: the same six judgements on every review. -------------
       - label: What these notes are based on
@@ -544,50 +634,64 @@ collections:
         name: inTheHand
         widget: object
         hint: >-
-          The same six on every review, so two yarns can be read against each other. A
-          score of 1–5 and one short sentence — a score with no reason is an opinion with
-          a number stuck on it.
+          The same six on every review, so two yarns can be read against each other. All
+          six are needed to publish — with one missing, two reviews no longer compare. A
+          score of 1–5 and one short sentence; a score with no reason is an opinion with a
+          number stuck on it.
         fields:
           - label: Stitch definition
             name: stitchDefinition
             widget: object
+            required: false
+            collapsed: true
             fields:
-              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
-              - { label: Note, name: note, widget: string }
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
+              - { label: Note, name: note, widget: string, required: false }
           - label: Splitting
             name: splitting
             widget: object
+            required: false
+            collapsed: true
             fields:
-              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
-              - { label: Note, name: note, widget: string }
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
+              - { label: Note, name: note, widget: string, required: false }
           - label: Softness
             name: softness
             widget: object
+            required: false
+            collapsed: true
             fields:
-              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
-              - { label: Note, name: note, widget: string }
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
+              - { label: Note, name: note, widget: string, required: false }
           - label: Itch
             name: itch
             widget: object
+            required: false
+            collapsed: true
             fields:
-              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
-              - { label: Note, name: note, widget: string }
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
+              - { label: Note, name: note, widget: string, required: false }
           - label: Drape
             name: drape
             widget: object
+            required: false
+            collapsed: true
             fields:
-              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
-              - { label: Note, name: note, widget: string }
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
+              - { label: Note, name: note, widget: string, required: false }
           - label: Frogging
             name: frogging
             widget: object
+            required: false
+            collapsed: true
             fields:
-              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
-              - { label: Note, name: note, widget: string }
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
+              - { label: Note, name: note, widget: string, required: false }
 
       - label: Body
         name: body
         widget: markdown
+        required: false
         hint: >-
           Two paragraphs, no more. One on gauge and fibre behaviour, one on
           use-it-for / do-not-use-it-for. Start with "## What that adds up to", and link

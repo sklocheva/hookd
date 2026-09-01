@@ -11,35 +11,44 @@
  * were tried and cut: they duplicate the blocked number and bury the thing being shown.
  */
 interface Props {
-	unblocked: string;
-	blocked: string;
+	unblocked?: string;
+	blocked?: string;
 	/** e.g. "Over 10 × 10 cm · half double crochet · 4 mm hook". Carries the units. */
-	method: string;
+	method?: string;
 	/** What the change means, in plain words. */
-	note: string;
+	note?: string;
 }
 
 const { unblocked, blocked, method, note } = Astro.props;
+
+// A draft may have one figure and not the other. The panel is worth showing for either —
+// an empty box is not, so the page decides whether to render this at all.
+const figures = [
+	{ label: 'Unblocked', value: unblocked, blocked: false },
+	{ label: 'Blocked', value: blocked, blocked: true },
+].filter((f) => f.value);
 ---
 
 <section class="gauge" aria-label="My gauge">
 	<div class="gauge__head">
 		<h2 class="gauge__title">My gauge</h2>
-		<p class="gauge__method">{method}</p>
+		{method && <p class="gauge__method">{method}</p>}
 	</div>
 
 	<div class="gauge__figures">
-		<div class="gauge__figure">
-			<div class="gauge__label">Unblocked</div>
-			<div class="gauge__value">{unblocked}</div>
-		</div>
-		<div class="gauge__figure">
-			<div class="gauge__label">Blocked</div>
-			<div class="gauge__value gauge__value--blocked">{blocked}</div>
-		</div>
+		{
+			figures.map((f) => (
+				<div class="gauge__figure">
+					<div class="gauge__label">{f.label}</div>
+					<div class:list={['gauge__value', { 'gauge__value--blocked': f.blocked }]}>
+						{f.value}
+					</div>
+				</div>
+			))
+		}
 	</div>
 
-	<p class="gauge__note">{note}</p>
+	{note && <p class="gauge__note">{note}</p>}
 </section>
 
 <style>

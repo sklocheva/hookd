@@ -44,11 +44,12 @@ export function fromReview(r: CollectionEntry<'reviews'>): JournalEntry {
 		kind: 'Yarn review',
 		title: r.data.title,
 		// The standfirst is the review's summary — it is written to be the answer on its own.
-		summary: r.data.standfirst,
+		// It can be absent on a draft, which still lists; the row just carries no excerpt.
+		summary: r.data.standfirst ?? '',
 		date: r.data.date,
 		heroImage: r.data.heroImage,
-		heroImageAlt: r.data.heroImageAlt,
-		method: `${r.data.yarn.brand} · ${r.data.yarn.line}`,
+		heroImageAlt: r.data.heroImageAlt ?? '',
+		method: [r.data.yarn.brand, r.data.yarn.line].filter(Boolean).join(' · ') || undefined,
 		readMinutes: readTime(r.body ?? ''),
 	};
 }

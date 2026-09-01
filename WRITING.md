@@ -215,6 +215,25 @@ judgement, and all three have rules:
 The body is **two paragraphs**: one on how the gauge and fibre behave, one on what to use it
 for and what not to. Link the test note behind the review inline, in the second paragraph.
 
+**Save whenever you like.** Nothing in a review is required to *save* — fill in the two
+things you know and come back. When you untick **Draft**, the build checks the rest and
+names anything missing. Any row you leave empty simply does not appear on the page.
+
+**Strand construction** has a type and a line. Pick the type from the list; then untwist a
+length and write what you see, e.g. *"Two strands, cotton and merino, twisted into a tweedy
+2-ply; six of those twisted together again."*
+
+**Fibre from** and **Made in** are different questions — where the fibre grew, and where the
+yarn was spun. Fill in whichever the band tells you.
+
+**OEKO-TEX** takes the class number from the band: 1 babies to 3 · 2 direct skin contact ·
+3 no direct skin contact · 4 decoration. It means the yarn was tested for harmful
+substances. It does **not** mean organic or eco, and the page says so, so don't use it as
+one.
+
+**Mulesing** is animal fibres only, and only what the label states. If it says nothing,
+choose "Not stated" — that is the truthful answer and the usual one.
+
 **Photographs are optional.** A review with none is a finished page — the two image blocks
 simply drop out. Publish without them rather than waiting for a shoot.
 
