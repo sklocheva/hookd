@@ -6,6 +6,7 @@ import PageHead from '../../../components/PageHead.astro';
 import JournalList from '../../../components/JournalList.astro';
 import { slugify } from '../../../lib/format';
 import { byDateDesc, kindHref, postKindsInUse } from '../../../lib/taxonomy';
+import { fromPost } from '../../../lib/journal';
 
 // Real static routes rather than client-side filtering, because of the no-JS rule.
 export const getStaticPaths = (async () => {
@@ -44,5 +45,5 @@ const filters = [
 		filters={filters}
 	/>
 
-	<JournalList posts={posts} />
+	<JournalList entries={posts.map(fromPost)} />
 </Base>

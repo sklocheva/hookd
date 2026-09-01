@@ -197,6 +197,31 @@ photo is still shown, stacked, so nobody misses one.
 
 ---
 
+## Yarn reviews
+
+A review is a different shape from a test note: **a spec sheet with a short essay at the end**,
+rather than an essay with tables in it. Start one from **Yarn reviews** in the panel.
+
+Most of it is transcription — the ball band, the shop, your own measurements. Three parts are
+judgement, and all three have rules:
+
+- **Price is a position, 1 to 5, never a price.** Prices change and differ by country; where a
+  yarn sits against its neighbours does not.
+- **The six "in the hand" rows never change.** Stitch definition, splitting, softness, itch,
+  drape, frogging — the same six on every review, so two yarns can be compared. Each needs a
+  score *and* a sentence; a score on its own is an opinion with a number on it.
+- **Gauge is unblocked against blocked, and nothing else.**
+
+The body is **two paragraphs**: one on how the gauge and fibre behave, one on what to use it
+for and what not to. Link the test note behind the review inline, in the second paragraph.
+
+**Photographs are optional.** A review with none is a finished page — the two image blocks
+simply drop out. Publish without them rather than waiting for a shoot.
+
+The "bought at full price" line is added by the site on every review. You never type it.
+
+---
+
 ## The fields that are required, and why
 
 The panel will not let you save without these, and the build fails without them:

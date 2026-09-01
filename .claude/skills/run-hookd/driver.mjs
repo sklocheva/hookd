@@ -72,13 +72,25 @@ function findChrome() {
 	return found;
 }
 
+/**
+ * Is the preview answering?
+ *
+ * Tries IPv6 as well as whatever `localhost` resolves to. `astro preview` has been seen to
+ * bind ::1 only, and Node's fetch resolved localhost to 127.0.0.1 — so the server was up,
+ * curl to [::1] returned 200, and this reported "preview did not come up" for twenty
+ * seconds. Chrome navigates to localhost happily either way, so only this check was wrong.
+ */
 async function isUp(url) {
-	try {
-		const r = await fetch(url, { signal: AbortSignal.timeout(1500) });
-		return r.ok;
-	} catch {
-		return false;
+	const candidates = [url, url.replace('//localhost:', '//[::1]:'), url.replace('//localhost:', '//127.0.0.1:')];
+	for (const candidate of new Set(candidates)) {
+		try {
+			const r = await fetch(candidate, { signal: AbortSignal.timeout(1500) });
+			if (r.ok) return true;
+		} catch {
+			// try the next address
+		}
 	}
+	return false;
 }
 
 /** Build, then start `astro preview` — unless something is already serving. */

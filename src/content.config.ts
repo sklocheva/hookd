@@ -284,4 +284,102 @@ const posts = defineCollection({
 		}),
 });
 
-export const collections = { patterns, posts };
+/**
+ * One five-bar judgement plus the sentence that explains it.
+ *
+ * The bar is comparable across reviews; the sentence is what actually helps. Neither is
+ * useful alone — a score with no reason is an opinion with a number stuck on it.
+ */
+const rated = z.object({
+	score: z.number().int().min(1).max(5),
+	note: z.string().min(1),
+});
+
+const reviews = defineCollection({
+	loader: glob({ base: './src/content/reviews', pattern: '**/*.{md,mdx}' }),
+	schema: z.object({
+		title: z.string(),
+		date: z.coerce.date(),
+		updated: optionalDate,
+		/**
+		 * One or two sentences giving the answer, set in italic serif under the title. It
+		 * replaces a verdict section: someone who reads only this should know whether to
+		 * buy the yarn.
+		 */
+		standfirst: z.string(),
+
+		/**
+		 * Both photographs are optional, and a review with neither is a finished page, not a
+		 * broken one — early reviews publish before anything is shot. Nothing is substituted
+		 * in their place: no placeholder art, no empty frame.
+		 */
+		heroImage: optionalString,
+		heroImageCaption: optionalString,
+		swatchImage: optionalString,
+		swatchImageAlt: optionalString,
+		swatchImageCaption: optionalString,
+
+		/** Ball-band and shop facts. Everything here is transcribed, not judged. */
+		yarn: z.object({
+			brand: z.string(),
+			line: z.string(),
+			content: z.string(),
+			cycWeight: z.number().int().min(0).max(7),
+			cycWeightName: z.string(),
+			/** e.g. "DK / 8 ply". */
+			ply: z.string(),
+			ballWeightG: z.number(),
+			ballLengthM: z.number(),
+			/** As printed on the band, e.g. "22 sts × 28 rows = 10 × 10 cm, knitted, 4 mm". */
+			ballBandGauge: z.string(),
+			hookMm: z.number(),
+			/** e.g. "band suggests 3.5–4.5 mm". */
+			hookNote: optionalString,
+			/** Measured, not calculated: how much yarn one 10 × 10 cm square actually ate. */
+			gramsPer10cm: z.number().optional(),
+			metresPer10cm: z.number().optional(),
+			care: z.string(),
+			madeIn: z.string(),
+		}),
+
+		/**
+		 * Where the yarn sits in the market, 1–5, never a currency figure. Prices change and
+		 * vary by country; the position does not, and a number would be wrong within a year.
+		 */
+		price: z.object({
+			level: z.number().int().min(1).max(5),
+			note: z.string().min(1),
+		}),
+
+		/** Only ever unblocked vs blocked — the whole point is the comparison between them. */
+		gauge: z.object({
+			unblocked: z.string(),
+			blocked: z.string(),
+			/** e.g. "Over 10 × 10 cm · half double crochet · 4 mm hook". */
+			method: z.string(),
+			/** What the change means, in plain words. */
+			note: z.string(),
+		}),
+
+		/**
+		 * The same six judgements on every review, so two reviews can be read against each
+		 * other. Fixed keys rather than a free list precisely so the set cannot drift.
+		 */
+		inTheHand: z.object({
+			stitchDefinition: rated,
+			splitting: rated,
+			softness: rated,
+			itch: rated,
+			drape: rated,
+			frogging: rated,
+		}),
+		/** e.g. "My notes, one swatch and one hat" — what the judgements are based on. */
+		inTheHandBasis: optionalString,
+
+		draft: z.boolean().default(false),
+
+		...seoFields,
+	}),
+});
+
+export const collections = { patterns, posts, reviews };

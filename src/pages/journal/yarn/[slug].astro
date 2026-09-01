@@ -1,0 +1,280 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import Base from '../../../layouts/Base.astro';
+import Eyebrow from '../../../components/Eyebrow.astro';
+import ReviewTable, { type ReviewRow } from '../../../components/ReviewTable.astro';
+import GaugePanel from '../../../components/GaugePanel.astro';
+import { formatDate } from '../../../lib/format';
+import { hookLabel } from '../../../lib/hooks';
+import { resolveImage } from '../../../lib/images';
+import { articleSchema } from '../../../lib/schema';
+
+/**
+ * A yarn review: a spec sheet with a short essay at the end.
+ *
+ * The other journal template is the reverse — an essay with tables in it — which is why
+ * this is a separate page rather than a variant. Two reference tables, one small gauge
+ * panel, two paragraphs.
+ */
+export const getStaticPaths = (async () => {
+	const reviews = await getCollection('reviews');
+	return reviews.map((review) => ({ params: { slug: review.id }, props: { review } }));
+}) satisfies GetStaticPaths;
+
+const { review } = Astro.props;
+const d = review.data;
+const { Content } = await render(review);
+
+const y = d.yarn;
+const M_PER_YD = 1.09361;
+const yards = Math.round(y.ballLengthM * M_PER_YD);
+
+// Derived rather than typed: how many 10 cm squares a ball holds follows from the two
+// numbers above it, so it can never disagree with them.
+// Rounded, not floored: 50 / 8.4 is 5.95, and the label already says "≈". Flooring it to
+// 5 understates by more than rounding overstates, and the design shows 6.
+const squaresPerBall =
+	y.gramsPer10cm && y.gramsPer10cm > 0 ? Math.round(y.ballWeightG / y.gramsPer10cm) : undefined;
+
+const perSquare = [
+	y.gramsPer10cm != null ? `${y.gramsPer10cm} g` : undefined,
+	y.metresPer10cm != null ? `≈ ${y.metresPer10cm} m` : undefined,
+]
+	.filter(Boolean)
+	.join(' · ');
+
+const yarnRows: ReviewRow[] = [
+	{ label: 'Brand & line', text: `${y.brand} · ${y.line}` },
+	{ label: 'Content', text: y.content },
+	{ label: 'Weight category', text: `CYC ${y.cycWeight} · ${y.cycWeightName} · ${y.ply}` },
+	{ label: 'Length', text: `${y.ballWeightG} g = ${y.ballLengthM} m / ${yards} yd` },
+	{ label: 'Ball-band gauge', text: y.ballBandGauge },
+	{
+		label: 'Hook I used',
+		text: hookLabel(y.hookMm) + (y.hookNote ? ` (${y.hookNote})` : ''),
+	},
+	...(perSquare
+		? [
+				{
+					label: 'Yarn per 10 × 10 cm',
+					text: perSquare,
+					aside: squaresPerBall ? `(one ball ≈ ${squaresPerBall} squares)` : undefined,
+				},
+			]
+		: []),
+	{ label: 'Care', text: y.care },
+	{ label: 'Made in', text: y.madeIn },
+	{
+		label: 'Price',
+		score: d.price.level,
+		endLabels: ['Budget', 'Premium'] as [string, string],
+		text: d.price.note,
+	},
+];
+
+const handRows: ReviewRow[] = (
+	[
+		['Stitch definition', d.inTheHand.stitchDefinition],
+		['Splitting', d.inTheHand.splitting],
+		['Softness', d.inTheHand.softness],
+		['Itch', d.inTheHand.itch],
+		['Drape', d.inTheHand.drape],
+		['Frogging', d.inTheHand.frogging],
+	] as const
+).map(([label, r]) => ({ label, score: r.score, text: r.note }));
+
+const hero = resolveImage(d.heroImage);
+const swatch = resolveImage(d.swatchImage);
+
+const schema = articleSchema({
+	type: 'BlogPosting',
+	url: new URL(Astro.url.pathname, Astro.site),
+	site: Astro.site!,
+	headline: d.title,
+	description: d.metaDescription,
+	datePublished: d.date,
+	dateModified: d.updated,
+	image: d.socialImage,
+	keywords: ['yarn review', y.brand, y.line],
+});
+---
+
+<Base
+	title={`${d.title} — yarn review`}
+	description={d.metaDescription}
+	active="journal"
+	shareImage={d.socialImage}
+	ogType="article"
+	noindex={d.draft}
+	jsonLd={[schema]}
+	breadcrumbName={d.title}
+>
+	<article class="shell review">
+		<div class="review__title">
+			<Eyebrow kind="Yarn review" tone="journal" rest={`· ${formatDate(d.date)}`} />
+			<h1>{d.title}</h1>
+			<p class="review__standfirst">{d.standfirst}</p>
+		</div>
+
+		{
+			hero && (
+				<figure class="review__photo">
+					<Image
+						src={hero}
+						alt={d.heroImageAlt}
+						widths={[600, 1000, 1600]}
+						sizes="(min-width: 1000px) 1000px, 100vw"
+						loading="eager"
+						style="aspect-ratio:16/7;width:100%;height:auto;object-fit:cover;display:block"
+					/>
+					{d.heroImageCaption && <figcaption>{d.heroImageCaption}</figcaption>}
+				</figure>
+			)
+		}
+
+		<ReviewTable heading="The yarn" subheading="Ball band and shop data" rows={yarnRows} />
+
+		<GaugePanel
+			unblocked={d.gauge.unblocked}
+			blocked={d.gauge.blocked}
+			method={d.gauge.method}
+			note={d.gauge.note}
+		/>
+
+		{
+			swatch && (
+				<figure class="review__photo review__photo--swatch">
+					<Image
+						src={swatch}
+						alt={d.swatchImageAlt ?? d.heroImageAlt}
+						widths={[400, 760, 1140]}
+						sizes="(min-width: 800px) 760px, 100vw"
+						loading="lazy"
+						style="aspect-ratio:3/2;width:100%;height:auto;object-fit:cover;display:block"
+					/>
+					{d.swatchImageCaption && <figcaption>{d.swatchImageCaption}</figcaption>}
+				</figure>
+			)
+		}
+
+		<ReviewTable
+			heading="In the hand"
+			subheading={d.inTheHandBasis}
+			rows={handRows}
+			footnote="Five bars, my judgement, same scale on every review."
+		/>
+
+		<div class="review__prose">
+			<Content />
+		</div>
+
+		{/* Standing site policy. On every review, so it belongs to the template rather than
+		    to something an author has to remember to type. Kept outside .review__prose so it
+		    does not have to fight that block's paragraph styling. */}
+		<p class="review__disclosure">
+			Bought at full price. No yarn on this site is supplied by a brand, and reviews are
+			never shown to a brand before publishing.
+		</p>
+
+		<div class="review__back">
+			<a href="/journal/">← All journal entries</a>
+		</div>
+	</article>
+</Base>
+
+<style>
+	.review__title {
+		padding-top: 40px;
+	}
+
+	.review__title :global(.eyebrow) {
+		margin-bottom: 14px;
+	}
+
+	h1 {
+		margin: 0;
+		max-width: 760px;
+		font: 400 clamp(32px, 5vw, 46px) / 1.08 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	/* The only italic-serif lede on the site. It is doing the job a verdict section would,
+	   so it is set apart from the body voice on purpose. */
+	.review__standfirst {
+		margin: 12px 0 0;
+		max-width: 640px;
+		font: italic 400 clamp(17px, 2vw, 19px) / 1.55 var(--serif);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	.review__photo {
+		margin: 30px 0 0;
+	}
+
+	/* Narrower than the hero: the swatch is evidence, not a headline. */
+	.review__photo--swatch {
+		max-width: 760px;
+		margin-top: clamp(28px, 3.5vw, 34px);
+	}
+
+	.review__photo figcaption {
+		margin-top: 11px;
+		font: 400 12.5px/1.55 var(--sans);
+		color: var(--muted);
+	}
+
+	.review__prose {
+		max-width: 640px;
+		margin-top: clamp(34px, 4.5vw, 42px);
+	}
+
+	.review__prose :global(h2) {
+		margin: 0 0 14px;
+		font: 400 clamp(22px, 2.6vw, 25px) / 1.25 var(--serif);
+		color: var(--ink);
+	}
+
+	.review__prose :global(p) {
+		margin: 0 0 16px;
+		font: var(--type-body);
+		color: var(--ink-2);
+		text-wrap: pretty;
+	}
+
+	.review__disclosure {
+		max-width: 640px;
+		margin: 0;
+		padding-top: 18px;
+		border-top: 1px solid var(--rule-light);
+		font: 400 13.5px/1.6 var(--sans);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	.review__back {
+		margin-top: 40px;
+		padding-top: 24px;
+		padding-bottom: 30px;
+		border-top: 1px solid var(--rule);
+	}
+
+	.review__back a {
+		display: inline-block;
+		/* 11px of uppercase is an 11px target; WCAG 2.5.8 wants 24. 7px each side clears it
+		   with the line-height, where 6px landed at 23. */
+		padding-block: 7px;
+		font: var(--type-label);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--terracotta);
+		text-decoration: none;
+	}
+
+	.review__back a:hover {
+		color: var(--terracotta-hover);
+	}
+</style>

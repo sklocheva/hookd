@@ -1,0 +1,53 @@
+---
+/**
+ * A five-segment bar. Used for the price band and for every "in the hand" judgement.
+ *
+ * Five segments rather than a number because the claim is a position, not a measurement —
+ * and the same five on every review is what lets two yarns be compared at a glance.
+ *
+ * It is decorative in the accessibility sense: the sentence beside it always states the
+ * same thing in words, so the bar is hidden from screen readers rather than read out as a
+ * meaningless run of divs. `label` is the fallback when there is no such sentence.
+ */
+interface Props {
+	/** 1–5. */
+	score: number;
+	/** 6px inside the notes table, 8px for the wider price band. */
+	height?: number;
+	maxWidth?: number;
+	gap?: number;
+	/** Announced instead of the bars when they are not already described in text. */
+	label?: string;
+}
+
+const { score, height = 6, maxWidth = 130, gap = 3, label } = Astro.props;
+const filled = Math.max(1, Math.min(5, Math.round(score)));
+---
+
+<div
+	class="bars"
+	style={`--h:${height}px;--max:${maxWidth}px;--gap:${gap}px`}
+	role={label ? 'img' : undefined}
+	aria-label={label}
+	aria-hidden={label ? undefined : 'true'}
+>
+	{[1, 2, 3, 4, 5].map((n) => <span class:list={['bars__seg', { 'bars__seg--on': n <= filled }]} />)}
+</div>
+
+<style>
+	.bars {
+		display: flex;
+		gap: var(--gap);
+		max-width: var(--max);
+	}
+
+	.bars__seg {
+		height: var(--h);
+		flex: 1;
+		background: var(--bar-empty);
+	}
+
+	.bars__seg--on {
+		background: var(--terracotta);
+	}
+</style>

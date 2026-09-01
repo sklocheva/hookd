@@ -1,30 +1,33 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import Hero from './Hero.astro';
 import Eyebrow from './Eyebrow.astro';
-import { formatDate, readTime } from '../lib/format';
+import { formatDate } from '../lib/format';
+import type { JournalEntry } from '../lib/journal';
 
 /**
  * The journal list rows. Shared by /journal/ and /journal/c/[kind]/, which previously
  * carried two copies of this markup and ~90 lines of identical CSS each.
+ *
+ * Takes already-normalised entries rather than a collection, because the journal lists
+ * two collections — test notes and yarn reviews. See src/lib/journal.ts.
  */
 interface Props {
-	posts: CollectionEntry<'posts'>[];
+	entries: JournalEntry[];
 }
 
-const { posts } = Astro.props;
+const { entries } = Astro.props;
 ---
 
 <div class="shell list">
 	{
-		posts.map((post, i) => (
-			<a href={`/journal/${post.id}/`} class:list={['row', { 'row--first': i === 0 }]}>
+		entries.map((entry, i) => (
+			<a href={entry.href} class:list={['row', { 'row--first': i === 0 }]}>
 				<div class="row__media">
 					<Hero
-						image={post.data.heroImage}
-						alt={post.data.heroImageAlt}
+						image={entry.heroImage}
+						alt={entry.heroImageAlt}
 						ratio="3/2"
-						caption={post.data.title.toLowerCase()}
+						caption={entry.title.toLowerCase()}
 						widths={[320, 640]}
 						sizes="(min-width: 1160px) 320px, 100vw"
 					/>
@@ -33,15 +36,15 @@ const { posts } = Astro.props;
 				<div class="row__text hoverable">
 					<div class="row__meta">
 						<Eyebrow
-							kind={post.data.kind}
-							rest={`· ${formatDate(post.data.date)} · ${readTime(post.body)} min`}
+							kind={entry.kind}
+							rest={`· ${formatDate(entry.date)} · ${entry.readMinutes} min`}
 							tone="journal"
 							size={11}
 						/>
 					</div>
-					<h2 class="hoverable__title">{post.data.title}</h2>
-					<p class="row__excerpt">{post.data.summary}</p>
-					{post.data.method && <p class="row__method">{post.data.method}</p>}
+					<h2 class="hoverable__title">{entry.title}</h2>
+					<p class="row__excerpt">{entry.summary}</p>
+					{entry.method && <p class="row__method">{entry.method}</p>}
 				</div>
 			</a>
 		))

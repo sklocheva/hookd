@@ -5,8 +5,14 @@ import PageHead from '../../components/PageHead.astro';
 import JournalList from '../../components/JournalList.astro';
 import EmptyState from '../../components/EmptyState.astro';
 import { byDateDesc, kindHref, postKindsInUse } from '../../lib/taxonomy';
+import { fromPost, fromReview, newestFirst } from '../../lib/journal';
 
 const posts = (await getCollection('posts')).sort(byDateDesc);
+const reviews = await getCollection('reviews');
+
+// Reviews are journal entries to a reader, so they list here. They carry no `kind`, so
+// they appear under "All" and not under a kind filter — see src/lib/journal.ts.
+const entries = [...posts.map(fromPost), ...reviews.map(fromReview)].sort(newestFirst);
 
 const filters = [
 	{ label: 'All', href: '/journal/', active: true },
@@ -26,8 +32,8 @@ const filters = [
 	/>
 
 	{
-		posts.length ? (
-			<JournalList posts={posts} />
+		entries.length ? (
+			<JournalList entries={entries} />
 		) : (
 			<EmptyState
 				label="Nothing here yet"

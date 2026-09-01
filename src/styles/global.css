@@ -9,6 +9,11 @@
 	--ink: #2a2320;
 	--ink-2: #4a4038;
 	--muted: #7a6d63;
+	/* Between --ink-2 and --muted. The review tables' label column: uppercase and small, so
+	   it needs more weight than --muted without becoming body ink. */
+	--label-ink: #5c5148;
+	/* The one filled panel on the site — the gauge box on a yarn review. */
+	--panel: #f6eee2;
 	--faint: #8a7c6e; /* was #c0b3a4 at 1.91:1 — illegible even for scaffolding */
 
 	/* Measured against --paper: this is 4.61:1, just clear of the 4.5:1 AA threshold.

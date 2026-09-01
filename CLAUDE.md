@@ -101,6 +101,13 @@ two index pages with two different filter treatments is worse than the thing it 
 derived from the path there. Anything `noindex` emits none, so a draft never ships structured
 data describing a page crawlers are told to ignore. Builders live in `src/lib/schema.ts`.
 
+**Yarn reviews are a third collection and a second journal template.** A test note is an
+essay with tables in it; a review is a spec sheet with a short essay at the end, so almost
+none of the fields overlap and it gets its own schema at `/journal/yarn/[slug]`. Both list
+together on `/journal/` — `src/lib/journal.ts` normalises the two into one row shape, which
+is why `JournalList` takes entries rather than a collection. Reviews carry no `kind`, so they
+appear under "All" and not under a kind filter.
+
 ## Content model
 
 Two collections, both with Zod schemas in `src/content.config.ts`. Example entries live in
@@ -139,6 +146,16 @@ measurement each size is cut for, yardage per size, US/UK terms.
   columns from the labels used, so keep a label spelled identically across every size or it
   becomes two columns. Each size also carries `fitsBodyCm`, the body it is cut for, shown
   next to the finished numbers so a maker sees the ease instead of calculating it.
+- **A review's judgements are six fixed keys, not a free list** (stitch definition, splitting,
+  softness, itch, drape, frogging), each a 1–5 score *and* a sentence. Fixed so two reviews can
+  be read against each other; the sentence is required because a score with no reason is an
+  opinion with a number stuck on it.
+- **Price is a 1–5 position, never a currency figure.** Prices change and vary by country; the
+  position in the market does not.
+- **A review's gauge is only ever unblocked vs blocked.** Washed and hung figures were tried and
+  cut — they duplicate the blocked number and bury the comparison, which is the whole point.
+- **A review with no photographs is a finished page**, not a broken one. Both image blocks drop
+  out and nothing else moves. No placeholder art, no empty frame.
 - US crochet terms throughout.
 
 ## Conventions

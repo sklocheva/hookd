@@ -5,9 +5,10 @@ import type { APIContext } from 'astro';
 export async function GET(context: APIContext) {
 	// Drafts are invented example content. They stay on the site so it does not look
 	// empty, but they must not reach a subscriber's reader.
-	const [patterns, posts] = await Promise.all([
+	const [patterns, posts, reviews] = await Promise.all([
 		getCollection('patterns', ({ data }) => !data.draft),
 		getCollection('posts', ({ data }) => !data.draft),
+		getCollection('reviews', ({ data }) => !data.draft),
 	]);
 
 	// One feed for the whole site — the homepage mixes both, so the feed should too.
@@ -25,6 +26,14 @@ export async function GET(context: APIContext) {
 			description: p.data.summary,
 			link: `/journal/${p.id}/`,
 			categories: [p.data.kind, ...p.data.tags],
+		})),
+		...reviews.map((r) => ({
+			title: r.data.title,
+			pubDate: r.data.date,
+			// The standfirst is written to work alone, which is exactly what a feed shows.
+			description: r.data.standfirst,
+			link: `/journal/yarn/${r.id}/`,
+			categories: ['Yarn review', r.data.yarn.brand],
 		})),
 	].sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf());
 

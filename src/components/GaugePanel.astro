@@ -1,0 +1,116 @@
+---
+/**
+ * Unblocked against blocked, and nothing else.
+ *
+ * The only filled box on the site, because this is the one number a reader came for. It
+ * is deliberately small: a yarn review is a spec sheet, and making this a hero would say
+ * the gauge matters more than the six judgements below it.
+ *
+ * Two figures, side by side, with **no divider** — the pair has to read as one
+ * comparison rather than two facts that happen to be adjacent. Washed and hung figures
+ * were tried and cut: they duplicate the blocked number and bury the thing being shown.
+ */
+interface Props {
+	unblocked: string;
+	blocked: string;
+	/** e.g. "Over 10 × 10 cm · half double crochet · 4 mm hook". Carries the units. */
+	method: string;
+	/** What the change means, in plain words. */
+	note: string;
+}
+
+const { unblocked, blocked, method, note } = Astro.props;
+---
+
+<section class="gauge" aria-label="My gauge">
+	<div class="gauge__head">
+		<h2 class="gauge__title">My gauge</h2>
+		<p class="gauge__method">{method}</p>
+	</div>
+
+	<div class="gauge__figures">
+		<div class="gauge__figure">
+			<div class="gauge__label">Unblocked</div>
+			<div class="gauge__value">{unblocked}</div>
+		</div>
+		<div class="gauge__figure">
+			<div class="gauge__label">Blocked</div>
+			<div class="gauge__value gauge__value--blocked">{blocked}</div>
+		</div>
+	</div>
+
+	<p class="gauge__note">{note}</p>
+</section>
+
+<style>
+	.gauge {
+		max-width: 760px;
+		margin-top: clamp(30px, 4vw, 38px);
+		border: 1px solid var(--border-dashed);
+		background: var(--panel);
+		padding: 20px 22px;
+	}
+
+	.gauge__head {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px 16px;
+		align-items: baseline;
+		margin-bottom: 16px;
+	}
+
+	.gauge__title {
+		margin: 0;
+		font: 600 12.5px/1.4 var(--sans);
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	/* --ink-2, not --muted: this sits on --panel, which is darker than paper, and --muted
+	   measures 4.35:1 against it. Everything inside this box needs the darker ink. */
+	.gauge__method {
+		margin: 0;
+		font: 400 13px/1.4 var(--sans);
+		color: var(--ink-2);
+	}
+
+	.gauge__figures {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16px 40px;
+		align-items: flex-end;
+	}
+
+	/* Wide enough that the two wrap cleanly rather than splitting a figure at 375px. */
+	.gauge__figure {
+		min-width: 140px;
+	}
+
+	.gauge__label {
+		margin-bottom: 6px;
+		font: 600 11.5px/1.4 var(--sans);
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: var(--label-ink);
+	}
+
+	.gauge__value {
+		font: 400 30px/1.1 var(--serif);
+		color: var(--ink);
+	}
+
+	/* The blocked figure is the one to work to, so it is the one that is coloured. */
+	.gauge__value--blocked {
+		color: var(--terracotta);
+	}
+
+	.gauge__note {
+		margin: 14px 0 0;
+		padding-top: 12px;
+		border-top: 1px solid var(--rule-light);
+		font: 400 13.5px/1.6 var(--sans);
+		color: var(--ink-2);
+		text-wrap: pretty;
+	}
+</style>

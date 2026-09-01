@@ -401,3 +401,194 @@ collections:
         hint: The test behind a pattern is the most useful thing to link here.
 
       - { label: Body, name: body, widget: markdown }
+
+  # ---------------------------------------------------------------- reviews
+  # A yarn review is a spec sheet with a short essay at the end — the mirror of a test
+  # note, which is an essay with tables in it. Hence its own collection: almost none of
+  # the fields overlap.
+  - name: reviews
+    label: Yarn reviews
+    label_singular: Yarn review
+    folder: src/content/reviews
+    create: true
+    extension: md
+    format: frontmatter
+    slug: '{{fields.title | slugify}}'
+    summary: '{{title}}'
+    preview_path: journal/yarn/{{slug}}
+    fields:
+      - label: Yarn name
+        name: title
+        widget: string
+        hint: As you would say it, e.g. Nordfjord Fjellull DK
+      - { label: Publish date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
+      - label: Last corrected
+        name: updated
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        required: false
+      - { label: Draft, name: draft, widget: boolean, default: false }
+      - label: Standfirst
+        name: standfirst
+        widget: text
+        hint: >-
+          One or two sentences giving the answer. Someone who reads only this should know
+          whether to buy the yarn — it replaces a verdict section.
+
+      # --- SEO. Required, deliberately. ---------------------------------
+      - label: Meta description
+        name: metaDescription
+        widget: string
+        required: true
+        pattern: ['^.{1,160}$', 'Must be 160 characters or fewer.']
+      - label: Social share image
+        name: socialImage
+        widget: string
+        required: true
+        default: /og-default.png
+
+      # --- Photos. Both optional: a review with neither is a finished page. ---
+      - { label: Yarn photo, name: heroImage, widget: image, required: false }
+      - label: Yarn photo alt text
+        name: heroImageAlt
+        widget: string
+        required: true
+        hint: Required even before the photo exists, so it is never forgotten afterwards.
+      - label: Yarn photo caption
+        name: heroImageCaption
+        widget: string
+        required: false
+        hint: e.g. Shade 118 Kalkstein, one 50 g ball.
+      - { label: Swatch photo, name: swatchImage, widget: image, required: false }
+      - { label: Swatch photo alt text, name: swatchImageAlt, widget: string, required: false }
+      - { label: Swatch photo caption, name: swatchImageCaption, widget: string, required: false }
+
+      # --- Table 1: transcribed from the ball band and the shop. ---------
+      - label: The yarn
+        name: yarn
+        widget: object
+        fields:
+          - { label: Brand, name: brand, widget: string }
+          - { label: Line, name: line, widget: string }
+          - label: Content
+            name: content
+            widget: string
+            hint: e.g. 100% Norwegian wool, single ply · not superwash
+          - { label: CYC weight number, name: cycWeight, widget: number, value_type: int, min: 0, max: 7 }
+          - { label: CYC weight name, name: cycWeightName, widget: string, hint: 'e.g. Light' }
+          - { label: Ply, name: ply, widget: string, hint: 'e.g. DK / 8 ply' }
+          - { label: Ball weight (g), name: ballWeightG, widget: number, value_type: int }
+          - label: Ball length (m)
+            name: ballLengthM
+            widget: number
+            value_type: int
+            hint: Yards are worked out for you.
+          - label: Ball-band gauge
+            name: ballBandGauge
+            widget: string
+            hint: Copy it as printed, knitted figures and all.
+          - label: Hook used (mm)
+            name: hookMm
+            widget: number
+            value_type: float
+            hint: The US size is added automatically.
+          - { label: Hook note, name: hookNote, widget: string, required: false, hint: 'e.g. band suggests 3.5–4.5 mm' }
+          - label: Grams per 10 × 10 cm
+            name: gramsPer10cm
+            widget: number
+            value_type: float
+            required: false
+            hint: Measured from your swatch. Squares per ball is worked out from it.
+          - { label: Metres per 10 × 10 cm, name: metresPer10cm, widget: number, value_type: float, required: false }
+          - { label: Care, name: care, widget: string }
+          - { label: Made in, name: madeIn, widget: string }
+
+      # --- Price as a position, never a figure. --------------------------
+      - label: Price
+        name: price
+        widget: object
+        hint: >-
+          Where it sits in the market, 1 budget to 5 premium. Never a currency figure —
+          prices change and vary by country, the position does not.
+        fields:
+          - { label: Level, name: level, widget: number, value_type: int, min: 1, max: 5 }
+          - label: Why
+            name: note
+            widget: string
+            hint: One line, e.g. Mid — about what a plain undyed wool of this quality costs.
+
+      # --- The gauge panel: only ever unblocked vs blocked. --------------
+      - label: My gauge
+        name: gauge
+        widget: object
+        hint: >-
+          Only these two figures. Washed and hung numbers were tried and cut — they
+          duplicate the blocked figure and bury the comparison.
+        fields:
+          - { label: Unblocked, name: unblocked, widget: string, hint: 'Stitches × rows, e.g. 17.5 × 11' }
+          - { label: Blocked, name: blocked, widget: string, hint: 'e.g. 16.5 × 10.5' }
+          - label: Method
+            name: method
+            widget: string
+            hint: e.g. Over 10 × 10 cm · half double crochet · 4 mm hook
+          - { label: What the change means, name: note, widget: text }
+
+      # --- Table 2: the same six judgements on every review. -------------
+      - label: What these notes are based on
+        name: inTheHandBasis
+        widget: string
+        required: false
+        hint: e.g. My notes, one swatch and one hat
+      - label: In the hand
+        name: inTheHand
+        widget: object
+        hint: >-
+          The same six on every review, so two yarns can be read against each other. A
+          score of 1–5 and one short sentence — a score with no reason is an opinion with
+          a number stuck on it.
+        fields:
+          - label: Stitch definition
+            name: stitchDefinition
+            widget: object
+            fields:
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
+              - { label: Note, name: note, widget: string }
+          - label: Splitting
+            name: splitting
+            widget: object
+            fields:
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
+              - { label: Note, name: note, widget: string }
+          - label: Softness
+            name: softness
+            widget: object
+            fields:
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
+              - { label: Note, name: note, widget: string }
+          - label: Itch
+            name: itch
+            widget: object
+            fields:
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
+              - { label: Note, name: note, widget: string }
+          - label: Drape
+            name: drape
+            widget: object
+            fields:
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
+              - { label: Note, name: note, widget: string }
+          - label: Frogging
+            name: frogging
+            widget: object
+            fields:
+              - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5 }
+              - { label: Note, name: note, widget: string }
+
+      - label: Body
+        name: body
+        widget: markdown
+        hint: >-
+          Two paragraphs, no more. One on gauge and fibre behaviour, one on
+          use-it-for / do-not-use-it-for. Start with "## What that adds up to", and link
+          the test note behind the review inline, in the second paragraph.
