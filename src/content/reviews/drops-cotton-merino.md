@@ -16,8 +16,7 @@ yarn:
   brand: Drops
   line: Cotton Merino
   content: A soft tweed of half superwash wool and half cotton. Perfect for transitional garments.
-  cycWeight: 3
-  ply: DK
+  weightLabel: Worsted
   ballWeightG: 50
   ballLengthM: 110
   ballBandGauge: ''
@@ -46,14 +45,14 @@ inTheHand:
   stitchDefinition:
     score: 5
     note: Very crisp definition, but remains soft
-  splitting:
-    score: 5
+  splitResistance:
+    score: 1
     note: Very splitty, so use blunt hook and appropriate stitch.
   softness:
     score: 3
     note: wool softness with cotton crisp
-  itch:
-    score: 1
+  nextToSkin:
+    score: 5
     note: No itch at all
   drape:
     score: 3

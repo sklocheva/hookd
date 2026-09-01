@@ -15,9 +15,7 @@ yarn:
   brand: Nordfjord Garn
   line: Fjellull DK
   content: 100% Norwegian wool, single ply · not superwash
-  cycWeight: 3
-  cycWeightName: Light
-  ply: DK / 8 ply
+  weightLabel: DK / 8 ply
   ballWeightG: 50
   ballLengthM: 105
   ballBandGauge: 22 sts × 28 rows = 10 × 10 cm, knitted, 4 mm
@@ -53,13 +51,13 @@ inTheHand:
   stitchDefinition:
     score: 5
     note: Crisp. Posts, bobbles and alpine stitch all read at arm's length.
-  splitting:
+  splitResistance:
     score: 3
     note: Splits on a sharp hook. A blunt tip fixes most of it.
   softness:
     score: 2
     note: Rustic. Softens a little after washing, never becomes soft.
-  itch:
+  nextToSkin:
     score: 3
     note: Noticeable on the neck. Line a hat; don't make a scarf.
   drape:

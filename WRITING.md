@@ -207,9 +207,13 @@ judgement, and all three have rules:
 
 - **Price is a position, 1 to 5, never a price.** Prices change and differ by country; where a
   yarn sits against its neighbours does not.
-- **The six "in the hand" rows never change.** Stitch definition, splitting, softness, itch,
-  drape, frogging — the same six on every review, so two yarns can be compared. Each needs a
-  score *and* a sentence; a score on its own is an opinion with a number on it.
+- **The six "in the hand" rows never change.** Stitch definition, split resistance, softness,
+  next to skin, drape, frogging — the same six on every review, so two yarns can be compared.
+  Each needs a score *and* a sentence; a score on its own is an opinion with a number on it.
+- **More bars is always better.** A yarn that splits badly scores 1 on split resistance, not 5.
+  The one exception is drape, which runs structured to fluid rather than bad to good.
+- **Softness is the hand; next to skin is prickle.** They are different — a yarn can feel
+  lovely to squeeze and still scratch a neck.
 - **Gauge is unblocked against blocked, and nothing else.**
 
 The body is **two paragraphs**: one on how the gauge and fibre behave, one on what to use it
@@ -222,6 +226,10 @@ names anything missing. Any row you leave empty simply does not appear on the pa
 **Strand construction** has a type and a line. Pick the type from the list; then untwist a
 length and write what you see, e.g. *"Two strands, cotton and merino, twisted into a tweedy
 2-ply; six of those twisted together again."*
+
+**Weight** is whatever the band prints — "Worsted", "DK / 8 ply". There is no CYC number to
+pick, because bands disagree with CYC and with each other. If you want the objective figure,
+wrap the yarn round a ruler for an inch and count: that is **WPI**.
 
 **Fibre from** and **Made in** are different questions — where the fibre grew, and where the
 yarn was spun. Fill in whichever the band tells you.

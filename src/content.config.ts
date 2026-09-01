@@ -346,9 +346,22 @@ const reviews = defineCollection({
 					brand: optionalString,
 					line: optionalString,
 					content: optionalString,
-					cycWeight: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.number().int().min(0).max(7).optional()),
-					/** e.g. "DK / 8 ply". */
-					ply: optionalString,
+					/**
+					 * The weight exactly as the band prints it — "Worsted", "DK / 8 ply".
+					 *
+					 * The CYC number used to be here and is gone. Bands disagree with the CYC
+					 * scale and with each other, so recording a category number meant deciding
+					 * which of them was right; quoting the label states what the label says.
+					 */
+					weightLabel: optionalString,
+					/**
+					 * Wraps per inch — the thickness measured rather than claimed.
+					 *
+					 * This is the objective counterpart to the label's word, and the reason it
+					 * earns a row: the same yarn is sold as DK by one shop and worsted by
+					 * another, and WPI settles it without arguing with either.
+					 */
+					wpi: optionalNumber,
 					ballWeightG: optionalNumber,
 					ballLengthM: optionalNumber,
 					/** As printed on the band. */
@@ -427,9 +440,21 @@ const reviews = defineCollection({
 			inTheHand: z
 				.object({
 					stitchDefinition: rated,
-					splitting: rated,
+					/**
+					 * Named so that more bars are always better. "Splitting" scored the
+					 * opposite way round from its neighbours, so five bars meant "excellent"
+					 * on one row and "awful" on the next, with only the sentence to tell them
+					 * apart.
+					 */
+					splitResistance: rated,
+					/** How it feels in the hand. */
 					softness: rated,
-					itch: rated,
+					/**
+					 * Whether it prickles, which is a different question from softness — the
+					 * itch comes from the small proportion of coarse fibre ends, not from
+					 * average fineness, so a yarn can feel soft to squeeze and still scratch.
+					 */
+					nextToSkin: rated,
 					drape: rated,
 					frogging: rated,
 				})
@@ -487,9 +512,9 @@ const reviews = defineCollection({
 			// The six are the comparison. A review missing one cannot be read against another.
 			for (const key of [
 				'stitchDefinition',
-				'splitting',
+				'splitResistance',
 				'softness',
-				'itch',
+				'nextToSkin',
 				'drape',
 				'frogging',
 			] as const) {

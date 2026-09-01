@@ -8,7 +8,6 @@ import ReviewTable, { type ReviewRow } from '../../../components/ReviewTable.ast
 import GaugePanel from '../../../components/GaugePanel.astro';
 import { formatDate } from '../../../lib/format';
 import { hookLabel } from '../../../lib/hooks';
-import { cycWeightName } from '../../../lib/yarn';
 import { resolveImage } from '../../../lib/images';
 import { articleSchema } from '../../../lib/schema';
 
@@ -68,11 +67,11 @@ const oekoTex = y.oekoTexClass
 const yarnRows: ReviewRow[] = [
 	...row('Brand & line', [y.brand, y.line].filter(Boolean).join(' · ')),
 	...row('Content', y.content),
+	// The label's own word, and the measured thickness beside it. They disagree often
+	// enough that showing both is the point.
 	...row(
-		'Weight category',
-		[y.cycWeight != null ? `CYC ${y.cycWeight}` : undefined, cycWeightName(y.cycWeight), y.ply]
-			.filter(Boolean)
-			.join(' · ')
+		'Weight',
+		[y.weightLabel, y.wpi != null ? `${y.wpi} WPI` : undefined].filter(Boolean).join(' · ')
 	),
 	...row(
 		'Construction',
@@ -115,9 +114,9 @@ const yarnRows: ReviewRow[] = [
 const handRows: ReviewRow[] = (
 	[
 		['Stitch definition', d.inTheHand.stitchDefinition],
-		['Splitting', d.inTheHand.splitting],
+		['Split resistance', d.inTheHand.splitResistance],
 		['Softness', d.inTheHand.softness],
-		['Itch', d.inTheHand.itch],
+		['Next to skin', d.inTheHand.nextToSkin],
 		['Drape', d.inTheHand.drape],
 		['Frogging', d.inTheHand.frogging],
 	] as const
@@ -213,7 +212,7 @@ const schema = articleSchema({
 					heading="In the hand"
 					subheading={d.inTheHandBasis}
 					rows={handRows}
-					footnote="Five bars, my judgement, same scale on every review."
+					footnote="Five bars, my judgement, same scale on every review. More bars is always better, except drape, which runs structured to fluid."
 				/>
 			)
 		}

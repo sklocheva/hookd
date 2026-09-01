@@ -151,10 +151,18 @@ measurement each size is cut for, yardage per size, US/UK terms.
   columns from the labels used, so keep a label spelled identically across every size or it
   becomes two columns. Each size also carries `fitsBodyCm`, the body it is cut for, shown
   next to the finished numbers so a maker sees the ease instead of calculating it.
-- **A review's judgements are six fixed keys, not a free list** (stitch definition, splitting,
-  softness, itch, drape, frogging), each a 1–5 score *and* a sentence. Fixed so two reviews can
-  be read against each other; the sentence is required because a score with no reason is an
-  opinion with a number stuck on it.
+- **A review's judgements are six fixed keys, not a free list** (stitch definition, split
+  resistance, softness, next to skin, drape, frogging), each a 1–5 score *and* a sentence.
+  Fixed so two reviews can be read against each other; the sentence is required because a
+  score with no reason is an opinion with a number stuck on it.
+- **More bars is always better** — the one exception is drape, which runs structured to fluid.
+  The rows were named "Splitting" and "Itch" and scored the opposite way from their
+  neighbours, so five bars meant excellent on one row and awful on the next with only the
+  sentence to tell them apart. **Renaming a row inverts its meaning: migrate the scores
+  (6 − n) at the same time**, or every existing review silently starts lying.
+- **Softness and "next to skin" are different questions.** Softness is the hand; prickle comes
+  from the small proportion of coarse fibre ends, not from average fineness, so a yarn can feel
+  soft to squeeze and still scratch a neck. Merging them was considered and rejected.
 - **Price is a 1–5 position, never a currency figure.** Prices change and vary by country; the
   position in the market does not.
 - **A review's gauge is only ever unblocked vs blocked.** Washed and hung figures were tried and
@@ -170,9 +178,11 @@ measurement each size is cut for, yardage per size, US/UK terms.
   environmentally made, and it is widely misread as the latter, so the row spells out what
   the class covers. **`mulesing` records only what the label states**, and "Not stated" is
   the honest and most common answer — silence is not a claim either way.
-- **CYC weight name is derived from the number** in `src/lib/yarn.ts`, never typed — the
-  same reasoning as hook sizes. The first real review proved it: it carried "CYC 3" and
-  "Worsted", and Worsted is category 4's name. CYC 3 is Light.
+- **A review records the weight the label claims, plus WPI — no CYC number.** Bands disagree
+  with the CYC scale and with each other (the first real review was sold as DK and printed
+  "Worsted"), so storing a category meant deciding which was right. `weightLabel` quotes the
+  band; `wpi` is the thickness measured rather than claimed, and settles it. Patterns still
+  carry `cycWeight` — that is a pattern's own requirement, not a transcription.
 - **Strand construction is a fixed type plus a free line.** The type (Singles, Plied,
   Cabled, Chainette, Roving) is what lets two reviews be compared; the line carries what
   the author sees on untwisting a length, which no category expresses.

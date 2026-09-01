@@ -489,17 +489,24 @@ collections:
             widget: string
             required: false
             hint: e.g. 100% Norwegian wool, single ply · not superwash
-          - label: CYC weight number
-            name: cycWeight
-            widget: number
-            value_type: int
-            min: 0
-            max: 7
+          - label: Weight, as the label says
+            name: weightLabel
+            widget: string
             required: false
             hint: >-
-              0–7. The category name (Lace, Light, Medium…) is added for you — there is no
-              second field to disagree with.
-          - { label: Ply, name: ply, widget: string, required: false, hint: 'e.g. DK / 8 ply' }
+              Copy the band's own word — "Worsted", "DK / 8 ply". No CYC number: bands
+              disagree with the CYC scale and with each other, so a number would mean
+              deciding who is right.
+          - label: WPI
+            name: wpi
+            widget: number
+            value_type: float
+            required: false
+            hint: >-
+              Wraps per inch, if you measured it. Wrap the yarn round a ruler for an inch
+              without stretching or overlapping, and count. This is the thickness measured
+              rather than claimed — useful when two shops sell the same yarn as different
+              weights.
 
           # How the strand is built. The type is a short fixed list so two reviews can be
           # compared on it; the note carries what you actually see when you untwist it.
@@ -642,7 +649,8 @@ collections:
         name: inTheHand
         widget: object
         hint: >-
-          The same six on every review, so two yarns can be read against each other. All
+          The same six on every review, so two yarns can be read against each other.
+          **More bars is always better**, except Drape, which runs structured to fluid. All
           six are needed to publish — with one missing, two reviews no longer compare. A
           score of 1–5 and one short sentence; a score with no reason is an opinion with a
           number stuck on it.
@@ -655,11 +663,12 @@ collections:
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
               - { label: Note, name: note, widget: string, required: false }
-          - label: Splitting
-            name: splitting
+          - label: Split resistance
+            name: splitResistance
             widget: object
             required: false
             collapsed: true
+            hint: More bars = splits less. A yarn that splits badly scores 1.
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
               - { label: Note, name: note, widget: string, required: false }
@@ -671,11 +680,12 @@ collections:
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
               - { label: Note, name: note, widget: string, required: false }
-          - label: Itch
-            name: itch
+          - label: Next to skin
+            name: nextToSkin
             widget: object
             required: false
             collapsed: true
+            hint: More bars = kinder on skin. Prickly scores 1. This is not the same as Softness — a yarn can feel soft in the hand and still scratch a neck.
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
               - { label: Note, name: note, widget: string, required: false }
