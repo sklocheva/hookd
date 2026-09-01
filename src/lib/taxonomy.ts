@@ -23,7 +23,15 @@ import { slugify } from './format';
  * can never become a dead end — which is why the full set can live here from the start.
  */
 export const PATTERN_CATEGORIES = ['clothing', 'accessories', 'pets', 'home'] as const;
-export const POST_KINDS = ['Garment making', 'Yarn and fibres', 'How-tos'] as const;
+/**
+ * "Yarn notes" rather than "reviews" — the author is writing down what a yarn did, not
+ * handing out marks. Yarn entries live in their own collection but file under this kind,
+ * so they group with everything else in the journal instead of only appearing under All.
+ */
+export const POST_KINDS = ['Garment making', 'Yarn notes', 'How-tos'] as const;
+
+/** The kind that yarn entries file under. They carry no `kind` field of their own. */
+export const YARN_KIND = 'Yarn notes';
 
 export type PatternCategory = (typeof PATTERN_CATEGORIES)[number];
 export type PostKind = (typeof POST_KINDS)[number];
@@ -62,8 +70,17 @@ function present<T extends string>(
 	return canonical.filter((value) => seen.has(value));
 }
 
-export const patternCategoriesInUse = (patterns: CollectionEntry<'patterns'>[]) =>
-	present(PATTERN_CATEGORIES, patterns.flatMap((p) => p.data.category));
+/**
+ * Every category, whether or not anything is filed under it.
+ *
+ * They used to be hidden until used, on the grounds that a filter leading nowhere is a dead
+ * end. That was true while there was no designed empty state; there is one now, and hiding
+ * Pets and Home made the site look like it had no plans for them. An empty category is a
+ * page that says so.
+ */
+export const patternCategoriesInUse = (_patterns: CollectionEntry<'patterns'>[]) => [
+	...PATTERN_CATEGORIES,
+];
 
-export const postKindsInUse = (posts: CollectionEntry<'posts'>[]) =>
-	present(POST_KINDS, posts.map((p) => p.data.kind));
+/** Kinds that actually have entries — counted across both collections. */
+export const kindsInUse = (kinds: Iterable<string>) => present(POST_KINDS, kinds);

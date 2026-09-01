@@ -1,5 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { readTime } from './format';
+import { YARN_KIND } from './taxonomy';
 
 /**
  * One row in the journal list, whichever collection it came from.
@@ -12,7 +13,7 @@ import { readTime } from './format';
  */
 export interface JournalEntry {
 	href: string;
-	/** The coloured eyebrow: a post's kind, or "Yarn review". */
+	/** The coloured eyebrow: a post's kind. Yarn entries file under YARN_KIND. */
 	kind: string;
 	title: string;
 	summary: string;
@@ -41,7 +42,7 @@ export function fromPost(p: CollectionEntry<'posts'>): JournalEntry {
 export function fromReview(r: CollectionEntry<'reviews'>): JournalEntry {
 	return {
 		href: `/journal/yarn/${r.id}/`,
-		kind: 'Yarn review',
+		kind: YARN_KIND,
 		title: r.data.title,
 		// The standfirst is the review's summary — it is written to be the answer on its own.
 		// It can be absent on a draft, which still lists; the row just carries no excerpt.
@@ -57,3 +58,16 @@ export function fromReview(r: CollectionEntry<'reviews'>): JournalEntry {
 /** Newest first, across both collections. */
 export const newestFirst = (a: JournalEntry, b: JournalEntry) =>
 	b.date.valueOf() - a.date.valueOf();
+
+/**
+ * Every journal entry, from both collections, newest first.
+ *
+ * One function so the index and the kind routes cannot disagree about what the journal
+ * contains — which they did while yarn entries were listed only under "All".
+ */
+export function allJournalEntries(
+	posts: CollectionEntry<'posts'>[],
+	reviews: CollectionEntry<'reviews'>[]
+): JournalEntry[] {
+	return [...posts.map(fromPost), ...reviews.map(fromReview)].sort(newestFirst);
+}

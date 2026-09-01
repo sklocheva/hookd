@@ -119,12 +119,17 @@ two index pages with two different filter treatments is worse than the thing it 
 derived from the path there. Anything `noindex` emits none, so a draft never ships structured
 data describing a page crawlers are told to ignore. Builders live in `src/lib/schema.ts`.
 
-**Yarn reviews are a third collection and a second journal template.** A test note is an
+**They are yarn *notes*, never reviews.** The author is writing down what a yarn did, not
+scoring it. `YARN_KIND` in `src/lib/taxonomy.ts` is the single place that word lives.
+
+**Yarn notes are a third collection and a second journal template.** A test note is an
 essay with tables in it; a review is a spec sheet with a short essay at the end, so almost
 none of the fields overlap and it gets its own schema at `/journal/yarn/[slug]`. Both list
 together on `/journal/` — `src/lib/journal.ts` normalises the two into one row shape, which
-is why `JournalList` takes entries rather than a collection. Reviews carry no `kind`, so they
-appear under "All" and not under a kind filter.
+is why `JournalList` takes entries rather than a collection. Yarn notes have no `kind` field
+but file under `YARN_KIND`, so they group like everything else; `allJournalEntries` is the one
+function both the index and the kind routes read, so they cannot disagree about what the
+journal contains.
 
 ## Content model
 
@@ -162,8 +167,10 @@ measurement each size is cut for, yardage per size, US/UK terms.
 - **A pattern has several categories, stored as lowercase slugs** (`clothing`, `accessories`,
   `pets`, `home`). A hooded scarf is genuinely both clothing and an accessory, and a single-select
   field files it wrong either way. Display labels live in `src/lib/taxonomy.ts`, never in
-  content, so renaming one touches no entry and no URL. Unused values are hidden from the filter
-  row, so a category with no patterns can never be a dead end.
+  content, so renaming one touches no entry and no URL. **Every category is shown, used or
+  not** — Pets and Home are planned sections, and hiding them made the site look like it had
+  no intention of filling them. An empty category renders the designed empty state rather
+  than a blank grid.
 - **Finished measurements are author-named label/value pairs, not fixed bust/length columns.**
   A hat needs circumference and depth; a blanket needs nothing. The size table builds its
   columns from the labels used, so keep a label spelled identically across every size or it

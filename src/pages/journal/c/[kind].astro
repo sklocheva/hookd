@@ -4,29 +4,37 @@ import type { GetStaticPaths } from 'astro';
 import Base from '../../../layouts/Base.astro';
 import PageHead from '../../../components/PageHead.astro';
 import JournalList from '../../../components/JournalList.astro';
+import EmptyState from '../../../components/EmptyState.astro';
 import { slugify } from '../../../lib/format';
-import { byDateDesc, kindHref, postKindsInUse } from '../../../lib/taxonomy';
-import { fromPost } from '../../../lib/journal';
+import { kindHref, kindsInUse } from '../../../lib/taxonomy';
+import { allJournalEntries } from '../../../lib/journal';
 
 // Real static routes rather than client-side filtering, because of the no-JS rule.
+//
+// Built from the same normalised entries as /journal/, so yarn notes appear under their
+// kind rather than only under "All" — they live in their own collection but are journal
+// entries to a reader.
 export const getStaticPaths = (async () => {
-	const posts = await getCollection('posts');
+	const [posts, reviews] = await Promise.all([getCollection('posts'), getCollection('reviews')]);
+	const entries = allJournalEntries(posts, reviews);
 
-	return postKindsInUse(posts).map((kind) => ({
+	return kindsInUse(entries.map((e) => e.kind)).map((kind) => ({
 		params: { kind: slugify(kind) },
-		props: {
-			kind,
-			posts: posts.filter((p) => p.data.kind === kind).sort(byDateDesc),
-		},
+		props: { kind, entries: entries.filter((e) => e.kind === kind) },
 	}));
 }) satisfies GetStaticPaths;
 
-const { kind, posts } = Astro.props;
-const allPosts = await getCollection('posts');
+const { kind, entries } = Astro.props;
+
+const [allPosts, allReviews] = await Promise.all([
+	getCollection('posts'),
+	getCollection('reviews'),
+]);
+const allEntries = allJournalEntries(allPosts, allReviews);
 
 const filters = [
 	{ label: 'All', href: '/journal/' },
-	...postKindsInUse(allPosts).map((k) => ({
+	...kindsInUse(allEntries.map((e) => e.kind)).map((k) => ({
 		label: k,
 		href: kindHref(k),
 		active: k === kind,
@@ -36,14 +44,26 @@ const filters = [
 
 <Base
 	title={`${kind} — Hookd journal`}
-	description={`Journal posts filed under ${kind.toLowerCase()} — written up from work actually done, including the inconvenient results.`}
+	description={`Journal entries filed under ${kind.toLowerCase()} — written up from work actually done, including the inconvenient results.`}
 	active="journal"
 >
 	<PageHead
 		heading={kind}
-		standfirst={`${posts.length} ${posts.length === 1 ? 'post' : 'posts'} filed under ${kind.toLowerCase()}.`}
+		standfirst={`${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} filed under ${kind.toLowerCase()}.`}
 		filters={filters}
 	/>
 
-	<JournalList entries={posts.map(fromPost)} />
+	{
+		entries.length ? (
+			<JournalList entries={entries} />
+		) : (
+			<EmptyState
+				label="No matches"
+				heading={`Nothing in ${kind} yet`}
+				body="No entry is filed under this yet. The rest of the journal is one click away."
+				actionHref="/journal/"
+				actionLabel="All journal entries"
+			/>
+		)
+	}
 </Base>

@@ -4,19 +4,15 @@ import Base from '../../layouts/Base.astro';
 import PageHead from '../../components/PageHead.astro';
 import JournalList from '../../components/JournalList.astro';
 import EmptyState from '../../components/EmptyState.astro';
-import { byDateDesc, kindHref, postKindsInUse } from '../../lib/taxonomy';
-import { fromPost, fromReview, newestFirst } from '../../lib/journal';
+import { kindHref, kindsInUse } from '../../lib/taxonomy';
+import { allJournalEntries } from '../../lib/journal';
 
-const posts = (await getCollection('posts')).sort(byDateDesc);
-const reviews = await getCollection('reviews');
-
-// Reviews are journal entries to a reader, so they list here. They carry no `kind`, so
-// they appear under "All" and not under a kind filter — see src/lib/journal.ts.
-const entries = [...posts.map(fromPost), ...reviews.map(fromReview)].sort(newestFirst);
+const [posts, reviews] = await Promise.all([getCollection('posts'), getCollection('reviews')]);
+const entries = allJournalEntries(posts, reviews);
 
 const filters = [
 	{ label: 'All', href: '/journal/', active: true },
-	...postKindsInUse(posts).map((k) => ({ label: k, href: kindHref(k) })),
+	...kindsInUse(entries.map((e) => e.kind)).map((k) => ({ label: k, href: kindHref(k) })),
 ];
 ---
 

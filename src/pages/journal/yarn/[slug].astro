@@ -9,16 +9,19 @@ import ReviewTable, { type ReviewRow } from '../../../components/ReviewTable.ast
 import GaugePanel from '../../../components/GaugePanel.astro';
 import YarnBadges from '../../../components/YarnBadges.astro';
 import { formatDate } from '../../../lib/format';
+import { YARN_KIND } from '../../../lib/taxonomy';
 import { hookLabel } from '../../../lib/hooks';
 import { resolveImage } from '../../../lib/images';
 import { articleSchema } from '../../../lib/schema';
 
 /**
- * A yarn review: a spec sheet with a short essay at the end.
+ * A yarn note: a spec sheet with a short essay at the end.
  *
  * The other journal template is the reverse — an essay with tables in it — which is why
  * this is a separate page rather than a variant. Two reference tables, one small gauge
  * panel, two paragraphs.
+ *
+ * Called notes, not reviews: the author is writing down what a yarn did, not scoring it.
  */
 export const getStaticPaths = (async () => {
 	const reviews = await getCollection('reviews');
@@ -124,12 +127,12 @@ const schema = articleSchema({
 	datePublished: d.date,
 	dateModified: d.updated,
 	image: d.socialImage,
-	keywords: ['yarn review', y.brand, y.line].filter((k): k is string => !!k),
+	keywords: ['yarn', y.brand, y.line].filter((k): k is string => !!k),
 });
 ---
 
 <Base
-	title={`${d.title} — yarn review`}
+	title={`${d.title} — Hookd yarn notes`}
 	description={d.metaDescription ?? d.standfirst ?? d.title}
 	active="journal"
 	shareImage={d.socialImage ?? undefined}
@@ -142,7 +145,7 @@ const schema = articleSchema({
 		{d.draft && <DraftNotice />}
 
 		<div class="review__title">
-			<Eyebrow kind="Yarn review" tone="journal" rest={`· ${formatDate(d.date)}`} />
+			<Eyebrow kind={YARN_KIND} tone="journal" rest={`· ${formatDate(d.date)}`} />
 			<h1>{d.title}</h1>
 			{d.standfirst && <p class="review__standfirst">{d.standfirst}</p>}
 

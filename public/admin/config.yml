@@ -329,7 +329,7 @@ collections:
       - label: Kind
         name: kind
         widget: select
-        options: ['Garment making', 'Yarn and fibres', 'How-tos']
+        options: ['Garment making', 'Yarn notes', 'How-tos']
         hint: Drives the eyebrow colour and the journal filters.
 
       - label: Draft
@@ -415,16 +415,16 @@ collections:
       - { label: Body, name: body, widget: markdown }
 
   # ---------------------------------------------------------------- reviews
-  # A yarn review is a spec sheet with a short essay at the end — the mirror of a test
-  # note, which is an essay with tables in it. Hence its own collection: almost none of
-  # the fields overlap.
+  # A yarn note is a spec sheet with a short essay at the end — the mirror of a test note,
+  # which is an essay with tables in it. Hence its own collection: almost none of the
+  # fields overlap. Called notes, not reviews: this is writing down what a yarn did.
   #
   # NOTHING here is required by the panel, so a half-filled draft always saves. What a
   # *published* review needs is enforced by the schema instead — see the superRefine in
   # src/content.config.ts. Untick Draft and the build names anything still missing.
   - name: reviews
-    label: Yarn reviews
-    label_singular: Yarn review
+    label: Yarn notes
+    label_singular: Yarn note
     folder: src/content/reviews
     create: true
     extension: md

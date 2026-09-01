@@ -270,7 +270,7 @@ const posts = defineCollection({
 			heroImage: optionalString,
 			gallery: galleryField,
 			/** Drives the eyebrow and the journal filters. */
-			kind: z.enum(['Garment making', 'Yarn and fibres', 'How-tos']),
+			kind: z.enum(['Garment making', 'Yarn notes', 'How-tos']),
 			/** The muted line under the excerpt, e.g. "6 yarns · 32 sts × 24 rows hdc". */
 			method: optionalString,
 			tags: z.array(z.string()).default([]),
