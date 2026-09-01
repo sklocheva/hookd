@@ -97,48 +97,45 @@ the name was claimed by someone else's misconfigured project — the opposite of
 probing name availability, calibrate against a known-free control name so you know what "free"
 actually looks like.
 
+## Trusting the wrong evidence
+
+**A required field that blocks a draft gets filled with lies, not skipped.** The review form
+demanded alt text, a gauge and a meta description before it would save. The first real review
+came back with `heroImageAlt: no`, `ballBandGauge: no` and all four gauge fields `"0"` — typed
+only to get past validation, and rendered on the page as a literal "no" and a gauge reading
+0 / 0 / 0. **Validate at publish, not at save.** A gate in front of unfinished work does not
+protect the data, it corrupts it.
+
+**The built HTML can be right while the page is wrong.** A gallery's main photograph vanished
+at runtime: the caption element and every slide shared a `data-caption` attribute, so
+`querySelector` matched slide 0 and writing to it replaced the image with text. `npm run build`,
+`npm run check` and the audit all passed, and the markup in `dist/` was correct. It took reading
+the live DOM to see. **When something looks wrong on the page, inspect the page** — not the file
+that generated it.
+
 ## Environment traps on this machine
 
-**Reading the wrong config key, twice, to produce two wrong conclusions.** These notes said a
-`gh` credential helper was configured local to this repo. That was correct. I checked it with
-`git config --local --get-all credential.helper`, got nothing, and rewrote the docs to say the
-helper was Git Credential Manager. The real setting is URL-scoped —
-`credential.https://github.com.helper = !gh auth git-credential`, with an empty first value to
-clear the inherited helper — and the bare key is empty by design. **Query
-`credential.https://github.com.helper`, or `git config --list` and read, before concluding
-anything about how this repo authenticates.**
+**GitHub auth — three wrong conclusions in one thread, none of them checked twice.**
 
-Then, on one `gh auth status` failure, I recorded "gh is not logged in" as fact. It was logged
-in; the command had failed once coming out of sleep. Two documented "corrections" were pushed
-before either was checked a second time. The pattern is the one this file exists for: a single
-observation, treated as settled, built on immediately.
+1. `git config --local --get-all credential.helper` returned nothing, so the docs were rewritten
+   to say the helper was Git Credential Manager. The setting is **URL-scoped**:
+   `credential.https://github.com.helper = !gh auth git-credential`, preceded by an empty value
+   that clears the inherited helper. The bare key is empty by design. **Read `git config --list`
+   before concluding anything about how this repo authenticates.**
+2. `gh auth status` failed once coming out of sleep, and "gh is not logged in" went into two
+   files as fact. It was logged in.
+3. `X-Oauth-Scopes` was read three times over a few minutes, still lacked `workflow`, and
+   "cannot be fixed, cause unknown" was written down and the CI workflow deleted. It attached
+   shortly after. **The OAuth grant and the token are separate** — a token's scopes are frozen
+   when it is issued, so the grant page can show a permission the current token does not carry.
 
-**`gh auth refresh` is unusable on this machine.** It reports "not logged in to any hosts" while
-`gh auth status` shows a valid login, because the token lives in the Windows keyring rather than
-inline in `hosts.yml`. `gh auth login --hostname github.com --git-protocol https --web --scopes
-workflow` works instead, and git picks the new token up with no config change — the helper is
-already pointed at gh.
+`gh auth refresh` does not work here at all: the token lives in the Windows keyring rather than
+in `hosts.yml`, so it reports "not logged in to any hosts". Use
+`gh auth login --hostname github.com --git-protocol https --web --scopes workflow`. A push
+touching `.github/workflows/` is refused without that scope; nothing else about pushing is.
 
-**A push touching `.github/workflows/` is rejected**: "refusing to allow an OAuth App to create
-or update workflow ... without `workflow` scope". Nothing else about pushing is affected, so it
-only bites when adding CI.
-
-**Adding that scope takes longer to propagate than it takes to check.** `gh auth refresh` is
-unusable here — the token lives in the Windows keyring rather than in `hosts.yml`, so it reports
-"not logged in to any hosts" while `gh auth status` shows a valid login. The route that works is
-`gh auth login --hostname github.com --git-protocol https --web --scopes workflow`.
-
-The trap is what happened next: the app grant on github.com showed "Update github action
-workflows" while `X-Oauth-Scopes` still returned `gist, read:org, repo` — because **the grant and
-the token are separate**, and a token's scopes are frozen when it is issued. I read the header
-three times over several minutes, concluded the scope could not be attached, wrote "do not retry"
-into this file and deleted the workflow. It attached. **Re-check `gh api -i user` later rather
-than declaring a cause unknown**, and if it is genuinely stuck, the GitHub web UI writes workflow
-files from the browser session with no token involved.
-
-**A push touching `.github/workflows/` is rejected.** GitHub returns "refusing to allow an
-OAuth App to create or update workflow ... without `workflow` scope". GCM's stored token lacks
-that scope. Nothing else about pushing is affected, so this only bites when adding CI.
+**The pattern, and the reason this file exists:** one observation, treated as settled, built on
+immediately. Every entry above is the same shape.
 
 **Node isn't on the inherited PATH.** Fresh tool shells inherit a stale environment. Prepend in
 PowerShell:

@@ -117,26 +117,20 @@ from the form.
 
 ## Gotchas
 
-- **`astro preview` daemonises.** The npm process exits immediately while the server keeps
-  running, so never wait on the child — poll the port. Stop it with `npx astro preview stop`,
-  not Ctrl-C. The driver handles this; you will hit it if you spawn preview yourself.
-- **Killing the preview process leaves `astro preview` thinking it is still running.** Its
-  own bookkeeping survives, so the next `npm run preview` prints "already running" and exits
-  without starting anything — and the driver then waits for a server nobody will start. It
-  failed three audits in a row before it was understood. The driver now runs
-  `astro preview stop` before spawning; do the same by hand if you kill it.
-- **"Preview did not come up" can be a lie.** `astro preview` has been seen to bind **::1
-  only**: `curl http://[::1]:4321/` returns 200 while `127.0.0.1` refuses, and Node's `fetch`
-  resolved `localhost` to IPv4 — so the driver reported the server missing while it was
-  serving. `isUp` now tries both stacks. If this recurs, check
-  `npx astro preview status` before believing the driver.
-- **A stale listener can hold 4321 without serving.** `astro preview stop` did not clear it and
-  no `node` process was listed; the port showed LISTEN under a pid that answered nothing.
-  `Get-NetTCPConnection -LocalPort 4321` finds the owner, then stop that process.
-- **Reuse the running preview.** The driver skips build+serve if 4321 already answers. If you
-  changed source and the audit looks stale, stop the preview first — otherwise you are
-  auditing the previous build. `npx astro preview status` prints the pid and uptime, which is
-  the quickest way to tell whether what you are looking at predates your edit.
+- **The preview is the flakiest part of this, and it lies in three ways.** All three have
+  cost real time; the fix is always to look before believing the message.
+
+  | Symptom | What is actually true | Do this |
+  | --- | --- | --- |
+  | "Preview did not come up" | It is up. `astro preview` sometimes binds **::1 only**, and Node's `fetch` resolves `localhost` to IPv4. `isUp` now tries both. | `npx astro preview status` |
+  | "already running", nothing serves | You killed the process. Astro's own record survives, so the next start exits without starting anything. The driver stops before spawning now. | `npx astro preview stop`, then retry |
+  | The audit passes but the page looks old | The driver reuses a live server and skips the rebuild. | Stop the preview, then audit |
+
+  A stale listener can also hold 4321 while answering nothing — `Get-NetTCPConnection
+  -LocalPort 4321` in PowerShell names the owner, then stop that pid.
+
+  **`astro preview` daemonises**: the npm process exits while the server keeps running, so
+  never wait on the child, and stop it with `npx astro preview stop` rather than Ctrl-C.
 - **`--hide-scrollbars` is load-bearing.** Without it Chrome's scrollbar eats ~15px of the
   viewport and the overflow check reports false positives at 375px.
 - **Poll `document.readyState`, don't trust `Page.loadEventFired`.** It can fire before the

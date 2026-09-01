@@ -157,6 +157,9 @@ measurement each size is cut for, yardage per size, US/UK terms.
   columns from the labels used, so keep a label spelled identically across every size or it
   becomes two columns. Each size also carries `fitsBodyCm`, the body it is cut for, shown
   next to the finished numbers so a maker sees the ease instead of calculating it.
+
+### Yarn reviews
+
 - **A review's judgements are six fixed keys, not a free list** (stitch definition, split
   resistance, softness, next to skin, drape, frogging), each a 1–5 score *and* a sentence.
   Fixed so two reviews can be read against each other; the sentence is required because a
@@ -250,13 +253,20 @@ Things that have already gone wrong here, and cost real time:
   and reading only that produced a confidently wrong conclusion once.
 - **Push from PowerShell.** `gh` is not on Git Bash's PATH, so the helper cannot run there and
   the push fails with `gh: command not found` then "Invalid username or token".
-- **The gh token has no `workflow` scope** (`gist, read:org, repo`), so any push that adds or
-  edits `.github/workflows/` is rejected: "refusing to allow an OAuth App to create or update
-  workflow ... without `workflow` scope". Nothing else is affected.
+- **The gh token now carries `workflow`**, so `.github/workflows/` can be pushed. It did not
+  before, and a push touching CI is rejected without it: "refusing to allow an OAuth App to
+  create or update workflow". Nothing else about pushing needs it.
 - **`gh auth refresh` does not work here** — it reports "not logged in to any hosts" even
   though `gh auth status` shows a valid login, because the token is in the Windows keyring
-  rather than in `hosts.yml`. Use `gh auth login ... --scopes workflow` instead, which
-  re-runs the OAuth flow and writes a token that git picks up immediately.
+  rather than in `hosts.yml`. Use `gh auth login ... --scopes workflow` instead. **The grant
+  and the token are separate**: github.com can show the permission granted while the current
+  token still lacks it, because scopes are frozen when a token is issued. Re-check
+  `gh api -i user` a minute later rather than concluding it cannot be done — that mistake
+  deleted a working CI workflow once.
+- **CI runs `npm run check`, `npm run build` and the CMS parity script** on every push, in
+  `.github/workflows/build.yml`. It cannot stop Cloudflare; it puts a red X on the commit,
+  which is the notification Cloudflare never sends — and it is the only guard on entries
+  published from `/admin`, which reach `main` with nobody watching a terminal.
 
 ## Out of scope
 
