@@ -2,6 +2,7 @@
 title: Nordfjord Fjellull DK
 date: 2026-09-01
 draft: true # invented example content — not for publication
+previewId: 8d764f9d-69ad-4604-a0b8-43d34929d553
 standfirst: >-
   Rustic single-ply Norwegian wool. Superb stitch definition, and it grows — read the blocked
   gauge, not the ball band.

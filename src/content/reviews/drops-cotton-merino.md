@@ -2,7 +2,8 @@
 title: Drops Cotton Merino
 date: 2026-09-01
 updated: ''
-draft: false
+draft: true
+previewId: 07a13871-ce17-4ccb-b40e-cdea437c0b80
 standfirst: Soft and colorful, safe for baby and adult garments.
 metaDescription: cotton merino drops
 socialImage: /og-default.png

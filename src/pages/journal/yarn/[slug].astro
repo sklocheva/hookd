@@ -13,6 +13,7 @@ import { YARN_KIND } from '../../../lib/taxonomy';
 import { hookLabel } from '../../../lib/hooks';
 import { resolveImage } from '../../../lib/images';
 import { articleSchema } from '../../../lib/schema';
+import { segment } from '../../../lib/drafts';
 
 /**
  * A yarn note: a spec sheet with a short essay at the end.
@@ -23,9 +24,11 @@ import { articleSchema } from '../../../lib/schema';
  *
  * Called notes, not reviews: the author is writing down what a yarn did, not scoring it.
  */
+// A draft is built at its preview id instead of its real slug, so the URL it will own
+// once published stays a 404 until then. See src/lib/drafts.ts.
 export const getStaticPaths = (async () => {
 	const reviews = await getCollection('reviews');
-	return reviews.map((review) => ({ params: { slug: review.id }, props: { review } }));
+	return reviews.map((review) => ({ params: { slug: segment(review) }, props: { review } }));
 }) satisfies GetStaticPaths;
 
 const { review } = Astro.props;

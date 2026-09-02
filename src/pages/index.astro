@@ -5,9 +5,10 @@ import Hero from '../components/Hero.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import { formatDate, patternSpecLine } from '../lib/format';
 
+// Drafts are absent from every listing, this one included — see src/lib/drafts.ts.
 const [patterns, posts] = await Promise.all([
-	getCollection('patterns'),
-	getCollection('posts'),
+	getCollection('patterns', ({ data }) => !data.draft),
+	getCollection('posts', ({ data }) => !data.draft),
 ]);
 
 type FeedItem = {
@@ -48,34 +49,52 @@ const feed: FeedItem[] = [
 	.slice(0, 4);
 
 
-// Editorially pinned, in rotation order. Deliberately hand-picked rather than derived —
-// this is the one editorial slot on the site.
-const pinned = [
+/**
+ * Editorially pinned, in rotation order. Hand-picked rather than derived — this is the
+ * one editorial slot on the site.
+ *
+ * Keyed on the entry rather than on a written-out URL. The hrefs used to be typed here as
+ * strings, which meant a pick could quietly point at a page that no longer existed: the
+ * moment drafts stopped being served at their real slug, two of these three pinned the
+ * homepage to a 404. Resolving against the published entries means a pick that is
+ * unpublished, renamed or deleted drops out of the rotation instead of breaking it.
+ */
+const picks = [
 	{
-		title: 'Halland Cowl',
+		collection: 'patterns' as const,
+		slug: 'halland-cowl',
 		excerpt:
 			'A single-skein cowl in garter-look crochet, picked to open the season — free while the wool lasts.',
 		cta: 'Read the pattern →',
-		href: '/patterns/halland-cowl/',
 		photo: 'cowl styled',
 	},
 	{
-		title: 'Fjord Yoke Pullover',
+		collection: 'patterns' as const,
+		slug: 'fjord-yoke-pullover',
 		excerpt:
 			'The one everyone asks about — a top-down circular yoke, still our most-repeated pattern.',
 		cta: 'Read the pattern →',
-		href: '/patterns/fjord-yoke-pullover/',
 		photo: 'blanket folded, textured',
 	},
 	{
-		title: 'Leftover wool into a cat toy',
+		collection: 'posts' as const,
+		slug: 'leftover-wool-cat-toy',
 		excerpt:
 			'Non-superwash scraps, a yarn needle and a normal wash — a light, bouncy felted ball with nothing synthetic in it.',
 		cta: 'Read the notes →',
-		href: '/journal/leftover-wool-cat-toy/',
 		photo: 'felted wool balls',
 	},
 ];
+
+const pinned = picks.flatMap((pick) => {
+	const pool = pick.collection === 'patterns' ? patterns : posts;
+	const entry = pool.find((e) => e.id === pick.slug);
+	if (!entry) return [];
+
+	const base = pick.collection === 'patterns' ? '/patterns' : '/journal';
+	// The title comes from the entry, so a pin cannot drift from what the page says.
+	return [{ ...pick, title: entry.data.title, href: `${base}/${entry.id}/` }];
+});
 ---
 
 <Base
@@ -84,45 +103,51 @@ const pinned = [
 >
 	<h1 class="visually-hidden">Hookd — free crochet patterns and yarn tests</h1>
 
-	{/* All three pinned entries are rendered server-side; the script only toggles which
-	    is visible. Crawlers that fetch but do not execute JS still see the first. */}
-	<section class="shell pinned" data-rotator>
-		{
-			pinned.map((item, i) => (
-				<div class="pinned__slide" data-slide hidden={i !== 0}>
-					<a href={item.href} class="pinned__media" tabindex={i === 0 ? undefined : -1}>
-						<Hero alt={item.title} ratio="4/5" caption={item.photo} widths={[300, 520, 1040]} sizes="(min-width: 1160px) 520px, 100vw" loading="eager" />
-					</a>
-					<div class="pinned__text">
-						<div class="pinned__eyebrow">Pinned</div>
-						<h2>{item.title}</h2>
-						<p>{item.excerpt}</p>
-						<a href={item.href} class="pinned__cta">
-							{item.cta}
-						</a>
-					</div>
-				</div>
-			))
-		}
-
-		<div class="dots" role="tablist" aria-label="Pinned posts">
+	{
+		/* A pick that is unpublished or deleted drops out above, so this can end up
+		   empty — an empty rotator is a bordered box with nothing in it. */
+		/* Every pinned entry is rendered server-side; the script only toggles which is
+		   visible. Crawlers that fetch but do not execute JS still see the first. */
+		pinned.length > 0 && (
+			<section class="shell pinned" data-rotator>
 			{
 				pinned.map((item, i) => (
-					<button
-						type="button"
-						class:list={['dot', { 'dot--on': i === 0 }]}
-						data-dot
-						data-index={i}
-						role="tab"
-						aria-selected={i === 0 ? 'true' : 'false'}
-						aria-label={`Show pinned post: ${item.title}`}
-					>
-						<span class="dot__mark" aria-hidden="true" />
-					</button>
+					<div class="pinned__slide" data-slide hidden={i !== 0}>
+						<a href={item.href} class="pinned__media" tabindex={i === 0 ? undefined : -1}>
+							<Hero alt={item.title} ratio="4/5" caption={item.photo} widths={[300, 520, 1040]} sizes="(min-width: 1160px) 520px, 100vw" loading="eager" />
+						</a>
+						<div class="pinned__text">
+							<div class="pinned__eyebrow">Pinned</div>
+							<h2>{item.title}</h2>
+							<p>{item.excerpt}</p>
+							<a href={item.href} class="pinned__cta">
+								{item.cta}
+							</a>
+						</div>
+					</div>
 				))
 			}
-		</div>
-	</section>
+
+			<div class="dots" role="tablist" aria-label="Pinned posts">
+				{
+					pinned.map((item, i) => (
+						<button
+							type="button"
+							class:list={['dot', { 'dot--on': i === 0 }]}
+							data-dot
+							data-index={i}
+							role="tab"
+							aria-selected={i === 0 ? 'true' : 'false'}
+							aria-label={`Show pinned post: ${item.title}`}
+						>
+							<span class="dot__mark" aria-hidden="true" />
+						</button>
+					))
+				}
+			</div>
+		</section>
+		)
+	}
 
 	<div class="shell latest-bar">
 		<div class="latest-bar__title">Latest</div>

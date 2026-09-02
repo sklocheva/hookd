@@ -10,6 +10,7 @@ tags: ['yarn', 'cyc', 'labels']
 heroImageAlt: A dozen yarn ball bands photographed from directly above, arranged in a grid.
 socialImage: /og-default.png
 draft: true  # invented example content — not for publication
+previewId: a896a63c-983d-4a61-971c-0d12c510ef66
 metaDescription: What a ball band actually promises, what it doesn't, and the one number worth more than the stated gauge.
 ---
 

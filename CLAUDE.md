@@ -50,10 +50,17 @@ thing that does.
 
 **The CMS writes blank three different ways, and every one of them has broken a build.**
 `''` for an untouched text field, `null` for a number, and `null` for an *object* the author
-never opened. `optionalString`, `optionalNumber` and `blankToUndefined` in
-`src/content.config.ts` normalise all three to undefined. The rule that generalises them:
+never opened. `optionalString`, `optionalNumber`, `optionalUrl` and `blankToUndefined` in
+`src/content.config.ts` normalise all of them to undefined. The rule that generalises them:
 **if the panel can leave a field blank, the schema has to accept blank** — a required field
 in front of unfinished work does not protect the data, it stops the site building.
+
+This has now happened four times, the last on `ravelryUrl` and `pdfUrl`: `.url()` rejects
+`''` just as `.date()` and `.number()` do, and publishing the first real pattern failed on two
+fields nobody had touched. **A `.default()` does not save you** — a default fills in for
+`undefined` only, so `bodyChartUrl: ''` was validated as a URL and failed while carrying a
+perfectly good default. Every optional field has been swept; the wrappers are the only
+correct way to add another.
 
 **Zod here is version 4, and its API differs from the Zod 3 examples in the wild.** A custom
 message is `.refine(check, { error: (issue) => '...' })`. The Zod 3 form — a second *function*
@@ -104,12 +111,40 @@ body. Both exist for one reason and break the same way. Sveltia also formats dat
 **A draft says so on the page.** `DraftNotice.astro` renders at the top of any entry still
 marked draft, with the time the page was built. That timestamp is what makes a draft usable as
 a preview: save in `/admin`, follow the link to the page, and the stamp says whether the build
-has caught up with the save yet. It also stops a half-finished entry looking published, which
-matters because drafts are visible.
+has caught up with the save yet.
 
-**Drafts are hidden from search, not from visitors.** `draft: true` keeps an entry out of the
-sitemap, the RSS feed, and adds `noindex` — but it still renders and is still listed on the
-homepage and the indexes. No listing filters drafts.
+**A draft is unlisted, and is not served at its real URL.** `src/lib/drafts.ts` is the single
+place this lives. A draft is absent from the homepage, both indexes, the filter routes, the
+related strip, the feed and the sitemap; and it is built at its `previewId` — a UUID the CMS
+generates on creation — so the URL it will eventually own returns 404 until it is published.
+Publishing moves it to its real slug, which is the point: a published pattern is meant to be
+found, and a random string is not what belongs in a search result. Nothing links to the
+preview address, so nothing breaks when it stops resolving.
+
+**This hides drafts from readers, not from the world.** The repository is public — the
+frontmatter, the `previewId` and the unfinished prose are all readable on GitHub. What it
+defends against is someone browsing the site or trying the obvious URL. A draft that genuinely
+must not be seen has to stop being built at all, which means a second Worker or a branch, not
+a schema change.
+
+**`/go/<previewId>/` is the address `/admin` links to**, not the page itself.
+`preview_path` is one template per collection and cannot ask whether an entry is a draft, so a
+link to either address would break in one of the two states. The `/go/` page forwards to
+whichever is live — a meta refresh, because static hosting has no server to issue a 3xx. It is
+keyed on the preview id and never on the slug: a guessable address that redirects to a draft
+would leak exactly what the id exists to hide.
+
+**The sitemap filter is an allowlist.** `astro.config.mjs` reads frontmatter and admits only
+the slugs of *published* entries under the three entry routes. It was a blocklist of draft
+slugs, which silently stopped matching when the addresses changed and had never covered the
+reviews collection at all — two draft yarn notes went live in the sitemap carrying `noindex`,
+which is the exact contradiction that code exists to prevent. An address it does not
+recognise is now dropped rather than published.
+
+**Nothing may link to an entry by a hand-typed URL.** The homepage's pinned slots did, and
+two of the three pointed at a 404 the moment drafts moved. They are keyed on the entry now and
+resolved against the published set, so an unpublished or renamed pick drops out of the
+rotation instead of breaking it.
 
 **Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
 `/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real
@@ -225,7 +260,11 @@ measurement each size is cut for, yardage per size, US/UK terms.
   Cabled, Chainette, Roving) is what lets two reviews be compared; the line carries what
   the author sees on untwisting a length, which no category expresses.
 - **A review with no photographs is a finished page**, not a broken one. Both image blocks drop
-  out and nothing else moves. No placeholder art, no empty frame.
+  out and nothing else moves. No placeholder art, no empty frame. **Alt text is therefore
+  required for a photograph, not in advance of one** — the publish gate asked for
+  `heroImageAlt` unconditionally and blocked a complete note that simply had no hero. Patterns
+  are the opposite and require it either way, because there a missing photo is `PhotoPending`,
+  a designed state that ships.
 - US crochet terms throughout.
 
 ## Conventions

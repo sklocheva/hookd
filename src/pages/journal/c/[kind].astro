@@ -8,6 +8,7 @@ import EmptyState from '../../../components/EmptyState.astro';
 import { slugify } from '../../../lib/format';
 import { kindHref, kindsInUse } from '../../../lib/taxonomy';
 import { allJournalEntries } from '../../../lib/journal';
+import { published } from '../../../lib/drafts';
 
 // Real static routes rather than client-side filtering, because of the no-JS rule.
 //
@@ -16,7 +17,7 @@ import { allJournalEntries } from '../../../lib/journal';
 // entries to a reader.
 export const getStaticPaths = (async () => {
 	const [posts, reviews] = await Promise.all([getCollection('posts'), getCollection('reviews')]);
-	const entries = allJournalEntries(posts, reviews);
+	const entries = allJournalEntries(published(posts), published(reviews));
 
 	return kindsInUse(entries.map((e) => e.kind)).map((kind) => ({
 		params: { kind: slugify(kind) },
@@ -30,7 +31,7 @@ const [allPosts, allReviews] = await Promise.all([
 	getCollection('posts'),
 	getCollection('reviews'),
 ]);
-const allEntries = allJournalEntries(allPosts, allReviews);
+const allEntries = allJournalEntries(published(allPosts), published(allReviews));
 
 const filters = [
 	{ label: 'All', href: '/journal/' },

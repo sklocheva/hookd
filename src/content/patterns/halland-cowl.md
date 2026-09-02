@@ -22,6 +22,7 @@ gallery:
 heroImageAlt: Three small felted wool balls, fuzzy and pale pink, on a sage green woven cloth
 socialImage: /og-default.png
 draft: true  # invented example content — not for publication
+previewId: 8fd8ddb6-8017-4193-8160-e864f675d29e
 metaDescription: A free single-skein cowl in garter-look crochet — one evening, one ball, no shaping.
 
 difficulty: Easy

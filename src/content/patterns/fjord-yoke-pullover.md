@@ -7,6 +7,7 @@ summary: >-
 heroImageAlt: A person wearing a blue DK pullover with a patterned circular yoke.
 socialImage: /og-default.png
 draft: true  # invented example content — not for publication
+previewId: 10de578a-4969-4cf3-b1cf-3f7b682dd59d
 metaDescription: A free top-down circular-yoke pullover in DK, XS–3X, with short-row back neck shaping.
 
 # No heroImage: photography is not shot yet. This drives the designed

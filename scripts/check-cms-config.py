@@ -59,7 +59,10 @@ def schema_fields(src: str, collection: str) -> set[str]:
     for ch_i, line in enumerate(body.splitlines()):
         stripped = line.strip()
         if depth == 0 and not stripped.startswith('//') and not stripped.startswith('*'):
-            m = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)\s*:', stripped)
+            # `name: value` and the shorthand `name,`. Without the second form a field
+            # declared as a shared schema (`previewId,`) reads as missing, and the script
+            # reports the form and the schema out of step when they agree.
+            m = re.match(r'^([A-Za-z_][A-Za-z0-9_]*)\s*(?::|,\s*$)', stripped)
             if m:
                 names.add(m.group(1))
         depth += line.count('{') + line.count('(') + line.count('[')

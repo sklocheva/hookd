@@ -4,9 +4,9 @@
  *
  * It does two jobs.
  *
- * **It says the page is a draft.** Drafts render and are listed like anything else — they
- * are only kept out of search, the sitemap and the feed — so without this a half-finished
- * review is indistinguishable from a published one, to a visitor and to the author.
+ * **It says the page is a draft.** A draft is unlisted and served at an unguessable
+ * address (see src/lib/drafts.ts), so the only way to be here is to have followed the
+ * link from /admin — but the page itself looks finished, and this says it is not.
  *
  * **It says when the page was built.** That is what makes it usable as a preview: save in
  * /admin, open the page, and the timestamp tells you whether you are looking at your last
@@ -25,8 +25,8 @@ const day = built.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', 
 <aside class="draft">
 	<p class="draft__label">Draft</p>
 	<p class="draft__body">
-		Not published. It is visible to anyone with the link but kept out of search, the sitemap
-		and the feed. This page was built <time datetime={iso} data-built>{day}, {utc} UTC</time
+		Not published. This is a private address — the page is listed nowhere on the site and
+		its real URL is still a 404. Built <time datetime={iso} data-built>{day}, {utc} UTC</time
 		> — if that is before your last save, the deploy has not landed yet.
 	</p>
 </aside>

@@ -7,38 +7,67 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 /**
- * Slugs of entries marked `draft: true`, read straight from the frontmatter.
+ * The slugs of every **published** entry in one collection.
  *
- * Drafts carry noindex, but a noindex page listed in the sitemap is contradictory and
- * Search Console reports it as an error — so they are dropped from the sitemap too.
- * Read here rather than passed in because the sitemap integration is configured before
- * the content collections exist.
+ * Read straight from the frontmatter rather than from the content collections, because
+ * the sitemap integration is configured before those exist.
+ *
+ * This is an allowlist, not a blocklist, and deliberately so. Drafts are built at an
+ * unguessable preview address (see src/lib/drafts.ts), and an earlier blocklist here
+ * listed the *real* slugs of drafts — which stopped matching the moment the address
+ * changed, and had never covered the reviews collection at all. Two draft yarn notes
+ * were live in the sitemap carrying `noindex`, which is the exact contradiction this
+ * code exists to prevent. Listing what may appear means an address this file does not
+ * recognise is dropped rather than published.
  */
-function draftPaths() {
-	const collections = { patterns: 'patterns', posts: 'journal' };
-	const paths = [];
+function publishedSlugs(/** @type {string} */ dir) {
+	const slugs = new Set();
+	const base = fileURLToPath(new URL(`./src/content/${dir}/`, import.meta.url));
 
-	for (const [dir, route] of Object.entries(collections)) {
-		const base = fileURLToPath(new URL(`./src/content/${dir}/`, import.meta.url));
-		let files = [];
-		try {
-			files = readdirSync(base);
-		} catch {
-			continue; // collection not created yet
-		}
-		for (const file of files) {
-			if (!/\.mdx?$/.test(file)) continue;
-			const body = readFileSync(base + file, 'utf8');
-			const frontmatter = body.split('---')[1] ?? '';
-			if (/^draft:\s*true/m.test(frontmatter)) {
-				paths.push(`/${route}/${file.replace(/\.mdx?$/, '')}/`);
-			}
-		}
+	let files = [];
+	try {
+		files = readdirSync(base);
+	} catch {
+		return slugs; // collection not created yet
 	}
-	return paths;
+
+	for (const file of files) {
+		if (!/\.mdx?$/.test(file)) continue;
+		const frontmatter = readFileSync(base + file, 'utf8').split('---')[1] ?? '';
+		if (/^draft:\s*true/m.test(frontmatter)) continue;
+		slugs.add(file.replace(/\.mdx?$/, ''));
+	}
+	return slugs;
 }
 
-const drafts = new Set(draftPaths());
+const live = {
+	patterns: publishedSlugs('patterns'),
+	posts: publishedSlugs('posts'),
+	reviews: publishedSlugs('reviews'),
+};
+
+/**
+ * Whether a built page belongs in the sitemap.
+ *
+ * Anything that is not an entry page — the indexes, the category and kind routes, the
+ * legal pages — passes through. An entry page is admitted only if its slug belongs to a
+ * published entry, so both a draft's preview address and the /go/ links are excluded
+ * without this file having to know how either is spelled.
+ */
+function inSitemap(/** @type {string} */ pathname) {
+	if (pathname.startsWith('/go/')) return false;
+
+	const yarn = pathname.match(/^\/journal\/yarn\/([^/]+)\/$/);
+	if (yarn) return live.reviews.has(yarn[1]);
+
+	const journal = pathname.match(/^\/journal\/([^/]+)\/$/);
+	if (journal) return journal[1] === 'c' || live.posts.has(journal[1]);
+
+	const pattern = pathname.match(/^\/patterns\/([^/]+)\/$/);
+	if (pattern) return pattern[1] === 'c' || live.patterns.has(pattern[1]);
+
+	return true;
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -51,10 +80,7 @@ export default defineConfig({
 	integrations: [
 		mdx(),
 		sitemap({
-			filter: (page) => {
-				const path = new URL(page).pathname;
-				return !drafts.has(path);
-			},
+			filter: (page) => inSitemap(new URL(page).pathname),
 		}),
 	],
 });

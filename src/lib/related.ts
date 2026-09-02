@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
+import { published } from './drafts';
 
 type Pattern = CollectionEntry<'patterns'>;
 type Post = CollectionEntry<'posts'>;
@@ -86,9 +87,18 @@ export function getRelated(
 	source:
 		| { type: 'pattern'; entry: Pattern }
 		| { type: 'post'; entry: Post },
-	all: { patterns: Pattern[]; posts: Post[] },
+	candidates: { patterns: Pattern[]; posts: Post[] },
 	limit = 3
 ): RelatedItem[] {
+	// Drafts are never offered as a link, including a hand-picked one: an author can pick
+	// an entry and then unpublish it, and "read next" is exactly the kind of listing this
+	// site's draft rule exists to keep clean. Filtered here rather than at the two call
+	// sites so neither can forget.
+	const all = {
+		patterns: published(candidates.patterns),
+		posts: published(candidates.posts),
+	};
+
 	const d = source.entry.data;
 	const selfHref =
 		source.type === 'pattern' ? `/patterns/${source.entry.id}/` : `/journal/${source.entry.id}/`;

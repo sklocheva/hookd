@@ -1,0 +1,59 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import { entryPath, type DraftCollection } from '../../lib/drafts';
+
+/**
+ * One stable address per entry, which follows it from draft to published.
+ *
+ * `/admin` needs a link to "view this entry on the site", and Sveltia's `preview_path`
+ * is a single template per collection — it cannot ask whether the entry is a draft. A
+ * template pointing at the preview id would 404 the moment the entry was published; one
+ * pointing at the real slug would 404 while it was still a draft. So the CMS links here
+ * instead, and this page forwards to wherever the entry currently lives.
+ *
+ * Keyed on `previewId`, never on the slug: a guessable address that redirects to a draft
+ * would leak exactly what the preview id exists to hide. An entry with no previewId gets
+ * no page here — the fallback address in src/lib/drafts.ts still serves the draft, but
+ * nothing advertises it.
+ *
+ * A meta refresh rather than a real 3xx, because this site is static assets with no
+ * server to issue one. The link is in the markup too, so it works with no JavaScript and
+ * with refresh disabled.
+ */
+export const getStaticPaths = (async () => {
+	const collections = ['patterns', 'posts', 'reviews'] as const;
+	const entries = await Promise.all(collections.map((c) => getCollection(c)));
+
+	return collections.flatMap((collection, i) =>
+		entries[i]
+			.filter((entry) => Boolean(entry.data.previewId))
+			.map((entry) => ({
+				params: { id: entry.data.previewId! },
+				props: {
+					target: entryPath(collection as DraftCollection, entry),
+					title: entry.data.title,
+					draft: entry.data.draft,
+				},
+			}))
+	);
+}) satisfies GetStaticPaths;
+
+const { target, title, draft } = Astro.props;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		{/* Never indexed: it is a redirect, and for a draft it is the way in. */}
+		<meta name="robots" content="noindex, nofollow" />
+		<meta http-equiv="refresh" content={`0; url=${target}`} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<p>
+			{draft ? 'Draft — ' : ''}<a href={target}>{title}</a>
+		</p>
+	</body>
+</html>

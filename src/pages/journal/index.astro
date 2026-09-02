@@ -6,9 +6,12 @@ import JournalList from '../../components/JournalList.astro';
 import EmptyState from '../../components/EmptyState.astro';
 import { kindHref, kindsInUse } from '../../lib/taxonomy';
 import { allJournalEntries } from '../../lib/journal';
+import { published } from '../../lib/drafts';
 
+// Drafts are absent from every listing — and because the filter row is built from the
+// kinds actually in use, a section backed only by drafts disappears with them.
 const [posts, reviews] = await Promise.all([getCollection('posts'), getCollection('reviews')]);
-const entries = allJournalEntries(posts, reviews);
+const entries = allJournalEntries(published(posts), published(reviews));
 
 const filters = [
 	{ label: 'All', href: '/journal/', active: true },

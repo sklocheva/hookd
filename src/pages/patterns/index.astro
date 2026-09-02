@@ -5,8 +5,11 @@ import PageHead from '../../components/PageHead.astro';
 import PatternGrid from '../../components/PatternGrid.astro';
 import EmptyState from '../../components/EmptyState.astro';
 import { byDateDesc, categoryHref, categoryLabel, patternCategoriesInUse } from '../../lib/taxonomy';
+import { published } from '../../lib/drafts';
 
-const patterns = (await getCollection('patterns')).sort(byDateDesc);
+// Drafts are absent from every listing — and because the filter row is built from the
+// categories actually in use, a section backed only by drafts disappears with them.
+const patterns = published(await getCollection('patterns')).sort(byDateDesc);
 
 // Text links, matching the journal index. Two index pages with two different filter
 // treatments was the problem the pill toggles introduced.

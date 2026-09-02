@@ -58,7 +58,12 @@ collections:
     format: frontmatter
     slug: '{{fields.title | slugify}}'
     summary: '{{title}} — {{difficulty}}'
-    preview_path: patterns/{{slug}}
+    # The "view on site" link. It points at /go/<previewId>/ rather than at the page,
+    # because preview_path is one template per collection and cannot ask whether the
+    # entry is a draft: a link to the preview address would break on publishing, and a
+    # link to the real slug would break while the entry was still a draft. /go/ forwards
+    # to whichever of the two is live right now. See src/pages/go/[id].astro.
+    preview_path: go/{{fields.previewId}}
     fields:
       - { label: Title, name: title, widget: string }
       - { label: Publish date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
@@ -81,8 +86,15 @@ collections:
         widget: boolean
         default: false
         hint: >-
-          Draft entries still appear on the site but are kept out of Google, the sitemap
-          and the RSS feed. Use it for anything not ready to be found.
+          A draft is not listed anywhere on the site — not on the homepage, the indexes,
+          the feed or the sitemap — and is served at the unguessable preview address
+          below rather than its real URL. Untick it to publish.
+      - label: Preview address
+        name: previewId
+        widget: uuid
+        hint: >-
+          Generated once, never edited. While this entry is a draft it is served at this
+          address instead of its real one, so the real URL stays a 404 until you publish.
 
       # --- SEO. Required, deliberately. ---------------------------------
       - label: Meta description
@@ -320,7 +332,12 @@ collections:
     format: frontmatter
     slug: '{{fields.title | slugify}}'
     summary: '{{title}} — {{kind}}'
-    preview_path: journal/{{slug}}
+    # The "view on site" link. It points at /go/<previewId>/ rather than at the page,
+    # because preview_path is one template per collection and cannot ask whether the
+    # entry is a draft: a link to the preview address would break on publishing, and a
+    # link to the real slug would break while the entry was still a draft. /go/ forwards
+    # to whichever of the two is live right now. See src/pages/go/[id].astro.
+    preview_path: go/{{fields.previewId}}
     fields:
       - { label: Title, name: title, widget: string }
       - { label: Date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
@@ -337,8 +354,15 @@ collections:
         widget: boolean
         default: false
         hint: >-
-          Draft entries still appear on the site but are kept out of Google, the sitemap
-          and the RSS feed. Use it for anything not ready to be found.
+          A draft is not listed anywhere on the site — not on the homepage, the indexes,
+          the feed or the sitemap — and is served at the unguessable preview address
+          below rather than its real URL. Untick it to publish.
+      - label: Preview address
+        name: previewId
+        widget: uuid
+        hint: >-
+          Generated once, never edited. While this entry is a draft it is served at this
+          address instead of its real one, so the real URL stays a 404 until you publish.
 
       # --- SEO. Required, deliberately. ---------------------------------
       - label: Meta description
@@ -431,7 +455,12 @@ collections:
     format: frontmatter
     slug: '{{fields.title | slugify}}'
     summary: '{{title}}'
-    preview_path: journal/yarn/{{slug}}
+    # The "view on site" link. It points at /go/<previewId>/ rather than at the page,
+    # because preview_path is one template per collection and cannot ask whether the
+    # entry is a draft: a link to the preview address would break on publishing, and a
+    # link to the real slug would break while the entry was still a draft. /go/ forwards
+    # to whichever of the two is live right now. See src/pages/go/[id].astro.
+    preview_path: go/{{fields.previewId}}
     fields:
       - label: Yarn name
         name: title
@@ -449,8 +478,16 @@ collections:
         widget: boolean
         default: true
         hint: >-
-          Leave ticked while you work — a draft saves with whatever you have. Untick it
-          when the review is ready, and the build will tell you if anything is missing.
+          Leave ticked while you work — a draft saves with whatever you have, is not
+          listed anywhere on the site, and is served at the unguessable preview address
+          below. Untick it when the note is ready, and the build will tell you if
+          anything is missing.
+      - label: Preview address
+        name: previewId
+        widget: uuid
+        hint: >-
+          Generated once, never edited. While this entry is a draft it is served at this
+          address instead of its real one, so the real URL stays a 404 until you publish.
       - label: Standfirst
         name: standfirst
         widget: text
