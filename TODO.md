@@ -19,10 +19,14 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
 
 ## Next up
 
-- [ ] **Decide whether drafts should be hidden from listings.** `draft: true` currently keeps
-      an entry out of Google, the sitemap and RSS, but it still shows on the homepage and the
-      indexes. Filtering them out is a few lines — but every entry is a draft today, so doing
-      it now would empty the site. Worth doing once real content exists.
+- [ ] **Fill in the blocked gauge for `drops-cotton-merino`, or leave it in draft.** It was
+      published with `gauge.blocked` empty, which the publish gate requires and the build
+      refuses. Back to draft for now — untick Draft again once the number exists.
+- [ ] **A second Worker, if unlisted stops feeling like enough.** Drafts are now unlisted and
+      served at an unguessable address, but they are still built into the production site and
+      the repository is public. Making them genuinely absent means a second Worker building
+      the same branch with drafts on, at its own hostname. None of the current work is wasted
+      if that day comes — the filtering is the same.
 ---
 
 ## Blocked on Sophia
@@ -111,8 +115,9 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
       `/_astro/` on the live host. The `/_image` bug cannot hide any more.
 - [ ] When a placeholder is deleted, delete its `data-scaffold` attribute too — otherwise the
       audit keeps ignoring an element that now ships.
-- [ ] Decide whether drafts should become pull requests (`publish_mode: editorial_workflow`).
-      Currently saving in the CMS commits straight to `main` and publishes in about a minute.
+- [ ] Drafts as pull requests (`publish_mode: editorial_workflow`) — **not possible yet**.
+      Sveltia has not built it; it is slated for 1.0, mid-2026. Saving in the CMS commits
+      straight to `main`, which is now safe enough: a draft is unlisted and off its real URL.
 - [ ] Run the skill-creator eval loop and description optimizer against the two skills,
       `verify-deploy` and `run-hookd` (needs subagents — ask first).
 
