@@ -2,7 +2,7 @@
 title: Drops Cotton Merino
 date: 2026-09-01
 updated: ''
-draft: true
+draft: false
 standfirst: Soft and colorful, safe for baby and adult garments.
 metaDescription: cotton merino drops
 socialImage: /og-default.png
@@ -24,8 +24,8 @@ yarn:
   ballWeightG: 50
   ballLengthM: 110
   ballBandGauge: ''
-  hookMm: 3
   hookOnLabel: 4 mm
+  hookMm: 3
   gramsPer10cm: null
   metresPer10cm: null
   care: Machine wash on gentle cycle max. 40°C / 104F. Dry flat or it will stretch!
