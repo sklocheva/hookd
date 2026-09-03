@@ -1,5 +1,5 @@
 ---
-title: "Isager Soft"
+title: Isager Soft
 date: 2026-09-02
 updated: ''
 draft: true
@@ -14,25 +14,25 @@ swatchImage: ''
 swatchImageAlt: ''
 swatchImageCaption: ''
 yarn:
-  brand: "Isager"
-  line: "Soft"
-  content: "56% baby alpaca, 44% organic Pima cotton"
-  weightLabel: ""
+  brand: Isager
+  line: Soft
+  content: 56% baby alpaca, 44% organic Pima cotton
+  weightLabel: ''
   wpi: null
+  construction:
+    type: Chainette
+    note: Alpaca blown into a hollow cotton chainette, so the cotton is what sits against the skin.
   ballWeightG: 50
   ballLengthM: 125
-  ballBandGauge: ""
-  hookOnLabel: ""
+  ballBandGauge: ''
+  hookOnLabel: ''
   hookMm: null
   gramsPer10cm: null
   metresPer10cm: null
-  care: ""
-  construction:
-    type: Chainette
-    note: "Alpaca blown into a hollow cotton chainette, so the cotton is what sits against the skin."
+  care: ''
 origin:
-  fibreOrigin: ""
-  madeIn: "Spun in Peru"
+  fibreOrigin: ''
+  madeIn: Spun in Peru
   oekoTexClass: null
   certifications: []
 price:
@@ -65,11 +65,10 @@ inTheHand:
     note: ''
 ---
 
-The one alpaca-containing yarn that has passed the itch test here. My boyfriend wore a beanie
-in this and did not react, where he reacts to both DROPS Alpaca and DROPS Nepal.
+The one alpaca-containing yarn that has passed the itch test for me! My boyfriend wore a beanie
+in this and did not react at all.
 
-The construction is why, and it matters more than the fibre percentage: the alpaca is blown
-into a hollow tube of organic cotton, so the cotton is what touches skin and the alpaca sits
+This alpaca is blown into a hollow tube of organic cotton, so the cotton is what touches skin and the alpaca sits
 inside it. That makes this evidence for cotton-core constructions, not evidence that alpaca
 content is safe. The two get confused and they are not the same claim.
 
