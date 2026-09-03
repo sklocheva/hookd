@@ -1,0 +1,524 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import {
+	allSizeValues,
+	defaultSizeIndex,
+	sizeSummary,
+	textParts,
+	valuesFor,
+} from '../lib/pattern-sizes';
+
+/**
+ * The written pattern: how to read it, what the abbreviations mean, the instructions
+ * themselves, and finishing.
+ *
+ * **One template, two designed variants, and nothing declares which.** A pattern with
+ * several sizes gets the sticky size picker and every number in the text follows the
+ * chosen size; a pattern with one size gets a static band instead. The size list decides,
+ * so an accessory that later gains sizes needs no change here.
+ *
+ * **No schematic, no stitch chart, no photo tutorial.** Deliberate: those are the paid PDF
+ * on Ravelry, and this is the free page. Written instructions only.
+ *
+ * The size picker is progressive enhancement, the same bargain as the homepage rotator:
+ * one whole size is rendered server-side, every size's numbers ship as JSON, and the
+ * script rewrites the numbers in place. With JavaScript off the reader still has a
+ * complete, readable pattern in the default size — which is why the default is the middle
+ * of the range and not the smallest.
+ */
+interface Props {
+	instructions: NonNullable<CollectionEntry<'patterns'>['data']['instructions']>;
+	sizes: CollectionEntry<'patterns'>['data']['sizes'];
+}
+
+const { instructions: ins, sizes } = Astro.props;
+
+const graded = sizes.length > 1;
+const activeIndex = defaultSizeIndex(sizes, ins.defaultSize);
+const active = sizes[activeIndex];
+const values = active ? valuesFor(active) : {};
+
+// Only shipped when there is a choice to make.
+const sizeData = graded
+	? JSON.stringify({
+			values: allSizeValues(sizes),
+			summaries: Object.fromEntries(sizes.map((s) => [s.name, sizeSummary(s)])),
+		})
+	: null;
+
+const learnHeading =
+	ins.specialStitches.length === 1 ? 'One thing to learn first' : 'Two stitches to learn first';
+---
+
+<section class="ins" id="pattern">
+	{
+		(ins.howWritten.length > 0 || ins.abbreviations.length > 0) && (
+			<div class="ins__reference">
+				{ins.howWritten.length > 0 && (
+					<div>
+						<h2 class="ins__label">How this pattern is written</h2>
+						<dl class="terms">
+							{ins.howWritten.map((t) => (
+								<>
+									<dt>{t.term}</dt>
+									<dd>{t.definition}</dd>
+								</>
+							))}
+						</dl>
+					</div>
+				)}
+
+				{ins.abbreviations.length > 0 && (
+					<div class="ins__cols">
+						<div class="ins__col">
+							<h2 class="ins__label">Abbreviations</h2>
+							<dl class="terms">
+								{ins.abbreviations.map((t) => (
+									<>
+										<dt>{t.term}</dt>
+										<dd>{t.definition}</dd>
+									</>
+								))}
+							</dl>
+						</div>
+
+						{ins.specialStitches.length > 0 && (
+							<div class="ins__col">
+								<h2 class="ins__label">{learnHeading}</h2>
+								<div class="stitches">
+									{ins.specialStitches.map((s) => (
+										<div>
+											<p class="named__label">{s.label}</p>
+											<p class="named__body">{s.body}</p>
+										</div>
+									))}
+								</div>
+								{ins.specialStitchesNote && (
+									<p class="stitches__note">{ins.specialStitchesNote}</p>
+								)}
+							</div>
+						)}
+					</div>
+				)}
+			</div>
+		)
+	}
+
+	{
+		sizes.length > 0 && (
+			<div class="picker" data-size-picker={sizeData ?? undefined}>
+				<div class="picker__head">
+					<p class="picker__label">
+						{graded ? 'Your size — every number below follows it' : 'The pattern — one size'}
+					</p>
+					<p class="picker__summary" data-size-summary>
+						{active ? sizeSummary(active) : ''}
+					</p>
+				</div>
+
+				{graded && (
+					<div class="picker__sizes">
+						{sizes.map((s, i) => (
+							<button
+								type="button"
+								class:list={['pill', { 'pill--on': i === activeIndex }]}
+								data-size={s.name}
+								aria-pressed={i === activeIndex ? 'true' : 'false'}
+							>
+								{s.name}
+							</button>
+						))}
+					</div>
+				)}
+			</div>
+		)
+	}
+
+	{
+		ins.sections.map((section) => (
+			<div class="sect">
+				<h2 class="sect__heading">{section.heading}</h2>
+				{section.intro && <p class="sect__intro">{section.intro}</p>}
+
+				{section.rows.length > 0 && (
+					<div class="rows" class:list={['rows', { 'rows--wide': !graded }]}>
+						{section.rows.map((row) => (
+							<div class="row">
+								<div class="row__label">
+									{textParts(row.label, values).map((part) =>
+										part.key ? (
+											<span data-size-field={part.key}>{part.text}</span>
+										) : (
+											part.text
+										)
+									)}
+								</div>
+								<div class="row__text">
+									{textParts(row.text, values).map((part) =>
+										part.key ? (
+											<span data-size-field={part.key}>{part.text}</span>
+										) : (
+											part.text
+										)
+									)}
+								</div>
+							</div>
+						))}
+					</div>
+				)}
+
+				{section.note && <p class="sect__note">{section.note}</p>}
+
+				{section.tip && (section.tip.lead || section.tip.body) && (
+					<div class="tip">
+						<div class="tip__rule" />
+						<p class="tip__body">
+							{section.tip.lead && (
+								<strong>
+									{textParts(section.tip.lead, values).map((part) =>
+										part.key ? (
+											<span data-size-field={part.key}>{part.text}</span>
+										) : (
+											part.text
+										)
+									)}{' '}
+								</strong>
+							)}
+							{section.tip.body}
+						</p>
+					</div>
+				)}
+			</div>
+		))
+	}
+
+	{
+		ins.finishing.length > 0 && (
+			<div class="sect">
+				<h2 class="sect__heading">Finishing</h2>
+				{ins.finishingIntro && <p class="sect__intro">{ins.finishingIntro}</p>}
+				<div class="finish">
+					{ins.finishing.map((n) => (
+						<div>
+							<p class="named__label">{n.label}</p>
+							<p class="named__body">{n.body}</p>
+						</div>
+					))}
+				</div>
+			</div>
+		)
+	}
+</section>
+
+<script>
+	// Rewrite the numbers in place when a size is chosen. Everything it needs is already in
+	// the page: the whole size table ships as JSON on the picker, and every substituted
+	// number is wrapped in a span carrying its key. Nothing is fetched and nothing is
+	// re-rendered — with the script absent the page is already a complete pattern.
+	type SizeData = {
+		values: Record<string, Record<string, string>>;
+		summaries: Record<string, string>;
+	};
+
+	const picker = document.querySelector<HTMLElement>('[data-size-picker]');
+	const raw = picker?.dataset.sizePicker;
+
+	if (picker && raw) {
+		const data: SizeData = JSON.parse(raw);
+		const buttons = Array.from(picker.querySelectorAll<HTMLButtonElement>('[data-size]'));
+		const summary = picker.querySelector<HTMLElement>('[data-size-summary]');
+		const fields = Array.from(document.querySelectorAll<HTMLElement>('[data-size-field]'));
+
+		function show(name: string, push: boolean) {
+			const values = data.values[name];
+			if (!values) return;
+
+			for (const el of fields) {
+				const key = el.dataset.sizeField;
+				// Leave a key this size does not carry alone rather than blanking the sentence.
+				if (key && values[key] !== undefined) el.textContent = values[key];
+			}
+			if (summary) summary.textContent = data.summaries[name] ?? '';
+
+			for (const b of buttons) {
+				const on = b.dataset.size === name;
+				b.classList.toggle('pill--on', on);
+				b.setAttribute('aria-pressed', on ? 'true' : 'false');
+			}
+
+			// So a maker can bookmark their size, or send it to someone.
+			if (push) {
+				const url = new URL(window.location.href);
+				url.searchParams.set('size', name);
+				history.replaceState(null, '', url);
+			}
+		}
+
+		for (const b of buttons) {
+			b.addEventListener('click', () => show(b.dataset.size!, true));
+		}
+
+		const wanted = new URL(window.location.href).searchParams.get('size');
+		if (wanted && data.values[wanted]) show(wanted, false);
+	}
+</script>
+
+<style>
+	.ins {
+		max-width: var(--shell-narrow);
+		margin: 0 auto;
+		padding-inline: var(--gutter);
+	}
+
+	.ins__reference {
+		padding-top: 40px;
+	}
+
+	.ins__label {
+		margin: 0 0 16px;
+		font: var(--type-section-label);
+		color: var(--ink);
+	}
+
+	.ins__cols {
+		display: flex;
+		flex-wrap: wrap;
+		gap: clamp(28px, 4vw, 48px);
+		margin-top: clamp(28px, 4vw, 40px);
+	}
+
+	.ins__col {
+		flex: 1 1 300px;
+		min-width: 0;
+	}
+
+	/* Reference material, so it is a two-column list rather than prose: nobody reads it
+	   start to finish, they look one thing up. */
+	.terms {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 9px 18px;
+		margin: 0;
+		max-width: 560px;
+	}
+
+	.terms dt {
+		font: 600 14.5px/1.5 var(--mono);
+		color: var(--ink);
+		white-space: nowrap;
+	}
+
+	.terms dd {
+		margin: 0;
+		font: 400 14.5px/1.5 var(--sans);
+		color: var(--ink-2);
+	}
+
+	.stitches {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.stitches__note {
+		margin: 20px 0 0;
+		padding-top: 16px;
+		border-top: 1px solid var(--rule-light);
+		font: var(--type-note);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	.named__label {
+		margin: 0 0 8px;
+		font: var(--type-label);
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+
+	.named__body {
+		margin: 0;
+		font: 400 15px/1.7 var(--sans);
+		color: var(--ink-2);
+		text-wrap: pretty;
+	}
+
+	/* The primary control on the page, so it follows the reader down it. */
+	.picker {
+		position: sticky;
+		top: 0;
+		z-index: 5;
+		margin-top: 44px;
+		padding: 14px 0 16px;
+		border-top: 1px solid var(--rule-strong);
+		border-bottom: 1px solid var(--rule);
+		background: var(--paper);
+	}
+
+	.picker__head {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 24px;
+		align-items: baseline;
+		justify-content: space-between;
+	}
+
+	.picker__label {
+		margin: 0;
+		font: var(--type-label-sm);
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+
+	.picker__summary {
+		margin: 0;
+		font: 400 13.5px/1.4 var(--sans);
+		color: var(--ink);
+	}
+
+	.picker__sizes {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-top: 12px;
+	}
+
+	.pill {
+		/* 44px, not the 24px WCAG floor: this is the control the whole page hangs off, and
+		   it is used mid-row with a hook in the other hand. */
+		min-height: 44px;
+		padding: 15px 18px;
+		border: 1px solid var(--rule-bar);
+		border-radius: 999px;
+		background: transparent;
+		font: 600 13.5px/1 var(--sans);
+		color: var(--ink-2);
+		cursor: pointer;
+	}
+
+	.pill:hover {
+		border-color: var(--rule-active);
+	}
+
+	.pill--on {
+		border-color: var(--terracotta);
+		background: var(--terracotta);
+		color: var(--paper);
+	}
+
+	.sect {
+		padding-top: 34px;
+	}
+
+	.sect__heading {
+		margin: 0 0 8px;
+		font: italic 400 26px/1.2 var(--serif);
+		color: var(--ink);
+	}
+
+	.sect__intro {
+		margin: 0 0 22px;
+		max-width: 620px;
+		font: 400 15px/1.7 var(--sans);
+		color: var(--ink-2);
+		text-wrap: pretty;
+	}
+
+	.rows {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		max-width: 760px;
+	}
+
+	.row {
+		display: flex;
+		gap: 16px;
+		align-items: baseline;
+		padding: 11px 0;
+		border-bottom: 1px solid var(--rule-light);
+	}
+
+	.row__label {
+		flex: 0 0 78px;
+		font: 600 13.5px/1.4 var(--mono);
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		/* The design sets these in --annotation (#8a7c6e), which measures 3.76:1 on paper
+		   and is reserved here for scaffolding that gets deleted. --muted is 4.65:1 and is
+		   the same decision already taken for every other small label on the site. */
+		color: var(--muted);
+	}
+
+	/* An ungraded pattern uses longer labels — "Last rnd", "Rnds 14–34". */
+	.rows--wide .row__label {
+		flex-basis: 88px;
+	}
+
+	.row__text {
+		flex: 1 1 auto;
+		min-width: 0;
+		font: 400 15px/1.7 var(--sans);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.sect__note {
+		margin: 14px 0 0;
+		max-width: 640px;
+		font: var(--type-note);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	/* The one thing that goes wrong at this stage, and how to catch it before carrying on. */
+	.tip {
+		display: flex;
+		gap: 14px;
+		align-items: flex-start;
+		max-width: 640px;
+		margin-top: 22px;
+		padding-top: 18px;
+		border-top: 1px solid var(--rule-light);
+	}
+
+	.tip__rule {
+		flex: none;
+		align-self: stretch;
+		width: 3px;
+		background: var(--ochre-rule);
+	}
+
+	.tip__body {
+		margin: 0;
+		font: var(--type-callout);
+		color: var(--ink-2);
+		text-wrap: pretty;
+	}
+
+	.tip__body strong {
+		font-weight: 600;
+	}
+
+	.finish {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		gap: 26px 40px;
+		max-width: 900px;
+	}
+
+	@media (max-width: 560px) {
+		/* The label cell stops earning its column when the text beside it is three words
+		   wide. Stacking keeps the instruction at a readable measure. */
+		.row {
+			flex-direction: column;
+			gap: 4px;
+		}
+
+		.row__label {
+			flex-basis: auto;
+		}
+	}
+</style>

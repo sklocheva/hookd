@@ -146,6 +146,30 @@ two of the three pointed at a 404 the moment drafts moved. They are keyed on the
 resolved against the published set, so an unpublished or renamed pick drops out of the
 rotation instead of breaking it.
 
+**A pattern's instructions are structured data, and one template serves both designed
+variants.** `PatternInstructions.astro` renders how-it-is-written, abbreviations, special
+stitches, the sections, and finishing. Nothing declares which variant a pattern is: **more
+than one size gets the sticky size picker, one size gets a static band.** An accessory that
+later gains sizes needs no change.
+
+**No schematic, no stitch chart, no photo tutorial — ever.** Those are the paid PDF on
+Ravelry, and this is the free page. Adding a chart block "for completeness" gives away the
+thing being sold.
+
+**Per-size numbers are substituted, never calculated.** Instruction text writes `{neckCh}`
+once and each size supplies its value in `sizes[].values`; `src/lib/pattern-sizes.ts` does
+the substitution and the picker rewrites the spans in place. The reader sees exactly one set
+of figures — nothing crossed out, no `(84, 92, 100, 108)` to count along. **The site owns no
+pattern maths.** The design derives its garment's counts from a raglan formula, and that is
+a fact about that cardigan, not about patterns: a beanie shares none of it. The arithmetic
+belongs in the author's grading spreadsheet; this stores the answers. A `{key}` with no value
+in some size **fails the build at publish**, naming the size and the key, because otherwise a
+maker reads a brace where a stitch count should be.
+
+The picker is progressive enhancement on the same terms as the homepage rotator: one whole
+size renders server-side — the middle one, so a reader with no JavaScript gets a usable
+pattern rather than the smallest — every size ships as JSON, and `?size=L` deep-links.
+
 **Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
 `/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real
 static routes rather than client-side filtering, because of the no-JS rule. Both indexes use
@@ -278,10 +302,14 @@ measurement each size is cut for, yardage per size, US/UK terms.
   literals in components — there are currently zero outside the token definitions, and
   that is worth keeping. Sizes used in more than one place get a `--type-*` token, so a
   change is one edit rather than seven.
-- **Uppercase labels have an 11px floor**, in `--ink-2` rather than `--muted`, with
-  letter-spacing at 0.06–0.08em. Small uppercase with wide tracking is the hardest thing
-  on a page to read, and passing contrast does not make it legible. Anything smaller is
-  scaffolding that gets deleted.
+- **There is one uppercase label size, 12px**, and it is a token — `--type-label` on one
+  line, `--type-label-sm` where it wraps. Eleven components had drifted to their own value
+  between 11 and 12.5px, so a badge, a difficulty level and a spec label were three sizes
+  of the same thing. Only two uppercase roles may differ, because they are not labels:
+  `--type-nav` and `--type-prose-label`, both 13px. Column heads are `--type-table-head`
+  at 11.5px — a shade smaller on purpose, because they sit directly above their own data.
+  Small uppercase with wide tracking is the hardest thing on a page to read, and passing
+  contrast does not make it legible; anything below 11px is scaffolding that gets deleted.
 - Class naming is BEM-ish: `block__element`, `block--modifier`.
 - Server-rendered HTML only. No client-side-only content — AI crawlers fetch JavaScript
   but do not execute it.

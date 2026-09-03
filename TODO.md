@@ -45,9 +45,10 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
 - [ ] Legal pages exist (`/privacy/`, `/licence/`, `/imprint/`) and need Sophia's review.
       The Austrian §5 ECG / §§24–25 Mediengesetz duties do **not** apply — she is not resident
       in Austria — and `imprint.astro` already says so. Revisit only if that changes.
-- [ ] Pattern **instructions and charts** were explicitly not designed. `<Row>` exists and the
-      example pattern uses it, but the surrounding section needs a design. Written first,
-      chart repeated after.
+- [x] ~~Pattern **instructions** were not designed~~ — designed and built, both variants
+      (graded garment, one-size accessory) from one template. Charts stay deliberately
+      unbuilt: a chart is what the paid PDF on Ravelry sells. The two example patterns
+      exercise the template.
 - [x] ~~Patterns have no `updated` field~~ — added as **Last corrected** in the CMS. Set it
       when you fix something in a published pattern; JSON-LD then reports it as `dateModified`
       instead of repeating the publish date. Verified: with it set, the two dates differ.

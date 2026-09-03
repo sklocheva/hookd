@@ -56,23 +56,180 @@ sizeNote: >-
 
 sizes:
   - name: XS
+    values:
+      - { key: neckCh, value: "88" }
+      - { key: yokeRnds, value: "14" }
+      - { key: yokeTotal, value: "232" }
+      - { key: sleeveSts, value: "48" }
+      - { key: underarmCh, value: "8" }
+      - { key: bodySts, value: "152" }
+      - { key: bodyRnds, value: "42" }
+      - { key: bodyCm, value: "38" }
+      - { key: sleeveRnds, value: "44" }
+      - { key: cuffSts, value: "34" }
+      - { key: neckSts, value: "88" }
+      - { key: tryOnRnd, value: "11" }
     fitsBodyCm: 72–76
     measurements:
       - { label: Finished bust, value: 84 }
       - { label: Finished length, value: 58 }
     yardageM: 1100
   - name: M
+    values:
+      - { key: neckCh, value: "96" }
+      - { key: yokeRnds, value: "18" }
+      - { key: yokeTotal, value: "290" }
+      - { key: sleeveSts, value: "58" }
+      - { key: underarmCh, value: "10" }
+      - { key: bodySts, value: "194" }
+      - { key: bodyRnds, value: "46" }
+      - { key: bodyCm, value: "41" }
+      - { key: sleeveRnds, value: "46" }
+      - { key: cuffSts, value: "40" }
+      - { key: neckSts, value: "96" }
+      - { key: tryOnRnd, value: "14" }
     fitsBodyCm: 96–100
     measurements:
       - { label: Finished bust, value: 108 }
       - { label: Finished length, value: 62 }
     yardageM: 1420
   - name: 3X
+    values:
+      - { key: neckCh, value: "112" }
+      - { key: yokeRnds, value: "25" }
+      - { key: yokeTotal, value: "404" }
+      - { key: sleeveSts, value: "76" }
+      - { key: underarmCh, value: "14" }
+      - { key: bodySts, value: "280" }
+      - { key: bodyRnds, value: "52" }
+      - { key: bodyCm, value: "45" }
+      - { key: sleeveRnds, value: "48" }
+      - { key: cuffSts, value: "50" }
+      - { key: neckSts, value: "112" }
+      - { key: tryOnRnd, value: "20" }
     fitsBodyCm: 143–147
     measurements:
       - { label: Finished bust, value: 155 }
       - { label: Finished length, value: 68 }
     yardageM: 1880
+instructions:
+  defaultSize: M
+  howWritten:
+    - { term: Terms, definition: US throughout — a US sc is a UK double }
+    - { term: Sizes, definition: Written inline — pick yours and every number follows }
+    - { term: Rounds, definition: Joined — sl st to the first st and ch 1 to start the next }
+    - { term: "*", definition: Repeat as directed }
+    - { term: "( )", definition: Work as a group, or all into the same stitch }
+    - { term: Counts, definition: In brackets, only where it is easy to lose track }
+  abbreviations:
+    - { term: ch, definition: chain }
+    - { term: sc, definition: single crochet }
+    - { term: inc, definition: 2 sc in the same stitch (an increase) }
+    - { term: sc2tog, definition: single crochet 2 together (a decrease) }
+    - { term: sl st, definition: slip stitch }
+    - { term: st(s), definition: stitch(es) }
+    - { term: rnd, definition: round }
+    - { term: rep, definition: repeat }
+    - { term: RS, definition: right side }
+  specialStitches:
+    - label: Spread increase
+      body: >-
+        Work the increases of a yoke round evenly spaced rather than stacked. Divide the
+        stitch count by the number of increases, work that many plain sc between each one,
+        and put the leftovers at the back where they will not be read as a line.
+    - label: Float catch
+      body: >-
+        On a colourwork round, carry the resting colour along the top of the row below and
+        work over it. It disappears inside the stitch and there is nothing to weave in at
+        the end of the band.
+  specialStitchesNote: >-
+    Nothing else in this pattern is unusual. If you can work sc in the round and read a
+    stitch count, you can make this.
+  sections:
+    - heading: Yoke
+      intro: >-
+        Worked top down in joined rounds. Increases fall on plain rounds only, so every
+        colourwork band sits on an unshaped row and the pattern stays square.
+      rows:
+        - label: Set up
+          text: >-
+            Ch {neckCh} and sl st to the first ch to join, taking care not to twist. Check it
+            passes over your head with room to spare — this edge does not grow later.
+        - label: Rnd 1
+          text: Ch 1, sc in each ch around, sl st to join. ({neckCh} sts)
+        - label: Rnds 2–{yokeRnds}
+          text: >-
+            Work in sc, placing a spread increase round every third round and working the
+            colourwork bands on the plain rounds between them. ({yokeTotal} sts after the
+            last round)
+      tip:
+        lead: Try it on around round {tryOnRnd}.
+        body: >-
+          The yoke should just reach your underarm and no further. If it is short, work
+          another plain round or two before dividing and take those rounds off the body
+          later — the yoke is the one place here you can adjust by feel.
+    - heading: Dividing for the sleeves
+      intro: >-
+        One round. The sleeve stitches are left where they are and picked up later, so
+        nothing is cut and nothing is set aside.
+      rows:
+        - label: Divide
+          text: >-
+            Ch 1, sc across the front to the first marker, skip the next {sleeveSts} sts (the
+            sleeve), ch {underarmCh}, sc across the back to the second marker, skip the next
+            {sleeveSts} sts, ch {underarmCh}, sl st to join. ({bodySts} sts)
+      note: The skipped stitches will look alarming and loose. They are fine.
+    - heading: Body
+      rows:
+        - label: Every rnd
+          text: >-
+            Ch 1, sc in each st around, sl st to join. Work {bodyRnds} rounds in all, or until
+            the body measures {bodyCm} cm from the underarm.
+        - label: Hem
+          text: Ch 1, sc in BLO in each st around for 4 rounds. Fasten off.
+      note: >-
+        Measure it hanging, not flat on a table. Wool at this gauge drops about 2 cm once it
+        is on a body.
+    - heading: Sleeves
+      intro: >-
+        Both sleeves are worked the same way, in joined rounds from the underarm down. Work
+        them one after the other so the second matches the first.
+      rows:
+        - label: Rnd 1
+          text: >-
+            Join yarn at the centre of the underarm chain. Ch 1, sc in each of the
+            {sleeveSts} sleeve sts and in each of the {underarmCh} underarm ch, sl st to
+            join.
+        - label: Rnds 2–{sleeveRnds}
+          text: >-
+            Ch 1, sc around, working sc2tog twice on every sixth round, spaced evenly, until
+            {cuffSts} sts remain.
+        - label: Cuff
+          text: Ch 1, sc in BLO in each st around for 5 rounds. Fasten off.
+    - heading: Neckband
+      rows:
+        - label: Rnds 1–4
+          text: >-
+            With RS facing, join at the back of the neck. Ch 1, work {neckSts} sc evenly
+            around the neck edge, sl st to join. Work three more rounds the same way and
+            fasten off.
+      note: >-
+        If the band flares, you worked too many stitches into the edge; if it pulls in, too
+        few. Pull it back and redistribute — it is the part everyone sees.
+  finishingIntro: >-
+    There are no seams in this pullover, but there are two underarms, and they are where a
+    yoke usually goes wrong.
+  finishing:
+    - label: Closing the underarm
+      body: >-
+        Thread the sleeve tail on a blunt needle. On the wrong side, take a small stitch
+        through the base of the first sleeve stitch, then through the underarm chain beside
+        it, and pull just snug — not tight. Two or three of these close the gap. Tight
+        stitches here crack open the first time the sleeve is lifted.
+    - label: Weaving in
+      body: >-
+        Split the ply and run each end through the back of 4–5 stitches, then double back
+        over 2. Wool will not slip once it has been washed. Trim short.
 ---
 
 The yoke is worked top down in the round with increases spread across four plain rounds

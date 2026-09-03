@@ -266,6 +266,26 @@ collections:
               - { label: Value, name: value, widget: number, value_type: float }
               - { label: Unit, name: unit, widget: string, default: cm, required: false }
           - { label: Yardage (m), name: yardageM, widget: number, value_type: int }
+          - label: Numbers for this size
+            name: values
+            widget: list
+            required: false
+            label_singular: Number
+            summary: '{{fields.key}} = {{fields.value}}'
+            hint: >-
+              Only for a graded pattern. Write the instruction once using {curly braces} —
+              "Ch {neckCh}, loosely" — and give each size its own value here. The reader
+              sees only their own numbers, and a correction is made in one place instead of
+              once per size. Use the same key names in every size.
+            fields:
+              - label: Key
+                name: key
+                widget: string
+                hint: 'The name inside the braces, e.g. neckCh. Letters and digits, no spaces.'
+              - label: Value
+                name: value
+                widget: string
+                hint: 'What this size uses, e.g. 88. Text, so ranges like 12–14 are fine.'
       - { label: Ease, name: ease, widget: string, required: false, hint: 'e.g. worn with 10–15 cm ease' }
       - label: How to choose a size
         name: sizeNote
@@ -284,6 +304,130 @@ collections:
           reference and includes an ease table — change it only to point somewhere better.
 
       # --- Links ----------------------------------------------------------
+      # ------------------------------------------------------------ the pattern itself
+      #
+      # All optional: a pattern page is complete without any of it, and the three example
+      # patterns have none. One template covers both designed variants — several sizes gets
+      # the sticky size picker and the numbers follow the choice, one size gets a static
+      # band. Nothing here declares which; the size list decides.
+      #
+      # Deliberately absent: schematic, stitch chart, photo tutorial. Those are the paid
+      # PDF on Ravelry, and this is the free page.
+      - label: The pattern
+        name: instructions
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - label: Default size
+            name: defaultSize
+            widget: string
+            required: false
+            hint: >-
+              Which size is written into the page, by name. This is what a reader with no
+              JavaScript gets, so pick a middle size. Leave blank for the middle of the list.
+          - label: How this pattern is written
+            name: howWritten
+            widget: list
+            required: false
+            label_singular: Entry
+            summary: '{{fields.term}} — {{fields.definition}}'
+            hint: >-
+              Terms, what * means, where counts appear. Reference material, so keep each to
+              one clause — nobody reads this start to finish, they look one thing up.
+            fields:
+              - { label: Term, name: term, widget: string }
+              - { label: Definition, name: definition, widget: string }
+          - label: Abbreviations
+            name: abbreviations
+            widget: list
+            required: false
+            label_singular: Abbreviation
+            summary: '{{fields.term}} — {{fields.definition}}'
+            fields:
+              - { label: Term, name: term, widget: string }
+              - { label: Definition, name: definition, widget: string }
+          - label: Stitches to learn first
+            name: specialStitches
+            widget: list
+            required: false
+            label_singular: Stitch
+            summary: '{{fields.label}}'
+            hint: >-
+              Only genuinely unusual stitches. Plain dc and sc do not belong here — a list
+              that explains what a double crochet is teaches the reader to skip the list.
+            fields:
+              - { label: Name, name: label, widget: string }
+              - { label: How to work it, name: body, widget: text }
+          - label: Nothing-else-is-unusual line
+            name: specialStitchesNote
+            widget: text
+            required: false
+            hint: The reassurance under the special stitches. One or two sentences.
+          - label: Sections
+            name: sections
+            widget: list
+            required: false
+            label_singular: Section
+            summary: '{{fields.heading}}'
+            hint: One per construction stage — Yoke, Body, Sleeves; or Base, Sides, Rim.
+            fields:
+              - { label: Heading, name: heading, widget: string }
+              - label: Intro
+                name: intro
+                widget: text
+                required: false
+                hint: What this stage does structurally. Optional.
+              - label: Instructions
+                name: rows
+                widget: list
+                required: false
+                label_singular: Row
+                summary: '{{fields.label}} — {{fields.text}}'
+                fields:
+                  - label: Label
+                    name: label
+                    widget: string
+                    hint: 'Row 1, Rnds 5–11, Set up, Hem. May use {braces} too.'
+                  - label: Instruction
+                    name: text
+                    widget: text
+                    hint: >-
+                      Use {braces} for anything that changes with the size. Put a stitch
+                      count in brackets only where a maker could lose track — after a set-up
+                      row, a repeat, a divide or increases.
+              - label: Closing note
+                name: note
+                widget: text
+                required: false
+                hint: A caveat that is not an instruction. Set quieter, under the rows.
+              - label: Coaching callout
+                name: tip
+                widget: object
+                required: false
+                collapsed: true
+                hint: >-
+                  The one thing that goes wrong at this stage, and how to catch it before
+                  carrying on. Leave empty unless there is something specific to say.
+                fields:
+                  - { label: Lead, name: lead, widget: string, required: false }
+                  - { label: Body, name: body, widget: text, required: false }
+          - label: Finishing intro
+            name: finishingIntro
+            widget: text
+            required: false
+          - label: Finishing notes
+            name: finishing
+            widget: list
+            required: false
+            label_singular: Note
+            summary: '{{fields.label}}'
+            hint: >-
+              Pattern-specific finishing only — closing an underarm, closing a magic ring.
+              Blocking and care belong to the yarn, not the pattern, and live on the yarn note.
+            fields:
+              - { label: Name, name: label, widget: string }
+              - { label: How to do it, name: body, widget: text }
       - { label: Ravelry URL, name: ravelryUrl, widget: string, required: false }
       - { label: PDF URL, name: pdfUrl, widget: string, required: false }
       - label: Related journal post

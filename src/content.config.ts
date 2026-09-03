@@ -1,5 +1,6 @@
 import { defineCollection, reference, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { keysUsed } from './lib/pattern-sizes';
 import { YARN_CERTIFICATIONS } from './lib/taxonomy';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -175,8 +176,28 @@ const measurement = z.object({
 	unit: z.string().default('cm'),
 });
 
+/**
+ * One number that changes with the chosen size, named so instruction text can call it.
+ *
+ * The pattern text writes `{neckCh}` once; each size supplies its own value. The
+ * alternative — writing the row out per size — is the thing that produces errata, because
+ * a corrected number gets fixed in one copy and not the other six.
+ *
+ * The arithmetic belongs in the author's grading spreadsheet, not here. This site stores
+ * the answers and never derives them: a formula that suits a top-down raglan says nothing
+ * about a beanie, so the template cannot own one.
+ */
+const sizeValue = z.object({
+	/** The name used in `{braces}` in instruction text. */
+	key: z.string().min(1),
+	/** Free text, not a number: "84", "12–14", "1290" all belong here. */
+	value: z.string().min(1),
+});
+
 const size = z.object({
 	name: z.string(),
+	/** Per-size numbers substituted into instruction text. See `sizeValue`. */
+	values: z.array(sizeValue).default([]),
 	/** Empty is fine: an accessory that comes in one size has nothing to tabulate. */
 	measurements: z.array(measurement).default([]),
 	/**
@@ -187,6 +208,101 @@ const size = z.object({
 	fitsBodyCm: optionalString,
 	yardageM: z.number(),
 });
+
+/** A term and its one-line explanation: abbreviations, and "how this is written". */
+const term = z.object({
+	term: z.string().min(1),
+	definition: z.string().min(1),
+});
+
+/** A named paragraph: a special stitch, or one finishing note. */
+const namedNote = z.object({
+	label: z.string().min(1),
+	body: z.string().min(1),
+});
+
+/**
+ * The written pattern itself.
+ *
+ * Every field is optional, because a pattern page is a complete page without any of it —
+ * the three example patterns have none, and the section simply does not render. What is
+ * deliberately absent is as important as what is here: **no schematic, no stitch chart, no
+ * photo tutorial.** Those are the paid PDF on Ravelry. The free page is written
+ * instructions, and adding a chart block "for completeness" would give away the thing that
+ * is being sold.
+ *
+ * One template covers both designed variants. A pattern with several sizes gets the sticky
+ * size picker and its numbers swap; a pattern with one size gets a static band instead.
+ * Nothing declares which variant it is — the size list decides.
+ */
+const instructions = z.preprocess(
+	blankToUndefined,
+	z
+		.object({
+			/**
+			 * How to read this pattern: terms, what `*` means, where counts appear. Reference
+			 * material, so it is a list and not a paragraph — nobody reads it start to finish,
+			 * they look one thing up.
+			 */
+			howWritten: z.array(term).default([]),
+			abbreviations: z.array(term).default([]),
+			/**
+			 * Only genuinely unusual stitches. Plain dc and sc do not go here — a list that
+			 * explains what a double crochet is teaches the reader to skip the list.
+			 */
+			specialStitches: z.array(namedNote).default([]),
+			/** The reassurance line under them: "nothing else here is unusual." */
+			specialStitchesNote: optionalString,
+			/**
+			 * Which size renders in the HTML, by name. With no JavaScript this is the pattern
+			 * the reader gets, so it should be a middle size rather than the smallest.
+			 * Defaults to the middle of the list.
+			 */
+			defaultSize: optionalString,
+			sections: z
+				.array(
+					z.object({
+						heading: z.string().min(1),
+						/** What this stage does structurally. Optional. */
+						intro: optionalString,
+						rows: z
+							.array(
+								z.object({
+									/** The monospace cell: "Row 1", "Rnds 5–11", "Set up", "Hem". */
+									label: z.string().min(1),
+									/** May contain `{key}` placeholders — see `sizeValue`. */
+									text: z.string().min(1),
+								})
+							)
+							.default([]),
+						/** A closing caveat that is not an instruction. */
+						note: optionalString,
+						/**
+						 * The ochre callout: the one thing that goes wrong at this stage, and how to
+						 * catch it before carrying on. Authored per pattern rather than toggled —
+						 * a coaching note with nothing specific to say is worse than none.
+						 */
+						tip: z.preprocess(
+							blankToUndefined,
+							z
+								.object({
+									lead: optionalString,
+									body: optionalString,
+								})
+								.optional()
+						),
+					})
+				)
+				.default([]),
+			finishingIntro: optionalString,
+			/**
+			 * Pattern-specific finishing only — closing an underarm, closing a magic ring.
+			 * Blocking and care belong to the yarn, not the pattern, and live on the yarn note.
+			 */
+			finishing: z.array(namedNote).default([]),
+		})
+		.optional()
+);
 
 const patterns = defineCollection({
 	loader: glob({ base: './src/content/patterns', pattern: '**/*.{md,mdx}' }),
@@ -267,6 +383,8 @@ const patterns = defineCollection({
 				}),
 			tags: z.array(z.string()).default([]),
 
+			instructions,
+
 			ravelryUrl: optionalUrl,
 			pdfUrl: optionalUrl,
 
@@ -293,6 +411,34 @@ const patterns = defineCollection({
 			previewId,
 
 			...seoFields,
+		})
+		/**
+		 * Every `{key}` in the instructions has a value in every size.
+		 *
+		 * A key with no value renders as the literal `{neckCh}` on the page — a maker reads
+		 * a brace where a stitch count should be. Checked at publish rather than at save, the
+		 * same bargain the reviews collection makes: a half-written pattern has to be
+		 * saveable, and this only matters once someone can read it.
+		 */
+		.superRefine((d, ctx) => {
+			if (d.draft || !d.instructions) return;
+
+			const keys = keysUsed(d);
+			if (keys.size === 0) return;
+
+			for (const [i, size] of d.sizes.entries()) {
+				const have = new Set(size.values.map((v) => v.key));
+				const missing = [...keys].filter((k) => !have.has(k));
+				if (missing.length > 0) {
+					ctx.addIssue({
+						code: 'custom',
+						path: ['sizes', i, 'values'],
+						message: `size "${size.name}" has no value for ${missing
+							.map((k) => `{${k}}`)
+							.join(', ')} — used in the instructions`,
+					});
+				}
+			}
 		}),
 });
 

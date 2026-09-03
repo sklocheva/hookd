@@ -7,6 +7,7 @@ import Base from '../../layouts/Base.astro';
 import Hero from '../../components/Hero.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import PatternLicence from '../../components/PatternLicence.astro';
+import PatternInstructions from '../../components/PatternInstructions.astro';
 import SizeTable from '../../components/SizeTable.astro';
 import SectionLabel from '../../components/SectionLabel.astro';
 import Related from '../../components/Related.astro';
@@ -163,7 +164,9 @@ const specs = [
 					}
 				</dl>
 
-				<a href="#instructions" class="pill">Jump to the pattern</a>
+				<a href={d.instructions ? '#pattern' : '#instructions'} class="pill">
+					Jump to the pattern
+				</a>
 			</div>
 		</div>
 
@@ -242,6 +245,8 @@ const specs = [
 		<div class="prose" id="instructions">
 			<Content />
 		</div>
+
+		{d.instructions && <PatternInstructions instructions={d.instructions} sizes={d.sizes} />}
 
 		<PatternLicence />
 

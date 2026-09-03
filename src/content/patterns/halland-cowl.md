@@ -60,6 +60,69 @@ sizes:
       - { label: Circumference, value: 58 }
       - { label: Height, value: 28 }
     yardageM: 180
+instructions:
+  howWritten:
+    - { term: Terms, definition: US throughout — a US hdc is a UK half treble }
+    - { term: Rounds, definition: Joined — sl st to the first st and ch 1 to start the next }
+    - { term: "*", definition: Repeat as directed }
+    - { term: Counts, definition: In brackets — the count never changes after round 1 }
+    - { term: Size, definition: One size, and nothing has to fit }
+  abbreviations:
+    - { term: ch, definition: chain }
+    - { term: hdc, definition: half double crochet }
+    - { term: BLO, definition: back loop only — work under the back strand of the stitch }
+    - { term: sl st, definition: slip stitch }
+    - { term: st(s), definition: stitch(es) }
+    - { term: rnd, definition: round }
+  specialStitches:
+    - label: BLO half double crochet
+      body: >-
+        Work each hdc under the back loop of the stitch below instead of both loops. The
+        front loop is left free and shows as a ridge, which is what gives this fabric its
+        garter look and most of its stretch.
+  specialStitchesNote: >-
+    Everything else is plain half double crochet worked in the round. If you can join a
+    round without twisting it, you can make this.
+  sections:
+    - heading: Set up
+      intro: >-
+        The whole cowl is one tube. The only round that needs care is the first, because a
+        twist here cannot be fixed later.
+      rows:
+        - label: Rnd 1
+          text: >-
+            Ch 104 and sl st to the first ch to join. Lay the chain flat and check every
+            stitch faces the same way before you go on.
+        - label: Rnd 2
+          text: Ch 1, hdc in each ch around, sl st to the first hdc to join. (104 sts)
+      tip:
+        lead: Check the join before round 3.
+        body: >-
+          A twisted starting round makes a Möbius, and it will not show until the cowl is
+          long enough to hang. Two rounds is a minute to pull back; twenty is an evening.
+    - heading: Body
+      rows:
+        - label: Rnds 3–36
+          text: >-
+            Ch 1, hdc in BLO in each st around, sl st to join. Work 34 rounds in all, or
+            until the cowl measures 28 cm from the starting edge.
+        - label: Last rnd
+          text: >-
+            Ch 1, hdc in each st around through both loops, sl st to join. Fasten off,
+            leaving a 20 cm tail.
+      note: >-
+        The last round through both loops closes the ridge pattern off and stops the top
+        edge flaring away from the rest.
+  finishingIntro: Nothing to sew. Two ends to hide, and no blocking needed.
+  finishing:
+    - label: Weaving in
+      body: >-
+        Take both tails to the inside. Run each through the back of 5–6 stitches, then
+        double back over 2. Trim short.
+    - label: Closing the join
+      body: >-
+        The starting chain leaves a small step where the round joins. Use the beginning tail
+        to take one stitch across it before weaving in, and it disappears.
 ---
 
 Worked in the round in back-loop half double crochet, which gives a ridged, garter-like
