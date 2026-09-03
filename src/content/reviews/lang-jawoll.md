@@ -1,5 +1,5 @@
 ---
-title: "Lang Yarns Jawoll"
+title: Lang Yarns Jawoll
 date: 2026-09-02
 updated: ''
 draft: true
@@ -14,22 +14,23 @@ swatchImage: ''
 swatchImageAlt: ''
 swatchImageCaption: ''
 yarn:
-  brand: "Lang Yarns"
-  line: "Jawoll"
-  content: "75% wool, 25% polyamide"
-  weightLabel: ""
+  brand: Lang Yarns
+  line: Jawoll
+  content: 75% wool, 25% polyamide
+  weightLabel: ''
   wpi: null
+  construction: null
   ballWeightG: 50
   ballLengthM: 210
-  ballBandGauge: ""
-  hookOnLabel: ""
+  ballBandGauge: ''
+  hookOnLabel: ''
   hookMm: null
   gramsPer10cm: null
   metresPer10cm: null
-  care: ""
+  care: ''
 origin:
-  fibreOrigin: ""
-  madeIn: ""
+  fibreOrigin: ''
+  madeIn: ''
   oekoTexClass: null
   certifications: []
 price:
@@ -63,7 +64,7 @@ inTheHand:
 ---
 
 The nicest thing in the basket to actually handle, and the one I am least likely to use for
-what it is best at. Light, soft, and it wants about a 3 mm hook — which means a garment in it
+what it is best at. Light, soft, and it wants about a 3 mm hook. Which means a garment in it
 would look wonderful and take forever. Better matched to something small.
 
 A spool of reinforcing thread comes with every ball, for heels and toes.
