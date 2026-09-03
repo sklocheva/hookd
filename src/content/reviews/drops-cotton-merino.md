@@ -4,7 +4,7 @@ date: 2026-09-01
 updated: ''
 draft: true
 previewId: 07a13871-ce17-4ccb-b40e-cdea437c0b80
-standfirst: Soft and colorful, safe for baby and adult garments.
+standfirst: Soft and no prickliness at all! I love the color options and the drape.
 metaDescription: cotton merino drops
 socialImage: /og-default.png
 heroImage: ''
@@ -66,4 +66,8 @@ inTheHand:
     note: No problem frogging, but does make the split much worse.
 ---
 
-Splits more but I would prefer the split for a good drape. If it is spun tighter it will have a much worse drape. Avoid for tricky stitches because of the split. Crochet/knit tighter as it will expand a bit after washed. Also has a risk of sagging when dried vertical. To avoid sagging do plan for garments with more tension points to hold it up.
+Splits more easily, but I actually prefer the split for the good drape it gives. If it were spun tighter, the drape would be much worse. Use a blunt hook and avoid it for tricky stitches because the splitting will drive you crazy.
+
+Crochet/knit a little tighter, as it will expand after washing. It can also sag when dried vertically, and may not fully bounce back because of the cotton content. To avoid sagging and stretched out stitches, plan garments with more tension points to help hold the weight up.
+
+The yarn is really nice and soft, with no prickliness at all on my sensitive skin. I would say it is safe for both baby and adult garments because of that. It is also superwash-treated, so it is easy to care for and can go straight into the washing machine, which makes it especially practical for everyday and baby garments.
