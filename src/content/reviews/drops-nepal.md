@@ -1,10 +1,10 @@
 ---
-title: "Drops Nepal"
+title: Drops Nepal
 date: 2026-09-02
 updated: ''
 draft: true
 previewId: 92fb38c7-d54a-41eb-b99f-cf08cc11c649
-standfirst: ''
+standfirst: Super versatile yarn. I’ve made everything from beanies and garments to accessories with it. The only downside is that it is a bit bulky for crochet garments, which sacrifices some of the drape, but it still adds a lot of warmth.
 metaDescription: ''
 socialImage: /og-default.png
 heroImage: ''
@@ -14,22 +14,23 @@ swatchImage: ''
 swatchImageAlt: ''
 swatchImageCaption: ''
 yarn:
-  brand: "Drops"
-  line: "Nepal"
-  content: "65% wool, 35% alpaca"
-  weightLabel: "Aran / worsted — Drops yarn group C"
+  brand: Drops
+  line: Nepal
+  content: 65% wool, 35% alpaca
+  weightLabel: Aran / worsted — Drops yarn group C
   wpi: null
+  construction: null
   ballWeightG: 50
   ballLengthM: 75
-  ballBandGauge: "17 sts × 22 rows to 10 cm on 5 mm needles"
-  hookOnLabel: ""
+  ballBandGauge: 17 sts × 22 rows to 10 cm on 5 mm needles
+  hookOnLabel: ''
   hookMm: null
   gramsPer10cm: null
   metresPer10cm: null
-  care: "Hand wash, max 30°C. Dry flat. Not superwash — it felts."
+  care: Hand wash, max 30°C. Dry flat. Not superwash — it felts.
 origin:
-  fibreOrigin: "Alpaca and wool from South America"
-  madeIn: "Peru"
+  fibreOrigin: Alpaca and wool from South America
+  madeIn: Peru
   oekoTexClass: 2
   certifications: []
 price:
@@ -62,13 +63,6 @@ inTheHand:
     note: ''
 ---
 
-Dense and structured rather than drapey, and the stitch definition is excellent — cables and
+Dense and structured rather than drapey, and the stitch definition is excellent. cables and
 texture pop. The trade is weight: they pop and then they hang. It does not split, and it
 softens noticeably after blocking.
-
-My hooded scarf is in this, in moss stitch, which is about the right use for it. Not a lace
-yarn.
-
-It itches my boyfriend too, though he places it as not quite as soft as Drops Alpaca. Both
-react. Softness and prickle are not the same question, and this pair is the reason I keep them
-as separate rows.
