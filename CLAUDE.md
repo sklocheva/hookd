@@ -101,6 +101,13 @@ its caption doubles as the shot list — it is scaffolding, to be deleted when r
 not yet shot, triggered by omitting `heroImage`, and it ships. Same for the dashed wordmark box
 in `Header.astro` and the social stubs in `Footer.astro`, both marked in the source.
 
+**An entry file must carry the extension its collection declares.** `patterns` and `posts`
+are `extension: mdx`, `reviews` is `md`. Astro's glob loader takes `.md` and `.mdx` alike, so
+a mismatched file builds, renders and goes live perfectly — and Sveltia never lists it, because
+it only shows files matching the declared extension. Three entries were invisible in `/admin`
+this way, two of them whole patterns, with nothing to report it but the author noticing she had
+fewer entries than she had written. `check-cms-config.py` now fails on a mismatch.
+
 **The CMS and Astro disagree about paths, and two files reconcile them.** Sveltia requires an
 absolute `public_folder`, so it writes `/src/assets/photo.webp` — which Astro treats as a
 public URL and leaves alone, so the image 404s. `src/lib/images.ts` translates that for

@@ -114,6 +114,25 @@ def main() -> int:
             if not_required:
                 failures.append(f'{name}: SEO fields not marked required in the form: {not_required}')
 
+        # Every entry file must match the extension the collection declares.
+        #
+        # Sveltia lists only files with the declared extension, but Astro's glob loader
+        # takes both .md and .mdx — so a mismatched file builds, renders and is live, and
+        # is simply absent from /admin. Three entries were invisible this way, including
+        # two whole patterns, and nothing reported it: the author just saw fewer entries
+        # than she had written.
+        ext = coll.get('extension')
+        folder = ROOT / coll['folder']
+        if ext and folder.is_dir():
+            wrong = sorted(
+                f.name for f in folder.iterdir()
+                if f.suffix in {'.md', '.mdx'} and f.suffix != f'.{ext}'
+            )
+            if wrong:
+                failures.append(
+                    f'{name}: files the CMS cannot see — collection declares .{ext}: {wrong}'
+                )
+
         print(f'{name:9} form={len(form):3} schema={len(schema):3}  ok' if not failures else f'{name}: checked')
 
     if failures:
