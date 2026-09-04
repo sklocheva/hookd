@@ -55,7 +55,13 @@ never opened. `optionalString`, `optionalNumber`, `optionalUrl` and `blankToUnde
 **if the panel can leave a field blank, the schema has to accept blank** — a required field
 in front of unfinished work does not protect the data, it stops the site building.
 
-This has now happened four times, the last on `ravelryUrl` and `pdfUrl`: `.url()` rejects
+This has now happened five times. The fifth was a **reference**: clearing the related-post
+picker writes `relatedPost: ''`, which satisfies `reference()` — it only checks the value is
+a string — and then the resolver looks for an entry whose id is the empty string and logs
+"Invalid content reference" during the build. `blankToUndefined` fixes it, and `dropBlanks`
+does the same for a cleared row inside a list of references.
+
+Before that it was `ravelryUrl` and `pdfUrl`: `.url()` rejects
 `''` just as `.date()` and `.number()` do, and publishing the first real pattern failed on two
 fields nobody had touched. **A `.default()` does not save you** — a default fills in for
 `undefined` only, so `bodyChartUrl: ''` was validated as a URL and failed while carrying a

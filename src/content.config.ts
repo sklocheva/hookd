@@ -69,6 +69,10 @@ const optionalNumber = z.preprocess(
  */
 const blankToUndefined = (v: unknown) => (v === null || v === '' ? undefined : v);
 
+/** The list counterpart: a cleared row in a CMS list arrives as `''` inside the array. */
+const dropBlanks = (v: unknown) =>
+	Array.isArray(v) ? v.filter((x) => x !== null && x !== '') : v;
+
 const optionalString = z.preprocess(
 	(v) => (v === '' || v === null ? undefined : v),
 	z.string().optional()
@@ -389,7 +393,15 @@ const patterns = defineCollection({
 			pdfUrl: optionalUrl,
 
 			/** Patterns cite the test behind their yarn advice. Load-bearing cross-link. */
-			relatedPost: reference('posts').optional(),
+			/**
+			 * Fifth instance of the blank-field bug, and the first in a reference.
+			 *
+			 * Clearing the picker in /admin writes `relatedPost: ''`. That satisfies
+			 * `reference()`, which only checks it is a string — and then the resolver looks
+			 * for an entry with an empty id and logs "Invalid content reference" at build.
+			 * `blankToUndefined` first, so an empty pick is an absent one.
+			 */
+			relatedPost: z.preprocess(blankToUndefined, reference('posts').optional()),
 
 			/**
 			 * Hand-picked "read this next" links, shown at the foot of the page.
@@ -398,8 +410,8 @@ const patterns = defineCollection({
 			 * three are set, the rest are filled by shared tags — see src/lib/related.ts.
 			 * That way the section is never half-empty, and never needs maintaining.
 			 */
-			relatedPatterns: z.array(reference('patterns')).default([]),
-			relatedPosts: z.array(reference('posts')).default([]),
+			relatedPatterns: z.preprocess(dropBlanks, z.array(reference('patterns')).default([])),
+			relatedPosts: z.preprocess(dropBlanks, z.array(reference('posts')).default([])),
 
 			/**
 			 * Unfinished, or example/scaffolding content. A draft is absent from every listing
@@ -465,8 +477,8 @@ const posts = defineCollection({
 			 * three are set, the rest are filled by shared tags — see src/lib/related.ts.
 			 * That way the section is never half-empty, and never needs maintaining.
 			 */
-			relatedPatterns: z.array(reference('patterns')).default([]),
-			relatedPosts: z.array(reference('posts')).default([]),
+			relatedPatterns: z.preprocess(dropBlanks, z.array(reference('patterns')).default([])),
+			relatedPosts: z.preprocess(dropBlanks, z.array(reference('posts')).default([])),
 			/**
 			 * Unfinished, or example/scaffolding content. A draft is absent from every listing
 			 * and from the feed and sitemap, carries noindex, and renders at its `previewId`
