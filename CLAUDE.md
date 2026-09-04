@@ -334,6 +334,12 @@ measurement each size is cut for, yardage per size, US/UK terms.
   at 11.5px — a shade smaller on purpose, because they sit directly above their own data.
   Small uppercase with wide tracking is the hardest thing on a page to read, and passing
   contrast does not make it legible; anything below 11px is scaffolding that gets deleted.
+- **The wordmark is live text, and it is `hookd.`** — Space Grotesk 500, all lowercase,
+  tracked at −0.05em, with the full stop in `--terracotta`. Never another typeface, never
+  sentence case, never without the stop. Tracking loosens to −0.04em at 19px and below,
+  where −0.05em collides; the footer is set at 19px for that reason. Space Grotesk is loaded
+  for this one purpose and `--wordmark` is the only place it may be used. Lora was here for
+  the same single purpose and came out with it — nothing else on the site used it.
 - Class naming is BEM-ish: `block__element`, `block--modifier`.
 - Server-rendered HTML only. No client-side-only content — AI crawlers fetch JavaScript
   but do not execute it.

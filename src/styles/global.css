@@ -45,7 +45,9 @@
 
 	/* Type */
 	--serif: 'Newsreader', Georgia, 'Times New Roman', serif;
-	--script: 'Lora', Georgia, serif;
+	/* The wordmark, and nothing else. Lora was here for the same single purpose and
+	   came out with it — no other element on the site used it. */
+	--wordmark: 'Space Grotesk', 'Work Sans', system-ui, sans-serif;
 	--sans: 'Work Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
 	--mono: ui-monospace, Menlo, monospace;
 

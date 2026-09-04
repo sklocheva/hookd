@@ -99,8 +99,14 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
 
 ## Assets still missing
 
-- [ ] **Wordmark artwork.** Currently italic Lora in a dashed box — delete the box and its
-      monospace caption in `Header.astro` and `Footer.astro` when real artwork lands.
+- [x] ~~**Wordmark artwork**~~ — done, and it needed no artwork: the mark is live text,
+      `hookd.` in Space Grotesk 500 with a rust full stop. The dashed box and its caption
+      are deleted. A PNG export exists for social avatars and PDF corners but the site does
+      not use it.
+- [ ] **The favicon is still Claude's default logo**, left over from scaffolding
+      (`public/favicon.svg` and `favicon.ico`). The wordmark spec calls for `hookd.` cropped
+      to the h–d box, or just `h.`. It cannot be live text in a favicon — the font will not
+      load — so this one does need an exported asset.
 - [ ] **Social icons** for Instagram, YouTube, Pinterest, Ravelry. Currently text stubs in
       circles, with a caption to delete alongside them.
 - [ ] All photography. `PhotoPlaceholder.astro` is scaffolding and should eventually be

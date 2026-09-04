@@ -29,7 +29,7 @@ const social = [
 
 	<div class="footer-row">
 		<div class="footer-left">
-			<a href="/" class="footer-wordmark">Hookd</a>
+			<a href="/" class="footer-wordmark">hookd<span class="footer-wordmark__stop">.</span></a>
 			<nav class="footer-nav">
 				{nav.map((item) => <a href={item.href}>{item.label}</a>)}
 			</nav>
@@ -84,11 +84,18 @@ const social = [
 		gap: 24px;
 	}
 
+	.footer-wordmark__stop {
+		color: var(--terracotta);
+	}
+
 	.footer-wordmark {
 		display: inline-block;
 		padding-block: 3px;
-		font: italic 500 20px/1 var(--script);
+		font: 500 19px/1 var(--wordmark);
+		/* -0.04em, not the header's -0.05em: at this size the tighter setting collides. */
+		letter-spacing: -0.04em;
 		color: var(--ink);
+		text-decoration: none;
 		text-decoration: none;
 	}
 

@@ -16,14 +16,8 @@ const nav = [
 ---
 
 <header class="shell site-header">
-	<div>
-		<a href="/" class="wordmark-box">
-			<span class="wordmark">Hookd</span>
-		</a>
-		{/* Placeholder scaffolding: delete the dashed box and this caption when real
-		    wordmark artwork lands. */}
-		<div class="annotation" data-scaffold>Logo artwork — replace with wordmark image</div>
-	</div>
+	{/* Live text, not an image. The full stop is the only decoration the mark gets. */}
+	<a href="/" class="wordmark">hookd<span class="wordmark__stop">.</span></a>
 
 	<nav>
 		{
@@ -53,25 +47,21 @@ const nav = [
 		align-items: flex-end;
 	}
 
-	.wordmark-box {
-		display: inline-block;
-		border: 1px dashed var(--border-dashed);
-		padding: 14px 26px;
+	.wordmark {
+		font: 500 clamp(28px, 4vw, 40px) / 1 var(--wordmark);
+		/* Tight tracking is what makes it read as set rather than typed. It loosens to
+		   -0.04em at 19px and below, where -0.05em starts to collide — see the footer. */
+		letter-spacing: -0.05em;
+		color: var(--ink);
 		text-decoration: none;
 	}
 
-	.wordmark {
-		font: italic 500 clamp(32px, 5vw, 46px) / 1 var(--script);
-		letter-spacing: -0.03em;
-		color: var(--ink);
-	}
-
-	.annotation {
-		margin-top: 9px;
-		font: var(--type-mono-caption);
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--annotation);
+	.wordmark__stop {
+		/* The design names #b1603f. That is this site's rust before it was corrected to
+		   4.5:1, and --terracotta is the corrected value of the same accent. A brand mark
+		   is exempt from the contrast rule, but there is no reason to keep a second rust
+		   around for one character. */
+		color: var(--terracotta);
 	}
 
 	nav {
