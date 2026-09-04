@@ -198,6 +198,13 @@ The picker is progressive enhancement on the same terms as the homepage rotator:
 size renders server-side — the middle one, so a reader with no JavaScript gets a usable
 pattern rather than the smallest — every size ships as JSON, and `?size=L` deep-links.
 
+**A pattern with one size gets no size table.** There is nothing to choose between, and a
+one-row table under a heading asking "Choosing your size" asks a question that does not
+apply — accessories and home pieces do not have to fit anyone. The dimensions move into the
+spec block as **Finished size**, in plain text, with `sizeNote` (or the ease, as a fallback)
+as the line beneath. Keyed on the size count rather than on the category, so a one-size
+garment is handled too: it still states its ease, it just has no chart.
+
 **Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
 `/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real
 static routes rather than client-side filtering, because of the no-JS rule. Both indexes use
@@ -330,15 +337,20 @@ measurement each size is cut for, yardage per size, US/UK terms.
   literals in components — there are currently zero outside the token definitions, and
   that is worth keeping. Sizes used in more than one place get a `--type-*` token, so a
   change is one edit rather than seven.
-- **There is one uppercase label size, 13px**, and it is a token — `--type-label` on one
+- **There is one uppercase label size, 14px**, and it is a token — `--type-label` on one
   line, `--type-label-sm` where it wraps. **Size is only half of it: a label is `--ink-2` at
   0.06em tracking, never `--muted` at 0.09em.** The instructions section shipped with the
   artboard's lighter, wider setting and read noticeably smaller than the spec block at the
   identical size — light grey plus uppercase plus tracking is what does it, not the pixels. Eleven components had drifted to their own value
   between 11 and 12.5px, so a badge, a difficulty level and a spec label were three sizes
   of the same thing. Only two uppercase roles may differ, because they are not labels:
-  `--type-nav` and `--type-prose-label`, both 13px. Column heads are `--type-table-head`
-  at 11.5px — a shade smaller on purpose, because they sit directly above their own data.
+  `--type-nav` and `--type-prose-label`, both 14px too. Column heads are `--type-table-head`
+  at 13px — a shade smaller on purpose, because they sit directly above their own data.
+  **Raising the token is not enough on its own**: the eyebrow, the footer links and the
+  social labels were 11px, 12.5px and 9.5px set by hand in their own components, and three
+  successive raises of the token never touched them. Measure the computed sizes on a
+  rendered page rather than grepping for a declaration — the audit's floor is 12px and it
+  checks the render.
   Small uppercase with wide tracking is the hardest thing on a page to read, and passing
   contrast does not make it legible; anything below 11px is scaffolding that gets deleted.
 - **The wordmark is live text, and it is `hookd.`** — Space Grotesk 500, all lowercase,

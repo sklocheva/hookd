@@ -60,6 +60,17 @@ export function finishedMeasurements(p: Pattern['data']): string {
 	return lo === hi ? `${lo} ${unit}` : `${lo}–${hi} ${unit}`;
 }
 
+/**
+ * Every finished measurement of one size, written out: "58 cm circumference · 28 cm height".
+ *
+ * For a pattern that comes in one size there is nothing to tabulate and nothing to choose
+ * between, so the dimensions are stated as a line of text instead of as a table with a
+ * single row under a heading asking which size you are.
+ */
+export function sizeLine(size: Pattern['data']['sizes'][number]): string {
+	return size.measurements.map((m) => `${m.value} ${m.unit} ${m.label.toLowerCase()}`).join(' · ');
+}
+
 /** e.g. "4.5 mm · US 7", or just "7 mm" where no US size exists. */
 export function hook(p: Pattern['data']): string {
 	return hookLabel(p.hookMm);

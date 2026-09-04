@@ -18,6 +18,7 @@ import {
 	gaugeLine,
 	mainYarn,
 	sizeRange,
+	sizeLine,
 	yardageRangeBoth,
 	finishedMeasurements,
 } from '../../lib/format';
@@ -41,6 +42,8 @@ const d = pattern.data;
 const { Content } = await render(pattern);
 
 const yarn = mainYarn(d);
+// One size: no size table, no "choosing your size", dimensions stated in the spec block.
+const oneSize = d.sizes.length === 1;
 const related = d.relatedPost ? await getEntry(d.relatedPost) : undefined;
 
 const [allPatterns, allPosts] = await Promise.all([
@@ -82,7 +85,9 @@ const frames = [
 const quickSpecs = [
 	{ label: 'Yarn', value: `CYC ${yarn.cycWeight} ${yarn.cycWeightName.split(' ')[0]}`, nowrap: true },
 	{ label: 'Hook', value: hookLabel(d.hookMm), nowrap: true },
-	{ label: 'Sizes', value: `${sizeRange(d)} · ${finishedMeasurements(d)}` },
+	oneSize
+		? { label: 'Finished size', value: sizeLine(d.sizes[0]) || d.sizes[0].name }
+		: { label: 'Sizes', value: `${sizeRange(d)} · ${finishedMeasurements(d)}` },
 	{ label: 'Difficulty', value: d.difficulty },
 ];
 
@@ -116,14 +121,21 @@ const specs = [
 		value: d.category.map(categoryLabel).join(' · '),
 		note: d.category.length > 1 ? 'Filed under both' : undefined,
 	},
-	{
-		label: 'Sizes',
-		value: d.sizes.map((s) => s.name).join(' · '),
-		note:
-			d.sizes.length === 1
-				? 'One size · measurements below'
-				: `${d.sizes.length} sizes · how to choose, below`,
-	},
+	oneSize
+		? {
+				label: 'Finished size',
+				value: sizeLine(d.sizes[0]) || d.sizes[0].name,
+				// Whatever the author wants to say about fit instead of a size chart —
+				// "a looser hand gives a wider, shorter basket". Falls back to the ease,
+				// which otherwise had nowhere left to go: a garment can come in one size
+				// and still need its fit stated.
+				note: d.sizeNote ?? d.ease,
+			}
+		: {
+				label: 'Sizes',
+				value: d.sizes.map((s) => s.name).join(' · '),
+				note: `${d.sizes.length} sizes · how to choose, below`,
+			},
 ];
 ---
 
@@ -235,12 +247,19 @@ const specs = [
 			</div>
 		</section>
 
-		<SizeTable
-			sizes={d.sizes}
-			ease={d.ease}
-			sizeNote={d.sizeNote}
-			bodyChartUrl={d.bodyChartUrl}
-		/>
+		{/* A pattern that comes in one size has nothing to tabulate and nothing to choose
+		    between — a one-row table under "Choosing your size" asks the reader a question
+		    that does not apply. The dimensions are stated in the spec block instead. */}
+		{
+			d.sizes.length > 1 && (
+				<SizeTable
+					sizes={d.sizes}
+					ease={d.ease}
+					sizeNote={d.sizeNote}
+					bodyChartUrl={d.bodyChartUrl}
+				/>
+			)
+		}
 
 		<div class="prose" id="instructions">
 			<Content />

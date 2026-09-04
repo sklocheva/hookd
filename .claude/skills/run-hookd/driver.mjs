@@ -332,11 +332,11 @@ function pageAudit() {
 
 		// Small uppercase with wide tracking is the hardest thing on a page to read.
 		// This floor exists because labels that passed contrast were still unreadable.
-		if (cs.textTransform === 'uppercase' && !cs.fontFamily.includes('mono') && size < 11) {
+		if (cs.textTransform === 'uppercase' && !cs.fontFamily.includes('mono') && size < 12) {
 			if (isScaffold(el)) { skipped++; }
 			else {
 				const key = 'l' + size + sample;
-				if (!seen.has(key)) { seen.add(key); issues.push({ check: 'label-floor', detail: `uppercase "${sample}" at ${size}px (floor 11px)` }); }
+				if (!seen.has(key)) { seen.add(key); issues.push({ check: 'label-floor', detail: `uppercase "${sample}" at ${size}px (floor 12px)` }); }
 			}
 		}
 	});

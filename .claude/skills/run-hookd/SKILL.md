@@ -41,7 +41,7 @@ Builds, serves, then loads **every route it finds in `dist/`** at **375px and 12
 | Content present without JS | Crawlers fetch scripts but do not run them |
 | Tap targets >= 24px tall | WCAG 2.5.8. Inline links in a sentence are exempt and skipped |
 | Contrast vs the real background | Computed, not guessed at from tokens |
-| Uppercase labels >= 11px | Small uppercase with wide tracking is unreadable even when contrast passes |
+| Uppercase labels >= 12px | Small uppercase with wide tracking is unreadable even when contrast passes |
 | Every internal link resolves | Broken links are invisible until clicked |
 
 Exit code 0 clean, 1 on findings, 2 if it could not start. Output ends with:
