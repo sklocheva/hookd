@@ -12,6 +12,7 @@ Exits non-zero on a mismatch, so it can gate a build later.
 
 from __future__ import annotations
 
+import io
 import re
 import sys
 from pathlib import Path
@@ -70,6 +71,32 @@ def schema_fields(src: str, collection: str) -> set[str]:
         if depth < 0:  # closed the top-level object
             break
     return names
+
+
+FLOW_ROW = re.compile(r'^\s*- \{ *(\w+): (.+?), *(\w+): (.+?) *\}\s*$')
+
+
+def flow_mapping_losses() -> list[str]:
+    """Hand-written `- { label: X, text: Y }` rows whose value contains a comma.
+
+    That is a YAML *flow mapping*: the comma ends the entry, and everything after it
+    parses as a further key with a null value, which Zod then strips as unknown. The text
+    disappears with no error anywhere — a yarn quantity read "666 g in all" on the page
+    when the file said "666 g in all, measured — 11 g per block".
+
+    Entries written by the CMS are safe; Sveltia quotes what it writes. This only catches
+    files edited by hand, which is exactly where it happened.
+    """
+    found: list[str] = []
+    for folder in (ROOT / 'src' / 'content').iterdir():
+        if not folder.is_dir():
+            continue
+        for f in sorted(folder.glob('*.md*')):
+            for n, line in enumerate(io.open(f, encoding='utf-8'), 1):
+                m = FLOW_ROW.match(line)
+                if m and ',' in m.group(4):
+                    found.append(f'{folder.name}/{f.name}:{n} — "{m.group(4)[:48]}…"')
+    return found
 
 
 def main() -> int:
@@ -134,6 +161,14 @@ def main() -> int:
                 )
 
         print(f'{name:9} form={len(form):3} schema={len(schema):3}  ok' if not failures else f'{name}: checked')
+
+    lost = flow_mapping_losses()
+    if lost:
+        failures.append(
+            'content rows losing text to a comma inside { }: '
+            + '; '.join(lost)
+            + ' — rewrite these as block mappings with quoted values'
+        )
 
     if failures:
         print('\nMISMATCH:')

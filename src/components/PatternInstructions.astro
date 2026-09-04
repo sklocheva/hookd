@@ -332,9 +332,9 @@ const learnHeading =
 	.named__label {
 		margin: 0 0 8px;
 		font: var(--type-label);
-		letter-spacing: 0.09em;
+		letter-spacing: 0.06em;
 		text-transform: uppercase;
-		color: var(--muted);
+		color: var(--ink-2);
 	}
 
 	.named__body {
@@ -367,9 +367,9 @@ const learnHeading =
 	.picker__label {
 		margin: 0;
 		font: var(--type-label-sm);
-		letter-spacing: 0.09em;
+		letter-spacing: 0.06em;
 		text-transform: uppercase;
-		color: var(--muted);
+		color: var(--ink-2);
 	}
 
 	.picker__summary {
@@ -442,19 +442,20 @@ const learnHeading =
 	}
 
 	.row__label {
-		flex: 0 0 78px;
-		font: 600 13.5px/1.4 var(--mono);
+		flex: 0 0 84px;
+		font: 600 14.5px/1.45 var(--mono);
 		letter-spacing: 0.02em;
 		text-transform: uppercase;
-		/* The design sets these in --annotation (#8a7c6e), which measures 3.76:1 on paper
-		   and is reserved here for scaffolding that gets deleted. --muted is 4.65:1 and is
-		   the same decision already taken for every other small label on the site. */
-		color: var(--muted);
+		/* The design sets these in --annotation (#8a7c6e) at 13.5px. That measures 3.76:1
+		   on paper — the value reserved here for scaffolding — and the house rule for a
+		   label is --ink-2, which is 9.5:1. Light grey plus uppercase plus tracking is what
+		   made this section read small next to the spec block at the same size. */
+		color: var(--ink-2);
 	}
 
 	/* An ungraded pattern uses longer labels — "Last rnd", "Rnds 14–34". */
 	.rows--wide .row__label {
-		flex-basis: 88px;
+		flex-basis: 94px;
 	}
 
 	.row__text {

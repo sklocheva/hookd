@@ -101,6 +101,14 @@ its caption doubles as the shot list — it is scaffolding, to be deleted when r
 not yet shot, triggered by omitting `heroImage`, and it ships. Same for the dashed wordmark box
 in `Header.astro` and the social stubs in `Footer.astro`, both marked in the source.
 
+**A comma inside `- { key: value }` silently eats the rest of the line.** That is a YAML
+flow mapping: the comma ends the entry and the remainder parses as a further key, which Zod
+strips as unknown. No error anywhere. A yarn quantity read "666 g in all" on the page while
+the file said "666 g in all, measured — 11 g per block", and 26 rows across three
+hand-written patterns had lost text this way. Entries written from `/admin` are safe because
+Sveltia quotes what it writes; this only bites hand-authored files. Write those as block
+mappings with quoted values, and `check-cms-config.py` now fails on the flow form.
+
 **An entry file must carry the extension its collection declares.** `patterns` and `posts`
 are `extension: mdx`, `reviews` is `md`. Astro's glob loader takes `.md` and `.mdx` alike, so
 a mismatched file builds, renders and goes live perfectly — and Sveltia never lists it, because
@@ -309,8 +317,11 @@ measurement each size is cut for, yardage per size, US/UK terms.
   literals in components — there are currently zero outside the token definitions, and
   that is worth keeping. Sizes used in more than one place get a `--type-*` token, so a
   change is one edit rather than seven.
-- **There is one uppercase label size, 12px**, and it is a token — `--type-label` on one
-  line, `--type-label-sm` where it wraps. Eleven components had drifted to their own value
+- **There is one uppercase label size, 13px**, and it is a token — `--type-label` on one
+  line, `--type-label-sm` where it wraps. **Size is only half of it: a label is `--ink-2` at
+  0.06em tracking, never `--muted` at 0.09em.** The instructions section shipped with the
+  artboard's lighter, wider setting and read noticeably smaller than the spec block at the
+  identical size — light grey plus uppercase plus tracking is what does it, not the pixels. Eleven components had drifted to their own value
   between 11 and 12.5px, so a badge, a difficulty level and a spec label were three sizes
   of the same thing. Only two uppercase roles may differ, because they are not labels:
   `--type-nav` and `--type-prose-label`, both 13px. Column heads are `--type-table-head`
