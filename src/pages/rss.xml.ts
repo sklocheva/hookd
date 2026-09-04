@@ -41,7 +41,7 @@ export async function GET(context: APIContext) {
 	return rss({
 		title: 'Hookd',
 		description:
-			'Free crochet patterns, and write-ups of yarn, fibre and stitch tests.',
+			'Crochet patterns, and write-ups of yarn, fibre and stitch tests.',
 		site: context.site!,
 		items,
 	});

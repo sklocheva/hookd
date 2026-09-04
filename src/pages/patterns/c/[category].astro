@@ -38,15 +38,15 @@ const filters = [
 ---
 
 <Base
-	title={`${label} — free crochet patterns`}
-	description={`Free crochet patterns filed under ${label.toLowerCase()}, written out in full with sizes and gauge stated.`}
+	title={`${label} — crochet patterns`}
+	description={`Crochet patterns filed under ${label.toLowerCase()}, written out in full with sizes and gauge stated.`}
 	active="patterns"
 >
 	<PageHead
 		heading={label}
 		standfirst={
 			patterns.length
-				? `${patterns.length} ${patterns.length === 1 ? 'free pattern' : 'free patterns'} filed under ${label.toLowerCase()}. Every one is written out in full, with the gauge measured on the blocked piece.`
+				? `${patterns.length} ${patterns.length === 1 ? 'pattern' : 'patterns'} filed under ${label.toLowerCase()}. Every one is written out in full, with the gauge measured on the blocked piece.`
 				: `Nothing filed under ${label.toLowerCase()} yet.`
 		}
 		filters={filters}
@@ -59,9 +59,9 @@ const filters = [
 			<EmptyState
 				label="No matches"
 				heading={`Nothing in ${label} yet`}
-				body="No pattern is filed under this yet. Every free pattern on the site is one click away."
+				body="No pattern is filed under this yet. Every pattern on the site is one click away."
 				actionHref="/patterns/"
-				actionLabel="All free patterns"
+				actionLabel="All patterns"
 			/>
 		)
 	}

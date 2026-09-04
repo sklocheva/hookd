@@ -9,7 +9,7 @@ interface Props {
 const { active } = Astro.props;
 
 const nav = [
-	{ label: 'Free patterns', href: '/patterns/', key: 'patterns' },
+	{ label: 'Patterns', href: '/patterns/', key: 'patterns' },
 	{ label: 'Journal', href: '/journal/', key: 'journal' },
 	{ label: 'About', href: '/about/', key: 'about' },
 ] as const;
@@ -48,7 +48,9 @@ const nav = [
 	}
 
 	.wordmark {
-		font: 500 clamp(28px, 4vw, 40px) / 1 var(--wordmark);
+		/* Larger than the 40px in the spec. Space Grotesk at 40px sat quieter next to
+		   Newsreader headings than the wordmark should. */
+		font: 500 clamp(32px, 5vw, 52px) / 1 var(--wordmark);
 		/* Tight tracking is what makes it read as set rather than typed. It loosens to
 		   -0.04em at 19px and below, where -0.05em starts to collide — see the footer. */
 		letter-spacing: -0.05em;

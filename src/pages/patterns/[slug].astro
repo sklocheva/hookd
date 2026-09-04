@@ -128,7 +128,7 @@ const specs = [
 ---
 
 <Base
-	title={`${d.title} — free crochet pattern`}
+	title={`${d.title} — crochet pattern`}
 	description={d.metaDescription}
 	active="patterns"
 	shareImage={d.socialImage}
@@ -141,7 +141,7 @@ const specs = [
 		{d.draft && <DraftNotice />}
 
 		<div class="title-block">
-			<Eyebrow kind="Pattern" rest={`· ${formatDate(d.date)} · free, always`} />
+			<Eyebrow kind="Pattern" rest={`· ${formatDate(d.date)}`} />
 			<h1>{d.title}</h1>
 		</div>
 

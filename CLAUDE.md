@@ -4,8 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Hookd — personal crochet blog
 
-A static site publishing free crochet patterns and write-ups of yarn, fibre and stitch tests.
-Not a shop. Selling happens on Ravelry, never here.
+A static site publishing crochet patterns and write-ups of yarn, fibre and stitch tests.
+Not a shop: no cart, no payments, no accounts. Anything sold is sold off-site, on Ravelry.
+
+**The site does not call its patterns free.** It used to — in the nav, in every page title,
+and in an eyebrow reading "free, always" on every pattern page. That was removed once the
+author decided some larger patterns may later be sold as PDFs: a promise printed on every
+page is expensive to walk back, and "free patterns" as a label read cheap besides. Individual
+patterns are still free, and the licence block says so per pattern; the *site* no longer
+makes the claim on their behalf.
 
 ## Stack — decided, do not substitute
 

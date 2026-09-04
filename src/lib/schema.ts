@@ -33,7 +33,7 @@ export function personSchema(site: URL): JsonLd {
 
 /** Human labels for path segments that would otherwise render as bare slugs. */
 const SEGMENT_LABELS: Record<string, string> = {
-	patterns: 'Free patterns',
+	patterns: 'Patterns',
 	journal: 'Journal',
 	about: 'About',
 	c: '',
