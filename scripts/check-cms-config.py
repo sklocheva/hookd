@@ -26,7 +26,11 @@ CMS = ROOT / 'public' / 'admin' / 'config.yml'
 # Fields the schema defines but the form intentionally does not ask for.
 # `body` is the markdown itself; Astro derives the slug from the filename.
 CMS_ONLY = {'body'}
-SCHEMA_ONLY: set[str] = set()
+# Fields the schema defines and the form deliberately does not offer.
+SCHEMA_ONLY: set[str] = {
+    # US terms are a standing site rule, not a per-pattern decision.
+    'terms',
+}
 
 # Required on every collection, deliberately — see CLAUDE.md.
 SEO_REQUIRED = {'metaDescription', 'heroImageAlt', 'socialImage'}

@@ -173,11 +173,6 @@ collections:
           - { label: Pets, value: pets }
           - { label: Home, value: home }
         hint: Tick every one that applies. At least one — the build fails on none.
-      - label: Terms
-        name: terms
-        widget: select
-        options: [US, UK]
-        default: US
       - { label: Tags, name: tags, widget: list, required: false }
 
       # --- Yarn. A list, because colour-blocked work uses several. --------
@@ -200,7 +195,13 @@ collections:
             max: 7
           - { label: CYC weight name, name: cycWeightName, widget: string, hint: 'e.g. Medium (worsted/aran)' }
           - { label: Colour name, name: colourName, widget: string, required: false }
-          - { label: Role, name: role, widget: string, default: main, hint: 'main, contrast, optional…' }
+          - label: Role
+            name: role
+            widget: string
+            required: false
+            hint: >-
+              Only worth filling in when a pattern uses more than one yarn — main,
+              contrast, edging. Left blank it is the main yarn.
 
       # --- Hook ----------------------------------------------------------
       # Only the mm is typed. The US size is looked up from it at build time
@@ -265,7 +266,13 @@ collections:
               - { label: Label, name: label, widget: string, hint: 'e.g. Finished bust' }
               - { label: Value, name: value, widget: number, value_type: float }
               - { label: Unit, name: unit, widget: string, default: cm, required: false }
-          - { label: Yardage (m), name: yardageM, widget: number, value_type: int }
+          - label: Yarn needed (metres)
+            name: yardageM
+            widget: number
+            value_type: int
+            hint: >-
+              Metres, not yards. The page converts and shows both — "1180 m / 1290 yd" —
+              so only ever type the metres.
           - label: Numbers for this size
             name: values
             widget: list
@@ -437,6 +444,9 @@ collections:
         search_fields: [title]
         value_field: '{{slug}}'
         display_fields: [title]
+        # Always a search box. The default threshold of 5 draws radios and checkboxes
+        # below it, which reads as a broken control and does not survive twenty patterns.
+        dropdown_threshold: 0
         required: false
         hint: The test that justifies this pattern's yarn advice. Linked from the substitution note.
 
@@ -448,6 +458,9 @@ collections:
         search_fields: [title]
         value_field: '{{slug}}'
         display_fields: [title]
+        # Always a search box. The default threshold of 5 draws radios and checkboxes
+        # below it, which reads as a broken control and does not survive twenty patterns.
+        dropdown_threshold: 0
         multiple: true
         required: false
         hint: >-
@@ -460,6 +473,9 @@ collections:
         search_fields: [title]
         value_field: '{{slug}}'
         display_fields: [title]
+        # Always a search box. The default threshold of 5 draws radios and checkboxes
+        # below it, which reads as a broken control and does not survive twenty patterns.
+        dropdown_threshold: 0
         multiple: true
         required: false
         hint: The test behind a pattern is the most useful thing to link here.
@@ -564,6 +580,9 @@ collections:
         search_fields: [title]
         value_field: '{{slug}}'
         display_fields: [title]
+        # Always a search box. The default threshold of 5 draws radios and checkboxes
+        # below it, which reads as a broken control and does not survive twenty patterns.
+        dropdown_threshold: 0
         multiple: true
         required: false
         hint: >-
@@ -576,6 +595,9 @@ collections:
         search_fields: [title]
         value_field: '{{slug}}'
         display_fields: [title]
+        # Always a search box. The default threshold of 5 draws radios and checkboxes
+        # below it, which reads as a broken control and does not survive twenty patterns.
+        dropdown_threshold: 0
         multiple: true
         required: false
         hint: The test behind a pattern is the most useful thing to link here.

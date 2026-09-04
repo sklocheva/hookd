@@ -160,8 +160,12 @@ const yarn = z.object({
 	cycWeight: z.number().int().min(0).max(7),
 	cycWeightName: z.string(),
 	colourName: optionalString,
-	/** Colour-blocked work uses several yarns, so each needs a role. */
-	role: z.string().default('main'),
+	/**
+	 * Only meaningful when a pattern uses more than one yarn. Blank means main —
+	 * `blankToUndefined` first, because a cleared field arrives as `''` and a `.default()`
+	 * fills in for `undefined` only.
+	 */
+	role: z.preprocess(blankToUndefined, z.string().default('main')),
 });
 
 /**
@@ -373,7 +377,15 @@ const patterns = defineCollection({
 				(v) => (v === '' || v === null ? undefined : v),
 				z.string().url().default('https://www.craftyarncouncil.com/standards/body-sizing')
 			),
-			terms: z.enum(['US', 'UK']).default('US'),
+			/**
+			 * US throughout, and not a choice.
+			 *
+			 * It was a select with UK as the other option, which asked the author a question
+			 * whose answer is a standing site rule. A literal keeps the key readable in
+			 * frontmatter and readable on the page, and makes UK impossible rather than
+			 * merely unlikely.
+			 */
+			terms: z.literal('US').default('US'),
 
 			/**
 			 * Several per pattern — a hooded scarf is both clothing and an accessory, and
