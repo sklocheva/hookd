@@ -1,5 +1,6 @@
 ---
 import Hero from './Hero.astro';
+import PlaceholderTile from './PlaceholderTile.astro';
 import Eyebrow from './Eyebrow.astro';
 import { formatDate } from '../lib/format';
 import type { JournalEntry } from '../lib/journal';
@@ -23,21 +24,27 @@ const { entries } = Astro.props;
 		entries.map((entry, i) => (
 			<a href={entry.href} class:list={['row', { 'row--first': i === 0 }]}>
 				<div class="row__media">
-					<Hero
-						image={entry.heroImage}
-						alt={entry.heroImageAlt}
-						ratio="3/2"
-						caption={entry.title.toLowerCase()}
-						widths={[320, 640]}
-						sizes="(min-width: 1160px) 320px, 100vw"
-					/>
+					{/* An entry with a tile is one that will never be photographed — a quiz,
+					    not a shot still to come. See PlaceholderTile.astro. */}
+					{entry.tile ? (
+						<PlaceholderTile symbol={entry.tile.symbol} caption={entry.tile.caption} ratio="3/2" />
+					) : (
+						<Hero
+							image={entry.heroImage}
+							alt={entry.heroImageAlt}
+							ratio="3/2"
+							caption={entry.title.toLowerCase()}
+							widths={[320, 640]}
+							sizes="(min-width: 1160px) 320px, 100vw"
+						/>
+					)}
 				</div>
 
 				<div class="row__text hoverable">
 					<div class="row__meta">
 						<Eyebrow
 							kind={entry.kind}
-							rest={`· ${formatDate(entry.date)} · ${entry.readMinutes} min`}
+							rest={`· ${formatDate(entry.date)} · ${entry.metaLabel ?? `${entry.readMinutes} min`}`}
 							tone="journal"
 						/>
 					</div>

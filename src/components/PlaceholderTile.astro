@@ -1,0 +1,67 @@
+---
+/**
+ * The image slot for an entry that will never have an image.
+ *
+ * There are three absent-photo states on this site and they mean different things:
+ * `PhotoPlaceholder` is scaffolding for a shot not yet taken, `PhotoPending` is the
+ * designed "photography to come" state on a pattern, and this is the designed state for
+ * something that is not photographable at all. A quiz is the first of those; it is built
+ * generic because every future quiz will use it and nothing here knows what a quiz is.
+ *
+ * The caption carries whatever the entry can honestly preview — for a quiz, the names of
+ * the outcomes, which say what kind of answer you get without saying which one.
+ */
+interface Props {
+	/** A single character, set in the serif at display size. */
+	symbol: string;
+	/** The uppercase line beneath it. */
+	caption?: string;
+	/** CSS aspect-ratio, matched to the slot it replaces. */
+	ratio?: string;
+}
+
+const { symbol, caption, ratio = '3/2' } = Astro.props;
+---
+
+<div class="tile" style={`aspect-ratio:${ratio}`} aria-hidden="true">
+	<span class="tile__symbol">{symbol}</span>
+	{caption && <span class="tile__caption">{caption}</span>}
+</div>
+
+<style>
+	.tile {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		padding: 18px;
+		text-align: center;
+		background: var(--panel);
+		border: 1px solid var(--rule);
+	}
+
+	.tile__symbol {
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 58px;
+		height: 58px;
+		border: 1px solid var(--border-dashed);
+		border-radius: 50%;
+		font: 400 28px/1 var(--serif);
+		color: var(--ochre);
+	}
+
+	/* The design set this at 11px, which is below the 12px floor the audit enforces and
+	   below the point where uppercase-plus-tracking stays readable at all. It is a label,
+	   so it takes the label token like every other one. */
+	.tile__caption {
+		font: var(--type-label-sm);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--label-ink);
+		text-wrap: balance;
+	}
+</style>

@@ -1,0 +1,132 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../layouts/Base.astro';
+import DraftNotice from '../../../components/DraftNotice.astro';
+import Eyebrow from '../../../components/Eyebrow.astro';
+import Quiz from '../../../components/Quiz.astro';
+import { articleSchema } from '../../../lib/schema';
+import { formatDate } from '../../../lib/format';
+import { published, segment } from '../../../lib/drafts';
+import { questionCountLabel } from '../../../lib/quiz';
+import { QUIZ_KIND } from '../../../lib/taxonomy';
+
+/**
+ * A quiz lives inside the journal, so the breadcrumb, the head, the draft notice and the
+ * preview-id addressing are all the ones every other journal entry uses. Only the body
+ * is different.
+ */
+export const getStaticPaths = (async () => {
+	const quizzes = await getCollection('quizzes');
+	return quizzes.map((quiz) => ({
+		params: { slug: segment(quiz) },
+		props: { quiz },
+	}));
+}) satisfies GetStaticPaths;
+
+const { quiz } = Astro.props;
+const d = quiz.data;
+
+/**
+ * The article link on the result screen, resolved rather than written out.
+ *
+ * Nothing on this site links to an entry by a hand-typed URL — the homepage's pinned
+ * slots did, and two of the three pointed at a 404 the moment drafts moved addresses. A
+ * draft or renamed target drops the link instead of printing one that does not resolve —
+ * which is the normal case for a while, since a quiz is often published before the
+ * article it belongs beside.
+ */
+const posts = published(await getCollection('posts'));
+const related = d.relatedPost ? posts.find((p) => p.id === d.relatedPost!.id) : undefined;
+
+const schema = articleSchema({
+	type: 'Article',
+	url: new URL(Astro.url.pathname, Astro.site),
+	site: Astro.site!,
+	headline: d.title,
+	description: d.metaDescription,
+	datePublished: d.date,
+	dateModified: d.updated,
+	image: d.socialImage,
+	keywords: [QUIZ_KIND, ...d.outcomes.map((o) => o.name.replace(/\.$/, ''))],
+});
+---
+
+<Base
+	title={`${d.title} — Hookd journal`}
+	description={d.metaDescription}
+	active="journal"
+	shareImage={d.socialImage}
+	ogType="article"
+	noindex={d.draft}
+	jsonLd={[schema]}
+	breadcrumbName={d.title}
+>
+	<article class="shell quiz-page">
+		{d.draft && <DraftNotice />}
+
+		<div class="title-block">
+			<Eyebrow
+				kind="Quiz"
+				rest={`· ${questionCountLabel(d)} · ${formatDate(d.date)}${d.updated ? ` · updated ${formatDate(d.updated)}` : ''}`}
+				tone="journal"
+			/>
+			<h1>{d.title}</h1>
+			<p class="standfirst">{d.standfirst}</p>
+			{/* The guarantee is the component's, not the content's — it is a promise the
+			    site makes on every quiz. A quiz may add to it; it cannot drop it. */}
+			<p class="privacy">
+				Nothing is saved and there is no email box at the end.{d.intro ? ` ${d.intro}` : ''}
+			</p>
+		</div>
+
+		<hr />
+
+		<Quiz quiz={d} relatedHref={related && `/journal/${related.id}/`} relatedTitle={related?.data.title} />
+	</article>
+</Base>
+
+<style>
+	/* The note column, for the same reason — see src/pages/journal/[slug].astro. `.shell`
+	   is border-box with padding-inline, so the gutters are added on top of the 760px. */
+	article.quiz-page {
+		max-width: calc(760px + 2 * var(--gutter));
+		padding-bottom: 60px;
+	}
+
+	.title-block {
+		padding-top: 44px;
+		max-width: var(--measure);
+	}
+
+	.title-block :global(.eyebrow) {
+		margin-bottom: 18px;
+	}
+
+	h1 {
+		margin: 0 0 18px;
+		font: 400 clamp(32px, 5.4vw, 50px) / 1.1 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.standfirst {
+		margin: 0 0 12px;
+		font: var(--type-standfirst);
+		color: var(--ink-2);
+		text-wrap: pretty;
+	}
+
+	.privacy {
+		margin: 0;
+		font: var(--type-note);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	hr {
+		margin: 34px 0 30px;
+		border: none;
+		border-top: 1px solid var(--rule);
+	}
+</style>

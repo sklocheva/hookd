@@ -1,0 +1,681 @@
+---
+import { ANSWER_TAGS } from '../lib/quiz';
+import type { QuizData } from '../lib/quiz';
+
+/**
+ * The quiz itself: questions, then a result.
+ *
+ * **Everything renders server-side.** Every question, every option and every outcome is
+ * in the HTML before a line of JavaScript runs, and the script only hides what is not
+ * currently being looked at — the same rule the pattern gallery and the size picker
+ * follow, and the reason the no-JS state is a real page rather than an apology.
+ *
+ * With JavaScript off a reader gets all the questions as a plain radio form and all the
+ * outcomes written out underneath, with a line saying so. That is a deliberate departure
+ * from the brief, which asked for the result to be "computed on submit in the same page
+ * via the inline script": on static hosting there is no server to post to, and if the
+ * script is off it cannot compute anything either. Showing every answer is the honest
+ * version — the reader still gets the whole content of the quiz, they just do the last
+ * step themselves.
+ *
+ * Nothing is stored, sent or counted. There is no localStorage and no analytics here,
+ * and the page says as much where a reader can see it.
+ */
+interface Props {
+	quiz: QuizData;
+	/** Where "Read:" points, or absent if there is nothing published to point at. */
+	relatedHref?: string;
+	relatedTitle?: string;
+}
+
+const { quiz, relatedHref, relatedTitle } = Astro.props;
+
+const pad = (n: number) => String(n).padStart(2, '0');
+const total = quiz.questions.length;
+---
+
+<div class="quiz" data-quiz>
+	{/* The scoring data the client script needs: the same content that is already in the
+	    markup, in the shape the scorer wants, rather than scraped back out of the DOM. */}
+	<script
+		is:inline
+		type="application/json"
+		data-quiz-data
+		set:html={JSON.stringify({
+			outcomes: quiz.outcomes.map((o) => o.id),
+			questions: quiz.questions.map((q) => q.options.map((o) => o.score)),
+		})}
+	/>
+
+	{/* Hidden until the script runs: without it every question is on screen at once, and
+	    "01 / 06" would be describing something that is not happening. */}
+	<div class="progress" data-quiz-progress hidden>
+		<span class="progress__label" data-quiz-count>{pad(1)} / {pad(total)}</span>
+		<div class="progress__track">
+			<div class="progress__fill" data-quiz-fill style="width:0%"></div>
+		</div>
+	</div>
+
+	<form class="quiz__form" data-quiz-form>
+		<p class="no-js" data-quiz-nojs>
+			All {total} questions are below. Answer them, then read the outcomes at the foot of the
+			page — with JavaScript on, this page picks the one that matches.
+		</p>
+
+		{
+			quiz.questions.map((question, qi) => (
+				<fieldset class="question" data-quiz-question={qi}>
+					{/* The legend carries the question for a screen reader; the visible
+					    heading is what everyone else reads, and is what focus moves to. */}
+					<legend class="visually-hidden">
+						Question {qi + 1} of {total}: {question.q}
+					</legend>
+
+					<h2 class="question__text" data-quiz-heading tabindex="-1">
+						{question.q}
+					</h2>
+					{question.note && <p class="question__note">{question.note}</p>}
+
+					<div class="options">
+						{question.options.map((option, oi) => (
+							<Fragment>
+								<label class="option">
+									<input
+										class="option__input"
+										type="radio"
+										name={`q${qi}`}
+										value={oi}
+										data-quiz-option={oi}
+									/>
+									<span class="option__tag">{ANSWER_TAGS[oi]}</span>
+									<span class="option__text">
+										<span class="option__label">{option.label}</span>
+										{option.sub && <span class="option__sub">{option.sub}</span>}
+									</span>
+								</label>
+
+								{/* A two-option question is a fork, not a list, so it gets a
+								    divider that says so. */}
+								{question.options.length === 2 && oi === 0 && (
+									<div class="or" aria-hidden="true">
+										<span class="or__rule" />
+										<span class="or__word">or</span>
+										<span class="or__rule" />
+									</div>
+								)}
+							</Fragment>
+						))}
+					</div>
+
+					<div class="question__nav">
+						<button type="button" class="link-button" data-quiz-back hidden>
+							Previous question
+						</button>
+					</div>
+				</fieldset>
+			))
+		}
+	</form>
+
+	{/* Every outcome, always in the HTML. The script hides the ones that did not win. */}
+	<div class="results" data-quiz-results>
+		<h2 class="results__heading" data-quiz-nojs-heading>
+			{quiz.outcomes.length === 2 ? 'The two answers' : 'The answers'}
+		</h2>
+
+		{
+			quiz.outcomes.map((outcome) => (
+				<div class="result" data-quiz-outcome={outcome.id}>
+					<div class="result__eyebrow" data-quiz-answer-label hidden>
+						Your answer
+					</div>
+					<h3 class="result__name">{outcome.name}</h3>
+					<p class="result__line">{outcome.line}</p>
+
+					<div class="result__panel">
+						<p class="result__body">{outcome.body}</p>
+						{outcome.steps.length > 0 && (
+							<Fragment>
+								<div class="result__steps-label">What to do next</div>
+								<ul class="result__steps">
+									{outcome.steps.map((step) => (
+										<li>{step}</li>
+									))}
+								</ul>
+							</Fragment>
+						)}
+					</div>
+				</div>
+			))
+		}
+
+		<div class="result__actions" data-quiz-actions hidden>
+			<button type="button" class="button" data-quiz-restart>Take it again</button>
+			{
+				relatedHref && (
+					<a class="result__link" href={relatedHref}>
+						Read: {relatedTitle}
+					</a>
+				)
+			}
+		</div>
+
+		{quiz.resultFootnote && <p class="result__footnote">{quiz.resultFootnote}</p>}
+	</div>
+</div>
+
+<style>
+	/* Several of these are flex or inline-flex, and a display declaration beats the
+	   `hidden` attribute. The script toggles `hidden` throughout, so it has to win. */
+	[hidden] {
+		display: none !important;
+	}
+
+	/* ---- progress ---- */
+
+	.progress {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		margin-bottom: 30px;
+	}
+
+	.progress__label {
+		flex: none;
+		font: 600 13px/1 var(--sans);
+		letter-spacing: 0.08em;
+		color: var(--ink-2);
+	}
+
+	.progress__track {
+		position: relative;
+		flex: 1;
+		height: 2px;
+		background: var(--bar-empty);
+	}
+
+	.progress__fill {
+		position: absolute;
+		inset: 0 auto 0 0;
+		background: var(--terracotta);
+		transition: width 0.25s ease;
+	}
+
+	/* ---- questions ---- */
+
+	.quiz__form {
+		margin: 0;
+	}
+
+	.no-js {
+		margin: 0 0 30px;
+		max-width: var(--measure);
+		font: var(--type-note);
+		color: var(--muted);
+	}
+
+	.question {
+		margin: 0 0 clamp(40px, 5vw, 56px);
+		padding: 0;
+		border: none;
+		animation: qIn 0.32s ease both;
+	}
+
+	.question__text {
+		margin: 0 0 10px;
+		font: 400 clamp(23px, 3.1vw, 31px) / 1.3 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	/* Focus moves here on every question change, but the reader did not click it — a
+	   focus ring on a heading reads as a bug, so it is shown only to keyboard users. */
+	.question__text:focus {
+		outline: none;
+	}
+
+	.question__text:focus-visible {
+		outline: 2px solid var(--terracotta);
+		outline-offset: 4px;
+	}
+
+	.question__note {
+		margin: 0 0 26px;
+		max-width: 600px;
+		font: var(--type-callout);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	.options {
+		display: flex;
+		flex-direction: column;
+		gap: 7px;
+	}
+
+	/* ---- an option ---- */
+
+	.option {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		min-height: 60px;
+		/* Do not replace the clamp with a fixed value: the 12px floor is what fits a
+		   four-option question on a 390 × 844 screen without scrolling. */
+		padding: clamp(12px, 1.9vw, 15px) clamp(16px, 2.4vw, 22px);
+		background: var(--panel);
+		border: 1px solid var(--rule);
+		border-left: 3px solid var(--rule-bar);
+		cursor: pointer;
+		transition:
+			background 0.18s ease,
+			border-color 0.18s ease,
+			transform 0.18s ease;
+	}
+
+	.option:hover,
+	.option:has(.option__input:checked) {
+		background: var(--panel-active);
+		border-left-color: var(--terracotta);
+		transform: translateX(3px);
+	}
+
+	/* The whole card is the control, so the input itself is only ever the focus target
+	   and the checked state. It stays in the accessibility tree. */
+	.option__input {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: 0;
+		opacity: 0;
+	}
+
+	.option:has(.option__input:focus-visible) {
+		outline: 2px solid var(--terracotta);
+		outline-offset: 2px;
+	}
+
+	.option__tag {
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 30px;
+		height: 30px;
+		border: 1px solid var(--border-dashed);
+		border-radius: 50%;
+		font: 600 12px/1 var(--sans);
+		color: var(--label-ink);
+	}
+
+	.option__text {
+		display: flex;
+		flex-direction: column;
+		gap: 5px;
+	}
+
+	.option__label {
+		font: 400 clamp(16px, 1.7vw, 18px) / 1.45 var(--sans);
+		color: var(--ink);
+	}
+
+	/* --label-ink, not --muted: --muted on --panel is 4.16:1 and fails AA. */
+	.option__sub {
+		font: 400 13.5px/1.55 var(--sans);
+		color: var(--label-ink);
+	}
+
+	.or {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		padding-top: 12px;
+	}
+
+	.or__rule {
+		flex: 1;
+		height: 1px;
+		background: var(--rule);
+	}
+
+	.or__word {
+		font: var(--type-label);
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--ochre);
+	}
+
+	.question__nav {
+		display: flex;
+		align-items: center;
+		gap: 22px;
+		min-height: 44px;
+		margin-top: 26px;
+	}
+
+	.link-button {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0 0 4px;
+		background: none;
+		border: none;
+		border-bottom: 1px solid var(--border-dashed);
+		cursor: pointer;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink-2);
+	}
+
+	.link-button:hover {
+		color: var(--terracotta);
+		border-bottom-color: var(--terracotta);
+	}
+
+	/* ---- the result ---- */
+
+	.results__heading {
+		margin: 0 0 clamp(28px, 3.5vw, 38px);
+		font: var(--type-article-h2);
+		color: var(--ink);
+	}
+
+	.result {
+		animation: qIn 0.34s ease both;
+	}
+
+	/* Separates the outcomes in the no-JS reading order. The script shows one at a time,
+	   where there is nothing to separate it from. */
+	.result + .result {
+		margin-top: clamp(40px, 5vw, 60px);
+	}
+
+	.result__eyebrow {
+		margin-bottom: 14px;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ochre);
+	}
+
+	.result__name {
+		margin: 0 0 16px;
+		font: 400 clamp(34px, 5.6vw, 52px) / 1.08 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.result__line {
+		margin: 0 0 28px;
+		max-width: 600px;
+		font: italic 400 clamp(18px, 2.2vw, 23px) / 1.5 var(--serif);
+		color: var(--ink-2);
+		text-wrap: pretty;
+	}
+
+	.result__panel {
+		margin-bottom: 30px;
+		padding: clamp(24px, 3.5vw, 34px);
+		background: var(--wash);
+		border-top: 2px solid var(--ochre-rule);
+	}
+
+	.result__body {
+		margin: 0 0 20px;
+		font: var(--type-body);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.result__steps-label {
+		margin-bottom: 14px;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--label-ink);
+	}
+
+	.result__steps {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		margin: 0;
+		padding-left: 22px;
+	}
+
+	.result__steps li {
+		font: 400 15.5px/1.7 var(--sans);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.result__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px 26px;
+		align-items: center;
+		padding-bottom: 6px;
+	}
+
+	.button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 48px;
+		padding: 12px 26px;
+		background: var(--ink);
+		border: 1px solid var(--ink);
+		color: var(--paper);
+		cursor: pointer;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		transition: background 0.18s ease;
+	}
+
+	.button:hover {
+		background: var(--ink-hover);
+	}
+
+	.result__link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		text-decoration: none;
+		color: var(--terracotta);
+		border-bottom: 1px solid currentColor;
+	}
+
+	.result__link:hover {
+		color: var(--terracotta-hover);
+	}
+
+	.result__footnote {
+		margin: 30px 0 0;
+		max-width: 600px;
+		font: var(--type-note);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	@keyframes qIn {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.question,
+		.result {
+			animation: none;
+		}
+
+		.option,
+		.progress__fill,
+		.button {
+			transition: none;
+		}
+
+		.option:hover,
+		.option:has(.option__input:checked) {
+			transform: none;
+		}
+	}
+</style>
+
+<script>
+	import { scoreQuiz } from '../lib/quiz';
+
+	/**
+	 * Progressive enhancement, on the same terms as the size picker: the page is complete
+	 * before this runs, and all this does is hide what the reader is not looking at.
+	 *
+	 * Scoring is imported rather than reimplemented — see src/lib/quiz.ts.
+	 */
+	type ScoreMap = Record<string, number>;
+	type Payload = { outcomes: string[]; questions: ScoreMap[][] };
+
+	for (const root of document.querySelectorAll<HTMLElement>('[data-quiz]')) {
+		const dataEl = root.querySelector<HTMLScriptElement>('[data-quiz-data]');
+		if (!dataEl?.textContent) continue;
+
+		const payload = JSON.parse(dataEl.textContent) as Payload;
+
+		// scoreQuiz wants the content shape; the page only ships the scoring half of it,
+		// which is all the sum depends on.
+		const quiz = {
+			outcomes: payload.outcomes.map((id) => ({ id })),
+			questions: payload.questions.map((options) => ({
+				options: options.map((score) => ({ score })),
+			})),
+		} as unknown as Parameters<typeof scoreQuiz>[0];
+
+		const questions = [...root.querySelectorAll<HTMLElement>('[data-quiz-question]')];
+		const results = root.querySelector<HTMLElement>('[data-quiz-results]')!;
+		const outcomes = [...root.querySelectorAll<HTMLElement>('[data-quiz-outcome]')];
+		const progress = root.querySelector<HTMLElement>('[data-quiz-progress]')!;
+		const countEl = root.querySelector<HTMLElement>('[data-quiz-count]')!;
+		const fillEl = root.querySelector<HTMLElement>('[data-quiz-fill]')!;
+		const nojs = root.querySelector<HTMLElement>('[data-quiz-nojs]')!;
+		const nojsHeading = root.querySelector<HTMLElement>('[data-quiz-nojs-heading]')!;
+		const actions = root.querySelector<HTMLElement>('[data-quiz-actions]')!;
+		const total = questions.length;
+
+		let idx = 0;
+		let done = false;
+		const answers: number[] = [];
+
+		const pad = (n: number) => String(n).padStart(2, '0');
+
+		function render(moveFocus: boolean) {
+			questions.forEach((q, i) => {
+				q.hidden = done || i !== idx;
+			});
+
+			progress.hidden = done;
+			countEl.textContent = `${pad(idx + 1)} / ${pad(total)}`;
+			fillEl.style.width = `${Math.round(((done ? total : idx) / total) * 100)}%`;
+
+			// The result region only exists once there is a result.
+			results.hidden = !done;
+			nojsHeading.hidden = true;
+			actions.hidden = !done;
+
+			if (done) {
+				const winner = scoreQuiz(quiz, answers);
+				outcomes.forEach((el) => {
+					const isWinner = el.dataset.quizOutcome === winner.id;
+					el.hidden = !isWinner;
+					const label = el.querySelector<HTMLElement>('[data-quiz-answer-label]');
+					if (label) label.hidden = !isWinner;
+				});
+			}
+
+			const current = questions[idx];
+			const back = current?.querySelector<HTMLElement>('[data-quiz-back]');
+			if (back) back.hidden = idx === 0;
+
+			if (moveFocus) {
+				const target = done
+					? outcomes.find((el) => !el.hidden)?.querySelector<HTMLElement>('.result__name')
+					: current?.querySelector<HTMLElement>('[data-quiz-heading]');
+				target?.focus();
+
+				// On a phone the title and standfirst push question two off the bottom of
+				// the screen, and answering a question you have to scroll to finish reading
+				// is the one thing the design asks this not to do. Pin the quiz to the top
+				// of the viewport, but only when what is showing does not already fit —
+				// on a desktop it almost always does, and a jump there is just a jolt.
+				const block = done ? outcomes.find((el) => !el.hidden) : current;
+				if (block && block.getBoundingClientRect().bottom > window.innerHeight) {
+					root.scrollIntoView({ block: 'start' });
+				}
+			}
+		}
+
+		root.addEventListener('change', (event) => {
+			const input = event.target as HTMLInputElement;
+			if (!input.matches('[data-quiz-option]')) return;
+
+			const question = input.closest<HTMLElement>('[data-quiz-question]');
+			if (!question) return;
+
+			const qi = Number(question.dataset.quizQuestion);
+			answers[qi] = Number(input.value);
+
+			// Picking advances immediately — there is no Next button.
+			if (qi >= total - 1) done = true;
+			else idx = qi + 1;
+			render(true);
+		});
+
+		root.addEventListener('click', (event) => {
+			const target = event.target as HTMLElement;
+
+			if (target.closest('[data-quiz-back]')) {
+				idx = Math.max(0, idx - 1);
+				done = false;
+				render(true);
+				return;
+			}
+
+			if (target.closest('[data-quiz-restart]')) {
+				idx = 0;
+				done = false;
+				answers.length = 0;
+				root
+					.querySelectorAll<HTMLInputElement>('[data-quiz-option]')
+					.forEach((input) => (input.checked = false));
+				render(true);
+			}
+		});
+
+		// The question region is announced as it changes. Set here rather than in the
+		// markup so a reader with no JavaScript, who gets every question at once, is not
+		// told about a live region that never updates.
+		const form = root.querySelector<HTMLElement>('[data-quiz-form]')!;
+		form.setAttribute('aria-live', 'polite');
+		results.setAttribute('aria-live', 'polite');
+
+		nojs.hidden = true;
+		render(false);
+	}
+</script>

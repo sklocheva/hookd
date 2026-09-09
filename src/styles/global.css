@@ -14,6 +14,17 @@
 	--label-ink: #5c5148;
 	/* The one filled panel on the site — the gauge box on a yarn review. */
 	--panel: #f6eee2;
+	/* --panel under the pointer, and while chosen: a quiz option card. */
+	--panel-active: #f1e5d3;
+	/* Barely-there fill, a shade off the paper rather than a panel in its own right —
+	   the quiz result block, where the ochre rule above it is doing the work.
+	   Opaque, not the rgba(42,35,32,.035) the design writes: an alpha fill composites
+	   correctly in a browser but cannot be measured, and the audit read the text as
+	   #2a2320 on #2a2320 — 1.00:1 — and failed the page. This is that alpha flattened
+	   onto --paper, which is the only thing it ever sits on. */
+	--wash: #f4efe8;
+	/* --ink as a filled button, hovered. */
+	--ink-hover: #463b35;
 	--faint: #8a7c6e; /* was #c0b3a4 at 1.91:1 — illegible even for scaffolding */
 
 	/* Measured against --paper: this is 4.61:1, just clear of the 4.5:1 AA threshold.
@@ -23,6 +34,15 @@
 	--terracotta-hover: #8f4a2f; /* 6.13:1 */
 	--ochre: #8f6714;
 	--ochre-rule: #b88a2e;
+
+	/* The two accents again, for text set on --panel rather than on --paper.
+	   Both are tuned against the paper and neither survives the move: on #f6eee2 the
+	   ochre measures 4.43:1 and the terracotta 4.32:1, so a quiz callout — panel fill,
+	   ochre eyebrow, terracotta call to action — failed on both lines at once. Same
+	   hues, darkened until they clear 4.5:1 against the panel, exactly as --terracotta
+	   itself was darkened against the paper. */
+	--ochre-on-panel: #8a6413; /* 4.66:1 on --panel */
+	--terracotta-on-panel: #9c5236; /* 4.97:1 on --panel */
 
 	/* Placeholder scaffolding — remove with the placeholders themselves */
 	--ph-stripe-a: #ecdfc9;

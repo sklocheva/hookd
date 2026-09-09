@@ -1,6 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { readTime } from './format';
-import { YARN_KIND } from './taxonomy';
+import { QUIZ_KIND, YARN_KIND } from './taxonomy';
 
 /**
  * One row in the journal list, whichever collection it came from.
@@ -23,6 +23,22 @@ export interface JournalEntry {
 	/** Only test notes carry one — the method line under the excerpt. */
 	method?: string;
 	readMinutes: number;
+	/**
+	 * What the eyebrow says instead of "N min".
+	 *
+	 * Read time is computed from a body, and a quiz does not have one — running the word
+	 * counter over its JSON would produce a number that means nothing. A quiz sets this
+	 * to "1 min" instead of pretending to have prose.
+	 */
+	metaLabel?: string;
+	/**
+	 * The designed stand-in for a row that will never have a photograph.
+	 *
+	 * Distinct from a missing `heroImage`, which means the picture has not been taken yet
+	 * and gets the striped placeholder. A quiz has nothing to photograph, so its row shows
+	 * a tile built out of the quiz itself — see PlaceholderTile.astro.
+	 */
+	tile?: { symbol: string; caption?: string };
 }
 
 export function fromPost(p: CollectionEntry<'posts'>): JournalEntry {
@@ -55,6 +71,32 @@ export function fromReview(r: CollectionEntry<'reviews'>): JournalEntry {
 	};
 }
 
+/**
+ * A quiz row.
+ *
+ * No photograph, and no read time — see `tile` and `metaLabel`. The outcome names go on
+ * the tile because they are the most honest preview a quiz can offer: they say what kind
+ * of answer you are going to get without giving away which one you will get.
+ */
+export function fromQuiz(q: CollectionEntry<'quizzes'>): JournalEntry {
+	return {
+		href: `/journal/quiz/${q.id}/`,
+		kind: QUIZ_KIND,
+		title: q.data.title,
+		summary: q.data.teaser,
+		date: q.data.date,
+		heroImageAlt: '',
+		method: `${q.data.questions.length} questions · nothing saved · no email`,
+		readMinutes: 1,
+		metaLabel: '1 min',
+		tile: {
+			symbol: '?',
+			caption:
+				q.data.tileCaption ?? q.data.outcomes.map((o) => o.name.replace(/\.$/, '')).join(' · '),
+		},
+	};
+}
+
 /** Newest first, across both collections. */
 export const newestFirst = (a: JournalEntry, b: JournalEntry) =>
 	b.date.valueOf() - a.date.valueOf();
@@ -67,7 +109,10 @@ export const newestFirst = (a: JournalEntry, b: JournalEntry) =>
  */
 export function allJournalEntries(
 	posts: CollectionEntry<'posts'>[],
-	reviews: CollectionEntry<'reviews'>[]
+	reviews: CollectionEntry<'reviews'>[],
+	quizzes: CollectionEntry<'quizzes'>[] = []
 ): JournalEntry[] {
-	return [...posts.map(fromPost), ...reviews.map(fromReview)].sort(newestFirst);
+	return [...posts.map(fromPost), ...reviews.map(fromReview), ...quizzes.map(fromQuiz)].sort(
+		newestFirst
+	);
 }

@@ -779,4 +779,198 @@ const reviews = defineCollection({
 		}),
 });
 
-export const collections = { patterns, posts, reviews };
+
+/**
+ * A quiz option's score, as the CMS is able to write it.
+ *
+ * Sveltia has no widget for an object with author-named keys, so the score map is a list
+ * of `{ outcome, points }` rows in the panel and a plain map in a hand-written file. This
+ * folds the first into the second and passes anything else through untouched, for Zod to
+ * reject with its own message.
+ *
+ * A blank row — the CMS's usual parting gift — is dropped rather than becoming a key of
+ * `''`, and points arrive as a number already; a cleared one is skipped instead of
+ * scoring `NaN`, which would silently poison every total the option touches.
+ */
+const scoreRows = (v: unknown) => {
+	if (!Array.isArray(v)) return v;
+
+	const map: Record<string, number> = {};
+	for (const row of v) {
+		if (row == null || typeof row !== 'object') continue;
+		const { outcome, points } = row as { outcome?: unknown; points?: unknown };
+		if (typeof outcome !== 'string' || outcome === '') continue;
+		if (typeof points !== 'number' || Number.isNaN(points)) continue;
+		map[outcome] = points;
+	}
+	return map;
+};
+
+/**
+ * Quizzes — structured data, not prose, so JSON rather than MDX.
+ *
+ * Built as a generic quiz from the start because more are coming: nothing in here knows
+ * what any particular quiz is about. A quiz is a list of questions whose options carry
+ * sparse point maps, and a list of outcomes those points are counted towards.
+ */
+const quizzes = defineCollection({
+	loader: glob({ base: './src/content/quizzes', pattern: '**/*.{json,yaml,yml}' }),
+	schema: z
+		.object({
+			title: z.string(),
+			standfirst: z.string(),
+			date: z.coerce.date(),
+			updated: optionalDate,
+
+			/**
+			 * The line under the standfirst. The component always states that nothing is
+			 * saved and no email is asked for — that is a promise the site makes, not a
+			 * per-quiz decision — so this is only what a quiz wants to add to it.
+			 */
+			intro: optionalString,
+
+			/** The summary in the journal row. */
+			teaser: z.string(),
+			/**
+			 * The teaser in the in-article callout, where the quiz is being interrupted
+			 * into rather than browsed to, so it is written shorter. Falls back to `teaser`.
+			 */
+			calloutTeaser: optionalString,
+			/** The muted paragraph under the result — what a quiz cannot know. Optional. */
+			resultFootnote: optionalString,
+			/**
+			 * The line on the journal row's tile, where a photograph would be.
+			 *
+			 * Falls back to the outcome names, which is usually right — but the outcomes
+			 * are declared in tie-breaking order, not reading order, and their names are
+			 * written to be read as a verdict ("Leave it alone.") rather than as a list.
+			 * A quiz sets this when those two want to differ.
+			 */
+			tileCaption: optionalString,
+
+			/**
+			 * The article this quiz belongs beside, linked from the result screen.
+			 *
+			 * A reference rather than a slug string, so it is resolved against the entries
+			 * that actually exist and a draft or renamed target drops the link instead of
+			 * printing a 404 — the same rule the homepage's pinned slots follow. The CMS
+			 * writes `''` when the picker is cleared, which satisfies `reference()` and
+			 * then fails the build looking for an entry with an empty id.
+			 */
+			relatedPost: z.preprocess(blankToUndefined, reference('posts').optional()),
+
+			/**
+			 * What the quiz can answer. Order is load-bearing: totals are compared in this
+			 * order, so a tie resolves to whichever is declared first. Declare the least
+			 * drastic outcome first: a quiz that cannot make up its mind should not be the
+			 * thing recommending the irreversible option.
+			 */
+			outcomes: z
+				.array(
+					z.object({
+						id: z.string(),
+						name: z.string(),
+						/** The italic serif line under the name. */
+						line: z.string(),
+						body: z.string(),
+						steps: z.array(z.string()).default([]),
+					})
+				)
+				.min(2),
+
+			questions: z
+				.array(
+					z.object({
+						q: z.string(),
+						note: optionalString,
+						options: z
+							.array(
+								z.object({
+									label: z.string(),
+									sub: optionalString,
+									/**
+									 * Points per outcome id, e.g. `{ "keep": 3 }`. Sparse —
+									 * an option only names what it actually scores.
+									 *
+									 * Written two ways, because the panel cannot write the
+									 * first one. A hand-authored file uses the map; `/admin`
+									 * has no map widget, so it writes a list of rows —
+									 * `[{ outcome: 'keep', points: 3 }]` — which is folded
+									 * back into the map here. Same rule as everywhere else in
+									 * this file: if the panel can only produce one shape, the
+									 * schema accepts that shape rather than the author
+									 * hand-editing JSON afterwards.
+									 */
+									score: z.preprocess(scoreRows, z.record(z.string(), z.number())),
+								})
+							)
+							.min(2)
+							.max(5),
+					})
+				)
+				.min(1),
+
+			draft: z.boolean().default(false),
+			previewId,
+
+			metaDescription: z.string().max(160, 'metaDescription must be 160 characters or fewer'),
+			/**
+			 * A quiz has no photograph, so there is no `heroImageAlt` here — alt text is
+			 * required for a picture, not in advance of one. The share image still is, and
+			 * still has to exist, but it defaults: `blankToUndefined` first, because a
+			 * `.default()` only fills in for `undefined` and the CMS writes `''`.
+			 */
+			socialImage: z.preprocess(
+				blankToUndefined,
+				z
+					.string()
+					.default('/og-default.png')
+					.refine(
+						(p) => existsSync(fileURLToPath(new URL(`../public${p}`, import.meta.url))),
+						{
+							error: (issue) =>
+								`socialImage "${issue.input}" does not exist in public/. Use /og-default.png until this quiz has its own artwork.`,
+						}
+					)
+			),
+		})
+		/**
+		 * Every `score` key must name a real outcome, and every outcome must be scored by
+		 * something.
+		 *
+		 * A typo in a score key is the one quiz bug nobody notices: the points go nowhere,
+		 * the quiz still runs, and an outcome the author wrote can simply never come up.
+		 * Both directions are checked because both produce that same silent result.
+		 */
+		.superRefine((d, ctx) => {
+			const ids = new Set(d.outcomes.map((o) => o.id));
+			const scored = new Set<string>();
+
+			d.questions.forEach((question, qi) => {
+				question.options.forEach((option, oi) => {
+					for (const key of Object.keys(option.score)) {
+						scored.add(key);
+						if (!ids.has(key)) {
+							ctx.addIssue({
+								code: 'custom',
+								path: ['questions', qi, 'options', oi, 'score', key],
+								message: `question ${qi + 1}, option ${oi + 1} scores "${key}", which is not an outcome id (${[...ids].join(', ')})`,
+							});
+						}
+					}
+				});
+			});
+
+			for (const outcome of d.outcomes) {
+				if (!scored.has(outcome.id)) {
+					ctx.addIssue({
+						code: 'custom',
+						path: ['outcomes'],
+						message: `outcome "${outcome.id}" is unreachable — no option scores it`,
+					});
+				}
+			}
+		}),
+});
+
+export const collections = { patterns, posts, reviews, quizzes };

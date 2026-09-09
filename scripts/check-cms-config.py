@@ -32,7 +32,7 @@ SCHEMA_ONLY: set[str] = {
     'terms',
 }
 
-# Required on every collection, deliberately — see CLAUDE.md.
+# The SEO trio, required wherever a collection spreads `seoFields` — see CLAUDE.md.
 SEO_REQUIRED = {'metaDescription', 'heroImageAlt', 'socialImage'}
 
 # Collections whose required-ness is enforced at publish rather than at save, so that a
@@ -50,6 +50,21 @@ def collection_block(src: str, collection: str) -> str:
     start = starts[collection]
     later = [p for p in starts.values() if p > start]
     return src[start : min(later)] if later else src[start:]
+
+
+def spreads_seo_fields(src: str, collection: str) -> bool:
+    """Whether a collection pulls in the shared `seoFields` block.
+
+    It matters because that spread is not literal — the field names never appear in the
+    collection's own source, so they have to be added back before comparing against the
+    form. This used to be added to every collection unconditionally, on the grounds that
+    the SEO fields are required everywhere. Quizzes are the exception that showed the
+    difference: a quiz has no photograph, so it declares `metaDescription` and
+    `socialImage` itself and deliberately has no `heroImageAlt` — alt text is required
+    for a picture, not in advance of one. Assuming the spread reported the quiz form as
+    missing a field the schema does not ask for.
+    """
+    return '...seoFields' in collection_block(src, collection)
 
 
 def schema_fields(src: str, collection: str) -> set[str]:
@@ -107,14 +122,14 @@ def main() -> int:
     src = SCHEMA.read_text(encoding='utf-8')
     cfg = yaml.safe_load(CMS.read_text(encoding='utf-8'))
 
-    # The shared seoFields spread is not literal in either collection block.
-    shared = SEO_REQUIRED
-
     failures: list[str] = []
 
     for coll in cfg['collections']:
         name = coll['name']
         form = {f['name'] for f in coll['fields']}
+        # The shared seoFields spread is not literal in a collection block, so add it
+        # back for the collections that actually use it.
+        shared = SEO_REQUIRED if spreads_seo_fields(src, name) else set()
         schema = schema_fields(src, name) | shared
 
         missing_in_form = schema - form - SCHEMA_ONLY
@@ -140,7 +155,7 @@ def main() -> int:
             not_required = [
                 f['name']
                 for f in coll['fields']
-                if f['name'] in SEO_REQUIRED and f.get('required') is not True
+                if f['name'] in (SEO_REQUIRED & (schema | form)) and f.get('required') is not True
             ]
             if not_required:
                 failures.append(f'{name}: SEO fields not marked required in the form: {not_required}')

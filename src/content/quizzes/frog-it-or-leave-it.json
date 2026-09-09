@@ -1,0 +1,196 @@
+{
+  "title": "Frog it or leave it?",
+  "standfirst": "There is a project in your basket that you keep picking up and putting down again. Six questions, then a straight answer — frog it, fix it, or leave it alone.",
+  "date": "2026-09-04",
+  "intro": "Answer honestly — the useless version of this quiz is the one you fill in as the person you wish you were.",
+  "teaser": "Six questions for the project you keep picking up and putting down again, and one straight answer at the end — frog it, fix it, or leave it alone.",
+  "calloutTeaser": "Six questions about the project currently sulking in your basket, and one honest answer at the end.",
+  "tileCaption": "Frog it · Fix it · Leave it",
+  "resultFootnote": "A quiz cannot see your fabric. If the answer and your gut disagree, your gut has more information — put the project in a bag for a week and ask again.",
+  "relatedPost": "all-about-frogging",
+  "metaDescription": "Six questions about the project you keep putting down, and one straight answer: frog it, fix it, or leave it alone.",
+  "socialImage": "/og-default.png",
+  "draft": false,
+  "previewId": "3f0a7c56-9d21-4e88-b0a4-5c7e1d2f9a63",
+  "outcomes": [
+    {
+      "id": "fix",
+      "name": "Fix it.",
+      "line": "The problem is smaller than your feelings about it.",
+      "body": "What is wrong with this project is local — one row, one motif, one seam — and everything around it is fine. Frogging the whole thing to fix a patch is the expensive option, and the version of you who finishes it this month will not remember the repair.",
+      "steps": [
+        "Find the last row you are happy with and mark it with a locking marker before you touch anything.",
+        "Frog back to that row only. Wind as you go, even for twenty stitches.",
+        "If the fix needs a new join, join at a seam or an edge, never mid-row on a visible panel.",
+        "Then keep going the same day. A project put down straight after a repair rarely gets picked back up."
+      ]
+    },
+    {
+      "id": "frog",
+      "name": "Frog it.",
+      "line": "The yarn deserves a second try. So do you.",
+      "body": "This is not going to become something you use, and every hour you spend on it is an hour the yarn is not being something else. Frogging is not failure — it is the only craft where you get the whole material back.",
+      "steps": [
+        "Check the yarn first: fuzzy mohair, alpaca halo, or a delicate single ply may not survive. Frog ten rows as a test before committing.",
+        "Wind as you unravel — a swift and winder if you have them, a centre-pull ball by hand if not.",
+        "Skein it loosely, soak it lukewarm, hang it to dry with no weight. That is what takes the old stitch memory out.",
+        "Write down what actually went wrong before you cast on again, or you will do it a second time."
+      ]
+    },
+    {
+      "id": "keep",
+      "name": "Leave it alone.",
+      "line": "Nothing is wrong with it. Something is wrong with today.",
+      "body": "By your own answers this is a project you would use and a fabric you like. What you have is boredom, or the middle third, which feels identical to boredom and is not. Do not take a permanent decision in a temporary mood.",
+      "steps": [
+        "Put it in a bag, out of sight, and set a date two weeks out.",
+        "Start something small and fast in the meantime — the point is to finish something, anything.",
+        "On the date, look at it in daylight before you look at the pattern.",
+        "If it still bores you then, reread this quiz. The answer will have changed and that answer is trustworthy."
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "q": "What is actually wrong with it?",
+      "note": "The first honest sentence, not the polite one.",
+      "options": [
+        {
+          "label": "The gauge or the size is off",
+          "sub": "It will not fit, or the fabric came out a different size than the pattern promised",
+          "score": { "frog": 3 }
+        },
+        {
+          "label": "There is one visible mistake a few rows back",
+          "sub": "A missed increase, a wrong stitch, a twisted round",
+          "score": { "fix": 3 }
+        },
+        {
+          "label": "I have gone off the colour or the yarn",
+          "sub": "It is well made. I just do not like looking at it",
+          "score": { "frog": 2, "keep": 1 }
+        },
+        {
+          "label": "Nothing, really. I am just bored of it",
+          "sub": "It is fine. I have simply stopped wanting to work on it",
+          "score": { "keep": 3 }
+        }
+      ]
+    },
+    {
+      "q": "How far into the project are you?",
+      "note": "Sunk cost is real, but it is not always the deciding factor.",
+      "options": [
+        {
+          "label": "The first few rows",
+          "sub": "Almost nothing to lose",
+          "score": { "frog": 3 }
+        },
+        {
+          "label": "Roughly a third of the way",
+          "sub": "Enough to hurt, not enough to be nearly done",
+          "score": { "frog": 2 }
+        },
+        {
+          "label": "Nearly finished",
+          "sub": "Sleeves, edging, or seams left",
+          "score": { "fix": 2, "keep": 1 }
+        },
+        {
+          "label": "Finished, blocked, and unworn",
+          "sub": "It exists. It just lives in a drawer",
+          "score": { "keep": 3 }
+        }
+      ]
+    },
+    {
+      "q": "Would you wear or use it exactly as it is now?",
+      "note": "As it is. Not as it would be after the imaginary fix.",
+      "options": [
+        {
+          "label": "Yes, happily",
+          "sub": "Out of the house, without thinking about it",
+          "score": { "keep": 3 }
+        },
+        {
+          "label": "Only at home",
+          "sub": "It is comfortable and I do not mind the flaws",
+          "score": { "keep": 2 }
+        },
+        {
+          "label": "No",
+          "sub": "I would find a reason not to, every time",
+          "score": { "frog": 3 }
+        }
+      ]
+    },
+    {
+      "q": "What is the yarn like?",
+      "note": "This decides whether frogging is even possible — halo and fragile plies do not always survive.",
+      "options": [
+        {
+          "label": "Smooth and tightly spun",
+          "sub": "Wool, cotton, linen, most superwash — frogs cleanly",
+          "score": { "frog": 2 }
+        },
+        {
+          "label": "Fluffy — mohair, brushed alpaca, a real halo",
+          "sub": "The fibres grip each other and fight back",
+          "score": { "keep": 2, "fix": 1 }
+        },
+        {
+          "label": "Delicate — a fine single ply, or already fraying",
+          "sub": "It has broken on me before",
+          "score": { "keep": 2, "fix": 1 }
+        },
+        {
+          "label": "No idea, the label is long gone",
+          "sub": "Test it on ten rows before you decide",
+          "score": { "fix": 1 }
+        }
+      ]
+    },
+    {
+      "q": "Is the problem in one place, or in the whole fabric?",
+      "note": "Local problems get repaired. Structural ones do not.",
+      "options": [
+        {
+          "label": "One row, one motif, one spot",
+          "sub": "I could point at it",
+          "score": { "fix": 3 }
+        },
+        {
+          "label": "A whole section — the yoke, a sleeve, a seam line",
+          "sub": "It would mean redoing a real chunk",
+          "score": { "frog": 2 }
+        },
+        {
+          "label": "The fabric itself is wrong",
+          "sub": "Stiff, floppy, dense, holey — the stitch and the yarn do not suit each other",
+          "score": { "frog": 3 }
+        }
+      ]
+    },
+    {
+      "q": "And when you pick it up, honestly, what do you feel?",
+      "note": "Last question. This one carries the most weight, because it is the one you already knew.",
+      "options": [
+        {
+          "label": "Dread",
+          "sub": "I move it off the chair and do something else",
+          "score": { "frog": 3 }
+        },
+        {
+          "label": "Irritation at one specific bit",
+          "sub": "Everything else is fine and I know exactly where I am annoyed",
+          "score": { "fix": 2 }
+        },
+        {
+          "label": "Fondness",
+          "sub": "I like it. I just have not been in the mood",
+          "score": { "keep": 3 }
+        }
+      ]
+    }
+  ]
+}

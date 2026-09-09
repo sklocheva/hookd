@@ -941,3 +941,226 @@ collections:
           Two paragraphs, no more. One on gauge and fibre behaviour, one on
           use-it-for / do-not-use-it-for. Start with "## What that adds up to", and link
           the test note behind the review inline, in the second paragraph.
+
+  # ---------------------------------------------------------------- quizzes
+  #
+  # A quiz is structured data, not prose, so it is stored as JSON with no body — which is
+  # why this collection sets `format: json` where the other three use frontmatter.
+  #
+  # The scoring model, because the form only makes sense once you have it: a quiz has a
+  # few named outcomes, and every answer hands points to the outcomes it argues for. The
+  # totals are added up across all the questions and the highest wins.
+  #
+  # There is no single running score, and the outcomes are deliberately not in an order.
+  # A middle outcome is not "halfway between" the other two — it is a different claim, so
+  # it gets its own tally that only rises when an answer actually argues for it. Score a
+  # quiz on one summed number instead and the middle result becomes whatever the average
+  # lands on, which is how someone answering strongly at both extremes ends up being told
+  # the moderate thing.
+  - name: quizzes
+    label: Quizzes
+    label_singular: Quiz
+    folder: src/content/quizzes
+    create: true
+    extension: json
+    format: json
+    slug: '{{fields.title | slugify}}'
+    summary: '{{title}}'
+    # As everywhere else: /go/<previewId>/ forwards to wherever the entry currently lives,
+    # which is the only link that survives publishing. See src/pages/go/[id].astro.
+    preview_path: go/{{fields.previewId}}
+    fields:
+      - label: Title
+        name: title
+        widget: string
+        hint: >-
+          The question the quiz answers, phrased the way a reader would arrive asking it.
+      - { label: Publish date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
+      - label: Last corrected
+        name: updated
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        required: false
+      - label: Draft
+        name: draft
+        widget: boolean
+        default: true
+        hint: >-
+          Leave ticked while you work — a draft is not listed anywhere on the site and is
+          served at the unguessable preview address below. Untick it when the quiz is
+          ready.
+      - label: Preview address
+        name: previewId
+        widget: uuid
+        hint: >-
+          Generated once, never edited. While this quiz is a draft it is served at this
+          address instead of its real one, so the real URL stays a 404 until you publish.
+
+      - label: Standfirst
+        name: standfirst
+        widget: text
+        hint: >-
+          The paragraph under the title. Say what the quiz is for and name the answers it
+          can give, so nobody starts it without knowing what they are getting.
+      - label: Extra line under the standfirst
+        name: intro
+        widget: text
+        required: false
+        hint: >-
+          Optional. The page always says "Nothing is saved and there is no email box at
+          the end" on its own — this is only what you want to add after it, e.g. a nudge
+          to answer honestly.
+
+      # --- SEO -----------------------------------------------------------
+      #
+      # No hero image alt text here, unlike every other collection: a quiz has no
+      # photograph, and alt text is required for a picture, not in advance of one.
+      - label: Meta description
+        name: metaDescription
+        widget: string
+        required: true
+        pattern: ['^.{0,160}$', 'Must be 160 characters or fewer.']
+        hint: What a search result shows. 160 characters at most.
+      - label: Social share image
+        name: socialImage
+        widget: string
+        required: true
+        default: /og-default.png
+        hint: Root-relative path under public/. Leave as /og-default.png until this quiz has its own artwork — the build checks the file exists.
+
+      # --- how it shows up elsewhere --------------------------------------
+      - label: Teaser — journal list
+        name: teaser
+        widget: text
+        hint: The summary on the row in /journal/. Written for someone browsing.
+      - label: Teaser — in-article callout
+        name: calloutTeaser
+        widget: text
+        required: false
+        hint: >-
+          Optional, and shorter. Used in the card inside an article, where the reader is
+          being interrupted rather than browsing. Falls back to the journal teaser.
+      - label: Tile caption
+        name: tileCaption
+        widget: string
+        required: false
+        hint: >-
+          The line on the journal row where a photo would be — normally the outcome names
+          separated by "·". It falls back to those names automatically, which is usually
+          right; set it by hand when they are in scoring order rather than reading order,
+          or when they are written as verdicts and read badly in a list.
+      - label: Article this quiz belongs to
+        name: relatedPost
+        widget: relation
+        collection: posts
+        search_fields: [title]
+        value_field: '{{slug}}'
+        display_fields: [title]
+        # Always a search box. The default threshold of 5 draws radios and checkboxes
+        # below it, which reads as a broken control and does not survive twenty posts.
+        dropdown_threshold: 0
+        required: false
+        hint: >-
+          Linked from the result screen. The link disappears by itself while the article
+          is a draft, so this is safe to set before the article is published.
+      - label: Footnote under the result
+        name: resultFootnote
+        widget: text
+        required: false
+        hint: >-
+          Optional. The muted line after the answer — usually a reminder of what a quiz
+          cannot know about the reader's actual situation.
+
+      # --- the answers ----------------------------------------------------
+      #
+      # Written before the questions on purpose: every question scores towards these, so
+      # there is nothing to score until they exist.
+      - label: Possible answers
+        name: outcomes
+        widget: list
+        label_singular: Answer
+        summary: '{{fields.id}} — {{fields.name}}'
+        hint: >-
+          At least two. **Order matters**: when two answers tie, the one listed first
+          wins, so put the least drastic answer at the top — a quiz that cannot decide
+          should not be the thing recommending the irreversible option.
+        fields:
+          - label: ID
+            name: id
+            widget: string
+            pattern: ['^[a-z0-9-]+$', 'Lowercase letters, numbers and hyphens only.']
+            hint: >-
+              A short tag used only for scoring, e.g. keep. Never shown to a reader. Type
+              it exactly the same way in the answers below — the build fails if a score
+              points at an ID that does not exist here, and tells you which one.
+          - label: Name
+            name: name
+            widget: string
+            hint: >-
+              The heading a reader sees. Write it as the verdict itself, ending in a
+              full stop, e.g. "Start again."
+          - label: Line
+            name: line
+            widget: string
+            hint: The italic line under the name. One sentence, the verdict in short.
+          - label: Body
+            name: body
+            widget: text
+            hint: A paragraph explaining the answer back to the person who got it.
+          - label: What to do next
+            name: steps
+            widget: list
+            required: false
+            field: { label: Step, name: step, widget: string }
+            hint: The numbered steps in the panel. Leave empty for an answer that needs none.
+
+      # --- the questions --------------------------------------------------
+      - label: Questions
+        name: questions
+        widget: list
+        label_singular: Question
+        summary: '{{fields.q}}'
+        fields:
+          - { label: Question, name: q, widget: string }
+          - label: Note
+            name: note
+            widget: string
+            required: false
+            hint: The small grey line under the question. Optional.
+          - label: Options
+            name: options
+            widget: list
+            label_singular: Option
+            summary: '{{fields.label}}'
+            hint: Two to five. Picking one moves the reader straight on, so there is no "next".
+            fields:
+              - { label: Option, name: label, widget: string }
+              - label: Sub-line
+                name: sub
+                widget: string
+                required: false
+                hint: The smaller second line inside the option. Optional.
+              - label: Scores
+                name: score
+                widget: list
+                label_singular: Score
+                summary: '{{fields.outcome}} +{{fields.points}}'
+                hint: >-
+                  What this option argues for. Add one row per answer it points at — most
+                  options only need one. An option that says nothing about an answer
+                  simply does not list it; it is not scored zero.
+                fields:
+                  - label: Answer ID
+                    name: outcome
+                    widget: string
+                    pattern: ['^[a-z0-9-]+$', 'Lowercase letters, numbers and hyphens only.']
+                    hint: One of the IDs from "Possible answers" above, spelled identically.
+                  - label: Points
+                    name: points
+                    widget: number
+                    value_type: int
+                    default: 1
+                    hint: >-
+                      How strongly this option argues for that answer. Keep the scale
+                      small and consistent — 1 for a hint, 3 for a clear signal.

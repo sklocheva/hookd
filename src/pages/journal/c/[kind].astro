@@ -16,8 +16,12 @@ import { published } from '../../../lib/drafts';
 // kind rather than only under "All" — they live in their own collection but are journal
 // entries to a reader.
 export const getStaticPaths = (async () => {
-	const [posts, reviews] = await Promise.all([getCollection('posts'), getCollection('reviews')]);
-	const entries = allJournalEntries(published(posts), published(reviews));
+	const [posts, reviews, quizzes] = await Promise.all([
+		getCollection('posts'),
+		getCollection('reviews'),
+		getCollection('quizzes'),
+	]);
+	const entries = allJournalEntries(published(posts), published(reviews), published(quizzes));
 
 	return kindsInUse(entries.map((e) => e.kind)).map((kind) => ({
 		params: { kind: slugify(kind) },
@@ -27,11 +31,16 @@ export const getStaticPaths = (async () => {
 
 const { kind, entries } = Astro.props;
 
-const [allPosts, allReviews] = await Promise.all([
+const [allPosts, allReviews, allQuizzes] = await Promise.all([
 	getCollection('posts'),
 	getCollection('reviews'),
+	getCollection('quizzes'),
 ]);
-const allEntries = allJournalEntries(published(allPosts), published(allReviews));
+const allEntries = allJournalEntries(
+	published(allPosts),
+	published(allReviews),
+	published(allQuizzes)
+);
 
 const filters = [
 	{ label: 'All', href: '/journal/' },

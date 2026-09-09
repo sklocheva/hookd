@@ -27,13 +27,15 @@ import type { CollectionEntry } from 'astro:content';
 type AnyEntry =
 	| CollectionEntry<'patterns'>
 	| CollectionEntry<'posts'>
-	| CollectionEntry<'reviews'>;
+	| CollectionEntry<'reviews'>
+	| CollectionEntry<'quizzes'>;
 
 /** URL prefix per collection, matching the routes under src/pages. */
 export const ROUTE_BASE = {
 	patterns: '/patterns',
 	posts: '/journal',
 	reviews: '/journal/yarn',
+	quizzes: '/journal/quiz',
 } as const;
 
 export type DraftCollection = keyof typeof ROUTE_BASE;

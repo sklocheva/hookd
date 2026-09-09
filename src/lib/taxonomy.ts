@@ -28,7 +28,7 @@ export const PATTERN_CATEGORIES = ['clothing', 'accessories', 'pets', 'home'] as
  * handing out marks. Yarn entries live in their own collection but file under this kind,
  * so they group with everything else in the journal instead of only appearing under All.
  */
-export const POST_KINDS = ['Garment making', 'Yarn notes', 'How-tos'] as const;
+export const POST_KINDS = ['Garment making', 'Yarn notes', 'How-tos', 'Quizzes'] as const;
 
 /**
  * Badges a yarn note can carry, in the order they are shown — so two notes list them the
@@ -53,6 +53,16 @@ export const CERTIFIED = new Set<string>(['GOTS', 'RWS', 'Mulesing-free']);
 
 /** The kind that yarn entries file under. They carry no `kind` field of their own. */
 export const YARN_KIND = 'Yarn notes';
+
+/**
+ * The kind that quizzes file under, on the same terms as YARN_KIND.
+ *
+ * Quizzes are their own collection and carry no `kind` field either — a quiz is always a
+ * quiz, so storing the word in every entry only creates something that can disagree with
+ * this. `POST_KINDS` lists it last so it sorts to the end of the filter row, and
+ * `kindsInUse` keeps it out of that row entirely until a quiz is published.
+ */
+export const QUIZ_KIND = 'Quizzes';
 
 export type PatternCategory = (typeof PATTERN_CATEGORIES)[number];
 export type PostKind = (typeof POST_KINDS)[number];

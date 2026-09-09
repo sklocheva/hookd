@@ -1,0 +1,99 @@
+---
+import { getCollection } from 'astro:content';
+import { published } from '../lib/drafts';
+
+/**
+ * The in-article invitation to a quiz.
+ *
+ * Takes a slug rather than the quiz itself so it can be dropped into MDX by an author,
+ * and resolves it here against the published set: an unpublished or renamed quiz makes
+ * the callout disappear rather than leave a link into a 404. Same rule as the homepage's
+ * pinned slots and the quiz's own article link.
+ *
+ * The whole card is the link. `calloutTeaser` is a separate line from the journal row's
+ * `teaser` because the reader is being interrupted mid-article here, not browsing — it
+ * is written shorter — but it falls back to the teaser when a quiz only has one.
+ */
+interface Props {
+	/** The quiz's slug — the filename under src/content/quizzes/, without .json. */
+	slug: string;
+}
+
+const { slug } = Astro.props;
+
+const quiz = published(await getCollection('quizzes')).find((q) => q.id === slug);
+---
+
+{
+	quiz && (
+		<a class="callout" href={`/journal/quiz/${quiz.id}/`}>
+			<span class="callout__eyebrow">Quiz · {quiz.data.questions.length} questions</span>
+			<span class="callout__title">{quiz.data.title}</span>
+			<span class="callout__teaser">{quiz.data.calloutTeaser ?? quiz.data.teaser}</span>
+			<span class="callout__cta">Take the quiz</span>
+		</a>
+	)
+}
+
+<style>
+	.callout {
+		display: block;
+		margin: clamp(34px, 4vw, 46px) 0;
+		padding: clamp(22px, 3vw, 30px);
+		background: var(--panel);
+		border: 1px solid var(--rule);
+		border-left: 3px solid var(--ochre-rule);
+		text-decoration: none;
+		transition: background 0.18s ease;
+	}
+
+	.callout:hover {
+		background: var(--panel-active);
+	}
+
+	.callout__eyebrow {
+		display: block;
+		margin-bottom: 12px;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ochre-on-panel);
+	}
+
+	.callout__title {
+		display: block;
+		margin-bottom: 10px;
+		font: 400 clamp(22px, 2.8vw, 28px) / 1.25 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.callout__teaser {
+		display: block;
+		margin-bottom: 14px;
+		max-width: 52ch;
+		font: 400 15px/1.7 var(--sans);
+		color: var(--ink-2);
+		text-wrap: pretty;
+	}
+
+	.callout__cta {
+		display: inline-block;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--terracotta-on-panel);
+		border-bottom: 1px solid currentColor;
+		padding-bottom: 3px;
+	}
+
+	.callout:hover .callout__cta {
+		color: var(--terracotta-hover);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.callout {
+			transition: none;
+		}
+	}
+</style>

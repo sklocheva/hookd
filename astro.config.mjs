@@ -40,10 +40,38 @@ function publishedSlugs(/** @type {string} */ dir) {
 	return slugs;
 }
 
+/**
+ * The same, for a collection stored as JSON rather than as frontmatter.
+ *
+ * Quizzes are structured data, so there is no `---` block to split on. Parsed rather than
+ * pattern-matched: a malformed quiz should fail here loudly instead of quietly counting
+ * as published, which is the direction this allowlist must never fail in.
+ */
+function publishedJsonSlugs(/** @type {string} */ dir) {
+	const slugs = new Set();
+	const base = fileURLToPath(new URL(`./src/content/${dir}/`, import.meta.url));
+
+	let files = [];
+	try {
+		files = readdirSync(base);
+	} catch {
+		return slugs; // collection not created yet
+	}
+
+	for (const file of files) {
+		if (!/\.json$/.test(file)) continue;
+		const data = JSON.parse(readFileSync(base + file, 'utf8'));
+		if (data.draft === true) continue;
+		slugs.add(file.replace(/\.json$/, ''));
+	}
+	return slugs;
+}
+
 const live = {
 	patterns: publishedSlugs('patterns'),
 	posts: publishedSlugs('posts'),
 	reviews: publishedSlugs('reviews'),
+	quizzes: publishedJsonSlugs('quizzes'),
 };
 
 /**
@@ -59,6 +87,9 @@ function inSitemap(/** @type {string} */ pathname) {
 
 	const yarn = pathname.match(/^\/journal\/yarn\/([^/]+)\/$/);
 	if (yarn) return live.reviews.has(yarn[1]);
+
+	const quiz = pathname.match(/^\/journal\/quiz\/([^/]+)\/$/);
+	if (quiz) return live.quizzes.has(quiz[1]);
 
 	const journal = pathname.match(/^\/journal\/([^/]+)\/$/);
 	if (journal) return journal[1] === 'c' || live.posts.has(journal[1]);

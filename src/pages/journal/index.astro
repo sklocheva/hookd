@@ -10,8 +10,12 @@ import { published } from '../../lib/drafts';
 
 // Drafts are absent from every listing — and because the filter row is built from the
 // kinds actually in use, a section backed only by drafts disappears with them.
-const [posts, reviews] = await Promise.all([getCollection('posts'), getCollection('reviews')]);
-const entries = allJournalEntries(published(posts), published(reviews));
+const [posts, reviews, quizzes] = await Promise.all([
+	getCollection('posts'),
+	getCollection('reviews'),
+	getCollection('quizzes'),
+]);
+const entries = allJournalEntries(published(posts), published(reviews), published(quizzes));
 
 const filters = [
 	{ label: 'All', href: '/journal/', active: true },

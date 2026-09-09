@@ -22,7 +22,7 @@ import { entryPath, type DraftCollection } from '../../lib/drafts';
  * with refresh disabled.
  */
 export const getStaticPaths = (async () => {
-	const collections = ['patterns', 'posts', 'reviews'] as const;
+	const collections = ['patterns', 'posts', 'reviews', 'quizzes'] as const;
 	const entries = await Promise.all(collections.map((c) => getCollection(c)));
 
 	return collections.flatMap((collection, i) =>
