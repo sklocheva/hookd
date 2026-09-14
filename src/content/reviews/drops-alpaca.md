@@ -1,11 +1,11 @@
 ---
 title: Drops Alpaca
 date: 2026-09-03
-updated: ''
+updated: 2026-09-14
 draft: true
 previewId: 8ae26cff-96ca-40c2-85bd-a6c76b9830d0
 standfirst: Soft and surprisingly fluffy. Has a really nice drape, but I’m always surprised by how long it takes me to finish a piece with this yarn. WORTH IT, though!
-metaDescription: Honest, practical yarn reviews covering feel, drape, stitch definition, durability, care, and how different yarns behave in real projects.
+metaDescription: Drops Alpaca - my view on the yarn
 socialImage: /og-default.png
 heroImage: ''
 heroImageAlt: ''
@@ -17,9 +17,11 @@ yarn:
   brand: Drops
   line: Alpaca
   content: 100% alpaca
-  weightLabel: Sport / 5 ply — Drops yarn group A
+  weightLabel: Sport - Drops yarn group A
   wpi: null
-  construction: null
+  construction:
+    type: Plied
+    note: Tightly twisted 3 strands
   ballWeightG: 50
   ballLengthM: 167
   ballBandGauge: 24 sts × 32 rows to 10 cm on 3 mm needles
@@ -47,20 +49,20 @@ inTheHand:
     score: 3
     note: ''
   splitResistance:
-    score: null
-    note: ''
+    score: 5
+    note: Tightly twisted, so has no issues on split
   softness:
     score: 3
     note: It has a stronger twist, which improves durability, but sacrifices softness
   nextToSkin:
     score: 3
-    note: I would not wear for hats and shawls. Boyfriends says he sometimes feels the prickliness even as an overall.
+    note: I would not wear for hats and shawls. I feel the prickliness even as an overall.
   drape:
     score: 5
     note: Very nice drape, if you put in the time to work with this thin yarn
   frogging:
     score: 2
-    note: Pretty tedious but possible.
+    note: Pretty tedious, because of the halo, but not impossible.
 ---
 
 Warmer than sheep wool for the same weight, sheds only lightly, and barely pills. As this is pure alpaca, expect it to sag a little bit more, so be careful when making it into a heavy garment.
