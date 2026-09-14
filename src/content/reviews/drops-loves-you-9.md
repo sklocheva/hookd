@@ -51,16 +51,16 @@ inTheHandBasis: ''
 inTheHand:
   stitchDefinition:
     score: 5
-    note: Very good definition, especially with tighter tension
+    note: Very good definition
   splitResistance:
-    score: 4
-    note: Only a little split
+    score: 3
+    note: As a recycled yarn it splits a little
   softness:
     score: 3
     note: Rugged feel, but softens a lot once washed
   nextToSkin:
     score: 5
-    note: ''
+    note: Not prickly, but a bit more rugged feel than other cotton yarns
   drape:
     score: 3
     note: good drape for cotton, especially on a taller stitch
