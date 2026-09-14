@@ -17,21 +17,23 @@ yarn:
   brand: Drops
   line: Loves You 9
   content: 100% cotton
-  weightLabel: Sport
-  wpi: null
-  construction: null
-  ballWeightG: null
-  ballLengthM: null
+  weightLabel: Sport - Drops weight A
+  wpi: 12
+  construction:
+    type: Plied
+    note: 5PLY
+  ballWeightG: 50
+  ballLengthM: 125
   ballBandGauge: ''
-  hookOnLabel: ''
+  hookOnLabel: 3mm
   hookMm: null
   gramsPer10cm: null
   metresPer10cm: null
-  care: ''
+  care: Machine wash on gentle cycle 40°C, Dry Flat or it may stretch
   hookNote: ''
 origin:
-  fibreOrigin: ''
-  madeIn: ''
+  fibreOrigin: Turkey
+  madeIn: EU
   oekoTexClass: 1
   certifications:
     - Recycled
@@ -49,20 +51,22 @@ inTheHandBasis: ''
 inTheHand:
   stitchDefinition:
     score: 5
-    note: dfhf
+    note: Very good definition, especially with tighter tension
   splitResistance:
-    score: 2
-    note: ydyfd
+    score: 4
+    note: Only a little split
   softness:
-    score: 2
-    note: hfd
+    score: 3
+    note: Rugged feel, but softens a lot once washed
   nextToSkin:
     score: 5
-    note: dh
+    note: ''
   drape:
     score: 3
-    note: hhdfh
+    note: good drape for cotton, especially on a taller stitch
   frogging:
     score: 5
-    note: dfhdhd
+    note: ''
 ---
+
+It's very nice and rustic feeling. Super versatile for me, I made garments like tops and shawls as well as all kinds of bags, including some wayuu bag. It was perfect for all of them. The only issue is that the rugged cotton feel is also felt at the hands and working for prolonged times with it will hurt and even inflame joints. Once washed it becomes nice and soft, but keeps it's rustic look. it can plie a bit, so needs the occasional fix.
