@@ -18,7 +18,7 @@ yarn:
   line: Alpaca
   content: 100% alpaca
   weightLabel: Sport - Drops yarn group A
-  wpi: null
+  wpi: 12
   construction:
     type: Plied
     note: Tightly twisted 3 strands
