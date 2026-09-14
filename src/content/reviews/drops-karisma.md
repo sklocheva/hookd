@@ -1,5 +1,5 @@
 ---
-title: "Drops Karisma"
+title: Drops Karisma
 date: 2026-09-02
 updated: ''
 draft: true
@@ -14,27 +14,30 @@ swatchImage: ''
 swatchImageAlt: ''
 swatchImageCaption: ''
 yarn:
-  brand: "Drops"
-  line: "Karisma"
-  content: "100% wool, superwash"
-  weightLabel: "DK / 8 ply — Drops yarn group B"
-  wpi: null
+  brand: Drops
+  line: Karisma
+  content: 100% wool, superwash
+  weightLabel: DK - Drops yarn group B
+  wpi: 11
+  construction:
+    type: Plied
+    note: 4PLY
   ballWeightG: 50
   ballLengthM: 100
-  ballBandGauge: "21 sts × 28 rows to 10 cm on 4 mm needles"
-  hookOnLabel: ""
-  hookMm: null
+  ballBandGauge: 21 sts × 28 rows to 10 cm on 4 mm needles
+  hookOnLabel: '4'
+  hookMm: 4
   gramsPer10cm: null
   metresPer10cm: null
-  care: "Machine wash gentle, 40°C. No fabric softener. Dry flat."
+  care: Superwash. Machine wash gentle, 40°C. No fabric softener. Dry flat.
 origin:
-  fibreOrigin: "Wool from South America"
-  madeIn: "EU"
+  fibreOrigin: Wool from South America
+  madeIn: EU
   oekoTexClass: 1
   certifications: []
 price:
-  level: null
-  note: ''
+  level: 1
+  note: Very good price, especially for a superwash yarn
 gauge:
   unblocked: ''
   blocked: ''
@@ -43,29 +46,23 @@ gauge:
 inTheHandBasis: ''
 inTheHand:
   stitchDefinition:
-    score: null
+    score: 4
     note: ''
   splitResistance:
-    score: null
-    note: ''
+    score: 4
+    note: Rarely splits
   softness:
-    score: null
+    score: 3
     note: ''
   nextToSkin:
-    score: null
-    note: ''
+    score: 4
+    note: It has a slight itch feel on delicate skin, but not too noticeable, so I can use it for shawls and beanies
   drape:
-    score: null
-    note: ''
+    score: 4
+    note: Drape is better than Nepal, especially after blocking
   frogging:
-    score: null
-    note: ''
+    score: 5
+    note: No problem frogging it
 ---
 
-My benchmark for what is acceptable against the neck. When I needed a yarn for a shawl that
-would actually sit on skin, this is what won — and it beat another 100% superwash wool to get
-there, which is the useful part. Both were superwash; the difference was fibre fineness, not
-the treatment.
-
-It splits, and noticeably more on a large piece than on a small one, where the hand-twist has
-less distance to build up. Good for texture and for colourwork.
+My benchmark for what is acceptable against the neck. Much softer than other superwash wool yarns I have used.
