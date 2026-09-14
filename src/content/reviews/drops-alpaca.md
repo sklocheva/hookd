@@ -71,4 +71,4 @@ It slightly blurs stitch definition, but you can still make nice accents with it
 
 It’s not superwash, so I would wash it by hand. If you want to try washing it in the washing machine on a wool programme, definitely test a swatch first. I never dared to try. Also, fold the finished garment, never hang it!
 
-It’s supposed to be roughly 24 microns on average, and it still itches on my sensitive skin to the point that it gets red! I would not wear it as a beanie or a shawl, but I would definitely keep reaching for it for layering garments.
+Alpaca is supposed to be much nicer on skin than wool but unfortunately it still itches on my sensitive skin to the point that it gets red. I would not wear it as a beanie or a shawl, but I would definitely keep continue using it for layering garments.
