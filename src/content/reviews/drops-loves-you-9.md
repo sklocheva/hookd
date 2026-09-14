@@ -69,4 +69,5 @@ inTheHand:
     note: ''
 ---
 
-It's very nice and rustic feeling. Super versatile for me, I made garments like tops and shawls as well as all kinds of bags, including some wayuu bag. It was perfect for all of them. The only issue is that the rugged cotton feel is also felt at the hands and working for prolonged times with it will hurt and even inflame joints. Once washed it becomes nice and soft, but keeps it's rustic look. it can plie a bit, so needs the occasional fix.
+It's very nice and rustic feeling. Super versatile for me, I made garments like tops and shawls as well as all kinds of bags, including some wayuu bag. It was perfect for all of them. The only issue is that the rugged cotton feel is also felt at the hands and working for prolonged times with it will hurt and even inflame joints. Once washed it becomes nice and soft, but keeps it's rustic look. it can plie a bit, so needs the occasional fix. 
+It has endless colors to choose from, but my absolute favorite are the denim range. Will definitely try to make some denim pants with these yarns.
