@@ -17,15 +17,15 @@ yarn:
   brand: Drops
   line: Paris
   content: 100% cotton
-  weightLabel: Aran / worsted — Drops yarn group C
-  wpi: null
+  weightLabel: Aran - Drops yarn group C
+  wpi: 8
   construction:
     type: Plied
-    note: Several thin strands plied together, with a loose twist.
+    note: Several thin strands plied together in a loose twist.
   ballWeightG: 50
   ballLengthM: 75
   ballBandGauge: 17 sts × 22 rows to 10 cm on 5 mm needles
-  hookOnLabel: ''
+  hookOnLabel: '5'
   hookMm: null
   gramsPer10cm: null
   metresPer10cm: null
@@ -36,8 +36,8 @@ origin:
   oekoTexClass: 1
   certifications: []
 price:
-  level: null
-  note: ''
+  level: 1
+  note: Look for sales for an even cheaper price.
 gauge:
   unblocked: ''
   blocked: ''
@@ -46,22 +46,22 @@ gauge:
 inTheHandBasis: ''
 inTheHand:
   stitchDefinition:
-    score: null
-    note: ''
+    score: 4
+    note: Really nice definition, but does soften a bit after wash
   splitResistance:
-    score: null
-    note: ''
+    score: 4
+    note: Good split resistance, although spun a bit lighter
   softness:
-    score: null
-    note: ''
+    score: 3
+    note: Soft but still a rugged look
   nextToSkin:
-    score: null
-    note: ''
+    score: 5
+    note: Really nice on skin, soft and cool, no scratch at all
   drape:
-    score: null
-    note: ''
+    score: 3
+    note: A bit chunkier for crochet, but still a nice drape for some garments
   frogging:
-    score: null
+    score: 5
     note: ''
 ---
 
