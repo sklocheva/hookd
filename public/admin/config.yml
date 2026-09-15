@@ -1128,6 +1128,21 @@ collections:
             widget: string
             required: false
             hint: The small grey line under the question. Optional.
+          - label: Photo
+            name: image
+            widget: image
+            required: false
+            hint: >-
+              Optional. For questions about something you can see — "which fibre is this?".
+              Shown under the question, above the options.
+          - label: Photo description (alt text)
+            name: imageAlt
+            widget: string
+            required: false
+            hint: >-
+              Needed once there is a photo. Describe what is visible, not what it is — for a
+              guess-the-fibre question, "a close-up of a hairy, slightly shiny yarn", never
+              "mohair". Otherwise a screen reader hears the answer.
           - label: Options
             name: options
             widget: list

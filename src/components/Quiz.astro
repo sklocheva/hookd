@@ -1,6 +1,8 @@
 ---
+import { Image } from 'astro:assets';
 import { ANSWER_TAGS } from '../lib/quiz';
 import type { QuizData } from '../lib/quiz';
+import { resolveImage } from '../lib/images';
 
 /**
  * The quiz itself: questions, then a result.
@@ -75,6 +77,21 @@ const total = quiz.questions.length;
 						{question.q}
 					</h2>
 					{question.note && <p class="question__note">{question.note}</p>}
+
+					{/* A photo the question is about, when there is one. Resolved at build, so a
+					    path that does not exist fails the build instead of showing a hole. Only
+					    the first question loads eagerly — the rest are hidden until reached. */}
+					{question.image && (
+						<figure class="question__photo">
+							<Image
+								src={resolveImage(question.image)!}
+								alt={question.imageAlt ?? ''}
+								widths={[400, 800, 1200]}
+								sizes="(min-width: 640px) 600px, 100vw"
+								loading={qi === 0 ? 'eager' : 'lazy'}
+							/>
+						</figure>
+					)}
 
 					<div class="options">
 						{question.options.map((option, oi) => (
@@ -245,6 +262,24 @@ const total = quiz.questions.length;
 		font: var(--type-callout);
 		color: var(--muted);
 		text-wrap: pretty;
+	}
+
+	/* Capped in height rather than width: a photo at full width on a phone pushes the
+	   options below the fold, and a question you cannot see the answers to is a question
+	   you have to scroll to finish reading. */
+	.question__photo {
+		margin: 0 0 22px;
+		max-width: 600px;
+	}
+
+	.question__photo :global(img) {
+		display: block;
+		width: 100%;
+		height: auto;
+		/* 34vh, not more: on a 390 × 844 phone the question, its note and four options
+		   need the rest of the screen, and 40vh put the last option at the fold. */
+		max-height: min(34vh, 420px);
+		object-fit: cover;
 	}
 
 	.options {

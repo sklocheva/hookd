@@ -205,6 +205,14 @@ spec block as **Finished size**, in plain text, with `sizeNote` (or the ease, as
 as the line beneath. Keyed on the size count rather than on the category, so a one-size
 garment is handled too: it still states its ease, it just has no chart.
 
+**A quiz question can carry a photo** — `image` and `imageAlt` on the question, for
+questions about something you can see ("which fibre is this?"). Resolved through
+`src/lib/images.ts` like every other photo, so a wrong path fails the build. **The alt text
+must describe what is visible, never name the answer** — alt text for a guess-the-fibre
+question that says "mohair" reads the answer to a screen-reader user before they have
+chosen. It is required at publish, not at save. The photo's height is capped so a
+four-option question still fits a phone screen.
+
 **Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
 `/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real
 static routes rather than client-side filtering, because of the no-JS rule. Both indexes use

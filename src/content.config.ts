@@ -883,6 +883,17 @@ const quizzes = defineCollection({
 					z.object({
 						q: z.string(),
 						note: optionalString,
+						/**
+						 * A photograph the question is about — "which fibre is this?". Optional: most
+						 * questions are words only. Stored as the path the CMS writes, /src/assets/x.webp,
+						 * and resolved through src/lib/images.ts like every other photo on the site.
+						 */
+						image: optionalString,
+						/**
+						 * Required once there is a photo, and it must not give the answer away: describe
+						 * what is visible ("a close-up of a hairy, slightly shiny yarn"), never what it is.
+						 */
+						imageAlt: optionalString,
 						options: z
 							.array(
 								z.object({
@@ -943,6 +954,20 @@ const quizzes = defineCollection({
 		 * Both directions are checked because both produce that same silent result.
 		 */
 		.superRefine((d, ctx) => {
+			// A question photo needs alt text — a screen reader otherwise gets the question with
+			// nothing to look at. Checked at publish, so a draft saves with the photo alone.
+			if (!d.draft) {
+				d.questions.forEach((question, qi) => {
+					if (question.image && !question.imageAlt) {
+						ctx.addIssue({
+							code: 'custom',
+							path: ['questions', qi, 'imageAlt'],
+							message: `question ${qi + 1} has a photo but no alt text`,
+						});
+					}
+				});
+			}
+
 			const ids = new Set(d.outcomes.map((o) => o.id));
 			const scored = new Set<string>();
 
