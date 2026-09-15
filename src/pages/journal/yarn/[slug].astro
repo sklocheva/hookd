@@ -88,7 +88,8 @@ const yarnRows: ReviewRow[] = [
 		y.ballWeightG != null && y.ballLengthM != null
 			? `${y.ballWeightG} g ball = ${y.ballLengthM} m / ${Math.round(y.ballLengthM * M_PER_YD)} yd`
 			: undefined,
-		{ aside: per100g ? `(${per100g} m per 100 g)` : undefined }
+		// Both units, like every other length on the site.
+		{ aside: per100g ? `(${per100g} m / ${Math.round(per100g * M_PER_YD)} yd per 100 g)` : undefined }
 	),
 	...row('Ball-band gauge', y.ballBandGauge),
 	...row('Hook on label', y.hookOnLabel),

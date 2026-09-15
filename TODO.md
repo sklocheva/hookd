@@ -27,6 +27,11 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
       the repository is public. Making them genuinely absent means a second Worker building
       the same branch with drafts on, at its own hostname. None of the current work is wasted
       if that day comes — the filtering is the same.
+- [ ] **A metric / imperial switch, later.** A remembered per-reader choice, same mechanism as
+      the size picker: both values in the HTML, a script shows one, metric with JavaScript off.
+      **Structured inputs only** — ball length, yardage, finished measurements, gauge. Numbers
+      typed into instruction prose are deliberately not converted. Needs pattern-style rounding
+      (halves or quarters of an inch, 10 cm gauge = 4 in), not exact conversion.
 - [x] ~~**Yarn notes: show length per 100 g.**~~ — done. The Length row reads "50 g ball = 110 m
       / 120 yd (220 m per 100 g)", derived from the ball figures, and the aside is omitted for a
       100 g ball where it would only repeat the line.
