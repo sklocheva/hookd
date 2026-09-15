@@ -49,6 +49,14 @@ const squaresPerBall =
 		? Math.round(y.ballWeightG / y.gramsPer10cm)
 		: undefined;
 
+// Balls come in 25, 50 and 100 g, so the ball figures alone cannot be compared across notes.
+// Metres per 100 g is the common unit. Derived, like squares-per-ball, so it cannot disagree
+// with the ball band — and omitted for a 100 g ball, where it would repeat the line it sits on.
+const per100g =
+	y.ballWeightG && y.ballWeightG > 0 && y.ballWeightG !== 100 && y.ballLengthM != null
+		? Math.round((y.ballLengthM * 100) / y.ballWeightG)
+		: undefined;
+
 const perSquare = [
 	y.gramsPer10cm != null ? `${y.gramsPer10cm} g` : undefined,
 	y.metresPer10cm != null ? `≈ ${y.metresPer10cm} m` : undefined,
@@ -78,8 +86,9 @@ const yarnRows: ReviewRow[] = [
 	...row(
 		'Length',
 		y.ballWeightG != null && y.ballLengthM != null
-			? `${y.ballWeightG} g = ${y.ballLengthM} m / ${Math.round(y.ballLengthM * M_PER_YD)} yd`
-			: undefined
+			? `${y.ballWeightG} g ball = ${y.ballLengthM} m / ${Math.round(y.ballLengthM * M_PER_YD)} yd`
+			: undefined,
+		{ aside: per100g ? `(${per100g} m per 100 g)` : undefined }
 	),
 	...row('Ball-band gauge', y.ballBandGauge),
 	...row('Hook on label', y.hookOnLabel),

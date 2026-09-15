@@ -27,12 +27,9 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
       the repository is public. Making them genuinely absent means a second Worker building
       the same branch with drafts on, at its own hostname. None of the current work is wasted
       if that day comes — the filtering is the same.
-- [ ] **Yarn notes: show length per 100 g.** Balls come in 25, 50 and 100 g, so "50 g = 110 m"
-      and "100 g = 300 m" cannot be compared at a glance. Metres per 100 g is the universal
-      figure. **Derive it, do not add a field** — it follows from `ballWeightG` and
-      `ballLengthM`, which every note already has, so it can never disagree with them (same
-      rule as squares-per-ball). Price is a 1–5 market position rather than a currency
-      figure, so per-100 g does not apply to it.
+- [x] ~~**Yarn notes: show length per 100 g.**~~ — done. The Length row reads "50 g ball = 110 m
+      / 120 yd (220 m per 100 g)", derived from the ball figures, and the aside is omitted for a
+      100 g ball where it would only repeat the line.
 ---
 
 ## Blocked on Sophia
