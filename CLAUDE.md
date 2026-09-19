@@ -390,6 +390,11 @@ Things that have already gone wrong here, and cost real time:
   it; and **green only means the build finished** — the `/_image` bug below came from a green
   build. A failed build leaves the previous version serving. The only proof a deploy is
   *right* is the live response; verify against something in it that actually differs.
+- **Whether a commit is live has an answer now: `/version.txt`.** It carries the commit
+  Cloudflare built from (`WORKERS_CI_COMMIT_SHA`; a local build says `local build`), so it
+  changes on every deploy. `.github/workflows/deploy.yml` waits for each pushed commit to appear
+  there, then smoke-tests the live site — a red `deploy` check means the commit never went
+  live or went live broken, and GitHub emails you. By hand: `verify-deploy.sh --sha HEAD`.
 - **Never trust that the host builds what this machine builds.** The same commit has produced
   different output locally and on Cloudflare. A green local `npm run build` is necessary, not
   sufficient.

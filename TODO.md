@@ -37,12 +37,10 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
       most likely to need changing is the score rows — one Answer ID and Points pair per row,
       typed by hand, because Sveltia cannot point a field at a sibling list in the same entry.
       A typo there fails the build and names the question and option, so it is safe to try.
-- [ ] **CI, phase 2 — check the live site after every deploy.** Have the build write the
-      commit SHA to `/version.txt` (Cloudflare's build exposes it as an environment variable —
-      confirm the name in its docs before relying on it), then a workflow on each push to
-      `main` polls the live site until that SHA appears and runs `verify-deploy.sh`. That turns
-      "did it deploy, and is it right" into a tick or a cross on the commit, and ends the
-      guessing over which marker to poll for.
+- [x] ~~**CI, phase 2 — check the live site after every deploy.**~~ — `/version.txt` carries
+      the commit from Cloudflare's `WORKERS_CI_COMMIT_SHA` (the name checked against its docs),
+      and `.github/workflows/deploy.yml` waits for each pushed commit to appear there before
+      running the smoke checks. By hand: `verify-deploy.sh --sha HEAD`.
 - [ ] **CI, phase 3 — maintenance.** Decided 19 Sep 2026:
       - Dependabot, **one grouped PR a month** for npm and GitHub Actions. Turn on Dependabot
         alerts in repo Settings too — they are off.
