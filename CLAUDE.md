@@ -138,7 +138,11 @@ fewer entries than she had written. `check-cms-config.py` now fails on a mismatc
 absolute `public_folder`, so it writes `/src/assets/photo.webp` — which Astro treats as a
 public URL and leaves alone, so the image 404s. `src/lib/images.ts` translates that for
 `heroImage` in frontmatter; `src/lib/remark-cms-images.mjs` does the same for images in the
-body. Both exist for one reason and break the same way. Sveltia also formats dates with
+body. Both exist for one reason and break the same way. **`@astrojs/markdown-remark` is a
+direct dependency for the second one alone** — nothing imports it by name, so it looks
+removable, and it is not: since Astro 7.3 the default Markdown processor is Sätteri, and
+`remarkPlugins` only runs on the unified processor that package provides. Without it the
+build fails in config validation, before a page is rendered. Sveltia also formats dates with
 **Day.js** tokens (`YYYY-MM-DD`) — date-fns style silently writes garbage like `yyyy-08-We`.
 
 **A draft says so on the page.** `DraftNotice.astro` renders at the top of any entry still
@@ -388,8 +392,8 @@ Things that have already gone wrong here, and cost real time:
   report to GitHub: every commit carries a `Workers Builds: hookd-blog` check run. It is a
   *check run*, not a commit *status*, so `commits/<sha>/status` shows a count of 0 and
   `deployments` is empty — which is how this file came to say, wrongly, that Cloudflare
-  reported nothing at all. Read `commits/<sha>/check-runs`. Its limits: nobody has yet seen
-  it fail, so it is unconfirmed that a failed build turns it red; nothing emails you about
+  reported nothing at all. Read `commits/<sha>/check-runs`. It **does** go red on a failed
+  build — first seen 19 Sep 2026, on three Dependabot PRs at once. Its limits: nothing emails you about
   it; and **green only means the build finished** — the `/_image` bug below came from a green
   build. A failed build leaves the previous version serving. The only proof a deploy is
   *right* is the live response; verify against something in it that actually differs.
