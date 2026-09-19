@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # A normal deploy lands in about a minute. Ten minutes covers a slow Cloudflare
       # queue without leaving a genuinely failed build unreported for long.
