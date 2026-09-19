@@ -1,0 +1,52 @@
+# The checks that can fail without anyone committing anything.
+#
+# build.yml and deploy.yml run on a push. But some things break on their own: a page this
+# site links to moves or closes, Google Fonts changes the stylesheet URL, unpkg stops
+# serving the CMS script /admin loads, Chrome updates and renders a page differently. None
+# of that produces a commit, so none of it is ever checked — until now, once a week.
+#
+# A failure here emails you. GitHub sends that for free — but for a *scheduled* run it goes
+# to whoever last edited the `cron:` line below, so keep that edit yours. GitHub also pauses
+# scheduled workflows after 60 days with no activity in the repository; a commit from
+# /admin counts, so this only matters in a long quiet spell.
+name: weekly
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays, 06:00 UTC
+  # And by hand, from the Actions tab, whenever you want an answer now.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # The live site should be serving the tip of main. If it is not, a deploy failed and
+      # was missed — deploy.yml should have caught it, and this is the backstop. Five
+      # minutes covers a push that landed seconds before this run started.
+      - name: The live site serves the tip of main, and works
+        run: bash .claude/skills/verify-deploy/scripts/verify-deploy.sh --sha "$GITHUB_SHA" --timeout 300 --interval 15
+
+      # Every step below runs even if one above failed, so one email carries every problem
+      # rather than the first one only.
+      - name: Audit the rendered pages
+        if: ${{ !cancelled() }}
+        run: node .claude/skills/run-hookd/driver.mjs audit
+
+      # Uses the build the audit just made.
+      - name: External links still resolve
+        if: ${{ !cancelled() }}
+        run: node scripts/check-external-links.mjs
