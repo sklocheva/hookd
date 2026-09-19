@@ -51,19 +51,28 @@ function discoverRoutes() {
 	return all.filter((r) => r === '/404.html' || existsSync(join(dist, r, 'index.html')) || r === '/');
 }
 
+/**
+ * Real Chrome before any Chromium. On Ubuntu, `/usr/bin/chromium-browser` is usually a stub
+ * that hands off to the Snap package, and Snap confinement cannot reach a profile directory
+ * under /tmp — so it was picked first on the CI runner and never opened a debugging port.
+ * GitHub's runners ship Google Chrome at /usr/bin/google-chrome. `CHROME_PATH` overrides
+ * the whole list.
+ */
 const CHROME_CANDIDATES = [
 	'C:/Program Files/Google/Chrome/Application/chrome.exe',
 	'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
 	'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+	'/usr/bin/google-chrome',
+	'/usr/bin/google-chrome-stable',
 	'/usr/bin/chromium',
 	'/usr/bin/chromium-browser',
-	'/usr/bin/google-chrome',
 ];
 
 const log = (...a) => console.log(...a);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function findChrome() {
+	if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
 	const found = CHROME_CANDIDATES.find((p) => existsSync(p));
 	if (!found) {
 		console.error('No Chrome or Edge found. Looked in:\n  ' + CHROME_CANDIDATES.join('\n  '));
@@ -158,11 +167,25 @@ async function browser() {
 			...(process.env.CI ? ['--no-sandbox'] : []),
 			'about:blank',
 		],
-		{ stdio: 'ignore' }
+		// stderr is kept, not discarded: when Chrome fails to start, what it printed is the
+		// only explanation there is. Read continuously so the pipe can never fill and stall
+		// it; only the tail is held.
+		{ stdio: ['ignore', 'ignore', 'pipe'] }
 	);
+	let chromeErr = '';
+	proc.stderr.on('data', (d) => {
+		chromeErr = (chromeErr + d).slice(-4000);
+	});
+	let exited = null;
+	proc.on('exit', (code, signal) => {
+		exited = signal ?? code;
+	});
 
+	// Longer on CI: a cold runner has been measured taking well over the 10s a warm
+	// desktop needs.
+	const tries = process.env.CI ? 120 : 40;
 	let wsUrl;
-	for (let i = 0; i < 40; i++) {
+	for (let i = 0; i < tries && exited === null; i++) {
 		await sleep(250);
 		try {
 			const r = await fetch(`http://127.0.0.1:${port}/json/version`, {
@@ -174,9 +197,13 @@ async function browser() {
 	}
 	if (!wsUrl) {
 		proc.kill();
-		console.error('Chrome did not expose a debugging endpoint.');
+		console.error(`Chrome did not expose a debugging endpoint.`);
+		console.error(`  binary: ${bin}`);
+		console.error(`  ${exited === null ? `still running after ${tries / 4}s` : `exited: ${exited}`}`);
+		console.error(chromeErr.trim() ? `  its stderr:\n${chromeErr.trim()}` : '  it printed nothing');
 		process.exit(2);
 	}
+	log(`browser: ${bin}`);
 
 	const ws = new WebSocket(wsUrl);
 	await new Promise((res, rej) => {
