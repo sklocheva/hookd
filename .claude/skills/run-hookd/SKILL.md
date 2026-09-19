@@ -83,6 +83,10 @@ npx astro preview status                         # is one already up, and since 
 npx astro preview stop                           # stop it
 ```
 
+`serve` is the only command that leaves a server behind. `audit` and `shot` stop the one they
+started when they finish — however they finish — and leave alone one that was already up.
+**Stop a `serve` before `npm ci`**: see the EPERM row below.
+
 Or the plain human path: `npm run dev` → http://localhost:4321, Ctrl-C to stop. Useful for
 hot reload while editing; useless for anything an agent needs to observe.
 
@@ -125,6 +129,7 @@ from the form.
   | "Preview did not come up" | It is up. `astro preview` sometimes binds **::1 only**, and Node's `fetch` resolves `localhost` to IPv4. `isUp` now tries both. | `npx astro preview status` |
   | "already running", nothing serves | You killed the process. Astro's own record survives, so the next start exits without starting anything. The driver stops before spawning now. | `npx astro preview stop`, then retry |
   | The audit passes but the page looks old | The driver reuses a live server and skips the rebuild. | Stop the preview, then audit |
+  | `npm ci` fails with **EPERM**, then `npx astro` runs a *different* Astro | A running preview holds files in `node_modules` open on Windows. `npm ci` deletes `node_modules` first, fails halfway, and `npx` finds no local Astro and downloads the latest to run instead. Audits used to leave their server running and caused exactly this; they no longer do. | `npx astro preview stop`, then `npm ci` again |
 
   A stale listener can also hold 4321 while answering nothing — `Get-NetTCPConnection
   -LocalPort 4321` in PowerShell names the owner, then stop that pid.

@@ -102,6 +102,29 @@ async function isUp(url) {
 	return false;
 }
 
+/**
+ * Whether this run started the preview server — and so owns stopping it.
+ *
+ * An audit used to leave its server running after it finished. On Windows that holds files
+ * in node_modules open, and the next `npm ci` failed with EPERM halfway through deleting
+ * node_modules; `npx astro` then found no local Astro and silently downloaded the latest
+ * one to run instead. So a server this run started is stopped when the run ends, however it
+ * ends — a normal finish, a `process.exit(2)` when Chrome fails, or Ctrl-C. A server that
+ * was already running belongs to someone else and is left alone, and `serve` exists to
+ * leave one running, so it opts out.
+ */
+let startedPreview = false;
+let keepPreview = false;
+
+process.on('exit', () => {
+	if (startedPreview && !keepPreview) {
+		// Synchronous on purpose: an 'exit' handler cannot wait for anything asynchronous.
+		spawnSync('npx', ['astro', 'preview', 'stop'], { cwd: ROOT, shell: true, stdio: 'ignore' });
+	}
+});
+// A signal skips 'exit' handlers unless it is turned into an exit.
+for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => process.exit(130));
+
 /** Build, then start `astro preview` — unless something is already serving. */
 async function ensurePreview() {
 	if (await isUp(PREVIEW)) {
@@ -128,6 +151,8 @@ async function ensurePreview() {
 
 	// astro preview daemonises and the parent exits, so don't wait on the child.
 	spawn('npm', ['run', 'preview'], { cwd: ROOT, shell: true, stdio: 'ignore', detached: true }).unref();
+
+	startedPreview = true;
 
 	for (let i = 0; i < 60; i++) {
 		await sleep(500);
@@ -483,6 +508,7 @@ switch (cmd) {
 		await cmdShot(rest[0] && !rest[0].startsWith('--') ? rest[0] : '/', width);
 		break;
 	case 'serve':
+		keepPreview = true;
 		await ensurePreview();
 		log(`serving ${PREVIEW} — stop with: npx astro preview stop`);
 		break;
