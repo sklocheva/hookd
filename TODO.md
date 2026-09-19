@@ -41,13 +41,13 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
       the commit from Cloudflare's `WORKERS_CI_COMMIT_SHA` (the name checked against its docs),
       and `.github/workflows/deploy.yml` waits for each pushed commit to appear there before
       running the smoke checks. By hand: `verify-deploy.sh --sha HEAD`.
-- [ ] **CI, phase 3 — maintenance.** Decided 19 Sep 2026:
-      - Dependabot, **one grouped PR a month** for npm and GitHub Actions. Turn on Dependabot
-        alerts in repo Settings too — they are off.
-      - A **weekly scheduled run**: audit, live smoke test, external links. A failure **emails**
-        rather than opening an issue — GitHub sends that for free, to whoever last edited the
-        workflow's `cron:` line, so keep that edit Sophia's. Scheduled workflows are paused
-        after 60 days with no repo activity.
+- [x] ~~**CI, phase 3 — maintenance.**~~ — `.github/dependabot.yml`: a grouped PR a month for
+      npm and one for Actions (Dependabot cannot mix ecosystems), an npm major on its own.
+      `.github/workflows/weekly.yml`: Mondays, live site at the tip of `main`, audit, external
+      links; a failure emails whoever last edited its `cron:` line — keep that Sophia's.
+- [ ] **Turn on Dependabot alerts** in repo Settings → Code security. They are off, and the
+      token here cannot change it. Version updates work without them; security advisories
+      do not.
 - [ ] **A ruleset on `main` that blocks force-push and deletion — and nothing else.** Settings
       only. Never require pull requests or passing checks there: Sveltia commits straight to
       `main`, and either rule would stop publishing from `/admin`.

@@ -43,6 +43,9 @@ There is no linter, and no unit-test runner. The checks that exist are:
   runs it too, so an `/admin` commit meets it — but CI only reports afterwards.
 - `python scripts/check-cms-config.py` — the CMS form and the Zod schemas have not drifted.
 - `node scripts/check-image-sizes.mjs` — no committed image is over 2000px on the long edge.
+- `node scripts/check-external-links.mjs` — links that leave the site still resolve. Run after
+  a build; weekly in CI. Fails only on 404, 410 or a host that does not resolve — a 403 from a
+  bot-blocking site is a warning, or the weekly email would cry wolf.
 - `verify-deploy` skill — the deployed site, after a push.
 
 Note that `astro build` does **not** type-check — `npm run check` is what does. `tsconfig.json`
@@ -435,6 +438,11 @@ Things that have already gone wrong here, and cost real time:
   Cloudflare's own check does not — and it is the only guard on entries published from
   `/admin`, which reach `main` with nobody watching a terminal. The audit runs Chrome with
   `--no-sandbox` on CI only: Ubuntu 24.04 blocks the user namespaces Chrome's sandbox needs.
+- **`.github/workflows/weekly.yml` checks what breaks without a commit** — Mondays 06:00 UTC:
+  the live site serves the tip of `main`, the audit, and external links (Google Fonts, the
+  unpkg script `/admin` loads, links in posts). Failure emails whoever last edited its
+  `cron:` line. **Dependabot** batches updates into a PR a month per ecosystem (npm, Actions),
+  with an npm *major* on its own; every one runs the full CI, so green is safe to merge.
 
 ## Out of scope
 

@@ -1,0 +1,34 @@
+# Dependency updates, once a month, batched so they arrive as a few PRs rather than a
+# drip of one per package. Decided 19 Sep 2026: monthly is enough for a site with four
+# dependencies and nothing running server-side.
+#
+# Safe to merge on green: every PR runs build.yml — type-check, build, CMS parity, image
+# sizes and the full audit — before anything reaches main.
+#
+# Dependabot cannot put two ecosystems in one PR, so a month can bring up to two: one for
+# npm, one for GitHub Actions. A *major* npm upgrade comes separately, on purpose: an Astro
+# major can need real work, and it must not hold every routine patch hostage behind it.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      npm:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: deps
+
+  # The actions this repo uses run on Node 20, which GitHub has deprecated — they are being
+  # forced onto Node 24 with a warning on every run. Their next majors fix that, and this
+  # is what will bring them.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ci
