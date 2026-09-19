@@ -46,9 +46,12 @@ absence of change is not evidence of failure.
 
 Before treating an unchanged site as a failure, ask: *would this change actually alter a byte
 of the response?* If it wouldn't, you have no signal either way and must get the build log
-instead of inferring. Cloudflare reports nothing to GitHub — `repos/.../deployments` is empty
-and `commits/main/status` returns `state: pending, count: 0` — so the log is the only source
-of truth, and only the user can reach it. Ask early; guessing cost several cycles and one
+instead of inferring. `repos/.../deployments` is empty and `commits/main/status` returns
+`state: pending, count: 0` — but that is not "Cloudflare reports nothing", which this file
+used to say. It posts a `Workers Builds: hookd-blog` **check run**, readable at
+`commits/<sha>/check-runs`, which says whether the build passed. It does not say *why*, and it
+cannot say whether the output is right. So for the reason, the log is still the only source of
+truth, and only the user can reach it. Ask early; guessing cost several cycles and one
 needless revert.
 
 ## Markers that cannot tell you anything — four times

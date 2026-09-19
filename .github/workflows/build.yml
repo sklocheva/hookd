@@ -1,14 +1,15 @@
 # Catch a broken commit before it becomes a silently broken site.
 #
-# Cloudflare builds this repo on every push to main and reports nothing back to GitHub —
-# no commit status, no deployment record, no email. When its build fails the previous
-# version keeps serving, so the site looks fine and nobody finds out. That has already
-# cost real time here.
+# Cloudflare builds this repo on every push to main and does report back — every commit
+# carries a "Workers Builds: hookd-blog" check run. But that only says Cloudflare's build
+# finished. It says nothing about whether the page is right: the worst bug this site has
+# had (every image 404ing through /_image) came from a build Cloudflare reported as a
+# success. And nothing emails you about Cloudflare's check.
 #
-# This does not deploy anything and cannot stop Cloudflare. What it does is put a red X
-# on the commit, which is the notification Cloudflare never sends. It matters most for
-# commits made from /admin: those are pushed straight to main by Sveltia with nobody
-# watching a terminal, and a missing required field fails the build by design.
+# This does not deploy anything and cannot stop Cloudflare. What it does is run the gates
+# a local push runs, put a red X on the commit when one fails, and — because it is a GitHub
+# Action — email you about it. It matters most for commits made from /admin: those are
+# pushed straight to main by Sveltia with nobody watching a terminal.
 #
 # It runs the same gates as a local push — see CLAUDE.md.
 name: build
@@ -18,6 +19,17 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+
+# Read the repository, and nothing else. None of these steps writes anywhere.
+permissions:
+  contents: read
+
+# A newer push to the same pull request makes the older run pointless, so cancel it. Never
+# on main: every commit there is a deploy, and each one gets its own verdict — two /admin
+# saves a minute apart must not have the first one's failure cancelled out of sight.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -52,3 +64,19 @@ jobs:
       # finds out from a failed deploy rather than from the form.
       - name: CMS form matches the schemas
         run: python3 scripts/check-cms-config.py
+
+      # Git keeps every version of every binary forever. /admin uploads are resized in the
+      # browser already; this catches the ones committed by hand.
+      - name: Images are 2000px or less
+        run: node scripts/check-image-sizes.mjs
+
+      # The checks the build cannot make, in a real browser at 375px and 1280px: contrast,
+      # overflow, one <h1>, content present without JavaScript, tap targets, the label
+      # floor, internal links. It was local-only, so a commit from /admin never met it —
+      # and it is the only thing that caught the quiz's contrast failures, on a build and a
+      # type-check that had both passed.
+      #
+      # It builds again before serving. That costs a few seconds and means it audits
+      # exactly what `astro build` produces, not a leftover.
+      - name: Audit the rendered pages
+        run: node .claude/skills/run-hookd/driver.mjs audit

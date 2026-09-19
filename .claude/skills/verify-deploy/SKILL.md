@@ -1,6 +1,6 @@
 ---
 name: verify-deploy
-description: Verify that a push to main actually reached the live Hookd site, and catch the static-hosting failures that look fine locally. Use this whenever you push to main, change astro.config.mjs, change the site URL or domain, touch anything under src/assets/ or an <Image>, or are asked "is it live yet", "did the deploy work", "why is the image broken", or "the site looks wrong". Also use it before telling the user a deploy succeeded — on this project a failed build is silent and the old version keeps serving, so a push that appears to work is not evidence that it did.
+description: Verify that a push to main actually reached the live Hookd site, and catch the static-hosting failures that look fine locally. Use this whenever you push to main, change astro.config.mjs, change the site URL or domain, touch anything under src/assets/ or an <Image>, or are asked "is it live yet", "did the deploy work", "why is the image broken", or "the site looks wrong". Also use it before telling the user a deploy succeeded — on this project Cloudflare's green check only means its build finished, and a failed build leaves the old version serving, so a push that appears to work is not evidence that it did.
 ---
 
 # Verifying a deploy of Hookd
@@ -14,11 +14,14 @@ failures that have already happened here, with the evidence that identified each
 
 ## The two things that are actually true here
 
-**A failed build is silent.** Cloudflare reports nothing back to GitHub — no commit status,
-no deployment record, no notification. When a build fails, the previous version keeps serving
-happily. So "I pushed and the site still works" is exactly what a failed deploy looks like.
-The only way to know a deploy landed is to find something in the live response that differs
-from what was there before.
+**A green check is not a deploy.** Cloudflare does report back — each commit carries a
+`Workers Builds: hookd-blog` check run (`commits/<sha>/check-runs`; it is not a commit
+*status*, so `commits/<sha>/status` shows nothing, which is why this was once believed not to
+exist). But green means only that the build finished, not that its output is right: the
+`/_image` bug shipped from a green build. When a build fails the previous version keeps
+serving happily, so "I pushed and the site still works" is exactly what a failed deploy looks
+like. The only way to know a deploy landed, and landed correctly, is to find something in the
+live response that differs from what was there before.
 
 **The host does not necessarily build what you build.** The same commit has produced different
 output locally and on Cloudflare. A green local `npm run build` tells you your source is

@@ -150,6 +150,12 @@ async function browser() {
 			'--no-default-browser-check',
 			'--disable-gpu',
 			'--hide-scrollbars', // otherwise the scrollbar eats ~15px and skews overflow checks
+			// On a CI runner only. Ubuntu 24.04 — what GitHub's ubuntu-latest now is — blocks
+			// the unprivileged user namespaces Chrome's sandbox is built on, and Chrome exits
+			// with "No usable sandbox!" before opening a page. The runner is a throwaway VM
+			// loading only this site's own build, so there is nothing for the sandbox to
+			// contain; on a real machine it stays on.
+			...(process.env.CI ? ['--no-sandbox'] : []),
 			'about:blank',
 		],
 		{ stdio: 'ignore' }
