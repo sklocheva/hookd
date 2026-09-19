@@ -39,8 +39,10 @@ There is no linter, and no unit-test runner. The checks that exist are:
 
 - `node .claude/skills/run-hookd/driver.mjs audit` — builds, serves, and drives all routes
   in headless Chrome at 375px and 1280px: overflow, one `<h1>`, content present without JS,
-  tap targets, contrast, the label floor, internal links. **Run this before pushing.**
+  tap targets, contrast, the label floor, internal links. **Run this before pushing.** CI
+  runs it too, so an `/admin` commit meets it — but CI only reports afterwards.
 - `python scripts/check-cms-config.py` — the CMS form and the Zod schemas have not drifted.
+- `node scripts/check-image-sizes.mjs` — no committed image is over 2000px on the long edge.
 - `verify-deploy` skill — the deployed site, after a push.
 
 Note that `astro build` does **not** type-check — `npm run check` is what does. `tsconfig.json`
@@ -338,7 +340,8 @@ measurement each size is cut for, yardage per size, US/UK terms.
 
 - Images go in `src/assets/` and use Astro's `<Image>` component. Never plain `<img>`.
 - Nothing above 2000px on the long edge gets committed — git keeps every version of every
-  binary forever.
+  binary forever. `/admin` uploads are resized in the browser; anything committed by hand is
+  caught by `scripts/check-image-sizes.mjs` in CI.
 - One `<h1>` per page.
 - Mobile first. Check at 375px.
 - **Colour and type come from the tokens in `src/styles/global.css`.** No colour
@@ -378,10 +381,15 @@ There is no manual deploy step and no deploy command.
 
 Things that have already gone wrong here, and cost real time:
 
-- **A failed build is silent.** Cloudflare reports nothing back to GitHub — no commit status,
-  no deployment record, no notification. The previous version keeps serving. The only way to
-  know a deploy landed is to fetch the live site and look for the change. Never assume a push
-  deployed; verify against something in the response that actually differs.
+- **A failed build is quiet, and a green one proves less than it looks.** Cloudflare *does*
+  report to GitHub: every commit carries a `Workers Builds: hookd-blog` check run. It is a
+  *check run*, not a commit *status*, so `commits/<sha>/status` shows a count of 0 and
+  `deployments` is empty — which is how this file came to say, wrongly, that Cloudflare
+  reported nothing at all. Read `commits/<sha>/check-runs`. Its limits: nobody has yet seen
+  it fail, so it is unconfirmed that a failed build turns it red; nothing emails you about
+  it; and **green only means the build finished** — the `/_image` bug below came from a green
+  build. A failed build leaves the previous version serving. The only proof a deploy is
+  *right* is the live response; verify against something in it that actually differs.
 - **Never trust that the host builds what this machine builds.** The same commit has produced
   different output locally and on Cloudflare. A green local `npm run build` is necessary, not
   sufficient.
@@ -416,10 +424,12 @@ Things that have already gone wrong here, and cost real time:
   token still lacks it, because scopes are frozen when a token is issued. Re-check
   `gh api -i user` a minute later rather than concluding it cannot be done — that mistake
   deleted a working CI workflow once.
-- **CI runs `npm run check`, `npm run build` and the CMS parity script** on every push, in
-  `.github/workflows/build.yml`. It cannot stop Cloudflare; it puts a red X on the commit,
-  which is the notification Cloudflare never sends — and it is the only guard on entries
-  published from `/admin`, which reach `main` with nobody watching a terminal.
+- **CI runs `npm run check`, `npm run build`, the CMS parity script, the image-size check
+  and the full audit** on every push and pull request, in `.github/workflows/build.yml`. It
+  cannot stop Cloudflare; it puts a red X on the commit and **emails you**, which
+  Cloudflare's own check does not — and it is the only guard on entries published from
+  `/admin`, which reach `main` with nobody watching a terminal. The audit runs Chrome with
+  `--no-sandbox` on CI only: Ubuntu 24.04 blocks the user namespaces Chrome's sandbox needs.
 
 ## Out of scope
 

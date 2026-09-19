@@ -37,6 +37,22 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
       most likely to need changing is the score rows — one Answer ID and Points pair per row,
       typed by hand, because Sveltia cannot point a field at a sibling list in the same entry.
       A typo there fails the build and names the question and option, so it is safe to try.
+- [ ] **CI, phase 2 — check the live site after every deploy.** Have the build write the
+      commit SHA to `/version.txt` (Cloudflare's build exposes it as an environment variable —
+      confirm the name in its docs before relying on it), then a workflow on each push to
+      `main` polls the live site until that SHA appears and runs `verify-deploy.sh`. That turns
+      "did it deploy, and is it right" into a tick or a cross on the commit, and ends the
+      guessing over which marker to poll for.
+- [ ] **CI, phase 3 — maintenance.** Decided 19 Sep 2026:
+      - Dependabot, **one grouped PR a month** for npm and GitHub Actions. Turn on Dependabot
+        alerts in repo Settings too — they are off.
+      - A **weekly scheduled run**: audit, live smoke test, external links. A failure **emails**
+        rather than opening an issue — GitHub sends that for free, to whoever last edited the
+        workflow's `cron:` line, so keep that edit Sophia's. Scheduled workflows are paused
+        after 60 days with no repo activity.
+- [ ] **A ruleset on `main` that blocks force-push and deletion — and nothing else.** Settings
+      only. Never require pull requests or passing checks there: Sveltia commits straight to
+      `main`, and either rule would stop publishing from `/admin`.
 - [x] ~~**Yarn notes: show length per 100 g.**~~ — done. The Length row reads "50 g ball = 110 m
       / 120 yd (220 m per 100 g)", derived from the ball figures, and the aside is omitted for a
       100 g ball where it would only repeat the line.
@@ -168,10 +184,11 @@ not things a script can check:
 - [ ] One change per branch; keep diffs reviewable
 - [ ] Don't change decided stack choices without asking
 - [x] ~~GitHub Action to catch failed builds~~ — `.github/workflows/build.yml` runs
-      `npm run check`, `npm run build` and the CMS parity script on every push to `main` and on
-      pull requests. It cannot stop Cloudflare, but it puts a red X on the commit, which is the
-      notification Cloudflare never sends — and it matters most for `/admin` commits, which go
-      straight to `main` from the browser with nobody watching a terminal.
+      `npm run check`, `npm run build`, the CMS parity script, the image-size check and the
+      full audit on every push to `main` and on pull requests. It cannot stop Cloudflare, but it
+      puts a red X on the commit and emails you, which Cloudflare's own `Workers Builds` check
+      does not — and it matters most for `/admin` commits, which go straight to `main` from the
+      browser with nobody watching a terminal.
       **GitHub emails on a failed run by default**; change that in notification settings if you
       would rather it did not.
 
