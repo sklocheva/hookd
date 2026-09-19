@@ -32,6 +32,11 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
       **Structured inputs only** — ball length, yardage, finished measurements, gauge. Numbers
       typed into instruction prose are deliberately not converted. Needs pattern-style rounding
       (halves or quarters of an inch, 10 cm gauge = 4 in), not exact conversion.
+- [ ] **Try the quiz form in `/admin` for real.** It passes the parity check and a
+      CMS-shaped fixture builds, but nobody has filled it in through the panel yet. The part
+      most likely to need changing is the score rows — one Answer ID and Points pair per row,
+      typed by hand, because Sveltia cannot point a field at a sibling list in the same entry.
+      A typo there fails the build and names the question and option, so it is safe to try.
 - [x] ~~**Yarn notes: show length per 100 g.**~~ — done. The Length row reads "50 g ball = 110 m
       / 120 yd (220 m per 100 g)", derived from the ball figures, and the aside is omitted for a
       100 g ball where it would only repeat the line.
@@ -57,6 +62,12 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
       (graded garment, one-size accessory) from one template. Charts stay deliberately
       unbuilt: a chart is what the paid PDF on Ravelry sells. The two example patterns
       exercise the template.
+- [x] ~~**Quizzes**~~ — a generic, JSON-backed collection at `/journal/quiz/[slug]/`, listed
+      in the journal under `Quizzes` with a placeholder tile instead of a photo, a callout
+      component for articles, and a CMS form. Each answer gives points to named outcomes and
+      the highest total wins — deliberately not one summed score, so a middle outcome is never
+      just the average. Everything renders server-side; with JavaScript off the reader gets
+      every question and every outcome. Questions can carry a photo.
 - [x] ~~Patterns have no `updated` field~~ — added as **Last corrected** in the CMS. Set it
       when you fix something in a published pattern; JSON-LD then reports it as `dateModified`
       instead of repeating the publish date. Verified: with it set, the two dates differ.
@@ -111,7 +122,7 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
       `hookd.` in Space Grotesk 500 with a rust full stop. The dashed box and its caption
       are deleted. A PNG export exists for social avatars and PDF corners but the site does
       not use it.
-- [ ] **The favicon is still Claude's default logo**, left over from scaffolding
+- [ ] **The favicon is still Astro's default logo**, left over from scaffolding
       (`public/favicon.svg` and `favicon.ico`). The wordmark spec calls for `hookd.` cropped
       to the h–d box, or just `h.`. It cannot be live text in a favicon — the font will not
       load — so this one does need an exported asset.
