@@ -8,6 +8,11 @@
 #   bash verify-deploy.sh --expect workers.dev   # poll until that string appears, then check
 #   bash verify-deploy.sh --expect How-tos --path /journal/   # poll a specific page
 #   bash verify-deploy.sh --url https://... --timeout 240
+#   bash verify-deploy.sh --sha HEAD             # wait until the live site serves this commit
+#
+# --sha is the one to reach for. /version.txt carries the commit Cloudflare built from, so
+# it changes on every deploy by construction — no per-change marker to choose, and no
+# config-only change that leaves nothing to look for.
 #
 # Exit codes: 0 all checks passed, 1 a check failed, 2 timed out waiting for --expect.
 
@@ -16,6 +21,7 @@ set -uo pipefail
 URL=""
 EXPECT=""
 EXPECT_PATH="/"
+SHA=""
 TIMEOUT=180
 INTERVAL=15
 
@@ -24,12 +30,23 @@ while [ $# -gt 0 ]; do
     --url)      URL="$2";     shift 2 ;;
     --expect)   EXPECT="$2";  shift 2 ;;
     --path)     EXPECT_PATH="$2"; shift 2 ;;
+    --sha)      SHA="$2";     shift 2 ;;
     --timeout)  TIMEOUT="$2"; shift 2 ;;
     --interval) INTERVAL="$2"; shift 2 ;;
     -h|--help)  sed -n '2,12p' "$0"; exit 0 ;;
     *) echo "unknown argument: $1" >&2; exit 1 ;;
   esac
 done
+
+# --sha: resolve a ref to the full commit id, and wait for it in /version.txt.
+if [ -n "$SHA" ]; then
+  case "$SHA" in
+    [0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]) ;;
+    *) SHA=$(git rev-parse --verify "$SHA^{commit}" 2>/dev/null) || { echo "--sha: not a commit" >&2; exit 1; } ;;
+  esac
+  EXPECT="$SHA"
+  EXPECT_PATH="/version.txt"
+fi
 
 # Default to the `site` value in astro.config.mjs so this stays correct across domain changes.
 if [ -z "$URL" ]; then
@@ -61,8 +78,12 @@ if [ -n "$EXPECT" ]; then
   ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
   BUILT="$ROOT_DIR/dist${EXPECT_PATH%/}/index.html"
   [ "$EXPECT_PATH" = "/" ] && BUILT="$ROOT_DIR/dist/index.html"
+  # A file route (/version.txt) is served as itself, not as <route>/index.html.
+  case "${EXPECT_PATH##*/}" in *.*) BUILT="$ROOT_DIR/dist$EXPECT_PATH" ;; esac
 
-  if [ -f "$BUILT" ]; then
+  # Not for --sha: only Cloudflare's build knows the commit, so a local dist/version.txt
+  # always says "local build" and the guard would refuse the one marker that is certain.
+  if [ -z "$SHA" ] && [ -f "$BUILT" ]; then
     if ! grep -qF -- "$EXPECT" "$BUILT"; then
       echo "  '$EXPECT' is not in the built page this would poll ($EXPECT_PATH)."
       if grep -rqF -- "$EXPECT" "$ROOT_DIR/dist" 2>/dev/null; then
@@ -78,16 +99,18 @@ if [ -n "$EXPECT" ]; then
   echo "Waiting for '$EXPECT' (timeout ${TIMEOUT}s)"
   START=$(date +%s)
   while :; do
-    BODY=$(curl -s "$URL$EXPECT_PATH")
+    # Past any cache: a marker that changes on every deploy must never be read stale, or
+    # a deploy that has landed looks like one that has not.
+    BODY=$(curl -s -H 'Cache-Control: no-cache' "$URL$EXPECT_PATH?_=$(date +%s)")
     EL=$(( $(date +%s) - START ))
     case "$BODY" in
       *"$EXPECT"*) echo "  marker appeared after ${EL}s"; break ;;
     esac
     if [ "$EL" -ge "$TIMEOUT" ]; then
       echo
-      echo "  TIMED OUT after ${EL}s. The build most likely FAILED."
-      echo "  Cloudflare reports nothing to GitHub, so the old version is still serving."
-      echo "  Get the Cloudflare build log - this cannot be diagnosed from outside."
+      echo "  TIMED OUT after ${EL}s. The build most likely FAILED, and the old version"
+      echo "  is still serving. Look at the commit's 'Workers Builds: hookd-blog' check on"
+      echo "  GitHub for pass/fail; for the reason, get the Cloudflare build log."
       exit 2
     fi
     sleep "$INTERVAL"

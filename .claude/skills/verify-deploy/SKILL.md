@@ -35,7 +35,21 @@ broken commit, and pushing something that cannot build wastes a deploy cycle. `c
 optional cover for `build`: the build does not type-check, so it will happily ship a type
 error that `check` catches in seconds.
 
-Then capture a **marker** — something in the live response that will visibly change once your
+**Whether a commit is live is now a solved question, and you rarely have to ask it.**
+`.github/workflows/deploy.yml` runs on every push to `main`: it waits for the pushed commit to
+appear at `/version.txt` — written from Cloudflare's `WORKERS_CI_COMMIT_SHA` by
+`src/pages/version.txt.ts` — and then runs the checks below against the live URL. Its result is
+the `deploy` check on the commit. To do the same by hand:
+
+```bash
+bash .claude/skills/verify-deploy/scripts/verify-deploy.sh --sha HEAD
+```
+
+That marker changes on every deploy by construction, so there is nothing to choose and a
+config-only change is no longer invisible. It answers *which commit is serving*; it does not
+answer *whether your change looks right* — for that you still want a content marker.
+
+For a content marker, capture something in the live response that will visibly change once your
 commit deploys. Pick something the change *creates*, anchored to structure rather than a loose
 substring. `--expect` refuses markers the built page does not contain, so a bad one fails in a
 second instead of at timeout — see `references/failures.md` for why that guard exists.

@@ -1,0 +1,39 @@
+# Did this commit actually go live — and is the live site right?
+#
+# build.yml proves a commit *can* build. Cloudflare's own "Workers Builds" check says its
+# build finished. Neither says the site now serving is this commit, or that it works: the
+# worst bug this site has had (every image 404ing through /_image) came from a build that
+# passed everywhere and was broken only on the live host.
+#
+# So after every push to main this waits until /version.txt on the live site shows the
+# pushed commit — src/pages/version.txt.ts writes it from Cloudflare's build — and then
+# runs the same smoke checks as the verify-deploy skill against the real URL. If the
+# commit never appears, Cloudflare's build failed and the old version is still serving;
+# this goes red, and GitHub emails you, which nothing did before.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A newer push supersedes an older one: once it deploys, the older commit's SHA will never
+# appear on the site again, so waiting for it would only time out. The newer run checks a
+# site that contains both.
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  live-site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # A normal deploy lands in about a minute. Ten minutes covers a slow Cloudflare
+      # queue without leaving a genuinely failed build unreported for long.
+      - name: Wait for this commit on the live site, then smoke-test it
+        run: bash .claude/skills/verify-deploy/scripts/verify-deploy.sh --sha "$GITHUB_SHA" --timeout 600 --interval 15
