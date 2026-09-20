@@ -3,7 +3,7 @@ import '../styles/global.css';
 
 interface Props {
 	/** Which nav item reads as current. The homepage has no active item. */
-	active?: 'patterns' | 'journal' | 'about';
+	active?: 'patterns' | 'journal' | 'tools' | 'about';
 }
 
 const { active } = Astro.props;
@@ -11,6 +11,7 @@ const { active } = Astro.props;
 const nav = [
 	{ label: 'Patterns', href: '/patterns/', key: 'patterns' },
 	{ label: 'Journal', href: '/journal/', key: 'journal' },
+	{ label: 'Tools', href: '/tools/', key: 'tools' },
 	{ label: 'About', href: '/about/', key: 'about' },
 ] as const;
 ---

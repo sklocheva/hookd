@@ -60,6 +60,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      # The yarn weight calculator's arithmetic, against the values its brief lists as its
+      # specification. Node's own runner, so it needs nothing installed.
+      - name: Unit tests
+        run: npm test
+
       # The CMS form and the Zod schemas drift apart silently otherwise, and the author
       # finds out from a failed deploy rather than from the form.
       - name: CMS form matches the schemas

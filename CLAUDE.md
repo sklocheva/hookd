@@ -35,8 +35,11 @@ still static assets only — there is no server process, and that constraint is 
 - `npm run build` — production build into `dist/`; must pass before pushing
 - `npm run preview` — serve the built `dist/` locally
 
-There is no linter, and no unit-test runner. The checks that exist are:
+There is no linter. The checks that exist are:
 
+- `npm test` — Node's built-in runner over `src/**/*.test.ts`, no dependency. It covers the
+  yarn weight calculator's arithmetic and nothing else; see Architecture. CI runs it after
+  the build.
 - `node .claude/skills/run-hookd/driver.mjs audit` — builds, serves, and drives all routes
   in headless Chrome at 375px and 1280px: overflow, one `<h1>`, content present without JS,
   tap targets, contrast, the label floor, internal links. **Run this before pushing.** CI
@@ -189,6 +192,11 @@ stitches, the sections, and finishing. Nothing declares which variant a pattern 
 than one size gets the sticky size picker, one size gets a static band.** An accessory that
 later gains sizes needs no change.
 
+**`categoryMax` reads `CATEGORIES` backwards if you use `find`.** The list runs thinnest
+first, so the band *above* a category is the last entry with a higher floor, not the first —
+`find` returns Lace for everything. It is a `reduce` for that reason. This is what
+`strandsToReach` depends on, and getting it wrong made every answer plausible and wrong.
+
 **No schematic, no stitch chart, no photo tutorial — ever.** Those are the paid PDF on
 Ravelry, and this is the free page. Adding a chart block "for completeness" gives away the
 thing being sold.
@@ -221,6 +229,111 @@ must describe what is visible, never name the answer** — alt text for a guess-
 question that says "mohair" reads the answer to a screen-reader user before they have
 chosen. It is required at publish, not at save. The photo's height is capped so a
 four-option question still fits a phone screen.
+
+**Tools are a section of their own, and the yarn weight calculator is the first.** `/tools/`
+is a plain list and `/tools/yarn-weight/` is the calculator; a second tool is a page under
+`src/pages/tools/` plus one entry in the list. The reader types a label or a yarn count and
+a fibre blend and gets the Craft Yarn Council category. Three things about it are not
+obvious from the code:
+
+- **The arithmetic lives in `src/lib/yarn-weight.ts` and nowhere else.** It has no DOM and no
+  Astro, so `src/lib/yarn-weight.test.ts` can call it — and that file *is* the specification:
+  the values in the design brief (`6 / 15000` wool → 250 m/100 g → 3 Light, and the rest) are
+  its first block. If a refactor breaks one, the refactor is wrong. The numbers themselves
+  come from the author's spreadsheet (`yarn_weight_calculator.xlsx`); the tables are copied
+  from it, not rounded, so change the spreadsheet and this together.
+- **It is not a `client:load` island, because there is no UI framework here.** The form, every
+  counting system's field and the four caveats are server-rendered and the script only reads
+  the form, calls `calculate` and shows or hides — the same arrangement as the quiz, and for
+  the same no-JS rule. Without JavaScript it says it cannot do its sums instead of showing
+  a button that does nothing. The caveats stay either way.
+- **Nothing is calculated until the button is pressed, then it follows every edit.** That is
+  the design, not a shortcut: a reader can fill the form top to bottom without being told off
+  for fields they have not reached. The button's label never changes — the hint under it is
+  what says the answer is now live. The result region is `aria-live="polite"`, which the
+  design file lacks. Wool-equivalent and blend density are deliberately never shown.
+- **The yarn count section is shut by default and its fields are ignored while it is.** A
+  reader with a ball band has metres and needs none of it; a reader with a cone does. Open, it
+  was more than twice the height of the field above it, so the fallback path looked like the
+  main one. Shutting it means "this does not apply to me", so a value left inside cannot
+  contradict the label from somewhere the reader cannot see it.
+
+**It is a "yarn count", never a "mill count".** The latter was a coinage and is not a term of
+art, so a reader who searched for it found nothing. *Yarn count* (or just *count*) is what the
+trade, weavers, machine knitters and cone sellers all say; Nm is the *metric count*, and the
+count is also what `tit.` means on an Italian cone.
+
+**A length no yarn has is refused before the category lookup.** Every figure has *some*
+category — `categoryFor` returns Super Bulky for anything down to zero and Lace for anything
+above 550 — so a wrong answer was printed as confidently as a right one, in 86px type. A
+first-time reader forced the divisor to ÷ 1 on a cone marked `NM 2000`, got 200,000 m/100 g,
+and was told **0 Lace**: six categories from the truth. The guard is on the *length*, between
+10 and 30,000 m/100 g, which is wide enough to pass the finest thread the tool claims to
+handle and narrow enough to catch a divisor off by a power of ten. It blames the divisor on
+`input.divisor !== 'auto'`, **not** on `divisor !== 1` — the case that prompted it is a
+divisor forced *to* 1.
+
+**A stated m/100 g picks the divisor, but only when it reconciles the count.** With one, the
+divisor is whichever power of ten brings the two together — which is right in both places the
+flat "printed ≥ 300 → ÷ 1000" rule fails, namely yarn under 30 m/100 g and thread finer than
+Nm 300. The catch is that rounding a logarithm always yields *some* power of ten, so a count
+and a label that genuinely disagree get one anyway and the cross-check then reports a figure
+bent toward the label: `2 / 28` against a stated 380 was divided by 10 and reported as 140
+rather than its honest 1400. The inferred divisor is therefore adopted only when it brings
+the two within the same 5% the cross-check uses. **The flat rule is the fallback, not the
+default.**
+
+**A message that needs attention gets a heading, a mark and a tint — never colour alone.**
+The cross-check and "Not yet" panels shipped as a white fill with a 3px bar and read as one
+more note beside the result. They now carry an uppercase heading naming the problem ("These
+two do not agree" / "Worth confirming" / "Not yet"), a small ringed `!`, a 4px bar and
+`--alert-warning` or `--alert-caution` — the site's own accents at about 12%. No red banner:
+the type is unchanged and the tints are the existing hues. `--ochre-text` exists because
+`--ochre` is 4.15:1 on the warning tint and 4.45:1 on the caution one, so both missed AA;
+this one value clears it on the tints, the paper and the panel alike.
+
+The "Total N%" warning is `--terracotta` on the paper, which measures 4.61:1. The brief asks
+for a darker `--terracotta-text` because it measured 4.32:1 *on the panel fill* — but that
+readout does not sit on the panel, so no new token was added. Move it onto a panel and it
+needs one. `--field` and `--field-border` are new: the input fill and edge the brief lists as
+literals.
+
+**The form has one left edge, one spacing scale, and columns that do not resize.** All three
+came out of a cold usability read, and all three are easy to undo by accident:
+
+- **Step numbers sit above their headings, not beside them.** Inline, the numeral held the
+  x=0 slot and pushed the heading 21px right of every other element in the column — and since
+  the heading is the heaviest thing there, it read as a misaligned heading rather than as a
+  numeral in a gutter. There is no room to hang one properly at 375px.
+- **The gaps are 8 / 16 / 24 / 40 and nothing else.** They were 6, 19, 8, 6, 24, 22, 8, 6, 13,
+  38, 6, 19, 12, 38 — nine values, no two of which meant anything different to a reader.
+- **`--pct-w` and `--rm-w` are shared** by the fibre row, the percentage box and the total
+  beneath them, so the three cannot drift. The remove button keeps its column even when
+  invisible (`.is-hidden` is `visibility`, not `hidden`): removing it from the layout resized
+  the row beside it, and at 375px the fibre select dropped 215px → 155px the instant a second
+  fibre was added, clipping "Bamboo viscose" to "Bamboo visco" in a row already filled in.
+  **Both values are as tight as their contents allow** — every pixel taken comes off the
+  fibre name, which needs 127px at 375px.
+
+**A refusal keeps the last good answer, dimmed.** Editing a blend means passing *through*
+invalid totals — 34 cannot become 50 without being some wrong number on the way — and blanking
+the result on every keystroke punished the reader for typing. `lastGood` holds the previous
+outcome and `.is-stale` fades it, with a line saying so.
+
+**The message appears twice, deliberately.** Short, above the button, where the reader is
+looking when they press it; and in full beside the answer, which on a phone is a screen away.
+The offending box is outlined as well — never as the only signal, since the words name the
+field too.
+
+**The running total stays quiet until the button is pressed.** The page promises "nothing is
+flagged until you press this", and the total used to turn red and read "— needs 100" on the
+first keystroke, breaking that promise inside thirty seconds.
+
+**The result column is sticky and barely moves, and that is the brief's doing.** The four
+caveats must sit beside the result rather than behind a disclosure, which makes that column
+nearly as tall as the form, so there is little for `position: sticky` to do. Making only the
+answer sticky would slide it over the caveats. Moving the caveats below the grid would fix it
+and break the brief — ask before doing that.
 
 **Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
 `/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real

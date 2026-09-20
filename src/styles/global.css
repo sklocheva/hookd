@@ -23,6 +23,13 @@
 	   #2a2320 on #2a2320 — 1.00:1 — and failed the page. This is that alpha flattened
 	   onto --paper, which is the only thing it ever sits on. */
 	--wash: #f4efe8;
+	/* The fill of a text input, select or callout that sits on the paper: a shade lighter
+	   than it, so an entry field reads as one. The calculator's form, and the two notes
+	   beneath its answer. */
+	--field: #fffdf9;
+	/* Its border. Stronger than --rule (.14), which is for structure; a field's edge is the
+	   only thing that says where to type. */
+	--field-border: rgba(42, 35, 32, 0.2);
 	/* --ink as a filled button, hovered. */
 	--ink-hover: #463b35;
 	--faint: #8a7c6e; /* was #c0b3a4 at 1.91:1 — illegible even for scaffolding */
@@ -34,6 +41,18 @@
 	--terracotta-hover: #8f4a2f; /* 6.13:1 */
 	--ochre: #8f6714;
 	--ochre-rule: #b88a2e;
+
+	/* Two tints for a panel that is asking to be read rather than sitting there: a
+	   disagreement between two figures, and a figure that could not be confirmed. They are
+	   the accents at about 12% on the paper — enough that the block reads as separate from
+	   --panel beside it, and nowhere near a red banner, which this site does not do.
+	   Each carries a heading and an icon as well, because a tint alone is a colour signal. */
+	--alert-warning: #f8e4d9; /* --terracotta's hue. --ink 12.57:1 */
+	--alert-caution: #f8efd6; /* --ochre's hue. --ink 13.47:1 */
+	/* The ochre as a heading on those tints. --ochre is 4.15:1 on the warning tint and
+	   4.45:1 on the caution one, so both miss AA; this clears it on either (4.65, 4.98)
+	   and on the paper and the panel too, so one value covers every surface it lands on. */
+	--ochre-text: #856011;
 
 	/* The two accents again, for text set on --panel rather than on --paper.
 	   Both are tuned against the paper and neither survives the move: on #f6eee2 the

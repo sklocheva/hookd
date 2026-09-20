@@ -35,6 +35,7 @@ export function personSchema(site: URL): JsonLd {
 const SEGMENT_LABELS: Record<string, string> = {
 	patterns: 'Patterns',
 	journal: 'Journal',
+	tools: 'Tools',
 	about: 'About',
 	c: '',
 };

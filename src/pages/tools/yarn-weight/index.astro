@@ -1,0 +1,95 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Eyebrow from '../../../components/Eyebrow.astro';
+import YarnWeightCalculator from '../../../components/YarnWeightCalculator.astro';
+---
+
+<Base
+	title="What weight is this yarn? — Hookd tools"
+	description="Work out a yarn's Craft Yarn Council weight category from metres per 100 g or a cone's yarn count, plus the fibre blend. Nothing is saved."
+	active="tools"
+	breadcrumbName="Yarn weight calculator"
+>
+	{/* 1160px, not the 760px note measure: the tool is two columns on a desktop. */}
+	<div class="shell page">
+		<div class="intro">
+			<Eyebrow kind="Tool" tone="journal" />
+			<h1>What weight is this yarn?</h1>
+			<p class="standfirst">
+				Type in what the label says — metres per 100 g, or the yarn count off a cone — add the fibre
+				blend, and this works out which Craft Yarn Council category the yarn belongs to.
+			</p>
+			<p class="note">
+				Fill it in, press the button, and it keeps up with your edits from there. Nothing is saved.
+			</p>
+		</div>
+
+		<YarnWeightCalculator />
+
+		<div class="source">
+			<p>
+				Categories follow the <a
+					href="https://www.craftyarncouncil.com/standards/yarn-weight-system"
+					rel="noopener">Craft Yarn Council standard yarn weight system</a
+				>.
+			</p>
+		</div>
+	</div>
+</Base>
+
+<style>
+	.page {
+		padding-top: 44px;
+		padding-bottom: 90px;
+	}
+
+	/* The intro reads at a note's measure even though the tool below it is wider. */
+	.intro {
+		max-width: var(--measure);
+		margin-bottom: 38px;
+	}
+
+	.intro :global(.eyebrow) {
+		margin-bottom: 14px;
+	}
+
+	h1 {
+		margin: 0 0 16px;
+		font: 400 clamp(32px, 5.4vw, 50px) / 1.1 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.standfirst {
+		margin: 0 0 10px;
+		font: var(--type-standfirst);
+		color: var(--ink-2);
+		text-wrap: pretty;
+	}
+
+	.note {
+		margin: 0;
+		font: var(--type-callout);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	.source {
+		max-width: var(--measure);
+		margin-top: 64px;
+		padding-top: 26px;
+		border-top: 1px solid var(--rule);
+	}
+
+	.source p {
+		margin: 0;
+		font: var(--type-note);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	.source a {
+		text-decoration: none;
+		border-bottom: 1px solid currentColor;
+	}
+</style>

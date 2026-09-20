@@ -1,0 +1,1379 @@
+---
+import YarnWeightFibreRow from './YarnWeightFibreRow.astro';
+import { CATEGORIES, DEFAULT_ADDED_FIBRE, SYSTEMS } from '../lib/yarn-weight';
+
+/**
+ * The yarn weight calculator: a form on the left, the answer on the right.
+ *
+ * **The arithmetic is not in here.** It lives in src/lib/yarn-weight.ts and is tested
+ * there; this file is markup, and the script at the foot reads the form, calls
+ * `calculate`, and writes the answer into the elements below.
+ *
+ * Everything the reader can see is rendered on the server — the form, every counting
+ * system's field, the four caveats — and the script only shows and hides. That is the same
+ * arrangement as the quiz and the size picker, and for the same reason: crawlers fetch
+ * scripts but do not run them. It is not an island (`client:load`) because this site has no
+ * UI framework to hydrate one with.
+ *
+ * Without JavaScript the tool cannot do its sums, so it says so in place of the answer
+ * rather than presenting a form that does nothing. The caveats stay, since they are the
+ * part worth reading either way.
+ *
+ * Nothing is stored, sent or counted.
+ *
+ * **The yarn count section is shut by default, and that is the point.** A reader holding a
+ * ball band has metres on it and needs none of this; a reader holding a cone does. Open, the
+ * section was more than twice the height of the field above it, so the fallback path looked
+ * like the main one. Shut, it is one quiet line.
+ *
+ * It is a **yarn count**, never a "mill count" — the latter is not a term of art, and a
+ * reader who searches for it finds nothing. Nm is the metric count; the count is also what
+ * `tit.` means on an Italian cone.
+ */
+// Server-rendered as Nm, the default; the script swaps the hint when the system changes.
+const first = SYSTEMS[0];
+---
+
+<div class="yw" data-yw>
+	<form class="yw__form" data-yw-form novalidate>
+		{/* ---- 1. how long is 100 g of it? ---- */}
+		<div class="step">
+			{/* The number sits above the heading rather than beside it. Inline, it pushed the
+			    heading 21px right of every other element in the column — and since the heading
+			    is the heaviest thing there, it read as a misalignment rather than as a numeral
+			    hung in a gutter. There is no room to hang it properly at 375px. */}
+			<p class="step__n">Step 1</p>
+			<h2 class="step__title">How long is 100 g of it?</h2>
+			<p class="step__note">
+				This is the one number that tells you how thick a yarn is. Most ball bands print it.
+			</p>
+		</div>
+
+		<label class="label-text" for="yw-m100">Metres per 100 g</label>
+		<div class="field">
+			<input
+				id="yw-m100"
+				class="field__input"
+				type="number"
+				min="0"
+				step="any"
+				inputmode="decimal"
+				placeholder="e.g. 380"
+				aria-describedby="yw-m100-hint"
+				data-yw-m100
+			/>
+			<span class="field__unit">m / 100 g</span>
+		</div>
+		<p class="hint" id="yw-m100-hint">
+			Often written as "100 g / 380 m". If it is on your label, this is all you need — the
+			section below is for cones, which usually have no length on them.
+		</p>
+
+		{/* The cone path, shut until asked for. */}
+		<div class="alt">
+			<button
+				type="button"
+				class="disclosure"
+				aria-expanded="false"
+				aria-controls="yw-count-block"
+				data-yw-count-toggle
+			>
+				<span class="disclosure__sign" aria-hidden="true" data-yw-count-sign>+</span>
+				<span data-yw-count-toggle-label>My label only gives a yarn count</span>
+			</button>
+
+			<div class="alt__panel" id="yw-count-block" data-yw-count-block hidden>
+				<p class="hint">
+					Cones and mill ends print a <em>count</em> instead of a length — "2 / 28", "6 / 15000",
+					"NM 2000", or "tit. Nm 2.5". It says how many metres go into a gram, so the finer the
+					yarn, the bigger the number.
+				</p>
+
+				<label class="label-text" for="yw-system">Which system is it in?</label>
+				<select id="yw-system" class="select-full" data-yw-system>
+					{SYSTEMS.map((s) => <option value={s.id}>{s.label}</option>)}
+				</select>
+				<p class="hint">
+					Nearly every cone is Nm. The rest are here for a label that names one of them outright.
+				</p>
+
+				<div role="group" aria-labelledby="yw-count-label">
+					<span class="label-text" id="yw-count-label">The count</span>
+
+					{/* Both shapes of field are always in the page and the script shows the one the
+					    chosen system can use. Removing the other, rather than greying it, is how
+					    "only one of these applies" is enforced — a greyed field invites a value. */}
+					<div class="pair" data-yw-pair>
+						<input
+							class="pair__input"
+							type="number"
+							min="0"
+							step="any"
+							inputmode="decimal"
+							aria-label="Yarn count, first number"
+							aria-describedby="yw-count-hint"
+							placeholder="2"
+							data-yw-mill-a
+						/>
+						<span class="pair__slash" aria-hidden="true">/</span>
+						<input
+							class="pair__input"
+							type="number"
+							min="0"
+							step="any"
+							inputmode="decimal"
+							aria-label="Yarn count, second number"
+							aria-describedby="yw-count-hint"
+							placeholder="28"
+							data-yw-mill-b
+						/>
+					</div>
+
+					<div class="field" data-yw-single hidden>
+						<input
+							class="field__input"
+							type="number"
+							min="0"
+							step="any"
+							inputmode="decimal"
+							aria-label="Count value"
+							aria-describedby="yw-count-hint"
+							placeholder="40"
+							data-yw-single-input
+						/>
+						<span class="field__unit" data-yw-single-unit>tex</span>
+					</div>
+				</div>
+
+				<p class="hint" id="yw-count-hint" data-yw-count-hint>{first.hint}</p>
+
+				<div class="working" data-yw-working-tile hidden>
+					<p class="working__text" data-yw-working></p>
+				</div>
+
+				<div data-yw-divisor-block>
+					<button
+						type="button"
+						class="disclosure disclosure--quiet"
+						aria-expanded="false"
+						aria-controls="yw-divisor-panel"
+						data-yw-advanced
+					>
+						<span class="disclosure__sign" aria-hidden="true" data-yw-advanced-sign>+</span>
+						<span data-yw-advanced-label>The count looks wrong</span>
+					</button>
+
+					<div class="divisor" id="yw-divisor-panel" data-yw-divisor-panel hidden>
+						{/* Plain words, and an anchor the reader can actually check against. The old copy
+						    said to override it "when the yarn is very thick or very fine" — which is the
+						    thing they came here to find out, so it asked for the answer to give the
+						    answer. */}
+						<p class="hint">
+							Some mills print the count a thousand times bigger than it is, so a cone marked
+							"NM 2500" really means Nm 2.5. Anything from 300 up is read that way automatically,
+							which is right for almost every cone.
+						</p>
+						<p class="hint">
+							Change it only if the result looks wrong. As a rough check: most yarn people crochet
+							with lands between 80 and 600 m per 100 g.
+						</p>
+						<div class="chips" role="group" aria-label="Divisor">
+							<button
+								type="button"
+								class="chip is-active"
+								aria-pressed="true"
+								data-yw-divisor="auto"
+							>
+								Automatic
+							</button>
+							<button type="button" class="chip" aria-pressed="false" data-yw-divisor="1">÷ 1</button>
+							<button type="button" class="chip" aria-pressed="false" data-yw-divisor="1000">
+								÷ 1000
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{/* ---- 2. what is it made of? ---- */}
+		<div class="step step--second">
+			<p class="step__n">Step 2</p>
+			<h2 class="step__title">What is it made of?</h2>
+			<p class="step__note">
+				Fibres differ in density, so two yarns of the same length per 100 g can be different
+				thicknesses. The same 200 m / 100 g is DK in cotton and worsted in wool.
+			</p>
+		</div>
+
+		<div class="rows" data-yw-rows>
+			<YarnWeightFibreRow fibre="Wool" pct="100" />
+		</div>
+
+		<template data-yw-row-template>
+			<YarnWeightFibreRow fibre={DEFAULT_ADDED_FIBRE} pct="" />
+		</template>
+
+		<div class="rows-foot">
+			<button type="button" class="link-button" data-yw-add>Add a fibre</button>
+			{/* Sits in the percentage column, under the figures it totals. */}
+			<span class="total" data-yw-total>Total 100%</span>
+		</div>
+
+		<div class="submit">
+			{/* The message goes here as well as beside the answer. The answer panel is a screen
+			    away on a phone and below the fold on a desktop, so a reader who pressed the
+			    button was being corrected somewhere they were not looking. This one is short;
+			    the one beside the answer keeps the explanation. */}
+			<div class="form-error" data-yw-form-error hidden>
+				<span class="alert__mark" aria-hidden="true">!</span>
+				<span class="form-error__text" data-yw-form-error-text></span>
+			</div>
+
+			{/* Hidden until the script is running: a button that does nothing is worse than none.
+			    The label does not change once pressed — the hint below it carries that. */}
+			<button type="submit" class="button" data-yw-submit hidden>Calculate weight</button>
+			<p class="hint hint--submit" data-yw-submit-hint hidden>
+				Fill in what you can first — nothing is flagged until you press this.
+			</p>
+		</div>
+	</form>
+
+	<div class="yw__side">
+		{/* The answer region. Announced politely as it changes — the design file has no
+		    aria-live here, and a category that changes silently is invisible to a screen
+		    reader. The script writes text only when it differs, so a keystroke that leaves
+		    the answer alone does not re-announce it. */}
+		<div class="answer" data-yw-answer aria-live="polite">
+			<div class="waiting" data-yw-waiting>
+				<div class="waiting__label">The answer appears here</div>
+				<p class="waiting__text">
+					Fill in the label as far as you can, then work it out. Nothing is checked until you ask.
+				</p>
+				<noscript>
+					<p class="waiting__text waiting__text--nojs">
+						This tool needs JavaScript to do its sums. Nothing is sent anywhere — it all happens in
+						your browser.
+					</p>
+				</noscript>
+			</div>
+
+			<div class="blocked" data-yw-blocked hidden>
+				<div class="alert__head">
+					<span class="alert__mark" aria-hidden="true">!</span>
+					<span class="alert__title">Not yet</span>
+				</div>
+				<p class="blocked__text" data-yw-blocked-text></p>
+			</div>
+
+			<div data-yw-result hidden>
+				{/* When the form goes invalid mid-edit this keeps showing the last good answer,
+				    dimmed, rather than blanking. Editing a blend means passing through wrong
+				    totals — you cannot change 34 to 50 without existing at some wrong number —
+				    and wiping the result on every keystroke punished the reader for typing. */}
+				<div class="result" data-yw-result-panel>
+					<div class="result__label">Craft Yarn Council category</div>
+					<div class="result__cat">
+						<span class="result__n" data-yw-cat-n></span>
+						<span class="result__name" data-yw-cat-name></span>
+					</div>
+					<div class="result__rule"></div>
+					<div class="result__label result__label--sub">The yarn you entered</div>
+					<p class="result__summary" data-yw-summary></p>
+					<p class="result__stale" data-yw-stale hidden>
+						This is the last answer that worked. Fix the form and it will catch up.
+					</p>
+				</div>
+
+				<div class="check" data-yw-check hidden>
+					<div class="alert__head">
+						<span class="alert__mark" aria-hidden="true">!</span>
+						<span class="alert__title" data-yw-check-title></span>
+					</div>
+					<p class="check__text" data-yw-check-text></p>
+				</div>
+
+				{/* The spreadsheet's last block: the question a reader with a cone of something far
+				    too fine actually has — not "what is this", but "how many do I hold to get the
+				    weight my pattern asks for".
+
+				    It asks before it answers. A line stating the two-strand figure used to sit
+				    above this, unrequested: directly under a panel headed "the yarn you entered",
+				    a second panel naming a different category for the same yarn read as a claim
+				    about the reader's yarn rather than a hypothetical — and once the picker
+				    existed it printed the same fact twice, 40px apart. */}
+				<div class="strands" data-yw-strands hidden>
+					{/* The picker's own label is this panel's heading. A "Held together" eyebrow above
+					    it left two uppercase labels stacked 9px apart saying much the same thing. */}
+					<div class="target">
+						<label class="target__label" for="yw-target">How many strands make…</label>
+						<select class="target__select" id="yw-target" data-yw-target>
+							<option value="">Pick a category</option>
+							{
+								[...CATEGORIES]
+									.sort((a, b) => a.n - b.n)
+									.map((c) => (
+										<option value={String(c.n)}>
+											{c.n} {c.name}
+										</option>
+									))
+							}
+						</select>
+						<p class="target__answer" data-yw-target-answer hidden></p>
+					</div>
+
+					<p class="strands__note">
+						Fine yarn is often worked several strands at once. Strands add up by volume, so the
+						length per 100 g divides by the number of strands. Held strands are not twisted
+						together, so the fabric will not look quite like a plied yarn of the same weight.
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<section class="caveats" aria-labelledby="yw-caveats">
+			<h2 class="caveats__title" id="yw-caveats">Before you trust it</h2>
+			<div class="caveats__list">
+				<div>
+					<h3 class="caveat__head">It cannot see the construction</h3>
+					<p class="caveat__text">
+						This works out the thickness of the yarn's core from its weight and its fibre. Anything
+						that adds bulk without adding weight is invisible to it — a brushed halo, chainette,
+						tape, ribbon, chenille, bouclé. For those, swatch and trust the swatch.
+					</p>
+				</div>
+				<div>
+					<h3 class="caveat__head">Cone yarn arrives oiled</h3>
+					<p class="caveat__text">
+						Yarn coned for industrial knitting still has spinning oil on it and fluffs up once
+						washed. It can work up a whole category heavier than this says. Wash the swatch before
+						you judge it.
+					</p>
+				</div>
+				<div>
+					<h3 class="caveat__head">The category is an estimate</h3>
+					<p class="caveat__text">
+						CYC defines its categories by gauge and hook size, not by yardage. A blocked swatch is
+						the final answer; this is the starting guess.
+					</p>
+				</div>
+				<div>
+					<h3 class="caveat__head">Where the divisor gives up</h3>
+					<p class="caveat__text">
+						The automatic divisor fails for yarn under 30 m/100 g and for thread finer than Nm 300.
+						Set it by hand in "The count looks wrong" for either.
+					</p>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+
+<style>
+	/* Several of these are flex or grid, and a display declaration beats the `hidden`
+	   attribute. The script toggles `hidden` throughout, so it has to win. `:global` because
+	   the fibre rows are a child component and carry a different scope attribute. */
+	.yw :global([hidden]) {
+		display: none !important;
+	}
+
+	/* One spacing scale — 8 / 16 / 24 / 40 — and nothing off it.
+	   The column used to run 6, 19, 8, 6, 24, 22, 8, 6, 13, 38, 6, 19, 12, 38: nine values,
+	   no two of them meaning anything different to a reader. That irregularity is most of
+	   what made the form feel jumbled. */
+	.yw {
+		--s1: 8px;
+		--s2: 16px;
+		--s3: 24px;
+		--s4: 40px;
+
+		/* The two right-hand columns of a fibre row, shared with the row component and with
+		   the total beneath it so the three cannot drift apart. Kept as tight as their
+		   contents allow: every pixel here comes off the fibre name, and at 375px the widest
+		   ("Bamboo viscose") needs 127px to render without clipping. */
+		--pct-w: 96px;
+		--rm-w: 44px;
+
+		display: grid;
+		/* Two columns where there is room, one where there is not, with no media query. */
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+		gap: clamp(28px, 4vw, 52px);
+		align-items: start;
+	}
+
+	.yw__form,
+	.yw__side {
+		min-width: 0;
+	}
+
+	.yw__form {
+		margin: 0;
+	}
+
+	.yw__side {
+		position: sticky;
+		top: 24px;
+	}
+
+	/* ---- step headings ---- */
+
+	.step {
+		margin-bottom: var(--s3);
+	}
+
+	.step--second {
+		margin-top: var(--s4);
+	}
+
+	.step__n {
+		margin: 0 0 var(--s1);
+		font: var(--type-label);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--ochre);
+	}
+
+	.step__title {
+		margin: 0 0 var(--s1);
+		font: 400 clamp(21px, 2.6vw, 26px) / 1.25 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.step__note {
+		margin: 0;
+		font: var(--type-callout);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	/* ---- labels and hints ---- */
+
+	.label-text {
+		display: block;
+		margin-bottom: var(--s1);
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--label-ink);
+	}
+
+	.hint {
+		margin: var(--s1) 0 var(--s3);
+		font: var(--type-note);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	.hint em {
+		font-style: italic;
+		color: var(--ink-2);
+	}
+
+	.hint--submit {
+		margin: var(--s2) 0 0;
+	}
+
+	/* ---- a boxed field with a unit on its right ---- */
+
+	.field {
+		display: flex;
+		align-items: stretch;
+		background: var(--field);
+		border: 1px solid var(--field-border);
+	}
+
+	.field__input {
+		flex: 1;
+		min-width: 0;
+		min-height: 52px;
+		padding: 0 16px;
+		background: transparent;
+		border: none;
+		border-radius: 0;
+		font: 400 18px/1 var(--sans);
+		color: var(--ink);
+	}
+
+	/* Fixed, and the same width as the percentage box's suffix, so the two in-field dividers
+	   sit on one vertical line down the column instead of 14px apart. */
+	.field__unit {
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		width: var(--pct-w);
+		padding-right: 12px;
+		border-left: 1px solid var(--rule);
+		font: 400 14px/1 var(--sans);
+		color: var(--muted);
+	}
+
+	/* The ring goes round the whole boxed field, not the bare input inside it. */
+	.field:has(.field__input:focus-visible) {
+		outline: 2px solid var(--terracotta);
+		outline-offset: 2px;
+	}
+
+	.field__input:focus-visible {
+		outline: none;
+	}
+
+	.select-full {
+		width: 100%;
+		min-height: 52px;
+		padding: 0 12px;
+		background: var(--field);
+		border: 1px solid var(--field-border);
+		border-radius: 0;
+		font: 400 16px/1 var(--sans);
+		color: var(--ink);
+		cursor: pointer;
+	}
+
+	/* ---- the yarn count section ---- */
+
+	.alt {
+		margin-top: var(--s3);
+	}
+
+	.disclosure {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		min-height: 44px;
+		padding: 0 0 4px;
+		background: none;
+		border: none;
+		border-bottom: 1px solid var(--border-dashed);
+		cursor: pointer;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink-2);
+		text-align: left;
+	}
+
+	.disclosure:hover {
+		color: var(--terracotta);
+		border-bottom-color: var(--terracotta);
+	}
+
+	.disclosure__sign {
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 18px;
+		height: 18px;
+		border: 1px solid currentColor;
+		font: 400 13px/1 var(--sans);
+	}
+
+	.disclosure--quiet {
+		font: var(--type-note);
+		letter-spacing: 0.04em;
+		text-transform: none;
+		color: var(--muted);
+	}
+
+	.alt__panel {
+		margin-top: var(--s3);
+		padding-left: var(--s2);
+		border-left: 2px solid var(--rule);
+	}
+
+	.pair {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.pair__input {
+		flex: 1;
+		min-width: 0;
+		min-height: 52px;
+		padding: 0 16px;
+		background: var(--field);
+		border: 1px solid var(--field-border);
+		border-radius: 0;
+		font: 400 18px/1 var(--sans);
+		color: var(--ink);
+	}
+
+	.pair__slash {
+		flex: none;
+		font: 400 20px/1 var(--serif);
+		color: var(--muted);
+	}
+
+	/* The sum, shown as it is worked. */
+	.working {
+		margin-bottom: var(--s3);
+		padding: 14px 16px;
+		background: var(--panel);
+		border: 1px solid var(--rule);
+		border-left: 3px solid var(--rule-bar);
+	}
+
+	.working__text {
+		margin: 0;
+		font: var(--type-callout);
+		color: var(--ink);
+	}
+
+	.divisor {
+		margin-top: var(--s2);
+		padding-top: var(--s2);
+		border-top: 1px solid var(--rule);
+	}
+
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s1);
+	}
+
+	.chip {
+		min-height: 44px;
+		padding: 0 18px;
+		background: var(--field);
+		border: 1px solid var(--field-border);
+		border-left: 3px solid var(--rule-bar);
+		border-radius: 0;
+		font: 600 14px/1 var(--sans);
+		letter-spacing: 0.04em;
+		color: var(--ink);
+		cursor: pointer;
+	}
+
+	.chip.is-active {
+		background: var(--panel-active);
+		border-left-color: var(--terracotta);
+	}
+
+	/* ---- the blend ---- */
+
+	.rows {
+		display: flex;
+		flex-direction: column;
+		gap: var(--s1);
+		margin-bottom: var(--s2);
+	}
+
+	.rows-foot {
+		display: flex;
+		align-items: center;
+		gap: var(--s1);
+		margin-bottom: var(--s4);
+	}
+
+	.link-button {
+		flex: 1;
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0;
+		background: none;
+		border: none;
+		cursor: pointer;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink-2);
+	}
+
+	.link-button:hover {
+		color: var(--terracotta);
+	}
+
+	.link-button[hidden] {
+		display: none;
+	}
+
+	/* Sits in the percentage column: same width and same right padding as .row__pct, so it
+	   lines up under the figures it is adding rather than floating mid-row. The trailing
+	   spacer stands in for the remove button's column. */
+	.total {
+		flex: none;
+		width: var(--pct-w);
+		padding-right: 12px;
+		text-align: right;
+		font: 600 14px/1 var(--sans);
+		letter-spacing: 0.04em;
+		color: var(--label-ink);
+	}
+
+	.rows-foot::after {
+		content: '';
+		flex: none;
+		width: var(--rm-w);
+	}
+
+	.total.is-off {
+		color: var(--terracotta);
+	}
+
+	/* ---- submit ---- */
+
+	.submit {
+		padding-top: var(--s3);
+		border-top: 1px solid var(--rule);
+	}
+
+	/* The short version of whatever the answer panel is saying, where the reader is looking
+	   when they press the button. */
+	.form-error {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+		margin-bottom: var(--s2);
+		padding: 12px 14px;
+		background: var(--alert-caution);
+		border: 1px solid var(--rule);
+		border-left: 4px solid var(--ochre-rule);
+		color: var(--ochre-text);
+	}
+
+	.form-error__text {
+		font: 600 14px/1.5 var(--sans);
+		color: var(--ink);
+	}
+
+	.button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 52px;
+		padding: 14px 30px;
+		background: var(--ink);
+		border: 1px solid var(--ink);
+		border-radius: 0;
+		color: var(--paper);
+		cursor: pointer;
+		white-space: nowrap;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		transition: background 0.18s ease;
+	}
+
+	.button:hover {
+		background: var(--ink-hover);
+	}
+
+	/* A field the message is about. Colour is not the signal — the message names the field
+	   in words; this only says which box to look at. */
+	.yw :global(.is-invalid) {
+		border-color: var(--terracotta);
+		box-shadow: inset 2px 0 0 var(--terracotta);
+	}
+
+	/* ---- the answer ---- */
+
+	.waiting {
+		padding: clamp(24px, 3.5vw, 32px);
+		border: 1px dashed var(--border-dashed);
+	}
+
+	.waiting__label {
+		margin-bottom: 12px;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--label-ink);
+	}
+
+	.waiting__text,
+	.blocked__text {
+		margin: 0;
+		font: 400 clamp(17px, 2vw, 20px) / 1.5 var(--serif);
+		color: var(--label-ink);
+		text-wrap: pretty;
+	}
+
+	.waiting__text--nojs {
+		margin-top: 14px;
+		color: var(--ink);
+	}
+
+	/* ---- anything asking to be read ----
+
+	   These were a white fill and a 3px bar, and they sat so quietly next to the result
+	   panel that a disagreement between two figures read as another note. Three things
+	   changed, and only one of them is colour: a heading that names what is wrong, a mark
+	   beside it, and a tint. Still no red banner — the type is unchanged and the tints are
+	   the site's own accents at about 12%. */
+
+	.alert__head {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		margin-bottom: 10px;
+		color: var(--ochre-text);
+	}
+
+	.alert__mark {
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 22px;
+		border: 1px solid currentColor;
+		border-radius: 50%;
+		font: 600 13px/1 var(--sans);
+	}
+
+	.alert__title {
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.check.is-warning .alert__head {
+		color: var(--terracotta-hover);
+	}
+
+	.blocked {
+		padding: clamp(24px, 3.5vw, 32px);
+		background: var(--alert-caution);
+		border: 1px solid var(--rule);
+		border-left: 4px solid var(--ochre-rule);
+	}
+
+	.blocked__text {
+		color: var(--ink);
+	}
+
+	.result {
+		padding: clamp(24px, 3.5vw, 34px);
+		background: var(--panel);
+		border: 1px solid var(--rule);
+		border-top: 2px solid var(--ochre-rule);
+	}
+
+	/* Faded rather than removed: the figures are still true of the last thing that worked. */
+	.result.is-stale {
+		opacity: 0.55;
+	}
+
+	.result__label {
+		margin-bottom: 16px;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ochre-on-panel);
+	}
+
+	.result__label--sub {
+		margin-bottom: 8px;
+		color: var(--label-ink);
+	}
+
+	.result__cat {
+		display: flex;
+		align-items: baseline;
+		gap: clamp(14px, 2.4vw, 22px);
+		margin-bottom: 18px;
+	}
+
+	/* Display type: at this size the 3:1 large-text rule applies, and --terracotta on the
+	   panel is 4.32:1. */
+	.result__n {
+		font: 400 clamp(58px, 9vw, 86px) / 0.85 var(--serif);
+		color: var(--terracotta);
+	}
+
+	.result__name {
+		font: 400 clamp(26px, 3.6vw, 38px) / 1.1 var(--serif);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.result__rule {
+		height: 1px;
+		margin-bottom: 16px;
+		background: var(--rule);
+	}
+
+	.result__summary {
+		margin: 0;
+		font: 400 15px/1.7 var(--sans);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.result__stale {
+		margin: 14px 0 0;
+		font: var(--type-note);
+		color: var(--label-ink);
+		text-wrap: pretty;
+	}
+
+	.check {
+		margin-top: 10px;
+		padding: 16px 18px;
+		background: var(--alert-caution);
+		border: 1px solid var(--rule);
+		border-left: 4px solid var(--ochre-rule);
+	}
+
+	.check.is-warning {
+		background: var(--alert-warning);
+		border-left-color: var(--terracotta);
+	}
+
+	.check__text {
+		margin: 0;
+		font: var(--type-callout);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.strands {
+		margin-top: 10px;
+		padding: 18px 20px;
+		background: var(--field);
+		border: 1px solid var(--rule);
+	}
+
+	.strands__note {
+		margin: 0;
+		font: var(--type-note);
+		color: var(--muted);
+		text-wrap: pretty;
+	}
+
+	/* ---- how many strands make a chosen category ---- */
+
+	.target {
+		margin-bottom: 14px;
+		padding-bottom: 14px;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.target__label {
+		display: block;
+		margin-bottom: 8px;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--label-ink);
+	}
+
+	.target__select {
+		width: 100%;
+		min-height: 44px;
+		padding: 0 10px;
+		background: var(--paper);
+		border: 1px solid var(--field-border);
+		border-radius: 0;
+		font: 400 16px/1 var(--sans);
+		color: var(--ink);
+		cursor: pointer;
+	}
+
+	.target__answer {
+		margin: 10px 0 0;
+		font: 400 15px/1.65 var(--sans);
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	/* ---- the four caveats: always visible, never behind a disclosure ---- */
+
+	.caveats {
+		margin-top: 22px;
+		padding-top: 22px;
+		border-top: 1px solid var(--rule);
+	}
+
+	.caveats__title {
+		margin: 0 0 16px;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ochre);
+	}
+
+	.caveats__list {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	.caveat__head {
+		margin: 0 0 5px;
+		font: 600 14px/1.4 var(--sans);
+		color: var(--ink);
+	}
+
+	.caveat__text {
+		margin: 0;
+		font: var(--type-callout);
+		color: var(--label-ink);
+		text-wrap: pretty;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.button {
+			transition: none;
+		}
+	}
+</style>
+
+<script>
+	import {
+		CATEGORIES,
+		DEFAULT_ADDED_FIBRE,
+		MAX_FIBRES,
+		MESSAGES,
+		blendTotal,
+		calculate,
+		countToMetres,
+		strandsToReach,
+		systemFor,
+		type DivisorMode,
+		type Input,
+		type Outcome,
+		type SystemId,
+	} from '../lib/yarn-weight';
+
+	/**
+	 * Reads the form, asks src/lib/yarn-weight.ts for the answer, writes it back.
+	 *
+	 * No calculation is done here. The form is the state — every render re-reads it — so
+	 * there is no second copy to drift, apart from the four things the DOM cannot hold:
+	 * whether the button has been pressed, which divisor chip is chosen, which disclosures
+	 * are open, and the last answer that worked.
+	 *
+	 * Nothing is validated until the first press of the button, so a reader can fill the
+	 * form top to bottom without being told off for fields they have not reached. After
+	 * that it follows every edit.
+	 */
+	const root = document.querySelector<HTMLElement>('[data-yw]');
+
+	if (root) {
+		const q = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
+
+		const form = q<HTMLFormElement>('[data-yw-form]');
+		const m100 = q<HTMLInputElement>('[data-yw-m100]');
+		const countToggle = q<HTMLButtonElement>('[data-yw-count-toggle]');
+		const countToggleLabel = q('[data-yw-count-toggle-label]');
+		const countSign = q('[data-yw-count-sign]');
+		const countBlock = q('[data-yw-count-block]');
+		const system = q<HTMLSelectElement>('[data-yw-system]');
+		const pair = q('[data-yw-pair]');
+		const millA = q<HTMLInputElement>('[data-yw-mill-a]');
+		const millB = q<HTMLInputElement>('[data-yw-mill-b]');
+		const single = q('[data-yw-single]');
+		const singleInput = q<HTMLInputElement>('[data-yw-single-input]');
+		const singleUnit = q('[data-yw-single-unit]');
+		const countHint = q('[data-yw-count-hint]');
+		const workingTile = q('[data-yw-working-tile]');
+		const working = q('[data-yw-working]');
+		const divisorBlock = q('[data-yw-divisor-block]');
+		const advanced = q<HTMLButtonElement>('[data-yw-advanced]');
+		const advancedLabel = q('[data-yw-advanced-label]');
+		const advancedSign = q('[data-yw-advanced-sign]');
+		const divisorPanel = q('[data-yw-divisor-panel]');
+		const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-yw-divisor]')];
+		const rowsEl = q('[data-yw-rows]');
+		const template = q<HTMLTemplateElement>('[data-yw-row-template]');
+		const addButton = q<HTMLButtonElement>('[data-yw-add]');
+		const totalEl = q('[data-yw-total]');
+		const formError = q('[data-yw-form-error]');
+		const formErrorText = q('[data-yw-form-error-text]');
+		const submit = q<HTMLButtonElement>('[data-yw-submit]');
+		const submitHint = q('[data-yw-submit-hint]');
+
+		const answer = q('[data-yw-answer]');
+		const waiting = q('[data-yw-waiting]');
+		const blocked = q('[data-yw-blocked]');
+		const blockedText = q('[data-yw-blocked-text]');
+		const result = q('[data-yw-result]');
+		const resultPanel = q('[data-yw-result-panel]');
+		const stale = q('[data-yw-stale]');
+		const catN = q('[data-yw-cat-n]');
+		const catName = q('[data-yw-cat-name]');
+		const summary = q('[data-yw-summary]');
+		const check = q('[data-yw-check]');
+		const checkTitle = q('[data-yw-check-title]');
+		const checkText = q('[data-yw-check-text]');
+		const strands = q('[data-yw-strands]');
+		const target = q<HTMLSelectElement>('[data-yw-target]');
+		const targetAnswer = q('[data-yw-target-answer]');
+
+		type Good = Extract<Outcome, { ok: true }>;
+
+		let submitted = false;
+		let divisor: DivisorMode = 'auto';
+		let countOpen = false;
+		let advancedOpen = false;
+		let lastGood: Good | null = null;
+
+		/** Text is only written when it changes, so a live region is not re-announced. */
+		const setText = (el: HTMLElement, text: string) => {
+			if (el.textContent !== text) el.textContent = text;
+		};
+
+		const rows = () => [...rowsEl.querySelectorAll<HTMLElement>('[data-yw-row]')];
+		const pctInputs = () => rows().map((r) => r.querySelector<HTMLInputElement>('[data-yw-pct]')!);
+
+		/**
+		 * A shut yarn count section is one the reader has said does not apply, so its fields
+		 * are not read. Otherwise a value left behind in there could contradict the label
+		 * from somewhere the reader cannot see it.
+		 */
+		const read = (): Input => {
+			const sys = systemFor(system.value);
+			const linear = sys.mode === 'linear';
+			return {
+				m100: m100.value,
+				system: sys.id as SystemId,
+				millA: countOpen && !linear ? millA.value : '',
+				millB: countOpen ? (linear ? singleInput.value : millB.value) : '',
+				divisor,
+				rows: rows().map((row) => ({
+					fibre: row.querySelector<HTMLSelectElement>('[data-yw-fibre]')!.value,
+					pct: row.querySelector<HTMLInputElement>('[data-yw-pct]')!.value,
+				})),
+			};
+		};
+
+		/** "Fibre 2", "Percentage of fibre 2": the same words in every row are no use to a
+		    screen reader, which has nothing but the label to tell them apart. */
+		const renumber = () => {
+			const all = rows();
+			all.forEach((row, i) => {
+				const n = i + 1;
+				row.querySelector('[data-yw-fibre]')!.setAttribute('aria-label', `Fibre ${n}`);
+				row.querySelector('[data-yw-pct]')!.setAttribute('aria-label', `Percentage of fibre ${n}`);
+				const remove = row.querySelector<HTMLElement>('[data-yw-remove]')!;
+				remove.setAttribute('aria-label', `Remove fibre ${n}`);
+				// Kept in the layout at all times. Toggling it with `hidden` resized the row
+				// beside it — on a phone the fibre select dropped 215px to 155px the moment a
+				// second fibre was added, which truncated "Bamboo viscose" to "Bamboo visco"
+				// in a row the reader had already filled in.
+				remove.classList.toggle('is-hidden', all.length === 1);
+				remove.tabIndex = all.length === 1 ? -1 : 0;
+				remove.setAttribute('aria-hidden', all.length === 1 ? 'true' : 'false');
+			});
+			addButton.hidden = all.length >= MAX_FIBRES;
+		};
+
+		/** Which boxes the current message is about. Never the only signal — the words name
+		    the field too; this just saves hunting for it. */
+		const markInvalid = (message: string | null) => {
+			const flagged = new Set<HTMLElement>();
+			if (message === MESSAGES.needsTotal) pctInputs().forEach((el) => flagged.add(el));
+			else if (message === MESSAGES.needsLength) flagged.add(m100);
+			else if (message) {
+				// A length no yarn has: the box that produced it.
+				const sys = systemFor(system.value);
+				if (m100.value.trim()) flagged.add(m100);
+				else if (countOpen) flagged.add(sys.mode === 'linear' ? singleInput : millB);
+			}
+
+			for (const el of [m100, millA, millB, singleInput, ...pctInputs()]) {
+				const bad = flagged.has(el);
+				el.classList.toggle('is-invalid', bad);
+				if (bad) el.setAttribute('aria-invalid', 'true');
+				else el.removeAttribute('aria-invalid');
+			}
+		};
+
+		/** Paint a good outcome into the result panel. */
+		const showResult = (outcome: Good, isStale: boolean) => {
+			setText(catN, String(outcome.category.n));
+			setText(catName, outcome.category.name);
+			setText(summary, outcome.summary);
+			resultPanel.classList.toggle('is-stale', isStale);
+			stale.hidden = !isStale;
+
+			check.hidden = !outcome.check;
+			if (outcome.check) {
+				const warning = outcome.check.tone === 'warning';
+				// A heading that names the problem, so the panel is not read as another note —
+				// and so the distinction survives for anyone not seeing the tint.
+				setText(checkTitle, warning ? 'These two do not agree' : 'Worth confirming');
+				setText(checkText, outcome.check.message);
+				check.classList.toggle('is-warning', warning);
+			}
+
+			strands.hidden = !outcome.canHoldStrands;
+
+			// "How many strands make a DK?" — answered against the same wool-equivalent the
+			// category above came from, so the two can never disagree.
+			const wanted = CATEGORIES.find((c) => String(c.n) === target.value);
+			targetAnswer.hidden = !wanted;
+			if (wanted) setText(targetAnswer, strandsToReach(outcome.woolEquivalent, wanted));
+		};
+
+		const render = () => {
+			const input = read();
+			const sys = systemFor(input.system);
+
+			// The yarn count section.
+			countToggle.setAttribute('aria-expanded', String(countOpen));
+			setText(countSign, countOpen ? '−' : '+');
+			setText(
+				countToggleLabel,
+				countOpen ? 'Hide the yarn count section' : 'My label only gives a yarn count'
+			);
+			countBlock.hidden = !countOpen;
+
+			// Only the fields the chosen system can use.
+			pair.hidden = sys.mode !== 'count';
+			single.hidden = sys.mode !== 'linear';
+			setText(singleUnit, sys.unit);
+			singleInput.placeholder = sys.example;
+			setText(countHint, sys.hint);
+			// A divisor means nothing for tex, dtex or denier.
+			divisorBlock.hidden = sys.mode !== 'count';
+
+			advanced.setAttribute('aria-expanded', String(advancedOpen));
+			setText(advancedSign, advancedOpen ? '−' : '+');
+			setText(advancedLabel, advancedOpen ? 'Hide' : 'The count looks wrong');
+			divisorPanel.hidden = !advancedOpen;
+			for (const chip of chips) {
+				const on = chip.dataset.ywDivisor === divisor;
+				chip.setAttribute('aria-pressed', String(on));
+				chip.classList.toggle('is-active', on);
+			}
+
+			const count = countToMetres(input);
+			workingTile.hidden = !count;
+			setText(working, count?.working ?? '');
+
+			// The total. It stays quiet until the button has been pressed — the page promises
+			// "nothing is flagged until you press this", and it used to turn red on the first
+			// keystroke, breaking that promise inside thirty seconds.
+			const total = blendTotal(input.rows);
+			const shown = Math.round(total.total * 10) / 10;
+			const loud = submitted && !total.ok;
+			setText(totalEl, loud ? total.label : `Total ${shown}%`);
+			totalEl.classList.toggle('is-off', loud);
+
+			submit.hidden = false;
+			submitHint.hidden = false;
+			setText(
+				submitHint,
+				submitted
+					? 'It follows your edits from here on.'
+					: 'Fill in what you can first — nothing is flagged until you press this.'
+			);
+
+			if (!submitted) {
+				waiting.hidden = false;
+				blocked.hidden = true;
+				result.hidden = true;
+				formError.hidden = true;
+				markInvalid(null);
+				return;
+			}
+
+			const outcome = calculate(input);
+			if (outcome.ok) lastGood = outcome;
+
+			waiting.hidden = true;
+			formError.hidden = outcome.ok;
+			markInvalid(outcome.ok ? null : outcome.message);
+			if (!outcome.ok) setText(formErrorText, outcome.message);
+
+			// A refusal with an earlier answer behind it keeps showing that answer, dimmed,
+			// rather than blanking the panel on the way through an invalid total.
+			const shownOutcome = outcome.ok ? outcome : lastGood;
+			blocked.hidden = !!shownOutcome;
+			result.hidden = !shownOutcome;
+
+			if (!shownOutcome) {
+				setText(blockedText, outcome.ok ? '' : outcome.message);
+				return;
+			}
+			showResult(shownOutcome, !outcome.ok);
+		};
+
+		// The strands picker sits beside the answer rather than in the form, so it needs its
+		// own listener; everything else it depends on is read from the form by `render`.
+		target.addEventListener('change', render);
+
+		// The form is the state, so any edit anywhere is a reason to look at it again.
+		form.addEventListener('input', render);
+		form.addEventListener('change', (event) => {
+			// A divisor chosen for one counting system says nothing about the next.
+			if (event.target === system) divisor = 'auto';
+			render();
+		});
+
+		form.addEventListener('submit', (event) => {
+			event.preventDefault();
+			const first = !submitted;
+			submitted = true;
+			render();
+
+			// In a single column the answer sits under the button, but a tall form can still
+			// leave it partly below the fold. Bring it in only if it is not already in view.
+			if (first) {
+				const box = answer.getBoundingClientRect();
+				if (box.top < 0 || box.bottom > window.innerHeight) {
+					const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+					answer.scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' });
+				}
+			}
+		});
+
+		form.addEventListener('click', (event) => {
+			const target = event.target as HTMLElement;
+
+			const chip = target.closest<HTMLElement>('[data-yw-divisor]');
+			if (chip) {
+				divisor = chip.dataset.ywDivisor as DivisorMode;
+				render();
+				return;
+			}
+
+			if (target.closest('[data-yw-count-toggle]')) {
+				countOpen = !countOpen;
+				render();
+				if (countOpen) system.focus();
+				return;
+			}
+
+			if (target.closest('[data-yw-advanced]')) {
+				advancedOpen = !advancedOpen;
+				render();
+				return;
+			}
+
+			if (target.closest('[data-yw-add]')) {
+				if (rows().length >= MAX_FIBRES) return;
+				const row = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
+				row.querySelector<HTMLSelectElement>('[data-yw-fibre]')!.value = DEFAULT_ADDED_FIBRE;
+				rowsEl.append(row);
+				renumber();
+				render();
+				row.querySelector<HTMLElement>('[data-yw-fibre]')!.focus();
+				return;
+			}
+
+			const remove = target.closest<HTMLElement>('[data-yw-remove]');
+			if (remove) {
+				const all = rows();
+				if (all.length <= 1) return;
+				const row = remove.closest<HTMLElement>('[data-yw-row]')!;
+				const at = all.indexOf(row);
+				row.remove();
+				renumber();
+				render();
+				// Focus would otherwise fall back to the top of the page.
+				const next = rows()[Math.min(at, rows().length - 1)];
+				next.querySelector<HTMLElement>('[data-yw-fibre]')!.focus();
+			}
+		});
+
+		renumber();
+		render();
+	}
+</script>

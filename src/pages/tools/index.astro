@@ -1,0 +1,83 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+
+/**
+ * Small tools that answer one question each. A plain list for now — there is one — and
+ * a list is what a second will need, so nothing here has to change shape when it arrives.
+ *
+ * Add a tool by adding a page under src/pages/tools/ and one entry here.
+ */
+const tools = [
+	{
+		title: 'What weight is this yarn?',
+		href: '/tools/yarn-weight/',
+		summary:
+			'Type in the label or the yarn count off a cone, add the fibre blend, and get the Craft Yarn Council weight category.',
+	},
+];
+---
+
+<Base
+	title="Tools — Hookd"
+	description="Small tools for yarn and crochet. Nothing to sign up for, nothing saved, and every result comes with what it cannot tell you."
+	active="tools"
+>
+	<PageHead
+		heading="Tools"
+		standfirst="Small tools that each answer one question. Nothing to sign up for and nothing saved — and each says what it cannot tell you."
+	/>
+
+	<div class="shell list">
+		<ul>
+			{
+				tools.map((tool) => (
+					<li>
+						<a class="tool hoverable" href={tool.href}>
+							<h2 class="hoverable__title">{tool.title}</h2>
+							<p>{tool.summary}</p>
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</Base>
+
+<style>
+	.list {
+		padding-top: 8px;
+		padding-bottom: 80px;
+	}
+
+	ul {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	li {
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.tool {
+		display: block;
+		padding: 28px 0;
+		color: var(--ink);
+		text-decoration: none;
+	}
+
+	h2 {
+		margin: 0 0 8px;
+		font: var(--type-article-h2);
+		color: var(--ink);
+	}
+
+	p {
+		margin: 0;
+		max-width: var(--measure);
+		font: var(--type-lede);
+		color: var(--ink-2);
+		text-wrap: pretty;
+	}
+</style>
