@@ -317,9 +317,9 @@ obvious from the code:
   "two strands of fingering make DK" was told her 190 m/100 g alpaca blend was not DK, and
   only the band — shifted by the fibre — shows why. **Nothing the result already says is said
   again**: one strand *is* the answer above, so "No exact fit" between one and two strands
-  names only the two ("2 strands already make 4 Medium…"), and the yarn's own category is
-  listed in the picker but disabled ("— this yarn") rather than answered "1 strand, held
-  together". Several strands landing in the yarn's own band only matters for very fine lace,
+  names only the two ("2 strands already make 4 Medium…"), and only heavier categories
+  can be picked: the yarn's own ("— this yarn") and every finer one are listed but greyed
+  out, rather than answered "1 strand, held together" or "None — already heavier". Several strands landing in the yarn's own band only matters for very fine lace,
   and is not worth the arithmetic. Ranges read low to high ("about 218 to 267"), and
   "No exact fit" names what to swatch ("Swatch 1 strand and 2 strands…").
 - **Every message says which figure was used and what to do.** The cross-check used to end

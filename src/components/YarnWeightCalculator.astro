@@ -1616,18 +1616,20 @@ const first = SYSTEMS[0];
 
 			strands.hidden = !!staleReason || !outcome.canHoldStrands;
 
-			// The yarn's own category is listed but not offered: the answer above has said it,
-			// and "1 strand, held together" was no answer. A choice it has just become is
-			// cleared rather than answered.
+			// Only heavier categories are offered. Holding strands together only ever makes a
+			// yarn heavier, so the yarn's own category ("1 strand, held together" was no answer)
+			// and every finer one ("None — already heavier") are listed but greyed out. A choice
+			// that has just become one of them is cleared rather than answered.
+			const own = outcome.category.n;
 			for (const option of target.options) {
 				if (!option.value) continue;
-				const own = option.value === String(outcome.category.n);
-				option.disabled = own;
+				const n = Number(option.value);
+				option.disabled = n <= own;
 				const name = option.dataset.name ?? option.textContent!.trim();
 				option.dataset.name = name;
-				setText(option, own ? `${name} — this yarn` : name);
+				setText(option, n === own ? `${name} — this yarn` : name);
 			}
-			if (target.value === String(outcome.category.n)) target.value = '';
+			if (target.value !== '' && Number(target.value) <= own) target.value = '';
 
 			// "How many strands make a DK?" — the band chosen on the same wool-equivalent the
 			// category above came from, the figures shown in the reader's own m/100 g.
