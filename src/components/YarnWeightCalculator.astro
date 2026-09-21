@@ -261,7 +261,7 @@ const first = SYSTEMS[0];
 			<h2 class="step__title">What is it made of?</h2>
 			<p class="step__note">
 				Fibres differ in density, so two yarns of the same length per 100 g can be different
-				thicknesses. The same 200 m / 100 g is DK in cotton and worsted in wool. For a single
+				thicknesses. The same 200&nbsp;m/100&nbsp;g is DK in cotton and worsted in wool. For a single
 				fibre, leave the percentage empty — it counts as 100%.
 			</p>
 		</div>
@@ -364,6 +364,11 @@ const first = SYSTEMS[0];
 					<div class="result__label result__label--sub">Recommended hook</div>
 					<p class="result__hook" data-yw-hook></p>
 					<p class="result__hook-range" data-yw-hook-range></p>
+					{/* Ball bands are sold by name and often disagree with the standard. A reader whose
+					    "DK" came out Sport distrusted the tool; this says why they can differ. */}
+					<p class="result__band-note">
+						Ball bands often name a weight either side of this. This goes by length and fibre alone.
+					</p>
 					{/* The yarn read back, or — when the answer is out of date — why, in the same
 					    place. The reason used to sit in a line above the card: it pushed the card
 					    down on every invalid keystroke, and while the reader worked in step 2 it was
@@ -1145,6 +1150,17 @@ const first = SYSTEMS[0];
 		color: var(--label-ink);
 	}
 
+	.result__band-note {
+		margin: 0 0 16px;
+		font: var(--type-note);
+		color: var(--label-ink);
+		text-wrap: pretty;
+	}
+
+	.result-block.is-stale .result__band-note {
+		opacity: 0.45;
+	}
+
 	.result__label--stale {
 		color: var(--ochre-on-panel);
 	}
@@ -1288,6 +1304,7 @@ const first = SYSTEMS[0];
 		countToMetres,
 		hookAdvice,
 		lengthProblem,
+		parseNumber,
 		strandsToReach,
 		systemFor,
 		type DivisorMode,
@@ -1397,6 +1414,13 @@ const first = SYSTEMS[0];
 
 		let divisor: DivisorMode = 'auto';
 		let countOpen = false;
+		/**
+		 * Whether focus is in the ply pair. Tracked from focusin/focusout rather than read from
+		 * `document.activeElement`: leaving the first box fires its `change` while focus is
+		 * between the two boxes, and read then, the half-typed pair counted as a whole count —
+		 * the page flashed Worsted on the way to 2 / 28.
+		 */
+		let inPair = false;
 		let advancedOpen = false;
 		let lastGood: Good | null = null;
 
@@ -1416,8 +1440,8 @@ const first = SYSTEMS[0];
 		/** "250 m/100 g" never breaks across a line: on a phone it wrapped to "250 / m / 100 g". */
 		const keepUnits = (text: string) =>
 			text
-				.replace(/(\d) m\/100 g/g, '$1 m/100 g')
-				.replace(/(\d) m per (\d+) g/g, '$1 m per $2 g');
+				.replace(/(\d) m\/100 g/g, '$1\u00a0m/100\u00a0g')
+				.replace(/(\d) m per (\d+) g/g, '$1\u00a0m\u00a0per\u00a0$2\u00a0g');
 
 		/** Text is only written when it changes, so a live region is not re-announced. */
 		const setText = (el: HTMLElement, raw: string) => {
@@ -1466,7 +1490,6 @@ const first = SYSTEMS[0];
 			// Worsted — and it flashed up as a full answer on the way to 2 / 28, Lace. So while
 			// focus is in the pair and one box is still empty, the pair waits. A single figure
 			// is still allowed in either box: it counts once the reader leaves the pair.
-			const inPair = document.activeElement === millA || document.activeElement === millB;
 			const half = !millA.value.trim() !== !millB.value.trim();
 			const waitForPair = !linear && inPair && half;
 			return {
@@ -1507,6 +1530,11 @@ const first = SYSTEMS[0];
 			const flagged = new Set<HTMLElement>();
 			const used = rows().filter((row) => fibreOf(row).value !== '' || pctOf(row).value.trim() !== '');
 			if (blendWarning === MESSAGES.needsTotal) used.forEach((row) => flagged.add(pctOf(row)));
+			if (blendWarning === MESSAGES.notAPercent) {
+				used
+					.filter((row) => pctOf(row).value.trim() !== '' && parseNumber(pctOf(row).value.replace(/%\s*$/, '')) === null)
+					.forEach((row) => flagged.add(pctOf(row)));
+			}
 			if (blendWarning === MESSAGES.needsFibre) {
 				used.filter((row) => fibreOf(row).value === '').forEach((row) => flagged.add(fibreOf(row)));
 			}
@@ -1534,11 +1562,25 @@ const first = SYSTEMS[0];
 		    follow the typing. With only the first named, a reader who fixed the length was then
 		    surprised by a blend problem the card had not mentioned. "Waiting for a length a
 		    yarn could have" read as a riddle; the length simply looks wrong. */
-		const staleReason = (lengthIssue: string | null, blendIssue: string | null) => {
+		const staleReason = (lengthIssue: string | null, blendIssue: string | null, fromMetres: boolean) => {
+			// Said of the box it came from. "The length looks wrong" to a reader who typed only a
+			// count and changed the divisor sent her looking at a box she had left empty.
+			const length = !lengthIssue
+				? null
+				: fromMetres
+					? lengthIssue === MESSAGES.notALength
+						? 'the metres box does not hold a number'
+						: 'the length looks wrong'
+					: lengthIssue === MESSAGES.notACount
+						? 'the count is not a number'
+						: divisor !== 'auto'
+							? 'the count gives a length no yarn has — try the divisor on Automatic'
+							: 'the count gives a length no yarn has';
 			const reasons = [
-				lengthIssue ? 'the length looks wrong' : null,
+				length,
 				blendIssue === MESSAGES.needsTotal ? 'the percentages do not add up to 100' : null,
 				blendIssue === MESSAGES.needsFibre ? 'a percentage has no fibre chosen' : null,
+				blendIssue === MESSAGES.notAPercent ? 'a percentage is not a number' : null,
 			].filter((r): r is string => r !== null);
 			if (reasons.length === 0) return 'Something above has changed.';
 			const sentence = reasons.join(', and ');
@@ -1675,7 +1717,7 @@ const first = SYSTEMS[0];
 			waiting.hidden = !!showing || !!(lengthWarning ?? blendWarning);
 			blocked.hidden = !!showing || !(lengthWarning ?? blendWarning);
 			result.hidden = !showing;
-			if (showing) showResult(showing, fresh ? null : staleReason(lengthIssue, blendIssue));
+			if (showing) showResult(showing, fresh ? null : staleReason(lengthIssue, blendIssue, fromMetres));
 			else if (lengthWarning ?? blendWarning) setText(blockedText, (lengthWarning ?? blendWarning)!);
 
 			// Warnings, each in its own slot under the fields it is about.
@@ -1708,7 +1750,10 @@ const first = SYSTEMS[0];
 
 			// The bar: the answer, or that it is out of date and where to see why. Never longer
 			// than one line — it used to wrap when the text grew, and grow over the form.
-			peekText = fresh ? `${fresh.category.n} ${fresh.category.name}` : showing ? 'Out of date' : '';
+			// The familiar name — "1 Fingering/Sock", not "1 Super Fine (Fingeri…": the bar is one
+			// line on a phone, and the words cut were the ones a crocheter knows.
+			const familiar = (name: string) => name.match(/\(([^)]+)\)/)?.[1] ?? name;
+			peekText = fresh ? `${fresh.category.n} ${familiar(fresh.category.name)}` : showing ? 'Out of date' : '';
 			setText(peekCat, peekText);
 			// A disagreement between the count and the label is said on the bar too: the panel
 			// that explains it is a screen away on a phone.
@@ -1761,6 +1806,7 @@ const first = SYSTEMS[0];
 		// another part, or anywhere else on the page — means she has finished with it, and a
 		// problem with it can now be said.
 		form.addEventListener('focusin', (event) => {
+			if (event.target === millA || event.target === millB) inPair = true;
 			const group = groupOf(event.target);
 			if (group) settled[group] = false;
 			keepFocusClear();
@@ -1769,6 +1815,7 @@ const first = SYSTEMS[0];
 			// Leaving the pair is when a single figure in it becomes a count; see `read`.
 			const pairBoxes: EventTarget[] = [millA, millB];
 			if (pairBoxes.includes(event.target!) && !pairBoxes.includes(event.relatedTarget!)) {
+				inPair = false;
 				window.setTimeout(now);
 			}
 			const group = groupOf(event.target);

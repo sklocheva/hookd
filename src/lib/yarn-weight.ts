@@ -23,16 +23,16 @@ export const FIBRES = [
 	['Silk', 1.25],
 	['Cotton', 1.54],
 	['Linen', 1.5],
-	['Polyamide', 1.14],
-	['Nylon', 1.14],
+	// One fibre under two names, listed once with both so a reader looking for either finds it.
+	// Two entries made readers wonder which to pick, and whether they behaved differently.
+	['Nylon (polyamide)', 1.14],
 	['Acrylic', 1.16],
 	['Polyester', 1.38],
 	['Mohair', 1.32],
 	['Cashmere', 1.3],
 	['Yak', 1.3],
 	['Camel', 1.3],
-	['Viscose', 1.52],
-	['Rayon', 1.52],
+	['Viscose (rayon)', 1.52],
 	['Modal', 1.52],
 	['Lyocell', 1.5],
 	['Bamboo viscose', 1.52],
@@ -190,7 +190,7 @@ export const SYSTEMS: readonly System[] = [
 		constant: 1000,
 		unit: 'tex',
 		example: '40',
-		hint: 'Grams per 1000 m. One figure only — for a plied tex, enter the total.',
+		hint: 'Grams per 1,000 m. One figure only — for a plied tex, enter the total.',
 	},
 	{
 		id: 'dtex',
@@ -199,7 +199,7 @@ export const SYSTEMS: readonly System[] = [
 		constant: 10000,
 		unit: 'dtex',
 		example: '400',
-		hint: 'Grams per 10 000 m. One figure only — for a plied dtex, enter the total.',
+		hint: 'Grams per 10,000 m. One figure only — for a plied dtex, enter the total.',
 	},
 	{
 		id: 'denier',
@@ -208,7 +208,7 @@ export const SYSTEMS: readonly System[] = [
 		constant: 9000,
 		unit: 'den',
 		example: '360',
-		hint: 'Grams per 9000 m. One figure only — for a plied denier, enter the total.',
+		hint: 'Grams per 9,000 m. One figure only — for a plied denier, enter the total.',
 	},
 ];
 
@@ -249,7 +249,16 @@ export interface Input {
  * comma and read 25, three categories out.
  */
 export function parseNumber(text: string): number | null {
-	const value = parseFloat(String(text).replace(',', '.'));
+	let t = String(text).trim();
+	// A comma or space before exactly three digits groups thousands — "1,200", "10 000" —
+	// as the page's own figures do. Read as a decimal, "1,200" became 1.2 and was refused as
+	// "1 m/100 g". Any other comma is a decimal one: "2,5" is 2.5.
+	if (/^\d{1,3}([, ]\d{3})+(\.\d+)?$/.test(t)) t = t.replace(/[, ]/g, '');
+	else t = t.replace(',', '.');
+	// The whole box has to be a number. parseFloat reads "220 yds" as 220 and drops the rest,
+	// and the page then took yards for metres without a word.
+	if (!/^(\d+\.?\d*|\.\d+)$/.test(t)) return null;
+	const value = Number(t);
 	return Number.isFinite(value) && value > 0 ? value : null;
 }
 
@@ -340,7 +349,7 @@ export function countToMetres(input: Input): CountResult | null {
 			divisor: 1,
 			nm,
 			metres,
-			working: `${system.constant} ÷ ${tidy(b)} ${system.unit} × 100 = ${grouped(metres)} m/100 g.`,
+			working: `${grouped(system.constant)} ÷ ${tidy(b)} ${system.unit} × 100 = ${grouped(metres)} m/100 g.`,
 		};
 	}
 
@@ -404,8 +413,10 @@ export interface BlendTotal {
  *   The page shows that 100 as the percentage box's placeholder, so it is never hidden.
  */
 export function effectiveRows(rows: readonly FibreRow[]): FibreRow[] {
-	const used = rows.filter((row) => row.fibre !== '' || parseNumber(row.pct) !== null);
-	if (used.length === 1 && used[0].fibre !== '' && parseNumber(used[0].pct) === null) {
+	const used = rows
+		.map((row) => ({ fibre: row.fibre, pct: row.pct.replace(/%\s*$/, '') }))
+		.filter((row) => row.fibre !== '' || row.pct.trim() !== '');
+	if (used.length === 1 && used[0].fibre !== '' && used[0].pct.trim() === '') {
 		return [{ fibre: used[0].fibre, pct: '100' }];
 	}
 	return used;
@@ -481,6 +492,7 @@ export const MESSAGES = {
 	needsBlend: 'Choose what the yarn is made of.',
 	needsFibre: 'Choose a fibre for each percentage.',
 	needsTotal: 'Percentages must total 100.',
+	notAPercent: 'A percentage is not a number.',
 	outOfRange: 'Result out of range.',
 } as const;
 
@@ -598,7 +610,9 @@ export function strandsToReach(woolEquivalent: number, target: Category, metres 
 		const heavier = `${strands(fewest)} ${most > 1 ? 'are' : 'already make'} ${cat(fewest)} at about ${each(fewest)}`;
 		return {
 			headline: 'No exact fit',
-			detail: `${lighter}${heavier}${most > 1 ? '' : ' m/100 g'}. ${band} Swatch whichever is nearer your pattern's gauge.`,
+			detail:
+				`${lighter}${heavier}${most > 1 ? '' : ' m/100 g'}. ${band} ` +
+				`Swatch ${strands(most)} and ${strands(fewest)}, and keep whichever is nearer your pattern's gauge.`,
 		};
 	}
 
@@ -621,16 +635,21 @@ export function strandsToReach(woolEquivalent: number, target: Category, metres 
 
 	return {
 		headline: `${fewest} to ${most} strands`,
-		detail: `Held together, about ${each(fewest)} to ${each(most)} m/100 g. ${band}`,
+		// Low to high, like every other range on the page.
+		detail: `Held together, about ${each(most)} to ${each(fewest)} m/100 g. ${band}`,
 	};
 }
 
 /** "46% alpaca, 20% merino, 34% polyamide" — the label, read back. */
 function describeBlend(rows: readonly FibreRow[]): string {
-	return effectiveRows(rows)
-		.map((row) => ({ fibre: row.fibre, pct: parseNumber(row.pct) ?? 0 }))
-		.filter((row) => row.pct > 0)
-		.map((row) => `${Math.round(row.pct * 10) / 10}% ${row.fibre.toLowerCase()}`)
+	// The same fibre twice is one fibre: "50% wool, 50% wool" is read back as "100% wool".
+	const totals = new Map<string, number>();
+	for (const row of effectiveRows(rows)) {
+		const pct = parseNumber(row.pct) ?? 0;
+		if (pct > 0) totals.set(row.fibre, (totals.get(row.fibre) ?? 0) + pct);
+	}
+	return [...totals]
+		.map(([fibre, pct]) => `${Math.round(pct * 10) / 10}% ${fibre.toLowerCase()}`)
 		.join(', ');
 }
 
@@ -675,6 +694,7 @@ export function lengthProblem(input: Input): string | null {
 export function blendProblem(rows: readonly FibreRow[]): string | null {
 	const used = effectiveRows(rows);
 	if (used.length === 0) return MESSAGES.needsBlend;
+	if (used.some((row) => row.pct.trim() !== '' && parseNumber(row.pct) === null)) return MESSAGES.notAPercent;
 	if (used.some((row) => row.fibre === '')) return MESSAGES.needsFibre;
 	if (!blendTotal(rows).ok || blendDensity(rows) === null) return MESSAGES.needsTotal;
 	return null;
@@ -723,9 +743,17 @@ export function calculate(input: Input): Outcome {
 				input.divisor !== 'auto'
 					? `No metres on the label given, and the divisor was set by hand to ÷ ${count.divisor}. ${confirm}`
 					: count.divisor !== 1
-						? `No metres on the label given, so the printed ${tidy(count.printed)} was read as ${tidy(count.printed)} ÷ ${count.divisor}. ${confirm}`
+						? `No metres on the label given, so the count was divided by ${count.divisor}, as mills often print it. ${confirm}`
 						: `No metres on the label given — this comes from the count alone. ${confirm}`,
 		};
+	}
+
+	// Mohair and angora are nearly always brushed, and the halo is bulk this cannot see — the
+	// first caveat, said here too, since the reader has just told the page which fibre it is.
+	const brushed = rows.find((row) => /^(Mohair|Angora)$/.test(row.fibre) && (parseNumber(row.pct) ?? 0) > 0);
+	if (brushed) {
+		const note = `${brushed.fibre} is usually brushed, and a halo adds bulk this cannot see — it will likely work up heavier than this. Swatch it.`;
+		check = check ? { tone: check.tone, message: `${check.message} ${note}` } : { tone: 'caution', message: note };
 	}
 
 	// Finer than any yarn — possible, and answered, but not without saying so.

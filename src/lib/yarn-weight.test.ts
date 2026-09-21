@@ -88,7 +88,7 @@ test('380 m/100 g, 46% alpaca / 20% merino / 34% polyamide → 362 → 1 Super F
 			rows: [
 				{ fibre: 'Alpaca', pct: '46' },
 				{ fibre: 'Merino', pct: '20' },
-				{ fibre: 'Polyamide', pct: '34' },
+				{ fibre: 'Nylon (polyamide)', pct: '34' },
 			],
 		})
 	);
@@ -98,7 +98,7 @@ test('380 m/100 g, 46% alpaca / 20% merino / 34% polyamide → 362 → 1 Super F
 	// reader's own figure instead — 380 ÷ 2 — because that is the sum she will check; the
 	// band chosen is the same either way.
 	assert.equal(said(strandsToReach(r.woolEquivalent, cat(4), r.metres)), '2 strands | Held together, about 190 m/100 g. For this yarn, 4 Medium (Worsted/Aran) is about 157–219 m/100 g.');
-	assert.equal(r.summary, '46% alpaca, 20% merino, 34% polyamide at 380 m/100 g.');
+	assert.equal(r.summary, '46% alpaca, 20% merino, 34% nylon (polyamide) at 380 m/100 g.');
 });
 
 test('1402 m/100 g, 100% cashmere → 1391 → 0 Lace; 3 strands ≈ 467 → 1 Super Fine', () => {
@@ -217,7 +217,7 @@ test('the working is one sum, true as read', () => {
 	);
 	assert.equal(
 		countToMetres(form({ system: 'tex', millB: '40' }))!.working,
-		'1000 ÷ 40 tex × 100 = 2,500 m/100 g.'
+		'1,000 ÷ 40 tex × 100 = 2,500 m/100 g.'
 	);
 });
 
@@ -479,7 +479,7 @@ test('count and label disagree by more than 5% → a warning, and the label wins
 test('count only → a caution that says what the divisor did', () => {
 	const assumed = answer(form({ millB: '2500' }));
 	assert.equal(assumed.check?.tone, 'caution');
-	assert.match(assumed.check!.message, /^No metres on the label given, so the printed 2500 was read as 2500 ÷ 1000\./);
+	assert.match(assumed.check!.message, /^No metres on the label given, so the count was divided by 1000, as mills often print it\./);
 
 	const plain = answer(form({ millA: '2', millB: '48' }));
 	assert.equal(plain.check?.tone, 'caution');
@@ -543,7 +543,7 @@ test('a range, because a category is a band', () => {
 	// 2400 m/100 g of lace-weight: 9 strands give 267, 11 give 218 — both DK.
 	assert.equal(
 		said(strandsToReach(2400, cat(3))),
-		'9 to 11 strands | Held together, about 267 to 218 m/100 g. For this yarn, 3 Light (DK) is about 210–269 m/100 g.'
+		'9 to 11 strands | Held together, about 218 to 267 m/100 g. For this yarn, 3 Light (DK) is about 210–269 m/100 g.'
 	);
 });
 
@@ -570,14 +570,14 @@ test('a band too narrow to land in names where the counts either side land, and 
 		said(strandsToReach(380, cat(3))),
 		'No exact fit | 2 strands already make 4 Medium (Worsted/Aran) at about 190 m/100 g. ' +
 			DK_BAND +
-			" Swatch whichever is nearer your pattern's gauge."
+			" Swatch 1 strand and 2 strands, and keep whichever is nearer your pattern's gauge."
 	);
 	// Between two and three strands, both sides are news, so both are said.
 	assert.equal(
 		said(strandsToReach(720, cat(2))),
 		'No exact fit | 2 strands are 1 Super Fine (Fingering/Sock) at about 360 m/100 g, ' +
 			'and 3 strands are 3 Light (DK) at about 240. For this yarn, 2 Fine (Sport) is about 270–349 m/100 g. ' +
-			"Swatch whichever is nearer your pattern's gauge."
+			"Swatch 2 strands and 3 strands, and keep whichever is nearer your pattern's gauge."
 	);
 });
 
@@ -621,4 +621,37 @@ test('a ply pair shows its division, with the ×1000 convention too', () => {
 test('two strand bands never share an edge', () => {
 	assert.match(strandsToReach(1000, cat(2)).detail, /270–349 m\/100 g/);
 	assert.match(strandsToReach(1000, cat(1)).detail, /350–549 m\/100 g/);
+});
+
+// ---- what a box will and will not take ------------------------------------------------
+
+test('a thousands comma is a thousands comma, and any other comma is a decimal', () => {
+	assert.equal(parseNumber('1,200'), 1200);
+	assert.equal(parseNumber('10 000'), 10000);
+	assert.equal(parseNumber('2,5'), 2.5);
+	assert.equal(parseNumber('2,50'), 2.5);
+});
+
+test('a box with anything but a number in it is not a number', () => {
+	// "220 yds" was read as 220 metres without a word.
+	assert.equal(parseNumber('220 yds'), null);
+	assert.equal(lengthProblem(form({ m100: '220 yds' })), MESSAGES.notALength);
+	assert.equal(parseNumber('abc'), null);
+});
+
+test('a percentage may carry its % sign, and a word in its place is flagged', () => {
+	assert.equal(answer(form({ m100: '250', rows: [{ fibre: 'Wool', pct: '100%' }] })).category.n, 3);
+	assert.equal(blendProblem([{ fibre: 'Wool', pct: 'most' }]), MESSAGES.notAPercent);
+});
+
+test('the same fibre twice is read back once', () => {
+	const r = answer(form({ m100: '250', rows: [{ fibre: 'Wool', pct: '50' }, { fibre: 'Wool', pct: '50' }] }));
+	assert.equal(r.summary, '100% wool at 250 m/100 g.');
+});
+
+test('mohair and angora carry a note that a brushed halo is not counted', () => {
+	const r = answer(form({ m100: '800', rows: [{ fibre: 'Mohair', pct: '70' }, { fibre: 'Silk', pct: '30' }] }));
+	assert.equal(r.check?.tone, 'caution');
+	assert.match(r.check!.message, /^Mohair is usually brushed/);
+	assert.equal(answer(form({ m100: '250' })).check, null);
 });

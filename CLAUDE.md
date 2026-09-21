@@ -279,13 +279,19 @@ obvious from the code:
   hidden from screen readers.
   **An out-of-date reason names every problem, not the first** ("The length looks wrong, and
   the percentages do not add up to 100"): naming one let the other ambush the reader after
-  she fixed it. "Waiting for a length a yarn could have" read as a riddle and went.
+  she fixed it. "Waiting for a length a yarn could have" read as a riddle and went. The
+  reason names the box it came from: a count with the divisor forced says "the count gives a
+  length no yarn has — try the divisor on Automatic", where "the length looks wrong" had
+  sent a reader to a metres box she had left empty.
 - **Step 2 starts empty, and there is no answer until a fibre is chosen.** It was pre-filled
   as 100% wool, and readers who typed a length saw an answer at once and never looked at
   step 2 — every cotton and alpaca was being worked out as wool. Two rules keep it from being
   a chore, both in `effectiveRows`: a row with neither fibre nor percentage is not there, and
   **one fibre with no percentage is all of it** — the box shows that 100 as its placeholder,
-  and step 2's note says so in words. With two fibres a blank is not assumed.
+  and step 2's note says so in words. **With two fibres a blank is not assumed** — not even
+  the one missing share of "Wool 60 + Nylon". A cold read expected the 40 filled in; the
+  author ruled it out: the reader checks and types it, and the page makes no assumptions.
+  The same fibre twice is read back once ("100% wool"), and a percentage may carry its `%`.
 - **On a phone the answer is pinned to the foot of the screen while it is out of view** —
   `.peek`, one line, driven by two IntersectionObservers. The button used to scroll the answer
   into view; without it, a reader typing at the top of a phone screen had an answer changing
@@ -314,7 +320,8 @@ obvious from the code:
   names only the two ("2 strands already make 4 Medium…"), and the yarn's own category is
   listed in the picker but disabled ("— this yarn") rather than answered "1 strand, held
   together". Several strands landing in the yarn's own band only matters for very fine lace,
-  and is not worth the arithmetic.
+  and is not worth the arithmetic. Ranges read low to high ("about 218 to 267"), and
+  "No exact fit" names what to swatch ("Swatch 1 strand and 2 strands…").
 - **Every message says which figure was used and what to do.** The cross-check used to end
   "Check the divisor", and a reader whose real problem was a leftover length from the
   previous yarn went looking for a setting she could not name. It now says the answer uses the
@@ -347,7 +354,15 @@ panel back to "Fill in how long…" with the reader's figure still in the box; n
 **A half-typed ply pair is not a count.** "2" on its own is Nm 2 — Worsted — and it
 flashed up as a confident answer on the way to 2 / 28, which is Lace. While focus is in the
 pair and one box is still empty, `read` withholds the pair; a single figure in either box
-(which the hint allows) counts once focus leaves the pair.
+(which the hint allows) counts once focus leaves the pair. **"In the pair" is tracked from
+focusin/focusout (`inPair`), not read from `document.activeElement`**: the first version did
+that, passed a scripted test, and failed a real one — leaving the first box fires its
+`change` while focus is between the two boxes, so the half-typed pair was read as whole.
+
+**A box holds a number or nothing.** `parseNumber` refuses anything else, so "220 yds" is
+refused rather than read as 220 metres (yards are for later; the box says metres). A comma or
+space before exactly three digits groups thousands — "1,200", "10 000" — and any other comma
+is a decimal one, so "2,5" is still 2.5. "1,200" read as 1.2 had been refused as "1 m/100 g".
 
 **Every figure is written the same way**: "m/100 g", never "m / 100 g"; thousands with a
 comma everywhere (`grouped`); and the page joins a number to its unit with no-break spaces
@@ -370,6 +385,10 @@ handle and narrow enough to catch a divisor off by a power of ten. It blames the
 `input.divisor !== 'auto'`, **not** on `divisor !== 1` — the case that prompted it is a
 divisor forced *to* 1.
 
+**Lace starts at the top of its range (2.25 mm) on purpose.** A cold read called it a
+mistake; the author kept it — what a reader does with lace yarn varies too much, and the
+smaller steel hooks are for thread.
+
 **The hook is a size to start with, then the usual range — in the site's own words.** The
 Craft Yarn Council's table is the reference for correctness, not for wording (the author's
 call). Each category's `hook` holds a starting size (roughly the middle of the range,
@@ -382,6 +401,18 @@ largest first, which read as a typo. US sizes are stored rather than derived thr
 `src/lib/hooks.ts`, which would give "M/N-13" and "P/Q" where CYC has M-13 and Q. CYC's
 gauge column is deliberately not shown: gauge is the input the brief rules out, and CYC
 gives Lace's gauge in double crochet and every other category's in single crochet.
+
+**The result says that ball bands disagree with it.** One quiet line under the hook:
+"Ball bands often name a weight either side of this. This goes by length and fibre alone."
+A reader whose Paintbox Cotton DK came out Sport simply distrusted the tool.
+
+**Mohair and angora carry the brushed-yarn caveat beside the answer**, as a "Worth
+confirming" note: the reader has just told the page the fibre, and kid-silk mohair was
+otherwise answered "0 Lace" with the halo's bulk unmentioned outside the caveats below.
+
+**Nylon and polyamide, viscose and rayon are one entry each, with both names** — "Nylon
+(polyamide)", "Viscose (rayon)" — so a reader looking for either finds it. Two cold reads
+running wondered whether the pairs behaved differently. The author's call.
 
 **A figure finer than any yarn is answered, with a note.** Above 4,000 m/100 g (the finest
 lace on a cone is about 2,800) the answer carries a caution that it is more like sewing
@@ -474,9 +505,9 @@ not shown at all — under empty boxes it read as a warning, above a gap that lo
 `scroll-padding-bottom` while it shows and scrolls a covered field up. A cold read found it
 covering the fibre dropdown being filled in. It is one line that never wraps: out of date it
 reads "Out of date · See why", and when the count and the label disagree its link reads
-"Check the figures" — the panel that explains it is a screen away. It has no "Answer"
-label: that took the room, and the category was cut to "4 Medium (…", losing the very words
-("Worsted/Aran") a crocheter knows. **It also goes once the foot of the form is nearly on screen**
+"Check the figures" — the panel that explains it is a screen away. It shows the familiar
+name only — "1 Fingering/Sock", "4 Worsted/Aran" — with no "Answer" label: the full name
+was cut to "1 Super Fine (Fingeri…", losing the very words a crocheter knows. **It also goes once the foot of the form is nearly on screen**
 (a third observer, on the row holding "Add a fibre", with a 72px bottom margin): there the
 answer is a short way below anyway, and the bar was sitting over "Add a fibre". Opening the
 yarn count section leaves focus on its toggle; it used to jump to the system select.
