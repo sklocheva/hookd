@@ -54,7 +54,9 @@ const first = SYSTEMS[0];
 		    script. They were one group, and a bad length in the metres box went unremarked
 		    while the reader tabbed on to the yarn count toggle. */}
 		<div data-yw-group="metres">
-		<label class="label-text" for="yw-m100">Metres per 100 g</label>
+		{/* A small tick beside each part of the form once it is usable — so a reader can see what
+		    is left to do without the answer panel changing its words. Quiet on purpose. */}
+		<label class="label-text" for="yw-m100">Metres per 100 g <span class="done" aria-hidden="true" data-yw-done="metres"></span></label>
 		<div class="field">
 			<input
 				id="yw-m100"
@@ -125,7 +127,7 @@ const first = SYSTEMS[0];
 				</p>
 
 				<div role="group" aria-labelledby="yw-count-label">
-					<span class="label-text" id="yw-count-label">The count</span>
+					<span class="label-text" id="yw-count-label">The count <span class="done" aria-hidden="true" data-yw-done="count"></span></span>
 
 					{/* Both shapes of field are always in the page and the script shows the one the
 					    chosen system can use. Removing the other, rather than greying it, is how
@@ -274,6 +276,7 @@ const first = SYSTEMS[0];
 
 			<div class="rows-foot" data-yw-rows-foot>
 				<button type="button" class="link-button" data-yw-add>Add a fibre</button>
+				<span class="done" aria-hidden="true" data-yw-done="blend"></span>
 				{/* Sits in the percentage column, under the figures it totals. Hidden until the
 				    blend has something in it — "Total 0%" on a blank form is noise. */}
 				<span class="total" data-yw-total hidden></span>
@@ -321,14 +324,6 @@ const first = SYSTEMS[0];
 				<p class="waiting__text">
 					Fill in how long 100 g of it is, and what it is made of.
 				</p>
-				{/* The two halves, each ticked off as it is filled in, so a reader who has done
-				    step 1 can see at a glance what is left without the sentence above changing.
-				    Small and quiet on purpose. Hidden from screen readers: this sits in the live
-				    region, and a tick is not worth an announcement — the form says the same. */}
-				<ul class="waiting__ticks" aria-hidden="true" data-yw-ticks hidden>
-					<li class="tick" data-yw-tick="length"><span class="tick__mark"></span>Length</li>
-					<li class="tick" data-yw-tick="blend"><span class="tick__mark"></span>What it is made of</li>
-				</ul>
 				<noscript>
 					<p class="waiting__text waiting__text--nojs">
 						This tool needs JavaScript to do its sums. Nothing is sent anywhere — it all happens in
@@ -949,44 +944,28 @@ const first = SYSTEMS[0];
 		text-wrap: pretty;
 	}
 
-	/* Deliberately quieter than the sentence above: note-sized, muted, and a tick that is
-	   an outline until its half is done. It is a progress aside, not a second message. */
-	.waiting__ticks {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--s1) var(--s3);
-		margin: var(--s2) 0 0;
-		padding: 0;
-		list-style: none;
-	}
-
-	.tick {
-		display: flex;
-		align-items: center;
-		gap: var(--s1);
-		font: var(--type-note);
-		color: var(--muted);
-	}
-
-	.tick__mark {
+	/* The tick beside a part of the form that is filled in. Held in place while not done
+	   (visibility), so it appearing moves nothing. Note-sized and ochre, not a green badge:
+	   a progress aside, not a second message. */
+	.done {
 		position: relative;
+		display: inline-block;
 		flex: none;
 		width: 14px;
 		height: 14px;
-		border: 1px solid var(--border-dashed);
+		margin-left: 6px;
+		vertical-align: -2px;
+		border: 1px solid var(--ochre-rule);
 		border-radius: 50%;
+		visibility: hidden;
 	}
 
-	.tick.is-done {
-		color: var(--label-ink);
-	}
-
-	.tick.is-done .tick__mark {
-		border-color: var(--ochre-rule);
+	.done.is-done {
+		visibility: visible;
 	}
 
 	/* The check itself: two sides of a small box, turned. */
-	.tick.is-done .tick__mark::after {
+	.done::after {
 		content: '';
 		position: absolute;
 		left: 4px;
@@ -1349,9 +1328,9 @@ const first = SYSTEMS[0];
 		const peekCat = q('[data-yw-peek-cat]');
 		const peekLink = q('[data-yw-peek-link]');
 		const rowsFoot = q('[data-yw-rows-foot]');
-		const ticks = q('[data-yw-ticks]');
-		const tickLength = q('[data-yw-tick="length"]');
-		const tickBlend = q('[data-yw-tick="blend"]');
+		const doneMetres = q('[data-yw-done="metres"]');
+		const doneCount = q('[data-yw-done="count"]');
+		const doneBlend = q('[data-yw-done="blend"]');
 
 		const answer = q('[data-yw-answer]');
 		const waiting = q('[data-yw-waiting]');
@@ -1542,6 +1521,19 @@ const first = SYSTEMS[0];
 
 			strands.hidden = !!staleReason || !outcome.canHoldStrands;
 
+			// The yarn's own category is listed but not offered: the answer above has said it,
+			// and "1 strand, held together" was no answer. A choice it has just become is
+			// cleared rather than answered.
+			for (const option of target.options) {
+				if (!option.value) continue;
+				const own = option.value === String(outcome.category.n);
+				option.disabled = own;
+				const name = option.dataset.name ?? option.textContent!.trim();
+				option.dataset.name = name;
+				setText(option, own ? `${name} — this yarn` : name);
+			}
+			if (target.value === String(outcome.category.n)) target.value = '';
+
 			// "How many strands make a DK?" — the band chosen on the same wool-equivalent the
 			// category above came from, the figures shown in the reader's own m/100 g.
 			const wanted = CATEGORIES.find((c) => String(c.n) === target.value);
@@ -1636,10 +1628,11 @@ const first = SYSTEMS[0];
 			conceal(countHint, !!(lengthWarning && !fromMetres));
 			if (lengthWarning) setText(fromMetres ? m100ErrorText : countErrorText, lengthWarning);
 
-			// Ticked off as each half is usable. The sentence above them never changes.
-			ticks.hidden = false;
-			tickLength.classList.toggle('is-done', lengthNow === null);
-			tickBlend.classList.toggle('is-done', blendNow === null);
+			// A tick beside each part once it is usable. The metres box's when it gives the
+			// length; the count's when the count alone would (it may be a cross-check).
+			doneMetres.classList.toggle('is-done', fromMetres && lengthNow === null);
+			doneCount.classList.toggle('is-done', !!count && lengthProblem({ ...input, m100: '' }) === null);
+			doneBlend.classList.toggle('is-done', blendNow === null);
 
 			totalEl.classList.toggle('is-off', blendWarning === MESSAGES.needsTotal);
 			blendError.hidden = !blendWarning;

@@ -557,19 +557,26 @@ export function strandsToReach(woolEquivalent: number, target: Category, metres 
 	// length. The line once gave only their m/100 g — "2 strands give 400 m/100 g, 3 strands
 	// give 267" — which told the reader nothing about what weight those were; then only the
 	// categories, which left her unable to check it against the band. Both, and the band.
+	//
+	// One strand is the answer already on screen, so when the gap is between one and two it is
+	// not said again: "1 strand is 1 Super Fine at about 380" only restated the result.
 	if (fewest > most) {
 		const cat = (n: number) => {
 			const c = categoryFor(Math.round(woolEquivalent / n))!;
 			return `${c.n} ${c.name}`;
 		};
-		const verb = (n: number) => (n === 1 ? 'is' : 'are');
+		const lighter = most > 1 ? `${strands(most)} are ${cat(most)} at about ${each(most)} m/100 g, and ` : '';
+		const heavier = `${strands(fewest)} ${most > 1 ? 'are' : 'already make'} ${cat(fewest)} at about ${each(fewest)}`;
 		return {
 			headline: 'No exact fit',
-			detail:
-				`${strands(most)} ${verb(most)} ${cat(most)} at about ${each(most)} m/100 g, ` +
-				`${strands(fewest)} ${verb(fewest)} ${cat(fewest)} at about ${each(fewest)}. ${band} ` +
-				`Swatch the one nearer your pattern's gauge.`,
+			detail: `${lighter}${heavier}${most > 1 ? '' : ' m/100 g'}. ${band} Swatch whichever is nearer your pattern's gauge.`,
 		};
+	}
+
+	// One strand already lands in the band: the target is the yarn's own category. The page
+	// does not offer that choice, since the answer above has said it; this is for completeness.
+	if (fewest === 1) {
+		return { headline: 'This yarn already is', detail: `One strand is ${label}.` };
 	}
 
 	if (!Number.isFinite(most)) {

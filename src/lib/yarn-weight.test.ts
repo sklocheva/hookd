@@ -547,8 +547,9 @@ test('a range, because a category is a band', () => {
 	);
 });
 
-test('one strand where only one lands in the band', () => {
-	assert.equal(said(strandsToReach(250, cat(3))), '1 strand | Held together, about 250 m/100 g. For this yarn, 3 Light (DK) is about 210–270 m/100 g.');
+test("the yarn's own category is not answered as \"1 strand, held together\"", () => {
+	// The answer above already says it; the page does not offer this choice at all.
+	assert.equal(said(strandsToReach(250, cat(3))), 'This yarn already is | One strand is 3 Light (DK).');
 });
 
 test('Super Bulky has no ceiling, so it is "or more"', () => {
@@ -563,13 +564,20 @@ test('one strand already heavier than the target', () => {
 test('a band too narrow to land in names where the counts either side land, and what to do', () => {
 	// 380: one strand is Super Fine, two are Medium. Nothing is DK. Said in categories *and*
 	// m/100 g, with the band beside them: a figure alone did not say what weight it was, and a
-	// category alone could not be checked against anything.
+	// category alone could not be checked against anything. One strand is the answer already
+	// on screen, so it is not restated.
 	assert.equal(
 		said(strandsToReach(380, cat(3))),
-		'No exact fit | 1 strand is 1 Super Fine (Fingering/Sock) at about 380 m/100 g, ' +
-			'2 strands are 4 Medium (Worsted/Aran) at about 190. ' +
+		'No exact fit | 2 strands already make 4 Medium (Worsted/Aran) at about 190 m/100 g. ' +
 			DK_BAND +
-			" Swatch the one nearer your pattern's gauge."
+			" Swatch whichever is nearer your pattern's gauge."
+	);
+	// Between two and three strands, both sides are news, so both are said.
+	assert.equal(
+		said(strandsToReach(720, cat(2))),
+		'No exact fit | 2 strands are 1 Super Fine (Fingering/Sock) at about 360 m/100 g, ' +
+			'and 3 strands are 3 Light (DK) at about 240. For this yarn, 2 Fine (Sport) is about 270–350 m/100 g. ' +
+			"Swatch whichever is nearer your pattern's gauge."
 	);
 });
 

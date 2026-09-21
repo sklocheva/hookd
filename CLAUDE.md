@@ -272,9 +272,11 @@ obvious from the code:
   answer, and an out-of-date reason names the problem without a running figure ("Waiting for
   the percentages to add up to 100", not "they come to 66% now"). A panel that reworded
   itself at every step pulled the author's eye away from the form, which is where it belongs.
-  Progress shows as two small ticks under the sentence — Length, What it is made of — that
-  fill in as each half becomes usable, kept deliberately quiet (the author's word was "not too
-  in your face") and hidden from screen readers, since they sit in the live region.
+  Progress shows as a small ochre tick **beside the part of the form that is done** — the
+  "Metres per 100 g" label, "The count" label, and the blend's total — not in the answer
+  panel, where the author found it in the wrong place. Kept deliberately quiet (her words:
+  "not too in your face"), held in place by `visibility` so it appearing moves nothing, and
+  hidden from screen readers.
   **An out-of-date reason names every problem, not the first** ("The length looks wrong, and
   the percentages do not add up to 100"): naming one let the other ambush the reader after
   she fixed it. "Waiting for a length a yarn could have" read as a riddle and went.
@@ -307,7 +309,12 @@ obvious from the code:
   (DK) is about 220–283 m/100 g"). Figures alone ("2 strands give 400 m/100 g, 3 give 267")
   said nothing about weight; categories alone could not be checked. A crocheter who knows
   "two strands of fingering make DK" was told her 190 m/100 g alpaca blend was not DK, and
-  only the band — shifted by the fibre — shows why.
+  only the band — shifted by the fibre — shows why. **Nothing the result already says is said
+  again**: one strand *is* the answer above, so "No exact fit" between one and two strands
+  names only the two ("2 strands already make 4 Medium…"), and the yarn's own category is
+  listed in the picker but disabled ("— this yarn") rather than answered "1 strand, held
+  together". Several strands landing in the yarn's own band only matters for very fine lace,
+  and is not worth the arithmetic.
 - **Every message says which figure was used and what to do.** The cross-check used to end
   "Check the divisor", and a reader whose real problem was a leftover length from the
   previous yarn went looking for a setting she could not name. It now says the answer uses the
