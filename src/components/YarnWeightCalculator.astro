@@ -278,6 +278,11 @@ const first = SYSTEMS[0];
 						<span class="result__name" data-yw-cat-name></span>
 					</div>
 					<div class="result__rule"></div>
+					{/* CYC's own figure for this category, quoted rather than derived — see
+					    Category.hook. Stated plainly, as a spec row: it is what the standard
+					    recommends, and the caveats below already say the category is a start. */}
+					<div class="result__label result__label--sub">Recommended hook</div>
+					<p class="result__hook" data-yw-hook></p>
 					<div class="result__label result__label--sub">The yarn you entered</div>
 					<p class="result__summary" data-yw-summary></p>
 					<p class="result__stale" data-yw-stale hidden>
@@ -897,11 +902,16 @@ const first = SYSTEMS[0];
 		background: var(--rule);
 	}
 
+	.result__hook,
 	.result__summary {
 		margin: 0;
 		font: 400 15px/1.7 var(--sans);
 		color: var(--ink);
 		text-wrap: pretty;
+	}
+
+	.result__hook {
+		margin-bottom: 16px;
 	}
 
 	.result__stale {
@@ -1097,6 +1107,7 @@ const first = SYSTEMS[0];
 		const stale = q('[data-yw-stale]');
 		const catN = q('[data-yw-cat-n]');
 		const catName = q('[data-yw-cat-name]');
+		const hook = q('[data-yw-hook]');
 		const summary = q('[data-yw-summary]');
 		const check = q('[data-yw-check]');
 		const checkTitle = q('[data-yw-check-title]');
@@ -1188,6 +1199,7 @@ const first = SYSTEMS[0];
 		const showResult = (outcome: Good, isStale: boolean) => {
 			setText(catN, String(outcome.category.n));
 			setText(catName, outcome.category.name);
+			setText(hook, outcome.category.hook);
 			setText(summary, outcome.summary);
 			resultPanel.classList.toggle('is-stale', isStale);
 			stale.hidden = !isStale;

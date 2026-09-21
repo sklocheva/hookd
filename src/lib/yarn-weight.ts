@@ -61,6 +61,20 @@ export interface Category {
 	name: string;
 	/** Lower bound in wool-equivalent m/100 g. A category owns [min, the next one's min). */
 	min: number;
+	/**
+	 * The Craft Yarn Council's recommended hook for this category, as one line.
+	 *
+	 * **Quoted from CYC's table, not derived from `src/lib/hooks.ts`.** Deriving the US range
+	 * from the millimetre range very nearly works and is wrong in two places: it yields
+	 * "M/N-13" where CYC prints "M-13", and "P/Q" where CYC prints "Q". Close enough to look
+	 * right, wrong enough to misquote the standard this page cites by name.
+	 *
+	 * Lace is not a plain range — CYC gives a steel-hook size and a regular-hook size — which
+	 * is the other reason this is a string per category rather than a pair of numbers.
+	 *
+	 * Source: https://www.craftyarncouncil.com/standards/yarn-weight-system
+	 */
+	hook: string;
 }
 
 /**
@@ -76,13 +90,13 @@ export const categoryMax = (category: Category): number =>
 
 /** Heaviest yarn last, so `find` on a descending list returns the first band it clears. */
 export const CATEGORIES: readonly Category[] = [
-	{ n: 0, name: 'Lace', min: 550 },
-	{ n: 1, name: 'Super Fine (Fingering/Sock)', min: 350 },
-	{ n: 2, name: 'Fine (Sport)', min: 270 },
-	{ n: 3, name: 'Light (DK)', min: 210 },
-	{ n: 4, name: 'Medium (Worsted/Aran)', min: 150 },
-	{ n: 5, name: 'Bulky (Chunky)', min: 90 },
-	{ n: 6, name: 'Super Bulky', min: 0 },
+	{ n: 0, name: 'Lace', min: 550, hook: 'Steel 1.6–1.4 mm, or a regular 2.25 mm · US steel 6, 7, 8, or B-1' },
+	{ n: 1, name: 'Super Fine (Fingering/Sock)', min: 350, hook: '2.25–3.5 mm · US B-1 to E-4' },
+	{ n: 2, name: 'Fine (Sport)', min: 270, hook: '3.5–4.5 mm · US E-4 to 7' },
+	{ n: 3, name: 'Light (DK)', min: 210, hook: '4.5–5.5 mm · US 7 to I-9' },
+	{ n: 4, name: 'Medium (Worsted/Aran)', min: 150, hook: '5.5–6.5 mm · US I-9 to K-10½' },
+	{ n: 5, name: 'Bulky (Chunky)', min: 90, hook: '6.5–9 mm · US K-10½ to M-13' },
+	{ n: 6, name: 'Super Bulky', min: 0, hook: '9–15 mm · US M-13 to Q' },
 ];
 
 /** The category a wool-equivalent m/100 g falls in. Expects an already-rounded integer. */

@@ -114,6 +114,78 @@ test('Denier 360, wool → Nm 25 → 2500 m/100 g', () => {
 	assert.equal(c.metres, 2500);
 });
 
+// ---- checked against published mill data ----------------------------------------------
+
+/**
+ * The ten yarns on the spreadsheet's "Reference & Notes" tab, section 5.
+ *
+ * All of it is public product data — ColourMart's and JaggerSpun's own listings — which is
+ * why it can live in a public repo. The author's own stash comparison is not here for that
+ * reason; it was run separately and is recorded in the spreadsheet.
+ *
+ * Two of the ten disagree with what the seller calls the yarn, and **both are expected**:
+ * they are lofty cashmeres, and the calculator reads them one category light, which is the
+ * direction section 6 of that tab predicts. They are pinned here at the calculator's answer,
+ * not the seller's, so that a change in either direction shows up as a failed test rather
+ * than as a quietly different answer.
+ */
+const MILL = [
+	// yarn,                    count,          fibre,      stated m/100 g, category
+	['ColourMart cashmere 2/28', ['2', '28'], 'Cashmere', 1402, 0],
+	['ColourMart cashmere 3/28', ['3', '28'], 'Cashmere', 945, 0],
+	// Seller calls this UK 4 ply; the calculator says lace.
+	['ColourMart cashmere 2/14', ['2', '14'], 'Cashmere', 701, 0],
+	['ColourMart cashmere 3/14', ['3', '14'], 'Cashmere', 469, 1],
+	// Seller calls this DK; the calculator says sport.
+	['ColourMart cashmere 4/14', ['4', '14'], 'Cashmere', 347, 2],
+	['ColourMart cashmere 8/14', ['8', '14'], 'Cashmere', 174, 4],
+	['ColourMart cashmere 12/14', ['12', '14'], 'Cashmere', 116, 5],
+] as const;
+
+for (const [name, [a, b], fibre, stated, expected] of MILL) {
+	test(`${name}: the count and the stated yardage agree, and give ${expected}`, () => {
+		const rows = [{ fibre, pct: '100' }];
+
+		// The count alone reproduces the seller's stated yardage within 5% — which is what
+		// makes the count trustworthy when a cone carries no length at all.
+		const c = countToMetres(form({ millA: a, millB: b }))!;
+		const drift = Math.abs(c.metres - stated) / stated;
+		assert.ok(drift <= 0.05, `${name}: count gives ${Math.round(c.metres)}, label says ${stated}`);
+
+		// And both routes land on the same category.
+		assert.equal(answer(form({ m100: String(stated), rows })).category.n, expected, 'from yardage');
+		assert.equal(answer(form({ millA: a, millB: b, rows })).category.n, expected, 'from the count');
+	});
+}
+
+/** JaggerSpun Maine Line, in worsted count — the one test of that system on real data. */
+const JAGGER = [
+	['JaggerSpun Maine Line 2/8', ['2', '8'], 451, 1],
+	['JaggerSpun Maine Line 3/8', ['3', '8'], 300, 2],
+	['JaggerSpun Maine Line 2/20', ['2', '20'], 1128, 0],
+] as const;
+
+for (const [name, [a, b], stated, expected] of JAGGER) {
+	test(`${name}: worsted count reproduces ${stated} m/100 g and gives ${expected}`, () => {
+		const input = form({ system: 'worsted', millA: a, millB: b });
+		const c = countToMetres(input)!;
+		const drift = Math.abs(c.metres - stated) / stated;
+		assert.ok(drift <= 0.05, `${name}: count gives ${Math.round(c.metres)}, listing says ${stated}`);
+		assert.equal(answer(input).category.n, expected);
+	});
+}
+
+test('a cashmere yarn reads lighter than its yardage, because cashmere is less dense than wool', () => {
+	// The correction is small but it is the whole reason fibre is asked for: the same 347
+	// m/100 g would be 2 Fine in cashmere and 2 Fine in wool here, but the wool-equivalent
+	// differs, and at a band edge that is what decides it.
+	const cashmere = answer(form({ m100: '347', rows: [{ fibre: 'Cashmere', pct: '100' }] }));
+	const wool = answer(form({ m100: '347' }));
+	assert.equal(cashmere.woolEquivalent, 344);
+	assert.equal(wool.woolEquivalent, 347);
+	assert.ok(cashmere.woolEquivalent < wool.woolEquivalent);
+});
+
 // ---- the working under the inputs -----------------------------------------------------
 
 test('the working reads the way the brief writes it', () => {
@@ -296,6 +368,24 @@ test('the guard is wide enough to pass every real yarn in the test set', () => {
 });
 
 // ---- categories ----------------------------------------------------------------------
+
+test('every category quotes a hook, and the answer carries its own', () => {
+	// Quoted from CYC, so the values are pinned rather than pattern-matched: deriving them
+	// from src/lib/hooks.ts gives "M/N-13" and "P/Q" where the standard prints "M-13" and
+	// "Q", which would misquote a standard this page cites by name.
+	assert.equal(cat(1).hook, '2.25–3.5 mm · US B-1 to E-4');
+	assert.equal(cat(3).hook, '4.5–5.5 mm · US 7 to I-9');
+	assert.equal(cat(4).hook, '5.5–6.5 mm · US I-9 to K-10½');
+	assert.equal(cat(6).hook, '9–15 mm · US M-13 to Q');
+	// Lace is not a plain range — steel hooks and a regular hook.
+	assert.match(cat(0).hook, /^Steel /);
+	for (const c of CATEGORIES) assert.ok(c.hook.length > 0, `category ${c.n} has no hook`);
+
+	// The hook shown is always the one belonging to the category shown.
+	const r = answer(form({ m100: '250' }));
+	assert.equal(r.category.n, 3);
+	assert.equal(r.category.hook, '4.5–5.5 mm · US 7 to I-9');
+});
 
 test('a category owns [min, the next one up)', () => {
 	assert.equal(categoryFor(549)?.n, 1);

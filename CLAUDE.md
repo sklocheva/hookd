@@ -273,6 +273,26 @@ handle and narrow enough to catch a divisor off by a power of ten. It blames the
 `input.divisor !== 'auto'`, **not** on `divisor !== 1` — the case that prompted it is a
 divisor forced *to* 1.
 
+**The result states CYC's recommended hook, quoted rather than derived.** Each entry in
+`CATEGORIES` carries its hook as one string copied from the CYC yarn weight table. Deriving
+the US range from the mm range through `src/lib/hooks.ts` very nearly works and is wrong in
+two places: "M/N-13" where CYC prints "M-13", and "P/Q" where it prints "Q". Lace isn't a plain
+range either (steel hooks plus a regular 2.25 mm), which is why it is a string. The author
+asked for it plainly, as a spec row with no swatch wording. The caveats already say the
+category is a starting point, so the hook is one too. CYC's gauge column is deliberately not
+shown: gauge is the input the brief rules out, and CYC gives Lace's gauge in double crochet
+and every other category's in single crochet.
+
+**The published mill data is a test; the author's stash is not.** The ten ColourMart and
+JaggerSpun yarns from the spreadsheet's Reference tab are pinned in `yarn-weight.test.ts`.
+They are public product data, and the two lofty cashmeres are pinned at the calculator's
+answer rather than the seller's. The Yarn Stash Tracker comparison was run separately on
+21 Sep 2026 and kept out of this public repo: 25 yarns, 14 agree. The three largest misses
+were all brushed yarns, which the first caveat already covers. Two of the others were
+contradictions in the tracker itself: Snorre and Karisma have identical inputs but different
+recorded categories, and Safran and Catona are recorded in the wrong order. A beaded yarn is
+refused, and the author decided to keep it that way.
+
 **A stated m/100 g picks the divisor, but only when it reconciles the count.** With one, the
 divisor is whichever power of ten brings the two together — which is right in both places the
 flat "printed ≥ 300 → ÷ 1000" rule fails, namely yarn under 30 m/100 g and thread finer than
