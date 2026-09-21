@@ -35,10 +35,8 @@ const { fibre = '', pct = '' } = Astro.props;
 	<div class="row__pct">
 		<input
 			class="row__pct-input"
-			type="number"
-			min="0"
-			max="100"
-			step="any"
+			type="text"
+			autocomplete="off"
 			inputmode="decimal"
 			aria-label="Percentage of fibre 1"
 			value={pct}

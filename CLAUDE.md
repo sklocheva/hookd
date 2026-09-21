@@ -268,7 +268,7 @@ obvious from the code:
   page's only source a wrong length hid a wrong blend: a reader fixed the length and was then
   surprised by a percentage problem the page had stopped showing.
 - **The words in the answer panel do not follow the typing.** The waiting panel is one
-  sentence — "Fill in how long 100 g of it is, and what it is made of." — until there is an
+  sentence — "Fill in how long a ball of it is, and what it is made of." — until there is an
   answer, and an out-of-date reason names the problem without a running figure ("Waiting for
   the percentages to add up to 100", not "they come to 66% now"). A panel that reworded
   itself at every step pulled the author's eye away from the form, which is where it belongs.
@@ -327,6 +327,33 @@ obvious from the code:
   was more than twice the height of the field above it, so the fallback path looked like the
   main one. Shutting it means "this does not apply to me", so a value left inside cannot
   contradict the label from somewhere the reader cannot see it.
+
+**Step 1 asks for the length a ball is sold at, and the ball weight beside it.** The box was
+"Metres per 100 g", and a cold read pointed out that most balls say "50 g / 125 m": nothing
+said to double it, and 125 typed as it stands made a DK wool Bulky. The unit is now a
+dropdown — per 100 g, per 50 g, per 25 g — which the author chose over a grams box because
+balls come in those three and a choice needs no arithmetic. `statedPer100` in the library
+does the scaling, and the summary says it was done ("250 m/100 g (125 m per 50 g)").
+
+**Every number box is a text box with `inputmode="decimal"`, never `type="number"`.** Italian
+cones print "Nm 2,5". A number box silently threw the comma away and kept 25, and the page
+said Lace, with no warning, for a DK. `parseNumber` has always read a decimal comma; the
+boxes were throwing it away before it got there. The number pad still comes up on a phone.
+
+**Something typed that is no length says so.** 0 or −200 used to read as blank and send the
+panel back to "Fill in how long…" with the reader's figure still in the box; now it is
+`notALength` / `notACount`, flagged like any other length problem.
+
+**A half-typed ply pair is not a count.** "2" on its own is Nm 2 — Worsted — and it
+flashed up as a confident answer on the way to 2 / 28, which is Lace. While focus is in the
+pair and one box is still empty, `read` withholds the pair; a single figure in either box
+(which the hint allows) counts once focus leaves the pair.
+
+**Every figure is written the same way**: "m/100 g", never "m / 100 g"; thousands with a
+comma everywhere (`grouped`); and the page joins a number to its unit with no-break spaces
+(`keepUnits` in the script), because on a phone "250 m/100 g" wrapped as "250 / m / 100 g".
+Strand bands never share an edge — a band ends one below the next one's floor, "270–349",
+because "270–350" and "350–550" left 350 in both.
 
 **It is a "yarn count", never a "mill count".** The latter was a coinage and is not a term of
 art, so a reader who searched for it found nothing. *Yarn count* (or just *count*) is what the
@@ -389,10 +416,10 @@ the type is unchanged and the tints are the existing hues. `--ochre-text` exists
 `--ochre` is 4.15:1 on the warning tint and 4.45:1 on the caution one, so both missed AA;
 this one value clears it on the tints, the paper and the panel alike.
 
-The "Total N%" warning is `--terracotta` on the paper, which measures 4.61:1. The brief asks
-for a darker `--terracotta-text` because it measured 4.32:1 *on the panel fill* — but that
-readout does not sit on the panel, so no new token was added. Move it onto a panel and it
-needs one. `--field` and `--field-border` are new: the input fill and edge the brief lists as
+The "Total N%" warning is `--ochre-text`, the same colour as the warning box beneath it:
+it was terracotta over an ochre box, one problem in two colours. A box the reader needs to
+fix is outlined all the way round — a bar on its left edge alone looked like the text
+cursor — on the wrapper where the border lives (the metres field, the percentage box). `--field` and `--field-border` are new: the input fill and edge the brief lists as
 literals.
 
 **The form has one left edge, one spacing scale, and columns that do not resize.** All three
@@ -438,12 +465,18 @@ the only signal: the words name the field.
 **The working line is one sum, true as read** — "Printed 2500 ÷ 1000 × 100 = 250 m/100 g".
 It had an Nm step ("→ Nm 2.5 →") that said the same thing twice and made the line change
 length; the × 100 is the step that turns metres per gram into metres per 100 g, so it is
-written rather than implied.
+written rather than implied. A ply pair shows its division ("Nm 28 ÷ 2 × 100"): "Nm 14"
+was a figure the reader could not find on her label. Before there is a count the tile says
+"The sum appears here once there is a count." in the quieter label ink, and "The count looks wrong" is
+not shown at all — under empty boxes it read as a warning, above a gap that looked broken.
 
 **On a phone the pinned answer bar keeps the focused field clear of itself** — it sets
 `scroll-padding-bottom` while it shows and scrolls a covered field up. A cold read found it
 covering the fibre dropdown being filled in. It is one line that never wraps: out of date it
-reads "Out of date · See why". **It also goes once the foot of the form is nearly on screen**
+reads "Out of date · See why", and when the count and the label disagree its link reads
+"Check the figures" — the panel that explains it is a screen away. It has no "Answer"
+label: that took the room, and the category was cut to "4 Medium (…", losing the very words
+("Worsted/Aran") a crocheter knows. **It also goes once the foot of the form is nearly on screen**
 (a third observer, on the row holding "Add a fibre", with a 72px bottom margin): there the
 answer is a short way below anyway, and the bar was sitting over "Add a fibre". Opening the
 yarn count section leaves focus on its toggle; it used to jump to the system select.

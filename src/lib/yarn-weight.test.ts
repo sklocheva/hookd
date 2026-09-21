@@ -31,7 +31,7 @@ import {
 /** A strands answer as one line, headline then detail, so a test can read it at a glance. */
 const said = (a: { headline: string; detail: string }) => `${a.headline} | ${a.detail}`;
 
-const DK_BAND = 'For this yarn, 3 Light (DK) is about 210–270 m/100 g.';
+const DK_BAND = 'For this yarn, 3 Light (DK) is about 210–269 m/100 g.';
 
 /** The category with this CYC number, for the tests that name one. */
 const cat = (n: number) => CATEGORIES.find((c) => c.n === n)!;
@@ -64,7 +64,7 @@ test('6 / 15000, 100% wool → 250 m/100 g, 3 Light (DK); 2 strands ≈ 125 → 
 	assert.equal(r.category.name, 'Light (DK)');
 	// The brief's strand figure, now reached through the picker rather than a line the page
 	// printed unasked: two strands of this land at 125 m/100 g, which is 5 Bulky.
-	assert.equal(said(strandsToReach(r.woolEquivalent, cat(5), r.metres)), '2 strands | Held together, about 125 m/100 g. For this yarn, 5 Bulky (Chunky) is about 90–150 m/100 g.');
+	assert.equal(said(strandsToReach(r.woolEquivalent, cat(5), r.metres)), '2 strands | Held together, about 125 m/100 g. For this yarn, 5 Bulky (Chunky) is about 90–149 m/100 g.');
 });
 
 test('2 / 48 count only, wool → 2400 → 0 Lace', () => {
@@ -97,15 +97,15 @@ test('380 m/100 g, 46% alpaca / 20% merino / 34% polyamide → 362 → 1 Super F
 	// The brief gives 181 here, which is the wool-equivalent halved. The page shows the
 	// reader's own figure instead — 380 ÷ 2 — because that is the sum she will check; the
 	// band chosen is the same either way.
-	assert.equal(said(strandsToReach(r.woolEquivalent, cat(4), r.metres)), '2 strands | Held together, about 190 m/100 g. For this yarn, 4 Medium (Worsted/Aran) is about 157–220 m/100 g.');
-	assert.equal(r.summary, '46% alpaca, 20% merino, 34% polyamide at 380 m / 100 g.');
+	assert.equal(said(strandsToReach(r.woolEquivalent, cat(4), r.metres)), '2 strands | Held together, about 190 m/100 g. For this yarn, 4 Medium (Worsted/Aran) is about 157–219 m/100 g.');
+	assert.equal(r.summary, '46% alpaca, 20% merino, 34% polyamide at 380 m/100 g.');
 });
 
 test('1402 m/100 g, 100% cashmere → 1391 → 0 Lace; 3 strands ≈ 467 → 1 Super Fine', () => {
 	const r = answer(form({ m100: '1402', rows: [{ fibre: 'Cashmere', pct: '100' }] }));
 	assert.equal(r.woolEquivalent, 1391);
 	assert.equal(r.category.n, 0);
-	assert.equal(said(strandsToReach(r.woolEquivalent, cat(1), r.metres)), '3 strands | Held together, about 467 m/100 g. For this yarn, 1 Super Fine (Fingering/Sock) is about 353–554 m/100 g.');
+	assert.equal(said(strandsToReach(r.woolEquivalent, cat(1), r.metres)), '3 strands | Held together, about 467 m/100 g. For this yarn, 1 Super Fine (Fingering/Sock) is about 353–553 m/100 g.');
 });
 
 test('NeC 24, wool → Nm 40.642 → 4064 m/100 g', () => {
@@ -204,7 +204,7 @@ test('the working is one sum, true as read', () => {
 	// The brief wrote "Nm 28 → Nm 28 → …". With nothing done to the figure that says the same
 	// thing twice, and with ÷ 1 on a cone it read "Nm 2000 → Nm 2000 → 200000", which a reader
 	// called nonsense. It is now one sum with no Nm step, and thousands get commas.
-	assert.equal(countToMetres(form({ millA: '2', millB: '28' }))!.working, 'Nm 14 × 100 = 1,400 m/100 g.');
+	assert.equal(countToMetres(form({ millA: '2', millB: '28' }))!.working, 'Nm 28 ÷ 2 × 100 = 1,400 m/100 g.');
 	assert.equal(countToMetres(form({ millB: '28' }))!.working, 'Nm 28 × 100 = 2,800 m/100 g.');
 	assert.equal(countToMetres(form({ millB: '2000', divisor: '1' }))!.working, 'Nm 2000 × 100 = 200,000 m/100 g.');
 	assert.equal(
@@ -263,7 +263,7 @@ test('a divisor that does not reconcile the two is not used, so the warning stay
 	assert.equal(c.metres, 1400);
 	assert.match(
 		answer(form({ m100: '380', millA: '2', millB: '28' })).check!.message,
-		/^The metres box says 380 m\/100 g but the count gives 1400/
+		/^The metres box says 380 m\/100 g but the count gives 1,400/
 	);
 });
 
@@ -327,7 +327,7 @@ test('rows with no percentage take no part', () => {
 		})
 	);
 	assert.equal(r.woolEquivalent, 250);
-	assert.equal(r.summary, '100% wool at 250 m / 100 g.');
+	assert.equal(r.summary, '100% wool at 250 m/100 g.');
 });
 
 // ---- refusals ------------------------------------------------------------------------
@@ -352,14 +352,14 @@ test('an untouched blend waits rather than warns, and is never divided by zero',
 test('one fibre with no percentage is all of it', () => {
 	const r = answer(form({ m100: '200', rows: [{ fibre: 'Cotton', pct: '' }] }));
 	assert.equal(r.woolEquivalent, 235);
-	assert.equal(r.summary, '100% cotton at 200 m / 100 g.');
+	assert.equal(r.summary, '100% cotton at 200 m/100 g.');
 	assert.equal(blendTotal([{ fibre: 'Cotton', pct: '' }]).ok, true);
 });
 
 test('empty extra rows are not 0% rows', () => {
 	// Pressing "Add a fibre" and changing your mind must not break a finished blend.
 	const r = answer(form({ m100: '250', rows: [{ fibre: 'Wool', pct: '' }, { fibre: '', pct: '' }] }));
-	assert.equal(r.summary, '100% wool at 250 m / 100 g.');
+	assert.equal(r.summary, '100% wool at 250 m/100 g.');
 });
 
 test('with two fibres, a blank percentage is not assumed', () => {
@@ -392,7 +392,7 @@ test('a cone count with the divisor forced to 1 is refused, not called Lace', ()
 test('an absurd stated length blames the stated length', () => {
 	const r = calculate(form({ m100: '900000' }));
 	assert.equal(r.ok, false);
-	assert.match(r.ok ? '' : r.message, /check the metres per 100 g\.$/);
+	assert.match(r.ok ? '' : r.message, /check the metres on the label\.$/);
 });
 
 test('an absurd count on Automatic blames the count and the system', () => {
@@ -479,11 +479,11 @@ test('count and label disagree by more than 5% → a warning, and the label wins
 test('count only → a caution that says what the divisor did', () => {
 	const assumed = answer(form({ millB: '2500' }));
 	assert.equal(assumed.check?.tone, 'caution');
-	assert.match(assumed.check!.message, /^No metres per 100 g given, so the printed 2500 was read as 2500 ÷ 1000\./);
+	assert.match(assumed.check!.message, /^No metres on the label given, so the printed 2500 was read as 2500 ÷ 1000\./);
 
 	const plain = answer(form({ millA: '2', millB: '48' }));
 	assert.equal(plain.check?.tone, 'caution');
-	assert.match(plain.check!.message, /^No metres per 100 g given — this comes from the count alone/);
+	assert.match(plain.check!.message, /^No metres on the label given — this comes from the count alone/);
 });
 
 test('the length and the blend are judged separately', () => {
@@ -543,7 +543,7 @@ test('a range, because a category is a band', () => {
 	// 2400 m/100 g of lace-weight: 9 strands give 267, 11 give 218 — both DK.
 	assert.equal(
 		said(strandsToReach(2400, cat(3))),
-		'9 to 11 strands | Held together, about 267 to 218 m/100 g. For this yarn, 3 Light (DK) is about 210–270 m/100 g.'
+		'9 to 11 strands | Held together, about 267 to 218 m/100 g. For this yarn, 3 Light (DK) is about 210–269 m/100 g.'
 	);
 });
 
@@ -576,7 +576,7 @@ test('a band too narrow to land in names where the counts either side land, and 
 	assert.equal(
 		said(strandsToReach(720, cat(2))),
 		'No exact fit | 2 strands are 1 Super Fine (Fingering/Sock) at about 360 m/100 g, ' +
-			'and 3 strands are 3 Light (DK) at about 240. For this yarn, 2 Fine (Sport) is about 270–350 m/100 g. ' +
+			'and 3 strands are 3 Light (DK) at about 240. For this yarn, 2 Fine (Sport) is about 270–349 m/100 g. ' +
 			"Swatch whichever is nearer your pattern's gauge."
 	);
 });
@@ -584,5 +584,41 @@ test('a band too narrow to land in names where the counts either side land, and 
 test('a yarn exactly on a lower bound still takes two strands to leave its band', () => {
 	const r = answer(form({ m100: '210' }));
 	assert.equal(r.category.n, 3);
-	assert.equal(said(strandsToReach(r.woolEquivalent, cat(5), r.metres)), '2 strands | Held together, about 105 m/100 g. For this yarn, 5 Bulky (Chunky) is about 90–150 m/100 g.');
+	assert.equal(said(strandsToReach(r.woolEquivalent, cat(5), r.metres)), '2 strands | Held together, about 105 m/100 g. For this yarn, 5 Bulky (Chunky) is about 90–149 m/100 g.');
+});
+
+// ---- the ball weight, the decimal comma, and figures that are no length -------------
+
+test('a 50 g or 25 g ball band is scaled to 100 g, and says so', () => {
+	// "50 g / 125 m" typed as 125 into a box asking for metres per 100 g made DK wool Bulky.
+	const half = answer(form({ m100: '125', grams: '50' }));
+	assert.equal(half.metres, 250);
+	assert.equal(half.category.n, 3);
+	assert.equal(half.summary, '100% wool at 250 m/100 g (125 m per 50 g).');
+	assert.equal(answer(form({ m100: '60', grams: '25' })).metres, 240);
+	// The count is cross-checked against the scaled figure, and the message says it was scaled.
+	const r = answer(form({ m100: '125', grams: '50', millA: '2', millB: '28' }));
+	assert.match(r.check!.message, /^The metres box works out at 250 m\/100 g but the count gives 1,400/);
+});
+
+test('a decimal comma is a decimal point', () => {
+	// Italian cones print "Nm 2,5"; a number box read it as 25 and said Lace for a DK.
+	assert.equal(parseNumber('2,5'), 2.5);
+	assert.equal(answer(form({ millB: '2,5' })).metres, 250);
+});
+
+test('a figure that is no length says so, rather than looking blank', () => {
+	assert.equal(lengthProblem(form({ m100: '0' })), MESSAGES.notALength);
+	assert.equal(lengthProblem(form({ m100: '-200' })), MESSAGES.notALength);
+	assert.equal(lengthProblem(form({ millB: '0' })), MESSAGES.notACount);
+	assert.equal(lengthProblem(form({})), MESSAGES.needsLength);
+});
+
+test('a ply pair shows its division, with the ×1000 convention too', () => {
+	assert.equal(countToMetres(form({ millA: '6', millB: '15000' }))!.working, 'Printed 15000 ÷ 6 ÷ 1000 × 100 = 250 m/100 g.');
+});
+
+test('two strand bands never share an edge', () => {
+	assert.match(strandsToReach(1000, cat(2)).detail, /270–349 m\/100 g/);
+	assert.match(strandsToReach(1000, cat(1)).detail, /350–549 m\/100 g/);
 });

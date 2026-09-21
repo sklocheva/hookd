@@ -43,9 +43,10 @@ const first = SYSTEMS[0];
 			    is the heaviest thing there, it read as a misalignment rather than as a numeral
 			    hung in a gutter. There is no room to hang it properly at 375px. */}
 			<p class="step__n">Step 1</p>
-			<h2 class="step__title">How long is 100 g of it?</h2>
+			<h2 class="step__title">How long is a ball of it?</h2>
 			<p class="step__note">
-				This is the one number that tells you how thick a yarn is. Most ball bands print it.
+				Length for weight is the one figure that tells you how thick a yarn is. Most ball bands
+				print it.
 			</p>
 		</div>
 
@@ -56,20 +57,27 @@ const first = SYSTEMS[0];
 		<div data-yw-group="metres">
 		{/* A small tick beside each part of the form once it is usable — so a reader can see what
 		    is left to do without the answer panel changing its words. Quiet on purpose. */}
-		<label class="label-text" for="yw-m100">Metres per 100 g <span class="done" aria-hidden="true" data-yw-done="metres"></span></label>
+		<label class="label-text" for="yw-m100">Metres on the label <span class="done" aria-hidden="true" data-yw-done="metres"></span></label>
 		<div class="field">
+			{/* Text, not type="number": a number box throws away a decimal comma without a word,
+			    and "2,5" became 25. `inputmode` still brings up the number pad on a phone. */}
 			<input
 				id="yw-m100"
 				class="field__input"
-				type="number"
-				min="0"
-				step="any"
+				type="text"
 				inputmode="decimal"
+				autocomplete="off"
 				placeholder="e.g. 380"
 				aria-describedby="yw-m100-hint"
 				data-yw-m100
 			/>
-			<span class="field__unit">m / 100 g</span>
+			{/* The ball weight the length is for. A dropdown, not a box: balls come in 100, 50
+			    and 25 g, and a choice of three needs no arithmetic from the reader. */}
+			<select class="field__per" aria-label="Ball weight" data-yw-grams>
+				<option value="100">per 100 g</option>
+				<option value="50">per 50 g</option>
+				<option value="25">per 25 g</option>
+			</select>
 		</div>
 		{/* The hint and the warning occupy the same slot, stacked, so the slot is always as
 		    tall as the taller of the two and swapping one for the other moves nothing. A
@@ -77,8 +85,8 @@ const first = SYSTEMS[0];
 		    it. */}
 		<div class="slot">
 			<p class="hint" id="yw-m100-hint" data-yw-m100-hint>
-				Often written as "100 g / 380 m". If it is on your label, this is all you need — the
-				section below is for cones, which usually have no length on them.
+				Often written as "100 g / 380 m" or "50 g / 125 m" — choose the ball weight beside it. If
+				it is on your label, this is all you need; the section below is for cones.
 			</p>
 			<p class="field-error is-concealed" data-yw-m100-error aria-hidden="true">
 				<span class="alert__mark" aria-hidden="true">!</span>
@@ -88,7 +96,7 @@ const first = SYSTEMS[0];
 			    tall enough for any of them and showing one moves nothing below. */}
 			<p class="field-error slot__sizer" aria-hidden="true">
 				<span class="alert__mark">!</span>
-				<span>9,999,999,999 m/100 g is not a length any yarn has — check the metres per 100 g.</span>
+				<span>9,999,999,999 m/100 g is not a length any yarn has — check the metres on the label.</span>
 			</p>
 		</div>
 		</div>
@@ -135,9 +143,8 @@ const first = SYSTEMS[0];
 					<div class="pair" data-yw-pair>
 						<input
 							class="pair__input"
-							type="number"
-							min="0"
-							step="any"
+							type="text"
+							autocomplete="off"
 							inputmode="decimal"
 							aria-label="Yarn count, first number"
 							aria-describedby="yw-count-hint"
@@ -146,9 +153,8 @@ const first = SYSTEMS[0];
 						<span class="pair__slash" aria-hidden="true">/</span>
 						<input
 							class="pair__input"
-							type="number"
-							min="0"
-							step="any"
+							type="text"
+							autocomplete="off"
 							inputmode="decimal"
 							aria-label="Yarn count, second number"
 							aria-describedby="yw-count-hint"
@@ -159,9 +165,8 @@ const first = SYSTEMS[0];
 					<div class="field" data-yw-single hidden>
 						<input
 							class="field__input"
-							type="number"
-							min="0"
-							step="any"
+							type="text"
+							autocomplete="off"
 							inputmode="decimal"
 							aria-label="Count value"
 							aria-describedby="yw-count-hint"
@@ -193,7 +198,7 @@ const first = SYSTEMS[0];
 				    sum it can show. It used to appear with the first figure and push everything
 				    below it down 48px while the reader was still typing. */}
 				<div class="slot">
-					<div class="working is-concealed" data-yw-working-tile aria-hidden="true">
+					<div class="working" data-yw-working-tile>
 						<p class="working__text" data-yw-working></p>
 					</div>
 					<div class="working slot__sizer" aria-hidden="true">
@@ -303,7 +308,6 @@ const first = SYSTEMS[0];
 	    moving the page under their thumb. */}
 	<div class="peek" data-yw-peek hidden>
 		<div class="peek__inner">
-			<span class="peek__label">Answer</span>
 			<span class="peek__cat" data-yw-peek-cat></span>
 			<a class="peek__link" href="#yw-answer" data-yw-peek-link>See the details</a>
 		</div>
@@ -322,7 +326,7 @@ const first = SYSTEMS[0];
 				    at every step pulled the eye away from the form. This names both halves, so it
 				    still sends a reader who has only done step 1 on to step 2. */}
 				<p class="waiting__text">
-					Fill in how long 100 g of it is, and what it is made of.
+					Fill in how long a ball of it is, and what it is made of.
 				</p>
 				<noscript>
 					<p class="waiting__text waiting__text--nojs">
@@ -609,6 +613,22 @@ const first = SYSTEMS[0];
 		color: var(--muted);
 	}
 
+	/* The ball weight, in the unit's place: a dropdown dressed as the unit, so the field still
+	   reads "380 | per 100 g". Wider than the unit column, because "per 100 g" and its arrow
+	   need it; the metres box is the only field with one. */
+	.field__per {
+		flex: none;
+		min-width: 0;
+		padding: 0 8px 0 12px;
+		background: transparent;
+		border: none;
+		border-left: 1px solid var(--rule);
+		border-radius: 0;
+		font: 400 14px/1 var(--sans);
+		color: var(--ink-2);
+		cursor: pointer;
+	}
+
 	/* The ring goes round the whole boxed field, not the bare input inside it. */
 	.field:has(.field__input:focus-visible) {
 		outline: 2px solid var(--terracotta);
@@ -724,6 +744,13 @@ const first = SYSTEMS[0];
 		color: var(--ink);
 	}
 
+	/* Before there is a count: the tile says what it is for, rather than sitting empty and
+	   looking like something that failed to load. */
+	/* --label-ink, not --muted: --muted is 4.35:1 on the panel fill. */
+	.working.is-empty .working__text {
+		color: var(--label-ink);
+	}
+
 	.divisor {
 		margin-top: var(--s2);
 		padding-top: var(--s2);
@@ -811,8 +838,10 @@ const first = SYSTEMS[0];
 		width: var(--rm-w);
 	}
 
+	/* The same ochre as the warning box beneath it: one problem, one colour. It was
+	   terracotta over an ochre box. --ochre-text clears AA on the paper. */
 	.total.is-off {
-		color: var(--terracotta);
+		color: var(--ochre-text);
 	}
 
 	/* Two things that take turns in one place — a hint and its warning, or a summary and the
@@ -875,13 +904,6 @@ const first = SYSTEMS[0];
 		padding: 4px var(--gutter);
 	}
 
-	.peek__label {
-		font: var(--type-label);
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		color: var(--ochre);
-	}
-
 	.peek__cat {
 		flex: 1;
 		min-width: 0;
@@ -914,11 +936,27 @@ const first = SYSTEMS[0];
 		color: var(--muted);
 	}
 
+	/* The count and the label disagree: the category shown may be the wrong one, and on a
+	   phone the panel that says so is a screen away. */
+	.peek.is-warning .peek__link {
+		color: var(--terracotta-hover);
+		font-weight: 700;
+	}
+
 	/* A field the message is about. Colour is not the signal — the message names the field
 	   in words; this only says which box to look at. */
-	.yw :global(.is-invalid) {
+	/* All the way round. A bar on the left edge alone looked like the text cursor. Boxes whose
+	   border is on a wrapper (the metres field, the percentage) get it on the wrapper. */
+	.yw :global(.is-invalid),
+	.yw .field:has(.is-invalid),
+	.yw :global(.row__pct:has(.is-invalid)) {
 		border-color: var(--terracotta);
-		box-shadow: inset 2px 0 0 var(--terracotta);
+		box-shadow: inset 0 0 0 1px var(--terracotta);
+	}
+
+	.yw .field__input.is-invalid,
+	.yw :global(.row__pct-input.is-invalid) {
+		box-shadow: none;
 	}
 
 	/* ---- the answer ---- */
@@ -1250,7 +1288,6 @@ const first = SYSTEMS[0];
 		countToMetres,
 		hookAdvice,
 		lengthProblem,
-		parseNumber,
 		strandsToReach,
 		systemFor,
 		type DivisorMode,
@@ -1294,6 +1331,7 @@ const first = SYSTEMS[0];
 
 		const form = q<HTMLFormElement>('[data-yw-form]');
 		const m100 = q<HTMLInputElement>('[data-yw-m100]');
+		const grams = q<HTMLSelectElement>('[data-yw-grams]');
 		const m100Hint = q('[data-yw-m100-hint]');
 		const m100Error = q('[data-yw-m100-error]');
 		const m100ErrorText = q('[data-yw-m100-error-text]');
@@ -1375,8 +1413,15 @@ const first = SYSTEMS[0];
 		let formEndInView = false;
 		let peekText = '';
 
+		/** "250 m/100 g" never breaks across a line: on a phone it wrapped to "250 / m / 100 g". */
+		const keepUnits = (text: string) =>
+			text
+				.replace(/(\d) m\/100 g/g, '$1 m/100 g')
+				.replace(/(\d) m per (\d+) g/g, '$1 m per $2 g');
+
 		/** Text is only written when it changes, so a live region is not re-announced. */
-		const setText = (el: HTMLElement, text: string) => {
+		const setText = (el: HTMLElement, raw: string) => {
+			const text = keepUnits(raw);
 			if (el.textContent !== text) el.textContent = text;
 		};
 
@@ -1417,11 +1462,19 @@ const first = SYSTEMS[0];
 		const read = (): Input => {
 			const sys = systemFor(system.value);
 			const linear = sys.mode === 'linear';
+			// A ply pair half typed is not a count. "2" on its own reads as Nm 2 — 200 m/100 g,
+			// Worsted — and it flashed up as a full answer on the way to 2 / 28, Lace. So while
+			// focus is in the pair and one box is still empty, the pair waits. A single figure
+			// is still allowed in either box: it counts once the reader leaves the pair.
+			const inPair = document.activeElement === millA || document.activeElement === millB;
+			const half = !millA.value.trim() !== !millB.value.trim();
+			const waitForPair = !linear && inPair && half;
 			return {
 				m100: m100.value,
+				grams: grams.value,
 				system: sys.id as SystemId,
-				millA: countOpen && !linear ? millA.value : '',
-				millB: countOpen ? (linear ? singleInput.value : millB.value) : '',
+				millA: countOpen && !linear && !waitForPair ? millA.value : '',
+				millB: countOpen && !waitForPair ? (linear ? singleInput.value : millB.value) : '',
 				divisor,
 				rows: rows().map((row) => ({ fibre: fibreOf(row).value, pct: pctOf(row).value })),
 			};
@@ -1460,7 +1513,7 @@ const first = SYSTEMS[0];
 			if (lengthWarning) {
 				// The box — or boxes — that produced the length. Whichever of the pair holds a
 				// figure, since a single figure may be typed in either.
-				if (parseNumber(m100.value) !== null) flagged.add(m100);
+				if (m100.value.trim()) flagged.add(m100);
 				else if (countOpen) {
 					const boxes = systemFor(system.value).mode === 'linear' ? [singleInput] : [millA, millB];
 					boxes.filter((box) => box.value.trim()).forEach((box) => flagged.add(box));
@@ -1564,8 +1617,6 @@ const first = SYSTEMS[0];
 			setText(singleUnit, sys.unit);
 			singleInput.placeholder = sys.example;
 			setText(countHint, sys.hint);
-			// A divisor means nothing for tex, dtex or denier.
-			divisorBlock.hidden = sys.mode !== 'count';
 
 			// The toggle keeps its name when open — the sign says open or shut. It used to turn
 			// into "Hide", and a message pointing at "The count looks wrong" then pointed at
@@ -1579,10 +1630,15 @@ const first = SYSTEMS[0];
 				chip.classList.toggle('is-active', on);
 			}
 
-			// Its space is held whether or not there is a sum yet; see the markup.
+			// Its space is held whether or not there is a sum yet; see the markup. Empty, it says
+			// what it is for.
 			const count = countToMetres(input);
-			conceal(workingTile, !count);
-			setText(working, count?.working ?? '');
+			workingTile.classList.toggle('is-empty', !count);
+			setText(working, count?.working ?? 'The sum appears here once there is a count.');
+
+			// A divisor means nothing for tex, dtex or denier — and nothing before there is a
+			// count to divide. Shown under empty boxes, "The count looks wrong" read as a warning.
+			divisorBlock.hidden = sys.mode !== 'count' || !count;
 
 			// One fibre with no percentage counts as all of it (see effectiveRows), and the box
 			// shows that 100 as its placeholder rather than leaving it to be guessed. It follows
@@ -1603,7 +1659,8 @@ const first = SYSTEMS[0];
 			const blendNow = blendProblem(input.rows);
 			const lengthIssue = lengthNow && lengthNow !== MESSAGES.needsLength ? lengthNow : null;
 			const blendIssue = blendNow && blendNow !== MESSAGES.needsBlend ? blendNow : null;
-			const fromMetres = parseNumber(m100.value) !== null;
+			// Anything typed in the metres box — even a 0 — is where a length problem lives.
+			const fromMetres = m100.value.trim() !== '';
 			const lengthWarning = lengthIssue && settled[fromMetres ? 'metres' : 'count'] ? lengthIssue : null;
 			const blendWarning = blendIssue && settled.blend ? blendIssue : null;
 
@@ -1640,7 +1697,9 @@ const first = SYSTEMS[0];
 				setText(
 					blendErrorText,
 					blendWarning === MESSAGES.needsTotal
-						? `The percentages come to ${shown}%. They need to add up to 100.`
+						? shown === 0
+							? 'Fill in a percentage for each fibre. They need to add up to 100.'
+							: `The percentages come to ${shown}%. They need to add up to 100.`
 						: blendWarning
 				);
 			}
@@ -1651,8 +1710,12 @@ const first = SYSTEMS[0];
 			// than one line — it used to wrap when the text grew, and grow over the form.
 			peekText = fresh ? `${fresh.category.n} ${fresh.category.name}` : showing ? 'Out of date' : '';
 			setText(peekCat, peekText);
-			setText(peekLink, fresh ? 'See the details' : 'See why');
+			// A disagreement between the count and the label is said on the bar too: the panel
+			// that explains it is a screen away on a phone.
+			const disagree = fresh?.check?.tone === 'warning';
+			setText(peekLink, fresh ? (disagree ? 'Check the figures' : 'See the details') : 'See why');
 			peek.classList.toggle('is-stale', !fresh);
+			peek.classList.toggle('is-warning', disagree);
 			updatePeek();
 		};
 
@@ -1703,6 +1766,11 @@ const first = SYSTEMS[0];
 			keepFocusClear();
 		});
 		form.addEventListener('focusout', (event) => {
+			// Leaving the pair is when a single figure in it becomes a count; see `read`.
+			const pairBoxes: EventTarget[] = [millA, millB];
+			if (pairBoxes.includes(event.target!) && !pairBoxes.includes(event.relatedTarget!)) {
+				window.setTimeout(now);
+			}
 			const group = groupOf(event.target);
 			if (group && groupOf(event.relatedTarget) !== group) {
 				settled[group] = true;

@@ -228,7 +228,14 @@ export interface FibreRow {
  * than in the script that reads the form.
  */
 export interface Input {
+	/** The metres printed on the label, for a ball of `grams`. */
 	m100: string;
+	/**
+	 * The ball weight that length is for: '100', '50' or '25', from a dropdown. Many balls are
+	 * 50 g or 25 g, and a reader typing "125" off a 50 g band into a box that asked for metres
+	 * per 100 g was told a DK wool was Bulky. Absent means 100.
+	 */
+	grams?: string;
 	system: SystemId;
 	millA: string;
 	millB: string;
@@ -236,17 +243,32 @@ export interface Input {
 	rows: readonly FibreRow[];
 }
 
-/** A positive number, or null. Accepts a decimal comma. */
+/**
+ * A positive number, or null. Accepts a decimal comma — Italian cones print "Nm 2,5", and the
+ * page's boxes are text boxes for exactly this reason: a number box silently dropped the
+ * comma and read 25, three categories out.
+ */
 export function parseNumber(text: string): number | null {
 	const value = parseFloat(String(text).replace(',', '.'));
 	return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+/** Something typed that is not a positive number: "0", "-200", "abc". Blank is not this. */
+const unusable = (text: string) => String(text).trim() !== '' && parseNumber(text) === null;
+
+/** The label's length as metres per 100 g, whatever ball weight it was printed for. */
+export function statedPer100(input: Input): number | null {
+	const metres = parseNumber(input.m100);
+	if (metres === null) return null;
+	const grams = parseNumber(input.grams ?? '100') ?? 100;
+	return (metres * 100) / grams;
 }
 
 /** Three decimals is enough to show a working and never enough to disagree with it. */
 const tidy = (value: number) => Math.round(value * 1000) / 1000;
 
 /** "200,000" rather than "200000": a misplaced zero is obvious with the commas in. */
-const grouped = (value: number) => Math.round(value).toLocaleString('en-GB');
+export const grouped = (value: number) => Math.round(value).toLocaleString('en-GB');
 
 export interface CountResult {
 	system: System;
@@ -326,14 +348,17 @@ export function countToMetres(input: Input): CountResult | null {
 	const printed = a && b ? Math.max(a, b) / Math.min(a, b) : (a ?? b)!;
 	const divisor =
 		input.divisor === 'auto'
-			? autoDivisor(system, printed, parseNumber(input.m100))
+			? autoDivisor(system, printed, statedPer100(input))
 			: Number(input.divisor);
 	const nm = (printed / divisor) * system.factor;
 	const metres = nm * 100;
 
 	// "Printed", not "Nm": once a divisor has been applied, calling the figure Nm 2500 would
 	// assert the very thing the divisor is correcting.
-	const steps = [divisor !== 1 ? `Printed ${tidy(printed)}` : `${system.unit} ${tidy(printed)}`];
+	// A ply pair shows its division: "Nm 28 ÷ 2", not "Nm 14", which a reader could not find
+	// anywhere on her label.
+	const figure = a && b ? `${tidy(Math.max(a, b))} ÷ ${tidy(Math.min(a, b))}` : tidy(printed);
+	const steps = [divisor !== 1 ? `Printed ${figure}` : `${system.unit} ${figure}`];
 	if (divisor !== 1) steps.push(`÷ ${divisor}`);
 	if (system.factor !== 1) steps.push(`× ${system.factor}`);
 
@@ -429,7 +454,7 @@ export type Outcome =
 			woolEquivalent: number;
 			/** m/100 g as used: the stated one if there is one, else the count's. */
 			metres: number;
-			/** "46% alpaca, 20% merino at 380 m / 100 g." */
+			/** "46% alpaca, 20% merino at 380 m/100 g." */
 			summary: string;
 			/** Silence means agreement; only a disagreement or a guess speaks. */
 			check: Check | null;
@@ -449,7 +474,9 @@ const WEIGH =
 	'To check it, measure out 10 m and weigh it: 1000 ÷ the grams is the metres per 100 g. It needs a scale that reads to 0.1 g.';
 
 export const MESSAGES = {
-	needsLength: 'Enter metres per 100 g, or a yarn count from a cone.',
+	needsLength: 'Enter the metres on the label, or a yarn count from a cone.',
+	notALength: 'That is not a length — enter the metres printed on the label.',
+	notACount: 'That is not a count — enter the figures printed on the cone.',
 	/** Not a mistake — the blend simply has not been started. The page waits, it does not warn. */
 	needsBlend: 'Choose what the yarn is made of.',
 	needsFibre: 'Choose a fibre for each percentage.',
@@ -491,7 +518,7 @@ const THREAD_FROM = 4000;
  */
 function implausible(metres: number, stated: number | null, manualDivisor: boolean): string {
 	const figure = `${grouped(metres)} m/100 g`;
-	if (stated !== null) return `${figure} is not a length any yarn has — check the metres per 100 g.`;
+	if (stated !== null) return `${figure} is not a length any yarn has — check the metres on the label.`;
 	if (manualDivisor) {
 		return `${figure} is not a length any yarn has. Set the divisor back to Automatic.`;
 	}
@@ -532,7 +559,7 @@ export function strandsToReach(woolEquivalent: number, target: Category, metres 
 	const most = target.min > 0 ? Math.floor(woolEquivalent / target.min) : Infinity;
 	const label = `${target.n} ${target.name}`;
 	const strands = (n: number) => (n === 1 ? '1 strand' : `${n} strands`);
-	const each = (n: number) => Math.round(metres / n);
+	const each = (n: number) => grouped(metres / n);
 
 	// The target band in the reader's own m/100 g. The band is defined on the wool-equivalent,
 	// so for any other fibre it sits somewhere she would not expect: a crocheter who knows
@@ -540,13 +567,15 @@ export function strandsToReach(woolEquivalent: number, target: Category, metres 
 	// that DK for her alpaca blend starts at about 219. Scaled by the same ratio as the length.
 	const ratio = woolEquivalent > 0 ? metres / woolEquivalent : 1;
 	const low = target.min > 0 ? Math.round(target.min * ratio) : null;
-	const high = Number.isFinite(max) ? Math.round(max * ratio) : null;
+	// One less than the next band's floor, so two bands never share an edge: "270–350" and
+	// "350–550" left 350 in both.
+	const high = Number.isFinite(max) ? Math.round(max * ratio) - 1 : null;
 	const range =
 		low !== null && high !== null
-			? `about ${low}–${high} m/100 g`
+			? `about ${grouped(low)}–${grouped(high)} m/100 g`
 			: low !== null
-				? `about ${low} m/100 g or more`
-				: `anything under about ${high} m/100 g`;
+				? `about ${grouped(low)} m/100 g or more`
+				: `anything under about ${high! + 1} m/100 g`;
 	const band = `For this yarn, ${label} is ${range}.`;
 
 	if (most < 1) {
@@ -609,7 +638,12 @@ type Length = { metres: number; stated: number | null; count: CountResult | null
 
 /** The length the answer will use, or why there is not one. */
 function resolveLength(input: Input): Length | { message: string } {
-	const stated = parseNumber(input.m100);
+	// A figure typed that is no length at all used to read as a blank, and the page went back
+	// to "Fill in how long 100 g of it is" with the reader's 0 still in the box.
+	if (unusable(input.m100)) return { message: MESSAGES.notALength };
+	if (unusable(input.millA) || unusable(input.millB)) return { message: MESSAGES.notACount };
+
+	const stated = statedPer100(input);
 	const count = countToMetres(input);
 
 	// A stated m/100 g is always the figure used; the count only cross-checks it.
@@ -669,11 +703,12 @@ export function calculate(input: Input): Outcome {
 	const where = 'under “The count looks wrong”';
 	if (count && stated !== null) {
 		if (Math.abs(count.metres - stated) / stated > AGREEMENT) {
-			const s = Math.round(stated);
+			const s = grouped(stated);
+			const says = (input.grams ?? '100') === '100' ? 'says' : 'works out at';
 			check = {
 				tone: 'warning',
 				message:
-					`The metres box says ${s} m/100 g but the count gives ${Math.round(count.metres)}, and the answer uses the ${s}. ` +
+					`The metres box ${says} ${s} m/100 g but the count gives ${grouped(count.metres)}, and the answer uses the ${s}. ` +
 					`If the count is the one to trust, clear the metres box; if neither looks right, check the divisor ${where}.`,
 			};
 		}
@@ -686,10 +721,10 @@ export function calculate(input: Input): Outcome {
 			tone: 'caution',
 			message:
 				input.divisor !== 'auto'
-					? `No metres per 100 g given, and the divisor was set by hand to ÷ ${count.divisor}. ${confirm}`
+					? `No metres on the label given, and the divisor was set by hand to ÷ ${count.divisor}. ${confirm}`
 					: count.divisor !== 1
-						? `No metres per 100 g given, so the printed ${tidy(count.printed)} was read as ${tidy(count.printed)} ÷ ${count.divisor}. ${confirm}`
-						: `No metres per 100 g given — this comes from the count alone. ${confirm}`,
+						? `No metres on the label given, so the printed ${tidy(count.printed)} was read as ${tidy(count.printed)} ÷ ${count.divisor}. ${confirm}`
+						: `No metres on the label given — this comes from the count alone. ${confirm}`,
 		};
 	}
 
@@ -699,14 +734,20 @@ export function calculate(input: Input): Outcome {
 		check = check ? { tone: check.tone, message: `${note} ${check.message}` } : { tone: 'caution', message: note };
 	}
 
-	const source = stated !== null ? '' : ' (worked out from the count)';
+	const grams = input.grams ?? '100';
+	const source =
+		stated === null
+			? ' (worked out from the count)'
+			: grams !== '100'
+				? ` (${grouped(parseNumber(input.m100)!)} m per ${grams} g)`
+				: '';
 
 	return {
 		ok: true,
 		category,
 		woolEquivalent,
 		metres,
-		summary: `${describeBlend(rows)} at ${Math.round(metres)} m / 100 g${source}.`,
+		summary: `${describeBlend(rows)} at ${grouped(metres)} m/100 g${source}.`,
 		check,
 		canHoldStrands: category.n !== 6,
 		working: count?.working ?? null,
