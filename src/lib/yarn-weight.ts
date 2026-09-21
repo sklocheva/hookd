@@ -58,20 +58,40 @@ export interface Category {
 	name: string;
 	/** Lower bound in wool-equivalent m/100 g. A category owns [min, the next one's min). */
 	min: number;
-	/**
-	 * The Craft Yarn Council's recommended hook for this category, as one line.
-	 *
-	 * **Quoted from CYC's table, not derived from `src/lib/hooks.ts`.** Deriving the US range
-	 * from the millimetre range very nearly works and is wrong in two places: it yields
-	 * "M/N-13" where CYC prints "M-13", and "P/Q" where CYC prints "Q". Close enough to look
-	 * right, wrong enough to misquote the standard this page cites by name.
-	 *
-	 * Lace is not a plain range — CYC gives a steel-hook size and a regular-hook size — which
-	 * is the other reason this is a string per category rather than a pair of numbers.
-	 *
-	 * Source: https://www.craftyarncouncil.com/standards/yarn-weight-system
-	 */
-	hook: string;
+	/** The hook for this category — see `Hook`, and `hookAdvice` for how it is worded. */
+	hook: Hook;
+}
+
+/**
+ * A category's hook: one size to start with, and the usual range around it.
+ *
+ * **The Craft Yarn Council's table is the reference for correctness, not for wording.** Its
+ * ranges are the ranges here, but the page says them in its own words and adds what the
+ * table does not: a size to start with. A reader shown "4.5–5.5 mm" asked which end to begin
+ * at, so `start` answers that — roughly the middle, rounded to a hook people own. CYC also
+ * writes Lace's steel sizes largest first ("1.6–1.4 mm"), which reads as a typo; every range
+ * here runs low to high.
+ *
+ * The US sizes are stored rather than derived through `src/lib/hooks.ts`: deriving the US
+ * range very nearly works and is wrong in two places ("M/N-13" for M-13, "P/Q" for Q).
+ * `startUs` is absent where a size has no US equivalent — 3 and 12 mm among them.
+ *
+ * Source: https://www.craftyarncouncil.com/standards/yarn-weight-system
+ */
+export interface Hook {
+	start: number;
+	startUs?: string;
+	from: number;
+	to: number;
+	usRange: string;
+}
+
+/** "Start with 5 mm (US H-8)" and "Usual range 4.5–5.5 mm (US 7 to I-9)". */
+export function hookAdvice(hook: Hook): { start: string; range: string } {
+	return {
+		start: `Start with ${hook.start} mm${hook.startUs ? ` (US ${hook.startUs})` : ''}`,
+		range: `Usual range ${hook.from}–${hook.to} mm (US ${hook.usRange})`,
+	};
 }
 
 /**
@@ -87,13 +107,14 @@ export const categoryMax = (category: Category): number =>
 
 /** Heaviest yarn last, so `find` on a descending list returns the first band it clears. */
 export const CATEGORIES: readonly Category[] = [
-	{ n: 0, name: 'Lace', min: 550, hook: 'Steel 1.6–1.4 mm, or a regular 2.25 mm · US steel 6, 7, 8, or B-1' },
-	{ n: 1, name: 'Super Fine (Fingering/Sock)', min: 350, hook: '2.25–3.5 mm · US B-1 to E-4' },
-	{ n: 2, name: 'Fine (Sport)', min: 270, hook: '3.5–4.5 mm · US E-4 to 7' },
-	{ n: 3, name: 'Light (DK)', min: 210, hook: '4.5–5.5 mm · US 7 to I-9' },
-	{ n: 4, name: 'Medium (Worsted/Aran)', min: 150, hook: '5.5–6.5 mm · US I-9 to K-10½' },
-	{ n: 5, name: 'Bulky (Chunky)', min: 90, hook: '6.5–9 mm · US K-10½ to M-13' },
-	{ n: 6, name: 'Super Bulky', min: 0, hook: '9–15 mm · US M-13 to Q' },
+	// The smallest Lace sizes are steel hooks; the range still runs low to high.
+	{ n: 0, name: 'Lace', min: 550, hook: { start: 2.25, startUs: 'B-1', from: 1.4, to: 2.25, usRange: 'steel 8 to B-1' } },
+	{ n: 1, name: 'Super Fine (Fingering/Sock)', min: 350, hook: { start: 3, from: 2.25, to: 3.5, usRange: 'B-1 to E-4' } },
+	{ n: 2, name: 'Fine (Sport)', min: 270, hook: { start: 4, startUs: 'G-6', from: 3.5, to: 4.5, usRange: 'E-4 to 7' } },
+	{ n: 3, name: 'Light (DK)', min: 210, hook: { start: 5, startUs: 'H-8', from: 4.5, to: 5.5, usRange: '7 to I-9' } },
+	{ n: 4, name: 'Medium (Worsted/Aran)', min: 150, hook: { start: 6, startUs: 'J-10', from: 5.5, to: 6.5, usRange: 'I-9 to K-10½' } },
+	{ n: 5, name: 'Bulky (Chunky)', min: 90, hook: { start: 8, startUs: 'L-11', from: 6.5, to: 9, usRange: 'K-10½ to M-13' } },
+	{ n: 6, name: 'Super Bulky', min: 0, hook: { start: 12, from: 9, to: 15, usRange: 'M-13 to Q' } },
 ];
 
 /** The category a wool-equivalent m/100 g falls in. Expects an already-rounded integer. */
@@ -221,6 +242,9 @@ export function parseNumber(text: string): number | null {
 /** Three decimals is enough to show a working and never enough to disagree with it. */
 const tidy = (value: number) => Math.round(value * 1000) / 1000;
 
+/** "200,000" rather than "200000": a misplaced zero is obvious with the commas in. */
+const grouped = (value: number) => Math.round(value).toLocaleString('en-GB');
+
 export interface CountResult {
 	system: System;
 	/** The count as printed: larger ÷ smaller for a pair, otherwise the single figure. */
@@ -291,7 +315,7 @@ export function countToMetres(input: Input): CountResult | null {
 			divisor: 1,
 			nm,
 			metres,
-			working: `${system.constant} ÷ ${tidy(b)} ${system.unit} → Nm ${tidy(nm)} → ${Math.round(metres)} m/100 g.`,
+			working: `${system.constant} ÷ ${tidy(b)} ${system.unit} → Nm ${tidy(nm)} → ${grouped(metres)} m/100 g.`,
 		};
 	}
 
@@ -310,13 +334,18 @@ export function countToMetres(input: Input): CountResult | null {
 	if (divisor !== 1) steps.push(`÷ ${divisor}`);
 	if (system.factor !== 1) steps.push(`× ${system.factor}`);
 
+	// When nothing was done to the figure, "Nm 28 → Nm 28 → …" says the same thing twice,
+	// and with a wrong divisor it read "Nm 2000 → Nm 2000 → 200000", which a reader called
+	// nonsense. The Nm step is only shown when it is a step.
+	const converted = steps.length > 1 ? ` → Nm ${tidy(nm)}` : '';
+
 	return {
 		system,
 		printed,
 		divisor,
 		nm,
 		metres,
-		working: `${steps.join(' ')} → Nm ${tidy(nm)} → ${Math.round(metres)} m/100 g.`,
+		working: `${steps.join(' ')}${converted} → ${grouped(metres)} m/100 g.`,
 	};
 }
 
@@ -413,6 +442,10 @@ export type Outcome =
 			working: string | null;
 	  };
 
+/** How to check a length by hand, in a form a reader can follow with a kitchen scale. */
+const WEIGH =
+	'To check it, measure out 10 m and weigh it: 1000 ÷ the grams is the metres per 100 g. It needs a scale that reads to 0.1 g.';
+
 export const MESSAGES = {
 	needsLength: 'Enter metres per 100 g, or a yarn count from a cone.',
 	/** Not a mistake — the blend simply has not been started. The page waits, it does not warn. */
@@ -440,6 +473,13 @@ const PLAUSIBLE_MIN = 10;
 const PLAUSIBLE_MAX = 30000;
 
 /**
+ * Past this a figure is possible but is not really yarn: the finest lace on a cone is around
+ * 2,800 m/100 g, and 25,000 is sewing thread. Such a figure is answered, but with a note — a
+ * reader who typed an extra zero was otherwise told "Lace" and nothing else.
+ */
+const THREAD_FROM = 4000;
+
+/**
  * The refusal for a length no yarn has, worded by whatever is most likely to have caused it.
  *
  * The divisor is blamed on `manualDivisor`, not on `divisor !== 1`: the case that prompted
@@ -448,7 +488,7 @@ const PLAUSIBLE_MAX = 30000;
  * this go unnamed.
  */
 function implausible(metres: number, stated: number | null, manualDivisor: boolean): string {
-	const figure = `${Math.round(metres).toLocaleString('en-GB')} m/100 g`;
+	const figure = `${grouped(metres)} m/100 g`;
 	if (stated !== null) return `${figure} is not a length any yarn has — check the metres per 100 g.`;
 	if (manualDivisor) {
 		return `${figure} is not a length any yarn has. Set the divisor back to Automatic.`;
@@ -477,27 +517,57 @@ function implausible(metres: number, stated: number | null, manualDivisor: boole
  * rather than 190. Dividing either number by n picks the same band — the fibre correction
  * is a multiplier, so it commutes with the division — so only the display changes.
  */
-export function strandsToReach(woolEquivalent: number, target: Category, metres = woolEquivalent): string {
+/** The strands answer as the page shows it: a headline to read at a glance, then the detail. */
+export interface StrandsAnswer {
+	headline: string;
+	detail: string;
+}
+
+export function strandsToReach(woolEquivalent: number, target: Category, metres = woolEquivalent): StrandsAnswer {
 	const max = categoryMax(target);
 	// Thinner is a larger figure, so the band's ceiling gives the fewest strands.
 	const fewest = Number.isFinite(max) ? Math.floor(woolEquivalent / max) + 1 : 1;
 	const most = target.min > 0 ? Math.floor(woolEquivalent / target.min) : Infinity;
 	const label = `${target.n} ${target.name}`;
 	const strands = (n: number) => (n === 1 ? '1 strand' : `${n} strands`);
-	const give = (n: number) => (n === 1 ? 'gives' : 'give');
 	const each = (n: number) => Math.round(metres / n);
 
-	if (most < 1) return `One strand is already heavier than ${label}.`;
-
-	if (fewest > most) {
-		return `Nothing lands in ${label}: ${strands(most)} ${give(most)} ${each(most)} m/100 g, ${strands(fewest)} ${give(fewest)} ${each(fewest)}.`;
+	if (most < 1) {
+		return { headline: 'None — already heavier', detail: `One strand is already heavier than ${label}.` };
 	}
 
-	if (!Number.isFinite(most)) return `${strands(fewest)} or more.`;
+	// No count lands in the band: say where the two either side of it land, by category. The
+	// line used to give only their m/100 g — "2 strands give 400 m/100 g, 3 strands give 267"
+	// — which told the reader nothing about what weight those were, and a reader who knows
+	// 190 m/100 g as "roughly DK" could not see why 190 was not DK here: the band allows for
+	// the fibre, so it has to be said in categories, which she can check against the answer.
+	if (fewest > most) {
+		const cat = (n: number) => {
+			const c = categoryFor(Math.round(woolEquivalent / n))!;
+			return `${c.n} ${c.name}`;
+		};
+		const verb = (n: number) => (n === 1 ? 'is' : 'are');
+		return {
+			headline: 'No exact fit',
+			detail:
+				`${strands(most)} ${verb(most)} ${cat(most)}, ${strands(fewest)} ${verb(fewest)} ${cat(fewest)}. ` +
+				`Swatch the one nearer your pattern's gauge.`,
+		};
+	}
 
-	if (fewest === most) return `${strands(fewest)} — about ${each(fewest)} m/100 g.`;
+	if (!Number.isFinite(most)) {
+		return {
+			headline: `${strands(fewest)} or more`,
+			detail: `About ${each(fewest)} m/100 g at ${fewest}, and heavier with each strand you add.`,
+		};
+	}
 
-	return `${fewest} to ${most} strands — about ${each(fewest)} to ${each(most)} m/100 g.`;
+	if (fewest === most) return { headline: strands(fewest), detail: `Held together, about ${each(fewest)} m/100 g.` };
+
+	return {
+		headline: `${fewest} to ${most} strands`,
+		detail: `Held together, about ${each(fewest)} to ${each(most)} m/100 g.`,
+	};
 }
 
 /** "46% alpaca, 20% merino, 34% polyamide" — the label, read back. */
@@ -509,26 +579,56 @@ function describeBlend(rows: readonly FibreRow[]): string {
 		.join(', ');
 }
 
-export function calculate(input: Input): Outcome {
+type Length = { metres: number; stated: number | null; count: CountResult | null };
+
+/** The length the answer will use, or why there is not one. */
+function resolveLength(input: Input): Length | { message: string } {
 	const stated = parseNumber(input.m100);
 	const count = countToMetres(input);
 
 	// A stated m/100 g is always the figure used; the count only cross-checks it.
 	const metres = stated ?? count?.metres ?? null;
-	if (metres === null) return { ok: false, message: MESSAGES.needsLength };
+	if (metres === null) return { message: MESSAGES.needsLength };
 
-	// Before the blend and before the lookup: every figure has some category, so a length
-	// this wrong would otherwise be reported as confidently as a right one.
+	// Before the lookup: every figure has some category, so a length this wrong would
+	// otherwise be reported as confidently as a right one.
 	if (metres < PLAUSIBLE_MIN || metres > PLAUSIBLE_MAX) {
-		return { ok: false, message: implausible(metres, stated, input.divisor !== 'auto') };
+		return { message: implausible(metres, stated, input.divisor !== 'auto') };
 	}
+	return { metres, stated, count };
+}
 
+/**
+ * What stands between the length fields and an answer, or null if nothing does.
+ *
+ * The length and the blend are judged **separately**, and the page asks for each on its own.
+ * `calculate` can only return one refusal, and it used to be the page's only source: a
+ * wrong length hid a wrong blend, so a reader who fixed the length was then surprised by a
+ * percentage problem the page had stopped showing.
+ */
+export function lengthProblem(input: Input): string | null {
+	const length = resolveLength(input);
+	return 'message' in length ? length.message : null;
+}
+
+/** What stands between the blend and an answer, or null if nothing does. */
+export function blendProblem(rows: readonly FibreRow[]): string | null {
+	const used = effectiveRows(rows);
+	if (used.length === 0) return MESSAGES.needsBlend;
+	if (used.some((row) => row.fibre === '')) return MESSAGES.needsFibre;
+	if (!blendTotal(rows).ok || blendDensity(rows) === null) return MESSAGES.needsTotal;
+	return null;
+}
+
+export function calculate(input: Input): Outcome {
+	const length = resolveLength(input);
+	if ('message' in length) return { ok: false, message: length.message };
+	const { metres, stated, count } = length;
+
+	const problem = blendProblem(input.rows);
+	if (problem) return { ok: false, message: problem };
 	const rows = effectiveRows(input.rows);
-	if (rows.length === 0) return { ok: false, message: MESSAGES.needsBlend };
-	if (rows.some((row) => row.fibre === '')) return { ok: false, message: MESSAGES.needsFibre };
-	if (!blendTotal(input.rows).ok) return { ok: false, message: MESSAGES.needsTotal };
-	const density = blendDensity(input.rows);
-	if (density === null) return { ok: false, message: MESSAGES.needsTotal };
+	const density = blendDensity(input.rows)!;
 
 	// Rounded before the lookup, so the category always agrees with any figure shown.
 	const woolEquivalent = Math.round(metres * (density / WOOL_DENSITY));
@@ -553,7 +653,9 @@ export function calculate(input: Input): Outcome {
 		}
 	} else if (count) {
 		// Never "the divisor is a guess" once the reader has set it herself — by then it is not.
-		const confirm = 'Confirm by weighing a measured length.';
+		// And say how to confirm it: "weigh a measured length" assumed a reader would know that
+		// a few metres of fine yarn weighs next to nothing.
+		const confirm = WEIGH;
 		check = {
 			tone: 'caution',
 			message:
@@ -563,6 +665,12 @@ export function calculate(input: Input): Outcome {
 						? `No metres per 100 g given, so the printed ${tidy(count.printed)} was read as ${tidy(count.printed)} ÷ ${count.divisor}. ${confirm}`
 						: `No metres per 100 g given — this comes from the count alone. ${confirm}`,
 		};
+	}
+
+	// Finer than any yarn — possible, and answered, but not without saying so.
+	if (metres > THREAD_FROM) {
+		const note = `${grouped(metres)} m/100 g is finer than almost any knitting or crochet yarn — more like sewing thread. If this is yarn, check the figure.`;
+		check = check ? { tone: check.tone, message: `${note} ${check.message}` } : { tone: 'caution', message: note };
 	}
 
 	const source = stated !== null ? '' : ' (worked out from the count)';

@@ -255,22 +255,29 @@ obvious from the code:
   region is `aria-live="polite"`, which the design file lacks. Wool-equivalent and blend
   density are deliberately never shown.
 - **When the form stops describing a yarn, two things happen on two clocks.** *The answer
-  stops claiming to be current at once*: the last good answer dims and a neutral line says
-  what it is waiting for ("Out of date — waiting for the percentages to add up to 100").
-  *The reader is told something is wrong only when focus leaves the group it is about* — the
-  length fields, or the blend as a whole (`data-yw-group`, `settled`) — or at once for a
-  deliberate click such as a divisor chip or a counting system. The first version waited on
-  both, and a cold read found an undimmed, confident answer for a yarn the reader was no
-  longer describing, which was the worst thing on the page. The second clock is what the
-  button used to protect: 46 / 20 / 34 passes through 46 and 66, and leaving one percentage
-  box for the next is not leaving the blend.
+  stops claiming to be current at once*: the category dims and, in the place where the yarn
+  is read back, a line says what it is waiting for. *The reader is told something is wrong
+  only when focus leaves the part of the form it is about* — the metres box, the yarn count
+  section, or the blend as a whole (`data-yw-group`, `settled`) — or at once for a deliberate
+  click such as a divisor chip or a counting system. The metres box and the count were once
+  one part, and a bad length went unremarked while the reader tabbed on to the count toggle.
+  Leaving one percentage box for the next is still not leaving the blend: 46 / 20 / 34
+  passes through 46 and 66.
+- **The length and the blend are judged separately** — `lengthProblem` and `blendProblem` in
+  the library, each asked on its own. `calculate` returns one refusal, and when that was the
+  page's only source a wrong length hid a wrong blend: a reader fixed the length and was then
+  surprised by a percentage problem the page had stopped showing.
+- **The words in the answer panel do not follow the typing.** The waiting panel is one
+  sentence — "Fill in how long 100 g of it is, and what it is made of." — until there is an
+  answer, and an out-of-date reason names the problem without a running figure ("Waiting for
+  the percentages to add up to 100", not "they come to 66% now"). A panel that reworded
+  itself at every step pulled the author's eye away from the form, which is where it belongs.
 - **Step 2 starts empty, and there is no answer until a fibre is chosen.** It was pre-filled
   as 100% wool, and readers who typed a length saw an answer at once and never looked at
-  step 2 — every cotton and alpaca was being worked out as wool. The waiting panel says what
-  is still missing ("Now choose what it is made of, in step 2"). Two rules keep it from
-  being a chore, both in `effectiveRows`: a row with neither fibre nor percentage is not
-  there, and **one fibre with no percentage is all of it** — the box shows that 100 as its
-  placeholder. With two fibres a blank is not assumed.
+  step 2 — every cotton and alpaca was being worked out as wool. Two rules keep it from being
+  a chore, both in `effectiveRows`: a row with neither fibre nor percentage is not there, and
+  **one fibre with no percentage is all of it** — the box shows that 100 as its placeholder,
+  and step 2's note says so in words. With two fibres a blank is not assumed.
 - **On a phone the answer is pinned to the foot of the screen while it is out of view** —
   `.peek`, one line, driven by two IntersectionObservers. The button used to scroll the answer
   into view; without it, a reader typing at the top of a phone screen had an answer changing
@@ -285,6 +292,13 @@ obvious from the code:
   band chosen is the same either way (the fibre correction is a multiplier, so it commutes
   with the division), so only the display changed — and the brief's §8 figures for strands
   are pinned in the tests in the reader's terms, with a note.
+- **The strands answer is set as an answer**: `strandsToReach` returns a headline ("2
+  strands", "No exact fit") shown in the serif, and a detail line, in a small panel of its
+  own — smaller than the category, since it answers a follow-up. It was one line of 15px
+  body text under a select that was better dressed than it, and read as a footnote. **When
+  no count lands in the band it names the categories either side, not their m/100 g**: "2
+  strands give 400 m/100 g, 3 strands give 267" told the reader nothing about what weight
+  either was, and the band allows for the fibre, so a figure cannot be checked by eye.
 - **Every message says which figure was used and what to do.** The cross-check used to end
   "Check the divisor", and a reader whose real problem was a leftover length from the
   previous yarn went looking for a setting she could not name. It now says the answer uses the
@@ -313,15 +327,20 @@ handle and narrow enough to catch a divisor off by a power of ten. It blames the
 `input.divisor !== 'auto'`, **not** on `divisor !== 1` — the case that prompted it is a
 divisor forced *to* 1.
 
-**The result states CYC's recommended hook, quoted rather than derived.** Each entry in
-`CATEGORIES` carries its hook as one string copied from the CYC yarn weight table. Deriving
-the US range from the mm range through `src/lib/hooks.ts` very nearly works and is wrong in
-two places: "M/N-13" where CYC prints "M-13", and "P/Q" where it prints "Q". Lace isn't a plain
-range either (steel hooks plus a regular 2.25 mm), which is why it is a string. The author
-asked for it plainly, as a spec row with no swatch wording. The caveats already say the
-category is a starting point, so the hook is one too. CYC's gauge column is deliberately not
-shown: gauge is the input the brief rules out, and CYC gives Lace's gauge in double crochet
-and every other category's in single crochet.
+**The hook is a size to start with, then the usual range — in the site's own words.** The
+Craft Yarn Council's table is the reference for correctness, not for wording (the author's
+call). Each category's `hook` holds a starting size (roughly the middle of the range,
+rounded to a hook people own), the range, and the US sizes; `hookAdvice` words it as "Start
+with 5 mm (US H-8)" over "Usual range 4.5–5.5 mm (US 7 to I-9)". A reader shown only the
+range asked which end to begin at. Ranges run low to high — CYC writes Lace's steel sizes
+largest first, which read as a typo. US sizes are stored rather than derived through
+`src/lib/hooks.ts`, which would give "M/N-13" and "P/Q" where CYC has M-13 and Q. CYC's
+gauge column is deliberately not shown: gauge is the input the brief rules out, and CYC
+gives Lace's gauge in double crochet and every other category's in single crochet.
+
+**A figure finer than any yarn is answered, with a note.** Above 4,000 m/100 g (the finest
+lace on a cone is about 2,800) the answer carries a caution that it is more like sewing
+thread — a reader who typed an extra zero was otherwise told "Lace" and nothing else.
 
 **The published mill data is a test; the author's stash is not.** The ten ColourMart and
 JaggerSpun yarns from the spreadsheet's Reference tab are pinned in `yarn-weight.test.ts`.
@@ -375,19 +394,30 @@ came out of a cold usability read, and all three are easy to undo by accident:
   **Both values are as tight as their contents allow** — every pixel taken comes off the
   fibre name, which needs 127px at 375px.
 
-**A problem keeps the last good answer on screen, dimmed.** The whole answer block dims —
-category, cross-check and strands — not just the top panel. Blanking it on every keystroke
-punished the reader for typing, because 34 cannot become 50 without passing some wrong
-number. Clearing the length or emptying the blend is different: that is a fresh start rather
-than a mistake, so it goes back to the waiting panel.
+**A problem keeps the last good answer on screen, dimmed, with the reason inside it.** The
+category and hook fade; the reason takes the place of "The yarn you entered", so it is
+beside the figures it explains. It used to be a line above the card, which pushed the card
+down on every invalid keystroke and was scrolled off screen while the reader worked in
+step 2 — leaving a pale card describing a yarn she had not typed. **The check and strands
+panels are hidden while out of date**: they described the old input, and one went on saying
+the count "was read as 2000 ÷ 1000" after the reader had just set ÷ 1. Clearing the length
+or emptying the blend is a fresh start rather than a mistake, so it goes back to the waiting
+panel.
 
 **A warning appears twice, deliberately: under the fields it is about, and in full beside the
-answer.** On a phone the answer is a screen away. The metres box and the count each have a
-`.field-error` that **takes the place of that field's hint** rather than appearing beneath it:
-beneath, it arrived just as focus reached the first fibre and pushed that menu 57px down under
-the pointer. The blend has its own line too. It used to rely on the total alone ("Total 96% —
-needs 100"), which wrapped to three lines in the 96px percentage column. The box concerned is
-outlined as well, but never as the only signal: the words name the field.
+answer.** On a phone the answer is a screen away. **Nothing moves when a warning appears.**
+Each warning shares a `.slot` with the hint it replaces — one grid cell, the one not showing
+kept by `visibility`, not removed — plus a never-shown `.slot__sizer` holding the longest
+warning that slot can carry, so the slot is always tall enough for any of them. Without the
+sizer a warning box, with its padding, was 20px taller than the hint and still pushed the
+next field down just as focus reached it. The blend's warning has a slot too, reserved
+below "Add a fibre"; the space it holds is why `.caveats` has almost no top margin. The box
+concerned is outlined as well, but never as the only signal: the words name the field.
+
+**On a phone the pinned answer bar keeps the focused field clear of itself** — it sets
+`scroll-padding-bottom` while it shows and scrolls a covered field up. A cold read found it
+covering the fibre dropdown being filled in. It is one line that never wraps: out of date it
+reads "Out of date · See why".
 
 **A rule separates the page intro from step 1.** Without it, the intro's last line, "Step 1"
 and the first question stacked into a single column of text, and the heading read as though
