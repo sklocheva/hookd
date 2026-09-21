@@ -187,8 +187,16 @@ const first = SYSTEMS[0];
 					</p>
 				</div>
 
-				<div class="working" data-yw-working-tile hidden>
-					<p class="working__text" data-yw-working></p>
+				{/* The sum's place is held from the moment the section opens, sized by the longest
+				    sum it can show. It used to appear with the first figure and push everything
+				    below it down 48px while the reader was still typing. */}
+				<div class="slot">
+					<div class="working is-concealed" data-yw-working-tile aria-hidden="true">
+						<p class="working__text" data-yw-working></p>
+					</div>
+					<div class="working slot__sizer" aria-hidden="true">
+						<p class="working__text">Printed 2500 ÷ 1000 × 1.6934 × 100 = 423 m/100 g.</p>
+					</div>
 				</div>
 
 				<div data-yw-divisor-block>
@@ -264,7 +272,7 @@ const first = SYSTEMS[0];
 				<YarnWeightFibreRow />
 			</template>
 
-			<div class="rows-foot">
+			<div class="rows-foot" data-yw-rows-foot>
 				<button type="button" class="link-button" data-yw-add>Add a fibre</button>
 				{/* Sits in the percentage column, under the figures it totals. Hidden until the
 				    blend has something in it — "Total 0%" on a blank form is noise. */}
@@ -273,19 +281,15 @@ const first = SYSTEMS[0];
 
 			{/* The blend's message gets a line of its own, like the length's. It used to live in
 			    the total — "Total 96% — needs 100" — which wrapped to three lines in a 96px
-			    column and was easy to miss. The total still turns colour; this says why. */}
-			<div class="slot">
-				<p class="field-error is-concealed" data-yw-blend-error aria-hidden="true">
-					<span class="alert__mark" aria-hidden="true">!</span>
-					<span data-yw-blend-error-text></span>
-				</p>
-				{/* Never shown: the longest warning this slot can hold, so the slot is always
-				    tall enough for any of them and showing one moves nothing below. */}
-				<p class="field-error slot__sizer" aria-hidden="true">
-					<span class="alert__mark">!</span>
-					<span>The percentages come to 199.5%. They need to add up to 100.</span>
-				</p>
-			</div>
+			    column and was easy to miss. The total still turns colour; this says why.
+
+			    Unlike the length's, it holds no space while hidden. Nothing the reader is using
+			    sits below it — only the answer and the caveats — and the space it held was a
+			    100px hole at the foot of the form on a phone. */}
+			<p class="field-error" data-yw-blend-error hidden>
+				<span class="alert__mark" aria-hidden="true">!</span>
+				<span data-yw-blend-error-text></span>
+			</p>
 		</div>
 	</form>
 
@@ -317,6 +321,14 @@ const first = SYSTEMS[0];
 				<p class="waiting__text">
 					Fill in how long 100 g of it is, and what it is made of.
 				</p>
+				{/* The two halves, each ticked off as it is filled in, so a reader who has done
+				    step 1 can see at a glance what is left without the sentence above changing.
+				    Small and quiet on purpose. Hidden from screen readers: this sits in the live
+				    region, and a tick is not worth an announcement — the form says the same. */}
+				<ul class="waiting__ticks" aria-hidden="true" data-yw-ticks hidden>
+					<li class="tick" data-yw-tick="length"><span class="tick__mark"></span>Length</li>
+					<li class="tick" data-yw-tick="blend"><span class="tick__mark"></span>What it is made of</li>
+				</ul>
 				<noscript>
 					<p class="waiting__text waiting__text--nojs">
 						This tool needs JavaScript to do its sums. Nothing is sent anywhere — it all happens in
@@ -937,6 +949,55 @@ const first = SYSTEMS[0];
 		text-wrap: pretty;
 	}
 
+	/* Deliberately quieter than the sentence above: note-sized, muted, and a tick that is
+	   an outline until its half is done. It is a progress aside, not a second message. */
+	.waiting__ticks {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s1) var(--s3);
+		margin: var(--s2) 0 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.tick {
+		display: flex;
+		align-items: center;
+		gap: var(--s1);
+		font: var(--type-note);
+		color: var(--muted);
+	}
+
+	.tick__mark {
+		position: relative;
+		flex: none;
+		width: 14px;
+		height: 14px;
+		border: 1px solid var(--border-dashed);
+		border-radius: 50%;
+	}
+
+	.tick.is-done {
+		color: var(--label-ink);
+	}
+
+	.tick.is-done .tick__mark {
+		border-color: var(--ochre-rule);
+	}
+
+	/* The check itself: two sides of a small box, turned. */
+	.tick.is-done .tick__mark::after {
+		content: '';
+		position: absolute;
+		left: 4px;
+		top: 1.5px;
+		width: 3px;
+		height: 7px;
+		border: solid var(--ochre-text);
+		border-width: 0 1.5px 1.5px 0;
+		transform: rotate(45deg);
+	}
+
 	.waiting__text--nojs {
 		margin-top: 14px;
 		color: var(--ink);
@@ -1160,9 +1221,8 @@ const first = SYSTEMS[0];
 	/* Literal sizes, not --s1..--s4: those are defined on .yw, and this section sits outside
 	   it. Written with the tokens, the padding and the gaps silently resolved to nothing and
 	   the three caveats ran into one another on a phone. */
-	/* Short, because the blend's warning slot above it already holds open a warning's height. */
 	.caveats {
-		margin-top: 16px;
+		margin-top: 40px;
 		padding-top: 24px;
 		border-top: 1px solid var(--rule);
 	}
@@ -1288,6 +1348,10 @@ const first = SYSTEMS[0];
 		const peek = q('[data-yw-peek]');
 		const peekCat = q('[data-yw-peek-cat]');
 		const peekLink = q('[data-yw-peek-link]');
+		const rowsFoot = q('[data-yw-rows-foot]');
+		const ticks = q('[data-yw-ticks]');
+		const tickLength = q('[data-yw-tick="length"]');
+		const tickBlend = q('[data-yw-tick="blend"]');
 
 		const answer = q('[data-yw-answer]');
 		const waiting = q('[data-yw-waiting]');
@@ -1329,6 +1393,7 @@ const first = SYSTEMS[0];
 		/** Whether the answer panel and the form are on screen — which decides the peek. */
 		let answerInView = true;
 		let formInView = true;
+		let formEndInView = false;
 		let peekText = '';
 
 		/** Text is only written when it changes, so a live region is not re-announced. */
@@ -1359,7 +1424,7 @@ const first = SYSTEMS[0];
 		};
 
 		const updatePeek = () => {
-			peek.hidden = !(peekText && formInView && !answerInView);
+			peek.hidden = !(peekText && formInView && !formEndInView && !answerInView);
 			// Focusing a field also scrolls it clear of the bar, rather than behind it.
 			document.documentElement.style.scrollPaddingBottom = peek.hidden ? '' : `${peek.offsetHeight + 16}px`;
 			keepFocusClear();
@@ -1432,14 +1497,21 @@ const first = SYSTEMS[0];
 			}
 		};
 
-		/** What an out-of-date answer is waiting for. A state of the answer, not a telling-off,
-		    and without a running figure — it names the problem, it does not follow the typing. */
-		const waitingFor = (problem: string) =>
-			problem === MESSAGES.needsTotal
-				? 'Waiting for the percentages to add up to 100.'
-				: problem === MESSAGES.needsFibre
-					? 'Waiting for a fibre for each percentage.'
-					: 'Waiting for a length a yarn could have.';
+		/** Why an answer is out of date — every reason, not the first. A state of the answer,
+		    not a telling-off, and without a running figure: it names the problems, it does not
+		    follow the typing. With only the first named, a reader who fixed the length was then
+		    surprised by a blend problem the card had not mentioned. "Waiting for a length a
+		    yarn could have" read as a riddle; the length simply looks wrong. */
+		const staleReason = (lengthIssue: string | null, blendIssue: string | null) => {
+			const reasons = [
+				lengthIssue ? 'the length looks wrong' : null,
+				blendIssue === MESSAGES.needsTotal ? 'the percentages do not add up to 100' : null,
+				blendIssue === MESSAGES.needsFibre ? 'a percentage has no fibre chosen' : null,
+			].filter((r): r is string => r !== null);
+			if (reasons.length === 0) return 'Something above has changed.';
+			const sentence = reasons.join(', and ');
+			return `${sentence[0].toUpperCase()}${sentence.slice(1)}.`;
+		};
 
 		/** Paint an outcome into the answer card. Stale: the old figures, and why they are old. */
 		const showResult = (outcome: Good, staleReason: string | null) => {
@@ -1515,8 +1587,9 @@ const first = SYSTEMS[0];
 				chip.classList.toggle('is-active', on);
 			}
 
+			// Its space is held whether or not there is a sum yet; see the markup.
 			const count = countToMetres(input);
-			workingTile.hidden = !count;
+			conceal(workingTile, !count);
 			setText(working, count?.working ?? '');
 
 			// One fibre with no percentage counts as all of it (see effectiveRows), and the box
@@ -1549,12 +1622,11 @@ const first = SYSTEMS[0];
 
 			const fresh = outcome.ok ? outcome : null;
 			const showing = fresh ?? lastGood;
-			const firstIssue = lengthIssue ?? blendIssue;
 
 			waiting.hidden = !!showing || !!(lengthWarning ?? blendWarning);
 			blocked.hidden = !!showing || !(lengthWarning ?? blendWarning);
 			result.hidden = !showing;
-			if (showing) showResult(showing, fresh ? null : waitingFor(firstIssue!));
+			if (showing) showResult(showing, fresh ? null : staleReason(lengthIssue, blendIssue));
 			else if (lengthWarning ?? blendWarning) setText(blockedText, (lengthWarning ?? blendWarning)!);
 
 			// Warnings, each in its own slot under the fields it is about.
@@ -1564,8 +1636,13 @@ const first = SYSTEMS[0];
 			conceal(countHint, !!(lengthWarning && !fromMetres));
 			if (lengthWarning) setText(fromMetres ? m100ErrorText : countErrorText, lengthWarning);
 
+			// Ticked off as each half is usable. The sentence above them never changes.
+			ticks.hidden = false;
+			tickLength.classList.toggle('is-done', lengthNow === null);
+			tickBlend.classList.toggle('is-done', blendNow === null);
+
 			totalEl.classList.toggle('is-off', blendWarning === MESSAGES.needsTotal);
-			conceal(blendError, !blendWarning);
+			blendError.hidden = !blendWarning;
 			if (blendWarning) {
 				setText(
 					blendErrorText,
@@ -1653,6 +1730,17 @@ const first = SYSTEMS[0];
 				formInView = entry.isIntersecting;
 				updatePeek();
 			}).observe(form);
+			// At the foot of the form the answer is only a short way below, and the bar was
+			// sitting over "Add a fibre". So it goes once the foot of the form is on screen — or
+			// nearly: the bottom margin, a little more than the bar is tall, means it has gone
+			// before "Add a fibre" can reach the strip it covers.
+			new IntersectionObserver(
+				([entry]) => {
+					formEndInView = entry.isIntersecting;
+					updatePeek();
+				},
+				{ rootMargin: '0px 0px 72px 0px' }
+			).observe(rowsFoot);
 		}
 
 		form.addEventListener('click', (event) => {
@@ -1669,9 +1757,10 @@ const first = SYSTEMS[0];
 			}
 
 			if (target.closest('[data-yw-count-toggle]')) {
+				// Focus stays on the toggle. It used to jump to the system select, which on a
+				// phone scrolled the page and opened nothing the reader had asked for.
 				countOpen = !countOpen;
 				now();
-				if (countOpen) system.focus();
 				return;
 			}
 

@@ -74,7 +74,9 @@ export interface Category {
  *
  * The US sizes are stored rather than derived through `src/lib/hooks.ts`: deriving the US
  * range very nearly works and is wrong in two places ("M/N-13" for M-13, "P/Q" for Q).
- * `startUs` is absent where a size has no US equivalent — 3 and 12 mm among them.
+ * Every start is a size that has a US equivalent — 3 and 12 mm, which do not, were moved to
+ * 2.75 and 10 — because a reader following a US pattern was left with a size she could not
+ * buy. `startUs` stays optional for a table that ever needs one without.
  *
  * Source: https://www.craftyarncouncil.com/standards/yarn-weight-system
  */
@@ -109,12 +111,13 @@ export const categoryMax = (category: Category): number =>
 export const CATEGORIES: readonly Category[] = [
 	// The smallest Lace sizes are steel hooks; the range still runs low to high.
 	{ n: 0, name: 'Lace', min: 550, hook: { start: 2.25, startUs: 'B-1', from: 1.4, to: 2.25, usRange: 'steel 8 to B-1' } },
-	{ n: 1, name: 'Super Fine (Fingering/Sock)', min: 350, hook: { start: 3, from: 2.25, to: 3.5, usRange: 'B-1 to E-4' } },
-	{ n: 2, name: 'Fine (Sport)', min: 270, hook: { start: 4, startUs: 'G-6', from: 3.5, to: 4.5, usRange: 'E-4 to 7' } },
-	{ n: 3, name: 'Light (DK)', min: 210, hook: { start: 5, startUs: 'H-8', from: 4.5, to: 5.5, usRange: '7 to I-9' } },
+	{ n: 1, name: 'Super Fine (Fingering/Sock)', min: 350, hook: { start: 2.75, startUs: 'C-2', from: 2.25, to: 3.5, usRange: 'B-1 to E-4' } },
+	// US 7 has no letter; "US 7" alone read as a count of something, so it is "size 7".
+	{ n: 2, name: 'Fine (Sport)', min: 270, hook: { start: 4, startUs: 'G-6', from: 3.5, to: 4.5, usRange: 'E-4 to size 7' } },
+	{ n: 3, name: 'Light (DK)', min: 210, hook: { start: 5, startUs: 'H-8', from: 4.5, to: 5.5, usRange: 'size 7 to I-9' } },
 	{ n: 4, name: 'Medium (Worsted/Aran)', min: 150, hook: { start: 6, startUs: 'J-10', from: 5.5, to: 6.5, usRange: 'I-9 to K-10½' } },
 	{ n: 5, name: 'Bulky (Chunky)', min: 90, hook: { start: 8, startUs: 'L-11', from: 6.5, to: 9, usRange: 'K-10½ to M-13' } },
-	{ n: 6, name: 'Super Bulky', min: 0, hook: { start: 12, from: 9, to: 15, usRange: 'M-13 to Q' } },
+	{ n: 6, name: 'Super Bulky', min: 0, hook: { start: 10, startUs: 'N/P-15', from: 9, to: 15, usRange: 'M-13 to Q' } },
 ];
 
 /** The category a wool-equivalent m/100 g falls in. Expects an already-rounded integer. */
@@ -315,7 +318,7 @@ export function countToMetres(input: Input): CountResult | null {
 			divisor: 1,
 			nm,
 			metres,
-			working: `${system.constant} ÷ ${tidy(b)} ${system.unit} → Nm ${tidy(nm)} → ${grouped(metres)} m/100 g.`,
+			working: `${system.constant} ÷ ${tidy(b)} ${system.unit} × 100 = ${grouped(metres)} m/100 g.`,
 		};
 	}
 
@@ -334,18 +337,17 @@ export function countToMetres(input: Input): CountResult | null {
 	if (divisor !== 1) steps.push(`÷ ${divisor}`);
 	if (system.factor !== 1) steps.push(`× ${system.factor}`);
 
-	// When nothing was done to the figure, "Nm 28 → Nm 28 → …" says the same thing twice,
-	// and with a wrong divisor it read "Nm 2000 → Nm 2000 → 200000", which a reader called
-	// nonsense. The Nm step is only shown when it is a step.
-	const converted = steps.length > 1 ? ` → Nm ${tidy(nm)}` : '';
-
+	// One sum, written so it is true as read. The Nm figure used to appear as a step of its
+	// own ("Printed 2500 ÷ 1000 → Nm 2.5 → 250"), which said the same thing twice when nothing
+	// was done to the count and made the line jump in length when something was. The × 100 is
+	// what turns metres per gram into metres per 100 g, so it is shown rather than implied.
 	return {
 		system,
 		printed,
 		divisor,
 		nm,
 		metres,
-		working: `${steps.join(' ')}${converted} → ${grouped(metres)} m/100 g.`,
+		working: `${steps.join(' ')} × 100 = ${grouped(metres)} m/100 g.`,
 	};
 }
 
@@ -532,15 +534,29 @@ export function strandsToReach(woolEquivalent: number, target: Category, metres 
 	const strands = (n: number) => (n === 1 ? '1 strand' : `${n} strands`);
 	const each = (n: number) => Math.round(metres / n);
 
+	// The target band in the reader's own m/100 g. The band is defined on the wool-equivalent,
+	// so for any other fibre it sits somewhere she would not expect: a crocheter who knows
+	// "two strands of fingering make DK" was told 190 m/100 g was not DK, with nothing to show
+	// that DK for her alpaca blend starts at about 219. Scaled by the same ratio as the length.
+	const ratio = woolEquivalent > 0 ? metres / woolEquivalent : 1;
+	const low = target.min > 0 ? Math.round(target.min * ratio) : null;
+	const high = Number.isFinite(max) ? Math.round(max * ratio) : null;
+	const range =
+		low !== null && high !== null
+			? `about ${low}–${high} m/100 g`
+			: low !== null
+				? `about ${low} m/100 g or more`
+				: `anything under about ${high} m/100 g`;
+	const band = `For this yarn, ${label} is ${range}.`;
+
 	if (most < 1) {
 		return { headline: 'None — already heavier', detail: `One strand is already heavier than ${label}.` };
 	}
 
-	// No count lands in the band: say where the two either side of it land, by category. The
-	// line used to give only their m/100 g — "2 strands give 400 m/100 g, 3 strands give 267"
-	// — which told the reader nothing about what weight those were, and a reader who knows
-	// 190 m/100 g as "roughly DK" could not see why 190 was not DK here: the band allows for
-	// the fibre, so it has to be said in categories, which she can check against the answer.
+	// No count lands in the band: say where the two either side of it land, by category and by
+	// length. The line once gave only their m/100 g — "2 strands give 400 m/100 g, 3 strands
+	// give 267" — which told the reader nothing about what weight those were; then only the
+	// categories, which left her unable to check it against the band. Both, and the band.
 	if (fewest > most) {
 		const cat = (n: number) => {
 			const c = categoryFor(Math.round(woolEquivalent / n))!;
@@ -550,7 +566,8 @@ export function strandsToReach(woolEquivalent: number, target: Category, metres 
 		return {
 			headline: 'No exact fit',
 			detail:
-				`${strands(most)} ${verb(most)} ${cat(most)}, ${strands(fewest)} ${verb(fewest)} ${cat(fewest)}. ` +
+				`${strands(most)} ${verb(most)} ${cat(most)} at about ${each(most)} m/100 g, ` +
+				`${strands(fewest)} ${verb(fewest)} ${cat(fewest)} at about ${each(fewest)}. ${band} ` +
 				`Swatch the one nearer your pattern's gauge.`,
 		};
 	}
@@ -558,15 +575,17 @@ export function strandsToReach(woolEquivalent: number, target: Category, metres 
 	if (!Number.isFinite(most)) {
 		return {
 			headline: `${strands(fewest)} or more`,
-			detail: `About ${each(fewest)} m/100 g at ${fewest}, and heavier with each strand you add.`,
+			detail: `About ${each(fewest)} m/100 g at ${fewest}, and heavier with each strand you add. ${band}`,
 		};
 	}
 
-	if (fewest === most) return { headline: strands(fewest), detail: `Held together, about ${each(fewest)} m/100 g.` };
+	if (fewest === most) {
+		return { headline: strands(fewest), detail: `Held together, about ${each(fewest)} m/100 g. ${band}` };
+	}
 
 	return {
 		headline: `${fewest} to ${most} strands`,
-		detail: `Held together, about ${each(fewest)} to ${each(most)} m/100 g.`,
+		detail: `Held together, about ${each(fewest)} to ${each(most)} m/100 g. ${band}`,
 	};
 }
 

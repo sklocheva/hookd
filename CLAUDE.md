@@ -250,7 +250,7 @@ obvious from the code:
 - **It answers as you type, and there is no button.** There was one: nothing was worked out
   until it was pressed, and everything followed each edit afterwards, so the same form
   behaved two ways depending on whether you had pressed it once. The author found that
-  inconsistent and it went. Keystrokes render after a 350 ms pause, so "380" does not flash
+  inconsistent and it went. Keystrokes render after a 450 ms pause, so "380" does not flash
   through 3 m/100 g (refused) and 38 (Super Bulky) on the way, or announce them. The result
   region is `aria-live="polite"`, which the design file lacks. Wool-equivalent and blend
   density are deliberately never shown.
@@ -272,6 +272,12 @@ obvious from the code:
   answer, and an out-of-date reason names the problem without a running figure ("Waiting for
   the percentages to add up to 100", not "they come to 66% now"). A panel that reworded
   itself at every step pulled the author's eye away from the form, which is where it belongs.
+  Progress shows as two small ticks under the sentence — Length, What it is made of — that
+  fill in as each half becomes usable, kept deliberately quiet (the author's word was "not too
+  in your face") and hidden from screen readers, since they sit in the live region.
+  **An out-of-date reason names every problem, not the first** ("The length looks wrong, and
+  the percentages do not add up to 100"): naming one let the other ambush the reader after
+  she fixed it. "Waiting for a length a yarn could have" read as a riddle and went.
 - **Step 2 starts empty, and there is no answer until a fibre is chosen.** It was pre-filled
   as 100% wool, and readers who typed a length saw an answer at once and never looked at
   step 2 — every cotton and alpaca was being worked out as wool. Two rules keep it from being
@@ -296,9 +302,12 @@ obvious from the code:
   strands", "No exact fit") shown in the serif, and a detail line, in a small panel of its
   own — smaller than the category, since it answers a follow-up. It was one line of 15px
   body text under a select that was better dressed than it, and read as a footnote. **When
-  no count lands in the band it names the categories either side, not their m/100 g**: "2
-  strands give 400 m/100 g, 3 strands give 267" told the reader nothing about what weight
-  either was, and the band allows for the fibre, so a figure cannot be checked by eye.
+  no count lands in the band it names the categories either side *and* their m/100 g**, and
+  every answer ends with the target band in the reader's own m/100 g ("For this yarn, 3 Light
+  (DK) is about 220–283 m/100 g"). Figures alone ("2 strands give 400 m/100 g, 3 give 267")
+  said nothing about weight; categories alone could not be checked. A crocheter who knows
+  "two strands of fingering make DK" was told her 190 m/100 g alpaca blend was not DK, and
+  only the band — shifted by the fibre — shows why.
 - **Every message says which figure was used and what to do.** The cross-check used to end
   "Check the divisor", and a reader whose real problem was a leftover length from the
   previous yarn went looking for a setting she could not name. It now says the answer uses the
@@ -331,8 +340,10 @@ divisor forced *to* 1.
 Craft Yarn Council's table is the reference for correctness, not for wording (the author's
 call). Each category's `hook` holds a starting size (roughly the middle of the range,
 rounded to a hook people own), the range, and the US sizes; `hookAdvice` words it as "Start
-with 5 mm (US H-8)" over "Usual range 4.5–5.5 mm (US 7 to I-9)". A reader shown only the
-range asked which end to begin at. Ranges run low to high — CYC writes Lace's steel sizes
+with 5 mm (US H-8)" over "Usual range 4.5–5.5 mm (US size 7 to I-9)". A reader shown only the
+range asked which end to begin at. **Every starting size has a US equivalent** — Super Fine
+starts at 2.75 mm (C-2) and Super Bulky at 10 mm (N/P-15), not 3 and 12, which have none —
+and US 7, which has no letter, is written "size 7" so it does not read as a count. Ranges run low to high — CYC writes Lace's steel sizes
 largest first, which read as a typo. US sizes are stored rather than derived through
 `src/lib/hooks.ts`, which would give "M/N-13" and "P/Q" where CYC has M-13 and Q. CYC's
 gauge column is deliberately not shown: gauge is the input the brief rules out, and CYC
@@ -410,14 +421,25 @@ Each warning shares a `.slot` with the hint it replaces — one grid cell, the o
 kept by `visibility`, not removed — plus a never-shown `.slot__sizer` holding the longest
 warning that slot can carry, so the slot is always tall enough for any of them. Without the
 sizer a warning box, with its padding, was 20px taller than the hint and still pushed the
-next field down just as focus reached it. The blend's warning has a slot too, reserved
-below "Add a fibre"; the space it holds is why `.caveats` has almost no top margin. The box
-concerned is outlined as well, but never as the only signal: the words name the field.
+next field down just as focus reached it. The count's working line holds its place the
+same way from the moment the section opens; it used to appear with the first figure and push
+the section down 48px. **The blend's warning is the exception and holds no space**: only the
+answer and the caveats sit below it, never a field in use, and the space it held was a 100px
+hole at the foot of the form on a phone. The box concerned is outlined as well, but never as
+the only signal: the words name the field.
+
+**The working line is one sum, true as read** — "Printed 2500 ÷ 1000 × 100 = 250 m/100 g".
+It had an Nm step ("→ Nm 2.5 →") that said the same thing twice and made the line change
+length; the × 100 is the step that turns metres per gram into metres per 100 g, so it is
+written rather than implied.
 
 **On a phone the pinned answer bar keeps the focused field clear of itself** — it sets
 `scroll-padding-bottom` while it shows and scrolls a covered field up. A cold read found it
 covering the fibre dropdown being filled in. It is one line that never wraps: out of date it
-reads "Out of date · See why".
+reads "Out of date · See why". **It also goes once the foot of the form is nearly on screen**
+(a third observer, on the row holding "Add a fibre", with a 72px bottom margin): there the
+answer is a short way below anyway, and the bar was sitting over "Add a fibre". Opening the
+yarn count section leaves focus on its toggle; it used to jump to the system select.
 
 **A rule separates the page intro from step 1.** Without it, the intro's last line, "Step 1"
 and the first question stacked into a single column of text, and the heading read as though

@@ -31,6 +31,8 @@ import {
 /** A strands answer as one line, headline then detail, so a test can read it at a glance. */
 const said = (a: { headline: string; detail: string }) => `${a.headline} | ${a.detail}`;
 
+const DK_BAND = 'For this yarn, 3 Light (DK) is about 210–270 m/100 g.';
+
 /** The category with this CYC number, for the tests that name one. */
 const cat = (n: number) => CATEGORIES.find((c) => c.n === n)!;
 
@@ -62,7 +64,7 @@ test('6 / 15000, 100% wool → 250 m/100 g, 3 Light (DK); 2 strands ≈ 125 → 
 	assert.equal(r.category.name, 'Light (DK)');
 	// The brief's strand figure, now reached through the picker rather than a line the page
 	// printed unasked: two strands of this land at 125 m/100 g, which is 5 Bulky.
-	assert.equal(said(strandsToReach(r.woolEquivalent, cat(5), r.metres)), '2 strands | Held together, about 125 m/100 g.');
+	assert.equal(said(strandsToReach(r.woolEquivalent, cat(5), r.metres)), '2 strands | Held together, about 125 m/100 g. For this yarn, 5 Bulky (Chunky) is about 90–150 m/100 g.');
 });
 
 test('2 / 48 count only, wool → 2400 → 0 Lace', () => {
@@ -95,7 +97,7 @@ test('380 m/100 g, 46% alpaca / 20% merino / 34% polyamide → 362 → 1 Super F
 	// The brief gives 181 here, which is the wool-equivalent halved. The page shows the
 	// reader's own figure instead — 380 ÷ 2 — because that is the sum she will check; the
 	// band chosen is the same either way.
-	assert.equal(said(strandsToReach(r.woolEquivalent, cat(4), r.metres)), '2 strands | Held together, about 190 m/100 g.');
+	assert.equal(said(strandsToReach(r.woolEquivalent, cat(4), r.metres)), '2 strands | Held together, about 190 m/100 g. For this yarn, 4 Medium (Worsted/Aran) is about 157–220 m/100 g.');
 	assert.equal(r.summary, '46% alpaca, 20% merino, 34% polyamide at 380 m / 100 g.');
 });
 
@@ -103,7 +105,7 @@ test('1402 m/100 g, 100% cashmere → 1391 → 0 Lace; 3 strands ≈ 467 → 1 S
 	const r = answer(form({ m100: '1402', rows: [{ fibre: 'Cashmere', pct: '100' }] }));
 	assert.equal(r.woolEquivalent, 1391);
 	assert.equal(r.category.n, 0);
-	assert.equal(said(strandsToReach(r.woolEquivalent, cat(1), r.metres)), '3 strands | Held together, about 467 m/100 g.');
+	assert.equal(said(strandsToReach(r.woolEquivalent, cat(1), r.metres)), '3 strands | Held together, about 467 m/100 g. For this yarn, 1 Super Fine (Fingering/Sock) is about 353–554 m/100 g.');
 });
 
 test('NeC 24, wool → Nm 40.642 → 4064 m/100 g', () => {
@@ -198,24 +200,24 @@ test('a cashmere yarn reads lighter than its yardage, because cashmere is less d
 
 // ---- the working under the inputs -----------------------------------------------------
 
-test('the working shows each step once', () => {
+test('the working is one sum, true as read', () => {
 	// The brief wrote "Nm 28 → Nm 28 → …". With nothing done to the figure that says the same
 	// thing twice, and with ÷ 1 on a cone it read "Nm 2000 → Nm 2000 → 200000", which a reader
-	// called nonsense. The Nm step appears only when it is a step, and thousands get commas.
-	assert.equal(countToMetres(form({ millA: '2', millB: '28' }))!.working, 'Nm 14 → 1,400 m/100 g.');
-	assert.equal(countToMetres(form({ millB: '28' }))!.working, 'Nm 28 → 2,800 m/100 g.');
-	assert.equal(countToMetres(form({ millB: '2000', divisor: '1' }))!.working, 'Nm 2000 → 200,000 m/100 g.');
+	// called nonsense. It is now one sum with no Nm step, and thousands get commas.
+	assert.equal(countToMetres(form({ millA: '2', millB: '28' }))!.working, 'Nm 14 × 100 = 1,400 m/100 g.');
+	assert.equal(countToMetres(form({ millB: '28' }))!.working, 'Nm 28 × 100 = 2,800 m/100 g.');
+	assert.equal(countToMetres(form({ millB: '2000', divisor: '1' }))!.working, 'Nm 2000 × 100 = 200,000 m/100 g.');
 	assert.equal(
 		countToMetres(form({ millB: '2500' }))!.working,
-		'Printed 2500 ÷ 1000 → Nm 2.5 → 250 m/100 g.'
+		'Printed 2500 ÷ 1000 × 100 = 250 m/100 g.'
 	);
 	assert.equal(
 		countToMetres(form({ system: 'nec', millB: '20' }))!.working,
-		'NeC 20 × 1.6934 → Nm 33.868 → 3,387 m/100 g.'
+		'NeC 20 × 1.6934 × 100 = 3,387 m/100 g.'
 	);
 	assert.equal(
 		countToMetres(form({ system: 'tex', millB: '40' }))!.working,
-		'1000 ÷ 40 tex → Nm 25 → 2,500 m/100 g.'
+		'1000 ÷ 40 tex × 100 = 2,500 m/100 g.'
 	);
 });
 
@@ -422,10 +424,14 @@ test('every category has a hook to start with, inside its own range', () => {
 test('the hook reads as a size to start with, then the range', () => {
 	assert.deepEqual(hookAdvice(cat(3).hook), {
 		start: 'Start with 5 mm (US H-8)',
-		range: 'Usual range 4.5–5.5 mm (US 7 to I-9)',
+		range: 'Usual range 4.5–5.5 mm (US size 7 to I-9)',
 	});
-	// A size with no US equivalent says nothing rather than invent one.
-	assert.equal(hookAdvice(cat(1).hook).start, 'Start with 3 mm');
+	// Every start has a US size: 3 and 12 mm have none, so the starts are 2.75 and 10.
+	assert.equal(hookAdvice(cat(1).hook).start, 'Start with 2.75 mm (US C-2)');
+	assert.equal(hookAdvice(cat(6).hook).start, 'Start with 10 mm (US N/P-15)');
+	for (const c of CATEGORIES) assert.ok(c.hook.startUs, `category ${c.n}: start has no US size`);
+	// A bare number reads as a count of something; US 7 has no letter, so it is "size 7".
+	assert.equal(hookAdvice(cat(2).hook).range, 'Usual range 3.5–4.5 mm (US E-4 to size 7)');
 	// Lace runs low to high, where CYC writes its steel sizes the other way round.
 	assert.equal(hookAdvice(cat(0).hook).range, 'Usual range 1.4–2.25 mm (US steel 8 to B-1)');
 	// And the answer carries the hook of its own category.
@@ -537,16 +543,17 @@ test('a range, because a category is a band', () => {
 	// 2400 m/100 g of lace-weight: 9 strands give 267, 11 give 218 — both DK.
 	assert.equal(
 		said(strandsToReach(2400, cat(3))),
-		'9 to 11 strands | Held together, about 267 to 218 m/100 g.'
+		'9 to 11 strands | Held together, about 267 to 218 m/100 g. For this yarn, 3 Light (DK) is about 210–270 m/100 g.'
 	);
 });
 
 test('one strand where only one lands in the band', () => {
-	assert.equal(said(strandsToReach(250, cat(3))), '1 strand | Held together, about 250 m/100 g.');
+	assert.equal(said(strandsToReach(250, cat(3))), '1 strand | Held together, about 250 m/100 g. For this yarn, 3 Light (DK) is about 210–270 m/100 g.');
 });
 
 test('Super Bulky has no ceiling, so it is "or more"', () => {
-	assert.equal(said(strandsToReach(2400, cat(6))), '27 strands or more | About 89 m/100 g at 27, and heavier with each strand you add.');
+	assert.equal(said(strandsToReach(2400, cat(6))), '27 strands or more | About 89 m/100 g at 27, and heavier with each strand you add. ' +
+			'For this yarn, 6 Super Bulky is anything under about 90 m/100 g.');
 });
 
 test('one strand already heavier than the target', () => {
@@ -554,18 +561,20 @@ test('one strand already heavier than the target', () => {
 });
 
 test('a band too narrow to land in names where the counts either side land, and what to do', () => {
-	// 380: one strand is Super Fine, two are Medium. Nothing is DK. Said in categories, not
-	// m/100 g, because the band allows for the fibre: a reader who knows 190 as "roughly DK"
-	// could not see from the figure alone why it was not.
+	// 380: one strand is Super Fine, two are Medium. Nothing is DK. Said in categories *and*
+	// m/100 g, with the band beside them: a figure alone did not say what weight it was, and a
+	// category alone could not be checked against anything.
 	assert.equal(
 		said(strandsToReach(380, cat(3))),
-		'No exact fit | 1 strand is 1 Super Fine (Fingering/Sock), 2 strands are 4 Medium (Worsted/Aran). ' +
-			"Swatch the one nearer your pattern's gauge."
+		'No exact fit | 1 strand is 1 Super Fine (Fingering/Sock) at about 380 m/100 g, ' +
+			'2 strands are 4 Medium (Worsted/Aran) at about 190. ' +
+			DK_BAND +
+			" Swatch the one nearer your pattern's gauge."
 	);
 });
 
 test('a yarn exactly on a lower bound still takes two strands to leave its band', () => {
 	const r = answer(form({ m100: '210' }));
 	assert.equal(r.category.n, 3);
-	assert.equal(said(strandsToReach(r.woolEquivalent, cat(5), r.metres)), '2 strands | Held together, about 105 m/100 g.');
+	assert.equal(said(strandsToReach(r.woolEquivalent, cat(5), r.metres)), '2 strands | Held together, about 105 m/100 g. For this yarn, 5 Bulky (Chunky) is about 90–150 m/100 g.');
 });
