@@ -50,9 +50,6 @@ const DENSITY = new Map<string, number>(FIBRES);
 /** Every other density is measured against this one: 100% wool passes through unchanged. */
 const WOOL_DENSITY = 1.31;
 
-/** The fibre added when a reader presses "Add a fibre". */
-export const DEFAULT_ADDED_FIBRE: FibreName = 'Cotton';
-
 /** A blend can hold this many fibres, as the spreadsheet does. */
 export const MAX_FIBRES = 4;
 
@@ -334,8 +331,35 @@ export interface BlendTotal {
 	label: string;
 }
 
+/**
+ * The blend as it should be counted.
+ *
+ * The page starts with the blend **empty** — no fibre chosen, no percentage — so the reader
+ * has to say what the yarn is made of before there is an answer. It used to start as 100%
+ * wool, and readers who typed a length saw an answer at once and never looked at step 2:
+ * every cotton, alpaca and acrylic was being worked out as wool.
+ *
+ * Two readings make that bearable:
+ *
+ * - **A row with neither a fibre nor a percentage is not there.** It is an empty row, not a
+ *   0% row, so it cannot make a total wrong.
+ * - **One fibre with no percentage is all of it.** Most yarn is a single fibre, and asking
+ *   the reader to type "100" after choosing "Cotton" is asking them to state the obvious.
+ *   The page shows that 100 as the percentage box's placeholder, so it is never hidden.
+ */
+export function effectiveRows(rows: readonly FibreRow[]): FibreRow[] {
+	const used = rows.filter((row) => row.fibre !== '' || parseNumber(row.pct) !== null);
+	if (used.length === 1 && used[0].fibre !== '' && parseNumber(used[0].pct) === null) {
+		return [{ fibre: used[0].fibre, pct: '100' }];
+	}
+	return used;
+}
+
+/** Whether the reader has put anything at all into the blend yet. */
+export const blendStarted = (rows: readonly FibreRow[]) => effectiveRows(rows).length > 0;
+
 export function blendTotal(rows: readonly FibreRow[]): BlendTotal {
-	const total = rows.reduce((sum, row) => sum + (parseNumber(row.pct) ?? 0), 0);
+	const total = effectiveRows(rows).reduce((sum, row) => sum + (parseNumber(row.pct) ?? 0), 0);
 	const ok = Math.abs(total - 100) <= TOTAL_TOLERANCE;
 	const shown = Math.round(total * 10) / 10;
 	return { total, ok, label: ok ? `Total ${shown}%` : `Total ${shown}% — needs 100` };
@@ -349,7 +373,7 @@ export function blendTotal(rows: readonly FibreRow[]): BlendTotal {
  * exactly 100 the two are the same.
  */
 export function blendDensity(rows: readonly FibreRow[]): number | null {
-	const used = rows
+	const used = effectiveRows(rows)
 		.map((row) => ({ pct: parseNumber(row.pct) ?? 0, density: DENSITY.get(row.fibre) ?? WOOL_DENSITY }))
 		.filter((row) => row.pct > 0);
 	const total = used.reduce((sum, row) => sum + row.pct, 0);
@@ -391,6 +415,9 @@ export type Outcome =
 
 export const MESSAGES = {
 	needsLength: 'Enter metres per 100 g, or a yarn count from a cone.',
+	/** Not a mistake — the blend simply has not been started. The page waits, it does not warn. */
+	needsBlend: 'Choose what the yarn is made of.',
+	needsFibre: 'Choose a fibre for each percentage.',
 	needsTotal: 'Percentages must total 100.',
 	outOfRange: 'Result out of range.',
 } as const;
@@ -442,8 +469,15 @@ function implausible(metres: number, stated: number | null, manualDivisor: boole
  * - a single count, or a range.
  *
  * Returns the sentence ready to show, because every branch words itself differently.
+ *
+ * **The band is chosen on the wool-equivalent; the figures shown are the reader's own.**
+ * Those are two different numbers for any fibre but wool, and showing the wool-equivalent
+ * broke the one sum a reader will check in her head: the page says the length divides by
+ * the number of strands, she has 380 m/100 g, and two strands came out as "about 181"
+ * rather than 190. Dividing either number by n picks the same band — the fibre correction
+ * is a multiplier, so it commutes with the division — so only the display changes.
  */
-export function strandsToReach(woolEquivalent: number, target: Category): string {
+export function strandsToReach(woolEquivalent: number, target: Category, metres = woolEquivalent): string {
 	const max = categoryMax(target);
 	// Thinner is a larger figure, so the band's ceiling gives the fewest strands.
 	const fewest = Number.isFinite(max) ? Math.floor(woolEquivalent / max) + 1 : 1;
@@ -451,25 +485,24 @@ export function strandsToReach(woolEquivalent: number, target: Category): string
 	const label = `${target.n} ${target.name}`;
 	const strands = (n: number) => (n === 1 ? '1 strand' : `${n} strands`);
 	const give = (n: number) => (n === 1 ? 'gives' : 'give');
+	const each = (n: number) => Math.round(metres / n);
 
 	if (most < 1) return `One strand is already heavier than ${label}.`;
 
 	if (fewest > most) {
-		return `Nothing lands in ${label}: ${strands(most)} ${give(most)} ${Math.round(woolEquivalent / most)} m/100 g, ${strands(fewest)} ${give(fewest)} ${Math.round(woolEquivalent / fewest)}.`;
+		return `Nothing lands in ${label}: ${strands(most)} ${give(most)} ${each(most)} m/100 g, ${strands(fewest)} ${give(fewest)} ${each(fewest)}.`;
 	}
 
 	if (!Number.isFinite(most)) return `${strands(fewest)} or more.`;
 
-	if (fewest === most) {
-		return `${strands(fewest)} — about ${Math.round(woolEquivalent / fewest)} m/100 g.`;
-	}
+	if (fewest === most) return `${strands(fewest)} — about ${each(fewest)} m/100 g.`;
 
-	return `${fewest} to ${most} strands — about ${Math.round(woolEquivalent / fewest)} to ${Math.round(woolEquivalent / most)} m/100 g.`;
+	return `${fewest} to ${most} strands — about ${each(fewest)} to ${each(most)} m/100 g.`;
 }
 
 /** "46% alpaca, 20% merino, 34% polyamide" — the label, read back. */
 function describeBlend(rows: readonly FibreRow[]): string {
-	return rows
+	return effectiveRows(rows)
 		.map((row) => ({ fibre: row.fibre, pct: parseNumber(row.pct) ?? 0 }))
 		.filter((row) => row.pct > 0)
 		.map((row) => `${Math.round(row.pct * 10) / 10}% ${row.fibre.toLowerCase()}`)
@@ -490,6 +523,9 @@ export function calculate(input: Input): Outcome {
 		return { ok: false, message: implausible(metres, stated, input.divisor !== 'auto') };
 	}
 
+	const rows = effectiveRows(input.rows);
+	if (rows.length === 0) return { ok: false, message: MESSAGES.needsBlend };
+	if (rows.some((row) => row.fibre === '')) return { ok: false, message: MESSAGES.needsFibre };
 	if (!blendTotal(input.rows).ok) return { ok: false, message: MESSAGES.needsTotal };
 	const density = blendDensity(input.rows);
 	if (density === null) return { ok: false, message: MESSAGES.needsTotal };
@@ -499,21 +535,33 @@ export function calculate(input: Input): Outcome {
 	const category = Number.isFinite(woolEquivalent) ? categoryFor(woolEquivalent) : undefined;
 	if (!category) return { ok: false, message: MESSAGES.outOfRange };
 
+	// Each message says which figure the answer used and what to do about the other. The
+	// disagreement used to end "Check the divisor" — and a first-time reader whose real
+	// problem was a leftover length from the previous yarn went hunting for a setting that
+	// needed no change, and which she could not have named.
 	let check: Check | null = null;
+	const where = 'under “The count looks wrong”';
 	if (count && stated !== null) {
 		if (Math.abs(count.metres - stated) / stated > AGREEMENT) {
+			const s = Math.round(stated);
 			check = {
 				tone: 'warning',
-				message: `Count gives ${Math.round(count.metres)} m/100 g, label says ${Math.round(stated)}. Check the divisor.`,
+				message:
+					`The metres box says ${s} m/100 g but the count gives ${Math.round(count.metres)}, and the answer uses the ${s}. ` +
+					`If the count is the one to trust, clear the metres box; if neither looks right, check the divisor ${where}.`,
 			};
 		}
 	} else if (count) {
+		// Never "the divisor is a guess" once the reader has set it herself — by then it is not.
+		const confirm = 'Confirm by weighing a measured length.';
 		check = {
 			tone: 'caution',
 			message:
-				count.divisor !== 1
-					? 'No stated m/100 g, so the divisor is a guess. Confirm by weighing a measured length.'
-					: 'No stated m/100 g — this comes from the count alone. Confirm by weighing a measured length.',
+				input.divisor !== 'auto'
+					? `No metres per 100 g given, and the divisor was set by hand to ÷ ${count.divisor}. ${confirm}`
+					: count.divisor !== 1
+						? `No metres per 100 g given, so the printed ${tidy(count.printed)} was read as ${tidy(count.printed)} ÷ ${count.divisor}. ${confirm}`
+						: `No metres per 100 g given — this comes from the count alone. ${confirm}`,
 		};
 	}
 
@@ -524,7 +572,7 @@ export function calculate(input: Input): Outcome {
 		category,
 		woolEquivalent,
 		metres,
-		summary: `${describeBlend(input.rows)} at ${Math.round(metres)} m / 100 g${source}.`,
+		summary: `${describeBlend(rows)} at ${Math.round(metres)} m / 100 g${source}.`,
 		check,
 		canHoldStrands: category.n !== 6,
 		working: count?.working ?? null,

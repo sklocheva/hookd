@@ -1,6 +1,6 @@
 ---
 import YarnWeightFibreRow from './YarnWeightFibreRow.astro';
-import { CATEGORIES, DEFAULT_ADDED_FIBRE, SYSTEMS } from '../lib/yarn-weight';
+import { CATEGORIES, SYSTEMS } from '../lib/yarn-weight';
 
 /**
  * The yarn weight calculator: a form on the left, the answer on the right.
@@ -10,7 +10,7 @@ import { CATEGORIES, DEFAULT_ADDED_FIBRE, SYSTEMS } from '../lib/yarn-weight';
  * `calculate`, and writes the answer into the elements below.
  *
  * Everything the reader can see is rendered on the server — the form, every counting
- * system's field, the four caveats — and the script only shows and hides. That is the same
+ * system's field, the caveats — and the script only shows and hides. That is the same
  * arrangement as the quiz and the size picker, and for the same reason: crawlers fetch
  * scripts but do not run them. It is not an island (`client:load`) because this site has no
  * UI framework to hydrate one with.
@@ -49,6 +49,9 @@ const first = SYSTEMS[0];
 			</p>
 		</div>
 
+		{/* Everything that produces the length. A problem with it is flagged when focus leaves
+		    this group, not on a keystroke — see `settled` in the script. */}
+		<div data-yw-group="length">
 		<label class="label-text" for="yw-m100">Metres per 100 g</label>
 		<div class="field">
 			<input
@@ -64,9 +67,17 @@ const first = SYSTEMS[0];
 			/>
 			<span class="field__unit">m / 100 g</span>
 		</div>
-		<p class="hint" id="yw-m100-hint">
+		<p class="hint" id="yw-m100-hint" data-yw-m100-hint>
 			Often written as "100 g / 380 m". If it is on your label, this is all you need — the
 			section below is for cones, which usually have no length on them.
+		</p>
+		{/* A problem with the metres box is said here, in place of the hint above rather than
+		    beneath it. Beneath, it arrived just as focus reached the first fibre and pushed
+		    that menu 57px down under the reader's pointer. Swapping for the hint costs a few
+		    pixels instead. */}
+		<p class="field-error" data-yw-m100-error hidden>
+			<span class="alert__mark" aria-hidden="true">!</span>
+			<span data-yw-m100-error-text></span>
 		</p>
 
 		{/* The cone path, shut until asked for. */}
@@ -112,7 +123,6 @@ const first = SYSTEMS[0];
 							inputmode="decimal"
 							aria-label="Yarn count, first number"
 							aria-describedby="yw-count-hint"
-							placeholder="2"
 							data-yw-mill-a
 						/>
 						<span class="pair__slash" aria-hidden="true">/</span>
@@ -124,7 +134,6 @@ const first = SYSTEMS[0];
 							inputmode="decimal"
 							aria-label="Yarn count, second number"
 							aria-describedby="yw-count-hint"
-							placeholder="28"
 							data-yw-mill-b
 						/>
 					</div>
@@ -145,7 +154,14 @@ const first = SYSTEMS[0];
 					</div>
 				</div>
 
+				{/* No placeholders in the two boxes: grey "2" and "28" read as values already
+				    entered, and after typing 2000 in one the other still showed "28" — so the
+				    field looked like "2000 / 28". The examples are in this hint instead. */}
 				<p class="hint" id="yw-count-hint" data-yw-count-hint>{first.hint}</p>
+				<p class="field-error" data-yw-count-error hidden>
+					<span class="alert__mark" aria-hidden="true">!</span>
+					<span data-yw-count-error-text></span>
+				</p>
 
 				<div class="working" data-yw-working-tile hidden>
 					<p class="working__text" data-yw-working></p>
@@ -175,9 +191,13 @@ const first = SYSTEMS[0];
 						</p>
 						<p class="hint">
 							Change it only if the result looks wrong. As a rough check: most yarn people crochet
-							with lands between 80 and 600 m per 100 g.
+							with lands between 80 and 600 m per 100 g. The automatic setting gets it wrong for
+							yarn under 30 m / 100 g and for thread finer than Nm 300.
 						</p>
-						<div class="chips" role="group" aria-label="Divisor">
+						{/* Named on screen, not only for a screen reader. Every message that mentions
+						    "the divisor" needs something visibly called that to point at. */}
+						<span class="label-text" id="yw-divisor-label">Divisor</span>
+						<div class="chips" role="group" aria-labelledby="yw-divisor-label">
 							<button
 								type="button"
 								class="chip is-active"
@@ -196,6 +216,8 @@ const first = SYSTEMS[0];
 			</div>
 		</div>
 
+		</div>
+
 		{/* ---- 2. what is it made of? ---- */}
 		<div class="step step--second">
 			<p class="step__n">Step 2</p>
@@ -206,49 +228,61 @@ const first = SYSTEMS[0];
 			</p>
 		</div>
 
-		<div class="rows" data-yw-rows>
-			<YarnWeightFibreRow fibre="Wool" pct="100" />
-		</div>
-
-		<template data-yw-row-template>
-			<YarnWeightFibreRow fibre={DEFAULT_ADDED_FIBRE} pct="" />
-		</template>
-
-		<div class="rows-foot">
-			<button type="button" class="link-button" data-yw-add>Add a fibre</button>
-			{/* Sits in the percentage column, under the figures it totals. */}
-			<span class="total" data-yw-total>Total 100%</span>
-		</div>
-
-		<div class="submit">
-			{/* The message goes here as well as beside the answer. The answer panel is a screen
-			    away on a phone and below the fold on a desktop, so a reader who pressed the
-			    button was being corrected somewhere they were not looking. This one is short;
-			    the one beside the answer keeps the explanation. */}
-			<div class="form-error" data-yw-form-error hidden>
-				<span class="alert__mark" aria-hidden="true">!</span>
-				<span class="form-error__text" data-yw-form-error-text></span>
+		{/* The blend. A wrong total is flagged when focus leaves the blend as a whole, not when
+		    it leaves one box: filling in 46 / 20 / 34 passes through 46 and 66 on the way, and
+		    a reader moving from the first box to the second is not finished. */}
+		<div data-yw-group="blend">
+			{/* Starts empty. See YarnWeightFibreRow for why nothing is chosen for the reader. */}
+			<div class="rows" data-yw-rows>
+				<YarnWeightFibreRow />
 			</div>
 
-			{/* Hidden until the script is running: a button that does nothing is worse than none.
-			    The label does not change once pressed — the hint below it carries that. */}
-			<button type="submit" class="button" data-yw-submit hidden>Calculate weight</button>
-			<p class="hint hint--submit" data-yw-submit-hint hidden>
-				Fill in what you can first — nothing is flagged until you press this.
+			<template data-yw-row-template>
+				<YarnWeightFibreRow />
+			</template>
+
+			<div class="rows-foot">
+				<button type="button" class="link-button" data-yw-add>Add a fibre</button>
+				{/* Sits in the percentage column, under the figures it totals. Hidden until the
+				    blend has something in it — "Total 0%" on a blank form is noise. */}
+				<span class="total" data-yw-total hidden></span>
+			</div>
+
+			{/* The blend's message gets a line of its own, like the length's. It used to live in
+			    the total — "Total 96% — needs 100" — which wrapped to three lines in a 96px
+			    column and was easy to miss. The total still turns colour; this says why. */}
+			<p class="field-error" data-yw-blend-error hidden>
+				<span class="alert__mark" aria-hidden="true">!</span>
+				<span data-yw-blend-error-text></span>
 			</p>
 		</div>
 	</form>
+
+	{/* The answer, in one line, pinned to the foot of the screen — shown only while there is an
+	    answer and the panel itself is out of view. On a desktop the panel is beside the form
+	    and this never appears. On a phone it is a screen below where the reader is typing, and
+	    the button this replaced used to scroll to it; this tells them it has changed without
+	    moving the page under their thumb. */}
+	<div class="peek" data-yw-peek hidden>
+		<div class="peek__inner">
+			<span class="peek__label">Answer</span>
+			<span class="peek__cat" data-yw-peek-cat></span>
+			<a class="peek__link" href="#yw-answer">See the details</a>
+		</div>
+	</div>
 
 	<div class="yw__side">
 		{/* The answer region. Announced politely as it changes — the design file has no
 		    aria-live here, and a category that changes silently is invisible to a screen
 		    reader. The script writes text only when it differs, so a keystroke that leaves
 		    the answer alone does not re-announce it. */}
-		<div class="answer" data-yw-answer aria-live="polite">
+		<div class="answer" id="yw-answer" data-yw-answer aria-live="polite">
 			<div class="waiting" data-yw-waiting>
 				<div class="waiting__label">The answer appears here</div>
-				<p class="waiting__text">
-					Fill in the label as far as you can, then work it out. Nothing is checked until you ask.
+				{/* Says what is still missing, so a reader who has done step 1 is sent to step 2
+				    rather than left wondering why nothing happened. */}
+				<p class="waiting__text" data-yw-waiting-text>
+					Fill in how long 100 g of it is, and what it is made of.
 				</p>
 				<noscript>
 					<p class="waiting__text waiting__text--nojs">
@@ -266,11 +300,14 @@ const first = SYSTEMS[0];
 				<p class="blocked__text" data-yw-blocked-text></p>
 			</div>
 
-			<div data-yw-result hidden>
-				{/* When the form goes invalid mid-edit this keeps showing the last good answer,
-				    dimmed, rather than blanking. Editing a blend means passing through wrong
-				    totals — you cannot change 34 to 50 without existing at some wrong number —
-				    and wiping the result on every keystroke punished the reader for typing. */}
+			{/* When the form stops describing a yarn mid-edit, this keeps the last answer that
+			    worked — dimmed at once, with a line saying what it is waiting for. Dimmed straight
+			    away, and the whole block rather than just the top panel: a cold read found it
+			    left undimmed until the reader left the step, so it looked like a live answer
+			    for a yarn she was no longer describing. The *warning* still waits; see the
+			    script. */}
+			<div class="result-block" data-yw-result hidden>
+				<p class="result__stale" data-yw-stale hidden></p>
 				<div class="result" data-yw-result-panel>
 					<div class="result__label">Craft Yarn Council category</div>
 					<div class="result__cat">
@@ -285,9 +322,6 @@ const first = SYSTEMS[0];
 					<p class="result__hook" data-yw-hook></p>
 					<div class="result__label result__label--sub">The yarn you entered</div>
 					<p class="result__summary" data-yw-summary></p>
-					<p class="result__stale" data-yw-stale hidden>
-						This is the last answer that worked. Fix the form and it will catch up.
-					</p>
 				</div>
 
 				<div class="check" data-yw-check hidden>
@@ -336,43 +370,48 @@ const first = SYSTEMS[0];
 			</div>
 		</div>
 
-		<section class="caveats" aria-labelledby="yw-caveats">
-			<h2 class="caveats__title" id="yw-caveats">Before you trust it</h2>
-			<div class="caveats__list">
-				<div>
-					<h3 class="caveat__head">It cannot see the construction</h3>
-					<p class="caveat__text">
-						This works out the thickness of the yarn's core from its weight and its fibre. Anything
-						that adds bulk without adding weight is invisible to it — a brushed halo, chainette,
-						tape, ribbon, chenille, bouclé. For those, swatch and trust the swatch.
-					</p>
-				</div>
-				<div>
-					<h3 class="caveat__head">Cone yarn arrives oiled</h3>
-					<p class="caveat__text">
-						Yarn coned for industrial knitting still has spinning oil on it and fluffs up once
-						washed. It can work up a whole category heavier than this says. Wash the swatch before
-						you judge it.
-					</p>
-				</div>
-				<div>
-					<h3 class="caveat__head">The category is an estimate</h3>
-					<p class="caveat__text">
-						CYC defines its categories by gauge and hook size, not by yardage. A blocked swatch is
-						the final answer; this is the starting guess.
-					</p>
-				</div>
-				<div>
-					<h3 class="caveat__head">Where the divisor gives up</h3>
-					<p class="caveat__text">
-						The automatic divisor fails for yarn under 30 m/100 g and for thread finer than Nm 300.
-						Set it by hand in "The count looks wrong" for either.
-					</p>
-				</div>
-			</div>
-		</section>
 	</div>
 </div>
+
+{/* The caveats, beneath the whole tool rather than beside the answer.
+
+    Beside it, four blocks of small print filled the answer column to nearly the height of
+    the form: cramped, easy to read as clutter, and the reason the "sticky" answer barely
+    moved. Here they have the full width, sit where a reader who has an answer arrives next,
+    and the answer column is short enough to stay in view while the form is filled in.
+
+    Three, not four. "Where the divisor gives up" only ever applies to someone setting the
+    divisor, so it moved into the divisor panel — and at the top of the page, "thread finer
+    than Nm 300" was the most intimidating line a ball-band reader met before typing
+    anything. */}
+<section class="caveats" aria-labelledby="yw-caveats">
+	<h2 class="caveats__title" id="yw-caveats">Before you trust it</h2>
+	<div class="caveats__list">
+		<div>
+			<h3 class="caveat__head">It cannot see the construction</h3>
+			<p class="caveat__text">
+				This works out the thickness of the yarn's core from its weight and its fibre. Anything
+				that adds bulk without adding weight is invisible to it — a brushed halo, chainette,
+				tape, ribbon, chenille, bouclé. For those, swatch and trust the swatch.
+			</p>
+		</div>
+		<div>
+			<h3 class="caveat__head">Cone yarn arrives oiled</h3>
+			<p class="caveat__text">
+				Yarn coned for industrial knitting still has spinning oil on it and fluffs up once
+				washed. It can work up a whole category heavier than this says. Wash the swatch before
+				you judge it.
+			</p>
+		</div>
+		<div>
+			<h3 class="caveat__head">The category is an estimate</h3>
+			<p class="caveat__text">
+				CYC defines its categories by gauge and hook size, not by yardage. A blocked swatch is
+				the final answer; this is the starting guess.
+			</p>
+		</div>
+	</div>
+</section>
 
 <style>
 	/* Several of these are flex or grid, and a display declaration beats the `hidden`
@@ -475,9 +514,6 @@ const first = SYSTEMS[0];
 		color: var(--ink-2);
 	}
 
-	.hint--submit {
-		margin: var(--s2) 0 0;
-	}
 
 	/* ---- a boxed field with a unit on its right ---- */
 
@@ -670,7 +706,6 @@ const first = SYSTEMS[0];
 		display: flex;
 		align-items: center;
 		gap: var(--s1);
-		margin-bottom: var(--s4);
 	}
 
 	.link-button {
@@ -719,52 +754,77 @@ const first = SYSTEMS[0];
 		color: var(--terracotta);
 	}
 
-	/* ---- submit ---- */
-
-	.submit {
-		padding-top: var(--s3);
-		border-top: 1px solid var(--rule);
-	}
-
-	/* The short version of whatever the answer panel is saying, where the reader is looking
-	   when they press the button. */
-	.form-error {
+	/* The short version of what the answer panel is saying, under the fields it is about. */
+	.field-error {
 		display: flex;
 		align-items: flex-start;
 		gap: 10px;
-		margin-bottom: var(--s2);
+		margin: var(--s1) 0 var(--s3);
 		padding: 12px 14px;
 		background: var(--alert-caution);
 		border: 1px solid var(--rule);
 		border-left: 4px solid var(--ochre-rule);
 		color: var(--ochre-text);
+		font: 600 14px/1.5 var(--sans);
 	}
 
-	.form-error__text {
-		font: 600 14px/1.5 var(--sans);
+	.field-error > span:last-child {
 		color: var(--ink);
 	}
 
-	.button {
-		display: inline-flex;
+	/* ---- the answer, pinned to the foot of a phone screen ---- */
+
+	.peek {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 5;
+		background: var(--paper);
+		border-top: 1px solid var(--rule-strong);
+	}
+
+	.peek__inner {
+		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		justify-content: center;
-		min-height: 52px;
-		padding: 14px 30px;
-		background: var(--ink);
-		border: 1px solid var(--ink);
-		border-radius: 0;
-		color: var(--paper);
-		cursor: pointer;
-		white-space: nowrap;
+		gap: 0 12px;
+		max-width: var(--shell);
+		margin: 0 auto;
+		padding: 4px var(--gutter);
+	}
+
+	.peek__label {
 		font: var(--type-label);
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
-		transition: background 0.18s ease;
+		color: var(--ochre);
 	}
 
-	.button:hover {
-		background: var(--ink-hover);
+	.peek__cat {
+		font: 400 20px/1.2 var(--serif);
+		color: var(--ink);
+	}
+
+	.peek__link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		margin-left: auto;
+		font: var(--type-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		text-decoration: underline;
+		text-underline-offset: 4px;
+		color: var(--terracotta);
+	}
+
+	.peek__link:hover {
+		color: var(--terracotta-hover);
+	}
+
+	.peek.is-stale .peek__cat {
+		color: var(--muted);
 	}
 
 	/* A field the message is about. Colour is not the signal — the message names the field
@@ -859,7 +919,7 @@ const first = SYSTEMS[0];
 	}
 
 	/* Faded rather than removed: the figures are still true of the last thing that worked. */
-	.result.is-stale {
+	.result-block.is-stale > :not(.result__stale) {
 		opacity: 0.55;
 	}
 
@@ -915,8 +975,8 @@ const first = SYSTEMS[0];
 	}
 
 	.result__stale {
-		margin: 14px 0 0;
-		font: var(--type-note);
+		margin: 0 0 10px;
+		font: var(--type-callout);
 		color: var(--label-ink);
 		text-wrap: pretty;
 	}
@@ -993,9 +1053,13 @@ const first = SYSTEMS[0];
 
 	/* ---- the four caveats: always visible, never behind a disclosure ---- */
 
+	/* Beneath the whole tool, full width: three columns on a desktop, one on a phone. */
+	/* Literal sizes, not --s1..--s4: those are defined on .yw, and this section sits outside
+	   it. Written with the tokens, the padding and the gaps silently resolved to nothing and
+	   the three caveats ran into one another on a phone. */
 	.caveats {
-		margin-top: 22px;
-		padding-top: 22px;
+		margin-top: clamp(40px, 5vw, 64px);
+		padding-top: 24px;
 		border-top: 1px solid var(--rule);
 	}
 
@@ -1008,9 +1072,9 @@ const first = SYSTEMS[0];
 	}
 
 	.caveats__list {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+		gap: 24px clamp(28px, 4vw, 52px);
 	}
 
 	.caveat__head {
@@ -1026,22 +1090,22 @@ const first = SYSTEMS[0];
 		text-wrap: pretty;
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.button {
-			transition: none;
-		}
+	/* Lands the answer clear of the top edge when "See the details" jumps to it. */
+	.answer {
+		scroll-margin-top: 16px;
 	}
 </style>
 
 <script>
 	import {
 		CATEGORIES,
-		DEFAULT_ADDED_FIBRE,
 		MAX_FIBRES,
 		MESSAGES,
+		blendStarted,
 		blendTotal,
 		calculate,
 		countToMetres,
+		parseNumber,
 		strandsToReach,
 		systemFor,
 		type DivisorMode,
@@ -1054,13 +1118,25 @@ const first = SYSTEMS[0];
 	 * Reads the form, asks src/lib/yarn-weight.ts for the answer, writes it back.
 	 *
 	 * No calculation is done here. The form is the state — every render re-reads it — so
-	 * there is no second copy to drift, apart from the four things the DOM cannot hold:
-	 * whether the button has been pressed, which divisor chip is chosen, which disclosures
-	 * are open, and the last answer that worked.
+	 * there is no second copy to drift, apart from what the DOM cannot hold: which divisor
+	 * chip is chosen, which disclosures are open, which group the reader is still in, and the
+	 * last answer that worked.
 	 *
-	 * Nothing is validated until the first press of the button, so a reader can fill the
-	 * form top to bottom without being told off for fields they have not reached. After
-	 * that it follows every edit.
+	 * **It answers as you type, and there is no button.** There was one, and nothing was
+	 * worked out until it was pressed — after which everything followed each edit, so the
+	 * same form behaved two ways depending on whether you had pressed it once.
+	 *
+	 * **Two different things happen when the form stops describing a yarn, on two different
+	 * clocks.**
+	 *
+	 * - *The answer stops claiming to be current* — at once. The last good answer dims and a
+	 *   line says what it is waiting for. That is a statement about the answer, not about the
+	 *   reader, and a cold read found that leaving it undimmed until she left the step made
+	 *   a stale answer look live: "a confident answer for a yarn I'm no longer describing".
+	 * - *The reader is told something is wrong* — only once she leaves the group it is about
+	 *   (the length fields, or the blend as a whole), or at once for a deliberate click such
+	 *   as a divisor chip. That is what the button used to protect: nobody should be told off
+	 *   for a box they have not reached, and 46 / 20 / 34 passes through 46 and 66.
 	 */
 	const root = document.querySelector<HTMLElement>('[data-yw]');
 
@@ -1069,6 +1145,9 @@ const first = SYSTEMS[0];
 
 		const form = q<HTMLFormElement>('[data-yw-form]');
 		const m100 = q<HTMLInputElement>('[data-yw-m100]');
+		const m100Hint = q('[data-yw-m100-hint]');
+		const m100Error = q('[data-yw-m100-error]');
+		const m100ErrorText = q('[data-yw-m100-error-text]');
 		const countToggle = q<HTMLButtonElement>('[data-yw-count-toggle]');
 		const countToggleLabel = q('[data-yw-count-toggle-label]');
 		const countSign = q('[data-yw-count-sign]');
@@ -1081,11 +1160,12 @@ const first = SYSTEMS[0];
 		const singleInput = q<HTMLInputElement>('[data-yw-single-input]');
 		const singleUnit = q('[data-yw-single-unit]');
 		const countHint = q('[data-yw-count-hint]');
+		const countError = q('[data-yw-count-error]');
+		const countErrorText = q('[data-yw-count-error-text]');
 		const workingTile = q('[data-yw-working-tile]');
 		const working = q('[data-yw-working]');
 		const divisorBlock = q('[data-yw-divisor-block]');
 		const advanced = q<HTMLButtonElement>('[data-yw-advanced]');
-		const advancedLabel = q('[data-yw-advanced-label]');
 		const advancedSign = q('[data-yw-advanced-sign]');
 		const divisorPanel = q('[data-yw-divisor-panel]');
 		const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-yw-divisor]')];
@@ -1093,17 +1173,17 @@ const first = SYSTEMS[0];
 		const template = q<HTMLTemplateElement>('[data-yw-row-template]');
 		const addButton = q<HTMLButtonElement>('[data-yw-add]');
 		const totalEl = q('[data-yw-total]');
-		const formError = q('[data-yw-form-error]');
-		const formErrorText = q('[data-yw-form-error-text]');
-		const submit = q<HTMLButtonElement>('[data-yw-submit]');
-		const submitHint = q('[data-yw-submit-hint]');
+		const blendError = q('[data-yw-blend-error]');
+		const blendErrorText = q('[data-yw-blend-error-text]');
+		const peek = q('[data-yw-peek]');
+		const peekCat = q('[data-yw-peek-cat]');
 
 		const answer = q('[data-yw-answer]');
 		const waiting = q('[data-yw-waiting]');
+		const waitingText = q('[data-yw-waiting-text]');
 		const blocked = q('[data-yw-blocked]');
 		const blockedText = q('[data-yw-blocked-text]');
 		const result = q('[data-yw-result]');
-		const resultPanel = q('[data-yw-result-panel]');
 		const stale = q('[data-yw-stale]');
 		const catN = q('[data-yw-cat-n]');
 		const catName = q('[data-yw-cat-name]');
@@ -1117,12 +1197,30 @@ const first = SYSTEMS[0];
 		const targetAnswer = q('[data-yw-target-answer]');
 
 		type Good = Extract<Outcome, { ok: true }>;
+		type Group = 'length' | 'blend';
 
-		let submitted = false;
 		let divisor: DivisorMode = 'auto';
 		let countOpen = false;
 		let advancedOpen = false;
 		let lastGood: Good | null = null;
+
+		/** False while focus is inside a group; telling the reader off waits until it is true. */
+		const settled: Record<Group, boolean> = { length: true, blend: true };
+		const groupOf = (el: EventTarget | null): Group | null => {
+			if (!(el instanceof Element)) return null;
+			return (el.closest<HTMLElement>('[data-yw-group]')?.dataset.ywGroup as Group) ?? null;
+		};
+
+		/** The blend's problems; anything else that stops an answer is the length's. */
+		const BLEND_PROBLEMS: readonly string[] = [MESSAGES.needsTotal, MESSAGES.needsFibre];
+
+		/** Whether the answer panel and the form are on screen — which decides the peek. */
+		let answerInView = true;
+		let formInView = true;
+		let peekText = '';
+		const updatePeek = () => {
+			peek.hidden = !(peekText && formInView && !answerInView);
+		};
 
 		/** Text is only written when it changes, so a live region is not re-announced. */
 		const setText = (el: HTMLElement, text: string) => {
@@ -1130,7 +1228,8 @@ const first = SYSTEMS[0];
 		};
 
 		const rows = () => [...rowsEl.querySelectorAll<HTMLElement>('[data-yw-row]')];
-		const pctInputs = () => rows().map((r) => r.querySelector<HTMLInputElement>('[data-yw-pct]')!);
+		const fibreOf = (row: HTMLElement) => row.querySelector<HTMLSelectElement>('[data-yw-fibre]')!;
+		const pctOf = (row: HTMLElement) => row.querySelector<HTMLInputElement>('[data-yw-pct]')!;
 
 		/**
 		 * A shut yarn count section is one the reader has said does not apply, so its fields
@@ -1146,10 +1245,7 @@ const first = SYSTEMS[0];
 				millA: countOpen && !linear ? millA.value : '',
 				millB: countOpen ? (linear ? singleInput.value : millB.value) : '',
 				divisor,
-				rows: rows().map((row) => ({
-					fibre: row.querySelector<HTMLSelectElement>('[data-yw-fibre]')!.value,
-					pct: row.querySelector<HTMLInputElement>('[data-yw-pct]')!.value,
-				})),
+				rows: rows().map((row) => ({ fibre: fibreOf(row).value, pct: pctOf(row).value })),
 			};
 		};
 
@@ -1159,8 +1255,8 @@ const first = SYSTEMS[0];
 			const all = rows();
 			all.forEach((row, i) => {
 				const n = i + 1;
-				row.querySelector('[data-yw-fibre]')!.setAttribute('aria-label', `Fibre ${n}`);
-				row.querySelector('[data-yw-pct]')!.setAttribute('aria-label', `Percentage of fibre ${n}`);
+				fibreOf(row).setAttribute('aria-label', `Fibre ${n}`);
+				pctOf(row).setAttribute('aria-label', `Percentage of fibre ${n}`);
 				const remove = row.querySelector<HTMLElement>('[data-yw-remove]')!;
 				remove.setAttribute('aria-label', `Remove fibre ${n}`);
 				// Kept in the layout at all times. Toggling it with `hidden` resized the row
@@ -1174,20 +1270,26 @@ const first = SYSTEMS[0];
 			addButton.hidden = all.length >= MAX_FIBRES;
 		};
 
-		/** Which boxes the current message is about. Never the only signal — the words name
+		/** Which boxes the current warning is about. Never the only signal — the words name
 		    the field too; this just saves hunting for it. */
-		const markInvalid = (message: string | null) => {
+		const markInvalid = (problem: string | null) => {
 			const flagged = new Set<HTMLElement>();
-			if (message === MESSAGES.needsTotal) pctInputs().forEach((el) => flagged.add(el));
-			else if (message === MESSAGES.needsLength) flagged.add(m100);
-			else if (message) {
-				// A length no yarn has: the box that produced it.
-				const sys = systemFor(system.value);
+			const used = rows().filter((row) => fibreOf(row).value !== '' || pctOf(row).value.trim() !== '');
+			if (problem === MESSAGES.needsTotal) used.forEach((row) => flagged.add(pctOf(row)));
+			else if (problem === MESSAGES.needsFibre) {
+				used.filter((row) => fibreOf(row).value === '').forEach((row) => flagged.add(fibreOf(row)));
+			} else if (problem) {
+				// A length no yarn has: the box — or boxes — that produced it. Whichever of the
+				// pair holds a figure, since a single figure may be typed in either.
 				if (m100.value.trim()) flagged.add(m100);
-				else if (countOpen) flagged.add(sys.mode === 'linear' ? singleInput : millB);
+				else if (countOpen) {
+					const boxes = systemFor(system.value).mode === 'linear' ? [singleInput] : [millA, millB];
+					boxes.filter((box) => box.value.trim()).forEach((box) => flagged.add(box));
+				}
 			}
 
-			for (const el of [m100, millA, millB, singleInput, ...pctInputs()]) {
+			const all = [m100, millA, millB, singleInput, ...rows().flatMap((r) => [fibreOf(r), pctOf(r)])];
+			for (const el of all) {
 				const bad = flagged.has(el);
 				el.classList.toggle('is-invalid', bad);
 				if (bad) el.setAttribute('aria-invalid', 'true');
@@ -1195,14 +1297,21 @@ const first = SYSTEMS[0];
 			}
 		};
 
+		/** What a stale answer is waiting for — a statement about the answer, not a warning. */
+		const waitingFor = (problem: string, total: number) => {
+			if (problem === MESSAGES.needsTotal) {
+				return `Out of date — waiting for the percentages to add up to 100. They come to ${total}% now.`;
+			}
+			if (problem === MESSAGES.needsFibre) return 'Out of date — waiting for a fibre for each percentage.';
+			return 'Out of date — waiting for a length a yarn could have.';
+		};
+
 		/** Paint a good outcome into the result panel. */
-		const showResult = (outcome: Good, isStale: boolean) => {
+		const showResult = (outcome: Good) => {
 			setText(catN, String(outcome.category.n));
 			setText(catName, outcome.category.name);
 			setText(hook, outcome.category.hook);
 			setText(summary, outcome.summary);
-			resultPanel.classList.toggle('is-stale', isStale);
-			stale.hidden = !isStale;
 
 			check.hidden = !outcome.check;
 			if (outcome.check) {
@@ -1216,11 +1325,11 @@ const first = SYSTEMS[0];
 
 			strands.hidden = !outcome.canHoldStrands;
 
-			// "How many strands make a DK?" — answered against the same wool-equivalent the
-			// category above came from, so the two can never disagree.
+			// "How many strands make a DK?" — the band chosen on the same wool-equivalent the
+			// category above came from, the figures shown in the reader's own m/100 g.
 			const wanted = CATEGORIES.find((c) => String(c.n) === target.value);
 			targetAnswer.hidden = !wanted;
-			if (wanted) setText(targetAnswer, strandsToReach(outcome.woolEquivalent, wanted));
+			if (wanted) setText(targetAnswer, strandsToReach(outcome.woolEquivalent, wanted, outcome.metres));
 		};
 
 		const render = () => {
@@ -1245,9 +1354,11 @@ const first = SYSTEMS[0];
 			// A divisor means nothing for tex, dtex or denier.
 			divisorBlock.hidden = sys.mode !== 'count';
 
+			// The toggle keeps its name when open — the sign says open or shut. It used to turn
+			// into "Hide", and a message pointing at "The count looks wrong" then pointed at
+			// something no longer on screen.
 			advanced.setAttribute('aria-expanded', String(advancedOpen));
 			setText(advancedSign, advancedOpen ? '−' : '+');
-			setText(advancedLabel, advancedOpen ? 'Hide' : 'The count looks wrong');
 			divisorPanel.hidden = !advancedOpen;
 			for (const chip of chips) {
 				const on = chip.dataset.ywDivisor === divisor;
@@ -1259,114 +1370,195 @@ const first = SYSTEMS[0];
 			workingTile.hidden = !count;
 			setText(working, count?.working ?? '');
 
-			// The total. It stays quiet until the button has been pressed — the page promises
-			// "nothing is flagged until you press this", and it used to turn red on the first
-			// keystroke, breaking that promise inside thirty seconds.
+			// One fibre with no percentage counts as all of it (see effectiveRows), and the box
+			// shows that 100 as its placeholder rather than leaving it to be guessed. It follows
+			// the rule, not the row count: an empty row added below does not change it.
+			const all = rows();
+			const used = all.filter((row) => fibreOf(row).value !== '' || pctOf(row).value.trim() !== '');
+			const sole = used.length === 1 ? used[0] : all.length === 1 ? all[0] : null;
+			for (const row of all) pctOf(row).placeholder = row === sole ? '100' : '';
+
+			const started = blendStarted(input.rows);
 			const total = blendTotal(input.rows);
 			const shown = Math.round(total.total * 10) / 10;
-			const loud = submitted && !total.ok;
-			setText(totalEl, loud ? total.label : `Total ${shown}%`);
-			totalEl.classList.toggle('is-off', loud);
-
-			submit.hidden = false;
-			submitHint.hidden = false;
-			setText(
-				submitHint,
-				submitted
-					? 'It follows your edits from here on.'
-					: 'Fill in what you can first — nothing is flagged until you press this.'
-			);
-
-			if (!submitted) {
-				waiting.hidden = false;
-				blocked.hidden = true;
-				result.hidden = true;
-				formError.hidden = true;
-				markInvalid(null);
-				return;
-			}
+			totalEl.hidden = !started;
+			setText(totalEl, `Total ${shown}%`);
 
 			const outcome = calculate(input);
-			if (outcome.ok) lastGood = outcome;
 
-			waiting.hidden = true;
-			formError.hidden = outcome.ok;
-			markInvalid(outcome.ok ? null : outcome.message);
-			if (!outcome.ok) setText(formErrorText, outcome.message);
-
-			// A refusal with an earlier answer behind it keeps showing that answer, dimmed,
-			// rather than blanking the panel on the way through an invalid total.
-			const shownOutcome = outcome.ok ? outcome : lastGood;
-			blocked.hidden = !!shownOutcome;
-			result.hidden = !shownOutcome;
-
-			if (!shownOutcome) {
-				setText(blockedText, outcome.ok ? '' : outcome.message);
-				return;
+			// Where the form stands:
+			//   an answer                  → show it
+			//   length or blend not begun  → the waiting panel, saying which is still to do
+			//   a problem                  → the last answer dims at once; a warning waits
+			//                                until the reader leaves the group it is about
+			let fresh: Good | null = null;
+			let problem: string | null = null;
+			if (outcome.ok) {
+				fresh = lastGood = outcome;
+			} else if (outcome.message === MESSAGES.needsLength || outcome.message === MESSAGES.needsBlend) {
+				lastGood = null;
+			} else {
+				problem = outcome.message;
 			}
-			showResult(shownOutcome, !outcome.ok);
+			const group: Group = problem && BLEND_PROBLEMS.includes(problem) ? 'blend' : 'length';
+			const warn = problem !== null && settled[group];
+
+			const hasLength = outcome.ok || outcome.message !== MESSAGES.needsLength;
+			const showing = fresh ?? (problem ? lastGood : null);
+
+			waiting.hidden = !!showing || warn;
+			result.hidden = !showing;
+			blocked.hidden = !!showing || !warn;
+			result.classList.toggle('is-stale', !fresh && !!showing);
+			stale.hidden = !!fresh || !showing;
+
+			if (showing) {
+				showResult(showing);
+				if (problem) setText(stale, waitingFor(problem, shown));
+			} else if (warn) {
+				setText(blockedText, problem!);
+			} else if (problem) {
+				setText(waitingText, waitingFor(problem, shown).replace(/^Out of date — w/, 'W'));
+			} else {
+				setText(
+					waitingText,
+					!hasLength && !started
+						? 'Fill in how long 100 g of it is, and what it is made of.'
+						: !started
+							? 'Now choose what it is made of, in step 2.'
+							: 'Now fill in how long 100 g of it is, in step 1.'
+				);
+			}
+
+			// Warnings, under the fields they are about.
+			const blendWarn = warn && group === 'blend';
+			const lengthWarn = warn && group === 'length';
+			const fromMetres = parseNumber(m100.value) !== null;
+
+			totalEl.classList.toggle('is-off', blendWarn && problem === MESSAGES.needsTotal);
+			blendError.hidden = !blendWarn;
+			if (blendWarn) {
+				setText(
+					blendErrorText,
+					problem === MESSAGES.needsTotal
+						? `The percentages come to ${shown}%. They need to add up to 100.`
+						: problem!
+				);
+			}
+
+			m100Error.hidden = !(lengthWarn && fromMetres);
+			m100Hint.hidden = !m100Error.hidden;
+			countError.hidden = !(lengthWarn && !fromMetres);
+			countHint.hidden = !countError.hidden;
+			if (lengthWarn) setText(fromMetres ? m100ErrorText : countErrorText, problem!);
+
+			markInvalid(warn ? problem : null);
+
+			peekText = fresh
+				? `${fresh.category.n} ${fresh.category.name}`
+				: showing
+					? `${showing.category.n} ${showing.category.name} — out of date`
+					: '';
+			setText(peekCat, peekText);
+			peek.classList.toggle('is-stale', !fresh);
+			updatePeek();
+		};
+
+		/**
+		 * Typing "380" passes through "3" and "38" on the way — 3 m/100 g is refused and 38
+		 * is Super Bulky. Rendering each keystroke flashed both, and announced both to a
+		 * screen reader. A short pause after the last keystroke lets the number finish; a
+		 * `change` (a select picked, a field left) renders at once.
+		 */
+		let pending = 0;
+		const soon = () => {
+			window.clearTimeout(pending);
+			pending = window.setTimeout(render, 350);
+		};
+		const now = () => {
+			window.clearTimeout(pending);
+			render();
 		};
 
 		// The strands picker sits beside the answer rather than in the form, so it needs its
 		// own listener; everything else it depends on is read from the form by `render`.
-		target.addEventListener('change', render);
+		target.addEventListener('change', now);
 
 		// The form is the state, so any edit anywhere is a reason to look at it again.
-		form.addEventListener('input', render);
+		form.addEventListener('input', soon);
 		form.addEventListener('change', (event) => {
-			// A divisor chosen for one counting system says nothing about the next.
-			if (event.target === system) divisor = 'auto';
-			render();
+			// A divisor chosen for one counting system says nothing about the next. Choosing
+			// a system is deliberate, so its consequences are said at once.
+			if (event.target === system) {
+				divisor = 'auto';
+				settled.length = true;
+			}
+			now();
 		});
 
-		form.addEventListener('submit', (event) => {
-			event.preventDefault();
-			const first = !submitted;
-			submitted = true;
-			render();
-
-			// In a single column the answer sits under the button, but a tall form can still
-			// leave it partly below the fold. Bring it in only if it is not already in view.
-			if (first) {
-				const box = answer.getBoundingClientRect();
-				if (box.top < 0 || box.bottom > window.innerHeight) {
-					const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-					answer.scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' });
-				}
+		// Entering a group means the reader is working on it; leaving it — for the other
+		// group, or anywhere else on the page — means they have finished, and a problem with
+		// it can now be said.
+		form.addEventListener('focusin', (event) => {
+			const group = groupOf(event.target);
+			if (group) settled[group] = false;
+		});
+		form.addEventListener('focusout', (event) => {
+			const group = groupOf(event.target);
+			if (group && groupOf(event.relatedTarget) !== group) {
+				settled[group] = true;
+				now();
 			}
 		});
+
+		// There is no submit button, but Enter in a field can still submit a form, and a
+		// submitted form reloads the page and loses everything typed.
+		form.addEventListener('submit', (event) => event.preventDefault());
+
+		if ('IntersectionObserver' in window) {
+			new IntersectionObserver(([entry]) => {
+				answerInView = entry.isIntersecting;
+				updatePeek();
+			}).observe(answer);
+			new IntersectionObserver(([entry]) => {
+				formInView = entry.isIntersecting;
+				updatePeek();
+			}).observe(form);
+		}
 
 		form.addEventListener('click', (event) => {
 			const target = event.target as HTMLElement;
 
+			// A divisor chip is a deliberate choice, not typing in progress: if it makes the
+			// length impossible, say so now rather than when the reader wanders off.
 			const chip = target.closest<HTMLElement>('[data-yw-divisor]');
 			if (chip) {
 				divisor = chip.dataset.ywDivisor as DivisorMode;
-				render();
+				settled.length = true;
+				now();
 				return;
 			}
 
 			if (target.closest('[data-yw-count-toggle]')) {
 				countOpen = !countOpen;
-				render();
+				now();
 				if (countOpen) system.focus();
 				return;
 			}
 
 			if (target.closest('[data-yw-advanced]')) {
 				advancedOpen = !advancedOpen;
-				render();
+				now();
 				return;
 			}
 
 			if (target.closest('[data-yw-add]')) {
 				if (rows().length >= MAX_FIBRES) return;
 				const row = template.content.firstElementChild!.cloneNode(true) as HTMLElement;
-				row.querySelector<HTMLSelectElement>('[data-yw-fibre]')!.value = DEFAULT_ADDED_FIBRE;
 				rowsEl.append(row);
 				renumber();
-				render();
-				row.querySelector<HTMLElement>('[data-yw-fibre]')!.focus();
+				now();
+				fibreOf(row).focus();
 				return;
 			}
 
@@ -1378,10 +1570,9 @@ const first = SYSTEMS[0];
 				const at = all.indexOf(row);
 				row.remove();
 				renumber();
-				render();
+				now();
 				// Focus would otherwise fall back to the top of the page.
-				const next = rows()[Math.min(at, rows().length - 1)];
-				next.querySelector<HTMLElement>('[data-yw-fibre]')!.focus();
+				fibreOf(rows()[Math.min(at, rows().length - 1)]).focus();
 			}
 		});
 

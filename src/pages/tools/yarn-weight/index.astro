@@ -19,10 +19,14 @@ import YarnWeightCalculator from '../../../components/YarnWeightCalculator.astro
 				Type in what the label says — metres per 100 g, or the yarn count off a cone — add the fibre
 				blend, and this works out which Craft Yarn Council category the yarn belongs to.
 			</p>
-			<p class="note">
-				Fill it in, press the button, and it keeps up with your edits from there. Nothing is saved.
-			</p>
+			<p class="note">It works the answer out as you type. Nothing is saved.</p>
 		</div>
+
+		{/* The break between reading about the tool and using it. Without it the intro's last
+		    line, "Step 1" and the first question stacked into one column of text, and the page
+		    heading read as though it ran on into the form. Full width, so it spans the answer
+		    column too — the same rule the quiz page puts between its title block and the quiz. */}
+		<hr class="divider" />
 
 		<YarnWeightCalculator />
 
@@ -46,7 +50,12 @@ import YarnWeightCalculator from '../../../components/YarnWeightCalculator.astro
 	/* The intro reads at a note's measure even though the tool below it is wider. */
 	.intro {
 		max-width: var(--measure);
-		margin-bottom: 38px;
+	}
+
+	.divider {
+		margin: 34px 0 40px;
+		border: none;
+		border-top: 1px solid var(--rule);
 	}
 
 	.intro :global(.eyebrow) {
@@ -74,11 +83,11 @@ import YarnWeightCalculator from '../../../components/YarnWeightCalculator.astro
 		text-wrap: pretty;
 	}
 
+	/* No rule of its own: it follows the caveats, which already open with one, and two
+	   hairlines a paragraph apart read as a mistake. */
 	.source {
 		max-width: var(--measure);
-		margin-top: 64px;
-		padding-top: 26px;
-		border-top: 1px solid var(--rule);
+		margin-top: 40px;
 	}
 
 	.source p {

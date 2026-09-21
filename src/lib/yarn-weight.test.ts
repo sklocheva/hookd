@@ -12,6 +12,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
 	blendDensity,
+	blendStarted,
 	blendTotal,
 	calculate,
 	CATEGORIES,
@@ -27,7 +28,7 @@ import {
 /** The category with this CYC number, for the tests that name one. */
 const cat = (n: number) => CATEGORIES.find((c) => c.n === n)!;
 
-/** A blank form with one row of wool, which is what the page starts as. */
+/** A form with one row of 100% wool — a convenience here; the page itself starts with the blend empty. */
 const form = (over: Partial<Input> = {}): Input => ({
 	m100: '',
 	system: 'nm',
@@ -55,7 +56,7 @@ test('6 / 15000, 100% wool → 250 m/100 g, 3 Light (DK); 2 strands ≈ 125 → 
 	assert.equal(r.category.name, 'Light (DK)');
 	// The brief's strand figure, now reached through the picker rather than a line the page
 	// printed unasked: two strands of this land at 125 m/100 g, which is 5 Bulky.
-	assert.equal(strandsToReach(r.woolEquivalent, cat(5)), '2 strands — about 125 m/100 g.');
+	assert.equal(strandsToReach(r.woolEquivalent, cat(5), r.metres), '2 strands — about 125 m/100 g.');
 });
 
 test('2 / 48 count only, wool → 2400 → 0 Lace', () => {
@@ -72,7 +73,7 @@ test('NM 2000 count only, cotton → 200 → wool-equivalent 235 → 3 Light (DK
 	assert.equal(r.category.n, 3);
 });
 
-test('380 m/100 g, 46% alpaca / 20% merino / 34% polyamide → 362 → 1 Super Fine; 2 strands ≈ 181 → 4 Medium', () => {
+test('380 m/100 g, 46% alpaca / 20% merino / 34% polyamide → 362 → 1 Super Fine; 2 strands ≈ 190 → 4 Medium', () => {
 	const r = answer(
 		form({
 			m100: '380',
@@ -85,15 +86,18 @@ test('380 m/100 g, 46% alpaca / 20% merino / 34% polyamide → 362 → 1 Super F
 	);
 	assert.equal(r.woolEquivalent, 362);
 	assert.equal(r.category.n, 1);
-	assert.equal(strandsToReach(r.woolEquivalent, cat(4)), '2 strands — about 181 m/100 g.');
+	// The brief gives 181 here, which is the wool-equivalent halved. The page shows the
+	// reader's own figure instead — 380 ÷ 2 — because that is the sum she will check; the
+	// band chosen is the same either way.
+	assert.equal(strandsToReach(r.woolEquivalent, cat(4), r.metres), '2 strands — about 190 m/100 g.');
 	assert.equal(r.summary, '46% alpaca, 20% merino, 34% polyamide at 380 m / 100 g.');
 });
 
-test('1402 m/100 g, 100% cashmere → 1391 → 0 Lace; 3 strands ≈ 464 → 1 Super Fine', () => {
+test('1402 m/100 g, 100% cashmere → 1391 → 0 Lace; 3 strands ≈ 467 → 1 Super Fine', () => {
 	const r = answer(form({ m100: '1402', rows: [{ fibre: 'Cashmere', pct: '100' }] }));
 	assert.equal(r.woolEquivalent, 1391);
 	assert.equal(r.category.n, 0);
-	assert.equal(strandsToReach(r.woolEquivalent, cat(1)), '3 strands — about 464 m/100 g.');
+	assert.equal(strandsToReach(r.woolEquivalent, cat(1), r.metres), '3 strands — about 467 m/100 g.');
 });
 
 test('NeC 24, wool → Nm 40.642 → 4064 m/100 g', () => {
@@ -245,9 +249,9 @@ test('a divisor that does not reconcile the two is not used, so the warning stay
 	const c = countToMetres(form({ m100: '380', millA: '2', millB: '28' }))!;
 	assert.equal(c.divisor, 1);
 	assert.equal(c.metres, 1400);
-	assert.equal(
-		answer(form({ m100: '380', millA: '2', millB: '28' })).check?.message,
-		'Count gives 1400 m/100 g, label says 380. Check the divisor.'
+	assert.match(
+		answer(form({ m100: '380', millA: '2', millB: '28' })).check!.message,
+		/^The metres box says 380 m\/100 g but the count gives 1400/
 	);
 });
 
@@ -326,9 +330,35 @@ test('a blend that does not total 100 → says so', () => {
 	assert.deepEqual(r, { ok: false, message: MESSAGES.needsTotal });
 });
 
-test('an empty blend is refused, not divided by zero', () => {
-	const r = calculate(form({ m100: '250', rows: [{ fibre: 'Wool', pct: '' }] }));
+test('an untouched blend waits rather than warns, and is never divided by zero', () => {
+	// The page starts like this: one row, no fibre, no percentage.
+	const r = calculate(form({ m100: '250', rows: [{ fibre: '', pct: '' }] }));
+	assert.deepEqual(r, { ok: false, message: MESSAGES.needsBlend });
+	assert.equal(blendStarted([{ fibre: '', pct: '' }]), false);
+});
+
+test('one fibre with no percentage is all of it', () => {
+	const r = answer(form({ m100: '200', rows: [{ fibre: 'Cotton', pct: '' }] }));
+	assert.equal(r.woolEquivalent, 235);
+	assert.equal(r.summary, '100% cotton at 200 m / 100 g.');
+	assert.equal(blendTotal([{ fibre: 'Cotton', pct: '' }]).ok, true);
+});
+
+test('empty extra rows are not 0% rows', () => {
+	// Pressing "Add a fibre" and changing your mind must not break a finished blend.
+	const r = answer(form({ m100: '250', rows: [{ fibre: 'Wool', pct: '' }, { fibre: '', pct: '' }] }));
+	assert.equal(r.summary, '100% wool at 250 m / 100 g.');
+});
+
+test('with two fibres, a blank percentage is not assumed', () => {
+	// "Cotton, then Silk" with no figures is not 50/50 or 100/0 — it is unfinished.
+	const r = calculate(form({ m100: '250', rows: [{ fibre: 'Cotton', pct: '' }, { fibre: 'Silk', pct: '' }] }));
 	assert.deepEqual(r, { ok: false, message: MESSAGES.needsTotal });
+});
+
+test('a percentage with no fibre asks for the fibre', () => {
+	const r = calculate(form({ m100: '250', rows: [{ fibre: 'Wool', pct: '60' }, { fibre: '', pct: '40' }] }));
+	assert.deepEqual(r, { ok: false, message: MESSAGES.needsFibre });
 });
 
 // ---- the plausibility guard ----------------------------------------------------------
@@ -415,18 +445,30 @@ test('count and label agree within 5% → silence', () => {
 test('count and label disagree by more than 5% → a warning, and the label wins', () => {
 	const r = answer(form({ m100: '380', millB: '3000' }));
 	assert.equal(r.check?.tone, 'warning');
-	assert.equal(r.check?.message, 'Count gives 300 m/100 g, label says 380. Check the divisor.');
+	// It says which figure was used and what to do about the other — not just "check the
+	// divisor", which sent a reader with a leftover length hunting for the wrong setting.
+	assert.equal(
+		r.check?.message,
+		'The metres box says 380 m/100 g but the count gives 300, and the answer uses the 380. ' +
+			'If the count is the one to trust, clear the metres box; if neither looks right, check the divisor under “The count looks wrong”.'
+	);
 	assert.equal(r.metres, 380);
 });
 
-test('count only → a caution, worded by whether a divisor was applied', () => {
-	const guessed = answer(form({ millB: '2500' }));
-	assert.equal(guessed.check?.tone, 'caution');
-	assert.match(guessed.check!.message, /^No stated m\/100 g, so the divisor is a guess/);
+test('count only → a caution that says what the divisor did', () => {
+	const assumed = answer(form({ millB: '2500' }));
+	assert.equal(assumed.check?.tone, 'caution');
+	assert.match(assumed.check!.message, /^No metres per 100 g given, so the printed 2500 was read as 2500 ÷ 1000\./);
 
 	const plain = answer(form({ millA: '2', millB: '48' }));
 	assert.equal(plain.check?.tone, 'caution');
-	assert.match(plain.check!.message, /^No stated m\/100 g — this comes from the count alone/);
+	assert.match(plain.check!.message, /^No metres per 100 g given — this comes from the count alone/);
+});
+
+test('a divisor set by hand is never called a guess', () => {
+	const r = answer(form({ millB: '2500', divisor: '1000' }));
+	assert.match(r.check!.message, /the divisor was set by hand to ÷ 1000/);
+	assert.doesNotMatch(r.check!.message, /guess|assumed/);
 });
 
 test('a stated length alone → silence', () => {
@@ -482,5 +524,5 @@ test('a band too narrow to land in is said so, with the two counts that straddle
 test('a yarn exactly on a lower bound still takes two strands to leave its band', () => {
 	const r = answer(form({ m100: '210' }));
 	assert.equal(r.category.n, 3);
-	assert.equal(strandsToReach(r.woolEquivalent, cat(5)), '2 strands — about 105 m/100 g.');
+	assert.equal(strandsToReach(r.woolEquivalent, cat(5), r.metres), '2 strands — about 105 m/100 g.');
 });

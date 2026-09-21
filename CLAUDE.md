@@ -247,11 +247,51 @@ obvious from the code:
   the form, calls `calculate` and shows or hides — the same arrangement as the quiz, and for
   the same no-JS rule. Without JavaScript it says it cannot do its sums instead of showing
   a button that does nothing. The caveats stay either way.
-- **Nothing is calculated until the button is pressed, then it follows every edit.** That is
-  the design, not a shortcut: a reader can fill the form top to bottom without being told off
-  for fields they have not reached. The button's label never changes — the hint under it is
-  what says the answer is now live. The result region is `aria-live="polite"`, which the
-  design file lacks. Wool-equivalent and blend density are deliberately never shown.
+- **It answers as you type, and there is no button.** There was one: nothing was worked out
+  until it was pressed, and everything followed each edit afterwards, so the same form
+  behaved two ways depending on whether you had pressed it once. The author found that
+  inconsistent and it went. Keystrokes render after a 350 ms pause, so "380" does not flash
+  through 3 m/100 g (refused) and 38 (Super Bulky) on the way, or announce them. The result
+  region is `aria-live="polite"`, which the design file lacks. Wool-equivalent and blend
+  density are deliberately never shown.
+- **When the form stops describing a yarn, two things happen on two clocks.** *The answer
+  stops claiming to be current at once*: the last good answer dims and a neutral line says
+  what it is waiting for ("Out of date — waiting for the percentages to add up to 100").
+  *The reader is told something is wrong only when focus leaves the group it is about* — the
+  length fields, or the blend as a whole (`data-yw-group`, `settled`) — or at once for a
+  deliberate click such as a divisor chip or a counting system. The first version waited on
+  both, and a cold read found an undimmed, confident answer for a yarn the reader was no
+  longer describing, which was the worst thing on the page. The second clock is what the
+  button used to protect: 46 / 20 / 34 passes through 46 and 66, and leaving one percentage
+  box for the next is not leaving the blend.
+- **Step 2 starts empty, and there is no answer until a fibre is chosen.** It was pre-filled
+  as 100% wool, and readers who typed a length saw an answer at once and never looked at
+  step 2 — every cotton and alpaca was being worked out as wool. The waiting panel says what
+  is still missing ("Now choose what it is made of, in step 2"). Two rules keep it from
+  being a chore, both in `effectiveRows`: a row with neither fibre nor percentage is not
+  there, and **one fibre with no percentage is all of it** — the box shows that 100 as its
+  placeholder. With two fibres a blank is not assumed.
+- **On a phone the answer is pinned to the foot of the screen while it is out of view** —
+  `.peek`, one line, driven by two IntersectionObservers. The button used to scroll the answer
+  into view; without it, a reader typing at the top of a phone screen had an answer changing
+  a screen below them with nothing to say so. It shows while there is an answer, the form is
+  on screen and the answer panel is not — so on a desktop, where the panel is sticky beside
+  the form, it never appears — and says "out of date" when the answer is. It does not scroll
+  the page itself: moving the page under someone's thumb while they type is worse than the
+  problem.
+- **Strand counts are chosen on the wool-equivalent and shown in the reader's own
+  m/100 g.** The page says the length divides by the number of strands; a reader with
+  380 m/100 g checks that two strands make 190, and the wool-equivalent version said 181. The
+  band chosen is the same either way (the fibre correction is a multiplier, so it commutes
+  with the division), so only the display changed — and the brief's §8 figures for strands
+  are pinned in the tests in the reader's terms, with a note.
+- **Every message says which figure was used and what to do.** The cross-check used to end
+  "Check the divisor", and a reader whose real problem was a leftover length from the
+  previous yarn went looking for a setting she could not name. It now says the answer uses the
+  metres box and to clear it if the count is the one to trust. A divisor set by hand is never
+  called "a guess". The divisor chips are labelled "Divisor" on screen, and the toggle keeps
+  the name "The count looks wrong" when open — it used to become "Hide", so the messages
+  pointing at it pointed at nothing.
 - **The yarn count section is shut by default and its fields are ignored while it is.** A
   reader with a ball band has metres and needs none of it; a reader with a cone does. Open, it
   was more than twice the height of the field above it, so the fallback path looked like the
@@ -335,25 +375,33 @@ came out of a cold usability read, and all three are easy to undo by accident:
   **Both values are as tight as their contents allow** — every pixel taken comes off the
   fibre name, which needs 127px at 375px.
 
-**A refusal keeps the last good answer, dimmed.** Editing a blend means passing *through*
-invalid totals — 34 cannot become 50 without being some wrong number on the way — and blanking
-the result on every keystroke punished the reader for typing. `lastGood` holds the previous
-outcome and `.is-stale` fades it, with a line saying so.
+**A problem keeps the last good answer on screen, dimmed.** The whole answer block dims —
+category, cross-check and strands — not just the top panel. Blanking it on every keystroke
+punished the reader for typing, because 34 cannot become 50 without passing some wrong
+number. Clearing the length or emptying the blend is different: that is a fresh start rather
+than a mistake, so it goes back to the waiting panel.
 
-**The message appears twice, deliberately.** Short, above the button, where the reader is
-looking when they press it; and in full beside the answer, which on a phone is a screen away.
-The offending box is outlined as well — never as the only signal, since the words name the
-field too.
+**A warning appears twice, deliberately: under the fields it is about, and in full beside the
+answer.** On a phone the answer is a screen away. The metres box and the count each have a
+`.field-error` that **takes the place of that field's hint** rather than appearing beneath it:
+beneath, it arrived just as focus reached the first fibre and pushed that menu 57px down under
+the pointer. The blend has its own line too. It used to rely on the total alone ("Total 96% —
+needs 100"), which wrapped to three lines in the 96px percentage column. The box concerned is
+outlined as well, but never as the only signal: the words name the field.
 
-**The running total stays quiet until the button is pressed.** The page promises "nothing is
-flagged until you press this", and the total used to turn red and read "— needs 100" on the
-first keystroke, breaking that promise inside thirty seconds.
+**A rule separates the page intro from step 1.** Without it, the intro's last line, "Step 1"
+and the first question stacked into a single column of text, and the heading read as though
+it ran on into the form. It is full width so it spans the answer column too. It is the same
+rule the quiz page uses between its title block and the quiz.
 
-**The result column is sticky and barely moves, and that is the brief's doing.** The four
-caveats must sit beside the result rather than behind a disclosure, which makes that column
-nearly as tall as the form, so there is little for `position: sticky` to do. Making only the
-answer sticky would slide it over the caveats. Moving the caveats below the grid would fix it
-and break the brief — ask before doing that.
+**The caveats sit beneath the whole tool, full width, and there are three.** The brief put
+four beside the result. That made the answer column nearly as tall as the form, so the sticky
+answer barely moved, and the author found the column cramped and cluttered. She asked for
+them underneath instead. "Where the divisor gives up" moved into the divisor panel, the only
+place it applies. At the top of the page, "thread finer than Nm 300" was the most
+intimidating line a ball-band reader met before typing anything. The section lives outside
+`.yw`, so it cannot use the `--s1`–`--s4` spacing tokens defined there. It uses literal sizes;
+with the tokens they silently resolved to nothing, and the caveats ran together on a phone.
 
 **Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
 `/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real
