@@ -50,6 +50,11 @@ There is no linter. The checks that exist are:
   a build; weekly in CI. Fails only on 404, 410 or a host that does not resolve — a 403 from a
   bot-blocking site is a warning, or the weekly email would cry wolf.
 - `verify-deploy` skill — the deployed site, after a push.
+- `ship-it` skill — the release itself: which gates run in what order, the commit and push
+  mechanics this machine needs, and proving the change is actually live.
+- `cold-read` skill — how to have a page judged by a subagent who has never seen it, and how
+  to tell a real defect from an artefact of how the page was driven. Six of these shaped the
+  yarn weight calculator.
 
 Note that `astro build` does **not** type-check — `npm run check` is what does. `tsconfig.json`
 extends `astro/tsconfigs/strict`, but nothing enforced it until that script existed, and its
