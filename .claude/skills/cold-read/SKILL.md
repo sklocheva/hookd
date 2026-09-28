@@ -31,6 +31,32 @@ One tip belongs in the brief, because the tool's browser cannot always type into
 values can be set with `javascript_tool` and `input` / `change` / `focusout` events
 dispatched by hand.
 
+## Running three
+
+**Prefer three at once to one at a time.** Six rounds of one reader took a week, and each
+round found what that reader happened to care about: the phone reader found the pinned bar
+covering a field, the cone reader found the divisor, and neither looked at what the other did.
+The reads are independent — no shared state, no order between them — so dispatch all three in
+a single message and let them run in the background.
+
+Vary the **persona and what they are holding**, never the instructions. Everything else in the
+brief stays identical, or the reports cannot be read against each other.
+
+| Persona | What they bring | What it tends to catch |
+| --- | --- | --- |
+| A ball-band reader on a phone | A 50 g European band with metres on it | Layout, anything pinned or covering a field, tap targets |
+| A cone buyer at a desk | A mill cone with a count and no length | The count section, the divisor, the working |
+| A US pattern follower | Yards, ounces, US hook letters | Units, conversions, anything that assumes metric |
+
+A fourth earns its place when a change is about one thing: someone who only ever types the
+wrong thing — a zero, a word, an extra digit — finds refusals, and someone using a keyboard
+alone finds focus order.
+
+**Merge before you act.** The same defect arrives worded three ways, and three reports of one
+problem is still one problem. Group them, drop what only one reader saw and you cannot
+reproduce, and sort what survives by whether it changes an answer. Say how many readers hit
+each thing: what all three met is what to fix first.
+
 ## Reading the report
 
 **Verify a defect before fixing it.** Findings arrive with equal confidence, and some are
