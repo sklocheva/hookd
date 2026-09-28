@@ -55,6 +55,9 @@ There is no linter. The checks that exist are:
 - `cold-read` skill — how to have a page judged by a subagent who has never seen it, and how
   to tell a real defect from an artefact of how the page was driven. Six of these shaped the
   yarn weight calculator.
+- `house-voice` skill — the words this site uses and does not, how a message a reader has to
+  act on is worded, and how figures are written. Read it before writing anything a reader
+  sees, anywhere on the site — it is not the calculator's skill.
 
 Note that `astro build` does **not** type-check — `npm run check` is what does. `tsconfig.json`
 extends `astro/tsconfigs/strict`, but nothing enforced it until that script existed, and its
