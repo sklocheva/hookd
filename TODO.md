@@ -8,6 +8,7 @@
 | How to build, preview, screenshot and audit it | `.claude/skills/run-hookd/SKILL.md` |
 | How to get a change live, and prove it landed | `.claude/skills/ship-it/SKILL.md`, then `.claude/skills/verify-deploy/SKILL.md` |
 | How to write and format an article | `WRITING.md` |
+| How an entry gets from `/admin` to a live page | `.claude/skills/publishing/SKILL.md` |
 | The words the site uses, and how a message is worded | `.claude/skills/house-voice/SKILL.md` |
 | How a page gets judged by someone who has never seen it | `.claude/skills/cold-read/SKILL.md` |
 | Why the yarn weight calculator behaves as it does | `docs/yarn-weight-calculator.md` |

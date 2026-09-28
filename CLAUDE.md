@@ -58,6 +58,9 @@ There is no linter. The checks that exist are:
 - `house-voice` skill — the words this site uses and does not, how a message a reader has to
   act on is worded, and how figures are written. Read it before writing anything a reader
   sees, anywhere on the site — it is not the calculator's skill.
+- `publishing` skill — the path from `/admin` to a live entry: the collections and their
+  extensions, why a blank field breaks the build, drafts and their preview addresses, and the
+  traps in a hand-written entry file.
 
 Note that `astro build` does **not** type-check — `npm run check` is what does. `tsconfig.json`
 extends `astro/tsconfigs/strict`, but nothing enforced it until that script existed, and its
@@ -285,8 +288,10 @@ journal contains.
 
 ## Content model
 
-Two collections, both with Zod schemas in `src/content.config.ts`. Example entries live in
-`src/content/` — they exist to exercise the schemas and should be replaced by real ones.
+Four collections — patterns, posts, reviews and quizzes — each with a Zod schema in
+`src/content.config.ts`. Example entries live in `src/content/`; they exist to exercise the
+schemas and should be replaced by real ones. The `publishing` skill covers getting one from
+`/admin` to a live page, and the several ways a save from the browser has broken the build.
 
 **patterns** carries structured data, not prose: yarn (brand, line, fibre content, ball
 weight and length, CYC weight category), hook size in mm only, one gauge, difficulty
