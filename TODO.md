@@ -6,8 +6,11 @@
 | --- | --- |
 | What this project is, and the rules that are decided | `CLAUDE.md` |
 | How to build, preview, screenshot and audit it | `.claude/skills/run-hookd/SKILL.md` |
-| How to check a deploy actually landed | `.claude/skills/verify-deploy/SKILL.md` |
+| How to get a change live, and prove it landed | `.claude/skills/ship-it/SKILL.md`, then `.claude/skills/verify-deploy/SKILL.md` |
 | How to write and format an article | `WRITING.md` |
+| The words the site uses, and how a message is worded | `.claude/skills/house-voice/SKILL.md` |
+| How a page gets judged by someone who has never seen it | `.claude/skills/cold-read/SKILL.md` |
+| Why the yarn weight calculator behaves as it does | `docs/yarn-weight-calculator.md` |
 | What has already gone wrong, and why | `.claude/skills/verify-deploy/references/failures.md` |
 
 The planning documents — `PLAN.md`, `OVERVIEW.md`, `RESEARCH.md` — live outside the repo in
