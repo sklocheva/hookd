@@ -53,8 +53,8 @@ There is no linter. The checks that exist are:
 - `ship-it` skill — the release itself: which gates run in what order, the commit and push
   mechanics this machine needs, and proving the change is actually live.
 - `cold-read` skill — how to have a page judged by a subagent who has never seen it, and how
-  to tell a real defect from an artefact of how the page was driven. Six of these shaped the
-  yarn weight calculator.
+  to tell a real defect from an artefact of how the page was driven. Eight of these shaped the
+  yarn weight calculator; the last was three readers at once.
 - `house-voice` skill — the words this site uses and does not, how a message a reader has to
   act on is worded, and how figures are written. Read it before writing anything a reader
   sees, anywhere on the site — it is not the calculator's skill.
