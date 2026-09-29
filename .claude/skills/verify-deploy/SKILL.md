@@ -136,7 +136,8 @@ If the site is partly broken, say which part and give the status codes. A workin
 `git push` to GitHub authenticates through `gh`, via a repo-local URL-scoped helper
 (`credential.https://github.com.helper = !gh auth git-credential`). `gh` is not on Git Bash's
 PATH, so push from **PowerShell**; `curl` checks are fine in Bash. A push that adds or edits
-`.github/workflows/*` is rejected regardless — gh's token has no `workflow` scope.
+`.github/workflows/*` needs the token's `workflow` scope, which it now has — check with
+`gh api -i user` if one is ever rejected.
 
 Node is not on the inherited PATH in fresh tool shells. In PowerShell, prepend:
 

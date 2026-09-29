@@ -61,6 +61,9 @@ There is no linter. The checks that exist are:
 - `publishing` skill — the path from `/admin` to a live entry: the collections and their
   extensions, why a blank field breaks the build, drafts and their preview addresses, and the
   traps in a hand-written entry file.
+- `new-tool` skill — what a second tool under `/tools/` has to be, distilled from the first
+  one: where the arithmetic lives, why there is no button, and the rules that decide the
+  design rather than the finish.
 
 Note that `astro build` does **not** type-check — `npm run check` is what does. `tsconfig.json`
 extends `astro/tsconfigs/strict`, but nothing enforced it until that script existed, and its

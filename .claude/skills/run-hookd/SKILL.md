@@ -151,8 +151,8 @@ from the form.
   helper (`credential.https://github.com.helper = !gh auth git-credential`), and `gh` is not on
   Git Bash's PATH — the push fails with `gh: command not found` then "Invalid username or
   token". Push from PowerShell. `node`, `curl` and the driver are fine in either shell.
-  A push touching `.github/workflows/` is rejected whatever the shell: gh's token has no
-  `workflow` scope.
+  A push touching `.github/workflows/` needs the token's `workflow` scope, which it now has
+  (`gh api -i user` shows it); it used to be rejected, and this line used to say so.
 - **Node is not on the inherited PATH** in fresh tool shells. In PowerShell, prepend:
   `$env:Path = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")`
 - **Verifying a deploy is `verify-deploy`'s job, not this one.** Its `--expect` guard exists

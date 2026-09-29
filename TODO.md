@@ -12,6 +12,7 @@
 | The words the site uses, and how a message is worded | `.claude/skills/house-voice/SKILL.md` |
 | How a page gets judged by someone who has never seen it | `.claude/skills/cold-read/SKILL.md` |
 | Why the yarn weight calculator behaves as it does | `docs/yarn-weight-calculator.md` |
+| How to add a second tool under `/tools/` | `.claude/skills/new-tool/SKILL.md` |
 | What has already gone wrong, and why | `.claude/skills/verify-deploy/references/failures.md` |
 
 The planning documents — `PLAN.md`, `OVERVIEW.md`, `RESEARCH.md` — live outside the repo in
