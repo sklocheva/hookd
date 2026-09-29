@@ -1,6 +1,6 @@
 ---
 import YarnWeightFibreRow from './YarnWeightFibreRow.astro';
-import { CATEGORIES, SYSTEMS } from '../lib/yarn-weight';
+import { BALL_WEIGHTS, CATEGORIES, SYSTEMS } from '../lib/yarn-weight';
 
 /**
  * The yarn weight calculator: a form on the left, the answer on the right.
@@ -71,12 +71,15 @@ const first = SYSTEMS[0];
 				aria-describedby="yw-m100-hint"
 				data-yw-m100
 			/>
-			{/* The ball weight the length is for. A dropdown, not a box: balls come in 100, 50
-			    and 25 g, and a choice of three needs no arithmetic from the reader. */}
+			{/* Metres or yards, and the ball weight the length is for. Dropdowns, not boxes: what a
+			    band prints is a short list, and a choice needs no arithmetic from the reader. A US
+			    band gives yards and ounces, and 220 yards typed as metres was a category out. */}
+			<select class="field__unit-pick" aria-label="Length unit" data-yw-unit>
+				<option value="m">m</option>
+				<option value="yd">yd</option>
+			</select>
 			<select class="field__per" aria-label="Ball weight" data-yw-grams>
-				<option value="100">per 100 g</option>
-				<option value="50">per 50 g</option>
-				<option value="25">per 25 g</option>
+				{BALL_WEIGHTS.map((w) => <option value={w.value}>{w.label}</option>)}
 			</select>
 		</div>
 		{/* The hint and the warning occupy the same slot, stacked, so the slot is always as
@@ -85,8 +88,9 @@ const first = SYSTEMS[0];
 		    it. */}
 		<div class="slot">
 			<p class="hint" id="yw-m100-hint" data-yw-m100-hint>
-				Often written as "100 g / 380 m" or "50 g / 125 m" — choose the ball weight beside it. If
-				it is on your label, this is all you need; the section below is for cones.
+				Often written as "100 g / 380 m", "50 g / 125 m" or "3.5 oz / 220 yds" — set the unit and
+				the ball weight beside the box to match your label. If it is on your label, this is all
+				you need; the section below is for cones.
 			</p>
 			<p class="field-error is-concealed" data-yw-m100-error aria-hidden="true">
 				<span class="alert__mark" aria-hidden="true">!</span>
@@ -325,7 +329,7 @@ const first = SYSTEMS[0];
 				    each part was filled in ("Now choose what it is made of…"), and a panel changing
 				    at every step pulled the eye away from the form. This names both halves, so it
 				    still sends a reader who has only done step 1 on to step 2. */}
-				<p class="waiting__text">
+				<p class="waiting__text" data-yw-waiting-text>
 					Fill in how long a ball of it is, and what it is made of.
 				</p>
 				<noscript>
@@ -361,7 +365,7 @@ const first = SYSTEMS[0];
 					{/* CYC's own figure for this category, quoted rather than derived — see
 					    Category.hook. Stated plainly, as a spec row: it is what the standard
 					    recommends, and the caveats below already say the category is a start. */}
-					<div class="result__label result__label--sub">Recommended hook</div>
+					<div class="result__label result__label--sub result__label--hook">Recommended hook</div>
 					<p class="result__hook" data-yw-hook></p>
 					<p class="result__hook-range" data-yw-hook-range></p>
 					{/* Ball bands are sold by name and often disagree with the standard. A reader whose
@@ -621,6 +625,7 @@ const first = SYSTEMS[0];
 	/* The ball weight, in the unit's place: a dropdown dressed as the unit, so the field still
 	   reads "380 | per 100 g". Wider than the unit column, because "per 100 g" and its arrow
 	   need it; the metres box is the only field with one. */
+	.field__unit-pick,
 	.field__per {
 		flex: none;
 		min-width: 0;
@@ -632,6 +637,10 @@ const first = SYSTEMS[0];
 		font: 400 14px/1 var(--sans);
 		color: var(--ink-2);
 		cursor: pointer;
+	}
+
+	.field__unit-pick {
+		padding: 0 4px 0 8px;
 	}
 
 	/* The ring goes round the whole boxed field, not the bare input inside it. */
@@ -1087,10 +1096,17 @@ const first = SYSTEMS[0];
 	   the old input, and one of them went on saying the count "was read as 2000 ÷ 1000" after
 	   the reader had just set ÷ 1. */
 	.result-block.is-stale .result__cat,
+	.result-block.is-stale .result__band-note,
+	.result-block.is-stale .result__label:not(.result__label--stale) {
+		opacity: 0.3;
+	}
+
+	/* The hook goes entirely while the answer is out of date. Faded, it still read as the size
+	   to pick up — three readers in one round took the stale card for a live answer. */
 	.result-block.is-stale .result__hook,
 	.result-block.is-stale .result__hook-range,
-	.result-block.is-stale .result__label:not(.result__label--stale) {
-		opacity: 0.45;
+	.result-block.is-stale .result__label--hook {
+		display: none;
 	}
 
 	.result__label {
@@ -1349,6 +1365,7 @@ const first = SYSTEMS[0];
 		const form = q<HTMLFormElement>('[data-yw-form]');
 		const m100 = q<HTMLInputElement>('[data-yw-m100]');
 		const grams = q<HTMLSelectElement>('[data-yw-grams]');
+		const unit = q<HTMLSelectElement>('[data-yw-unit]');
 		const m100Hint = q('[data-yw-m100-hint]');
 		const m100Error = q('[data-yw-m100-error]');
 		const m100ErrorText = q('[data-yw-m100-error-text]');
@@ -1389,6 +1406,7 @@ const first = SYSTEMS[0];
 
 		const answer = q('[data-yw-answer]');
 		const waiting = q('[data-yw-waiting]');
+		const waitingText = q('[data-yw-waiting-text]');
 		const blocked = q('[data-yw-blocked]');
 		const blockedText = q('[data-yw-blocked-text]');
 		const result = q('[data-yw-result]');
@@ -1490,11 +1508,16 @@ const first = SYSTEMS[0];
 			// Worsted — and it flashed up as a full answer on the way to 2 / 28, Lace. So while
 			// focus is in the pair and one box is still empty, the pair waits. A single figure
 			// is still allowed in either box: it counts once the reader leaves the pair.
-			const half = !millA.value.trim() !== !millB.value.trim();
-			const waitForPair = !linear && inPair && half;
+			// A ply pair half typed is not a count — but a *single figure* in either box is one,
+			// and the hint says so. So the wait lasts only while the reader is standing in the box
+			// that is still empty, the moment before the second figure arrives. Waiting whenever
+			// either box was empty swallowed "NM 2000" entirely, and silently.
+			const emptyBox = !millA.value.trim() ? millA : !millB.value.trim() ? millB : null;
+			const waitForPair = !linear && inPair && emptyBox !== null && document.activeElement === emptyBox;
 			return {
 				m100: m100.value,
 				grams: grams.value,
+				lengthUnit: unit.value as 'm' | 'yd',
 				system: sys.id as SystemId,
 				millA: countOpen && !linear && !waitForPair ? millA.value : '',
 				millB: countOpen && !waitForPair ? (linear ? singleInput.value : millB.value) : '',
@@ -1569,10 +1592,10 @@ const first = SYSTEMS[0];
 				? null
 				: fromMetres
 					? lengthIssue === MESSAGES.notALength
-						? 'the metres box does not hold a number'
+						? 'the metres box does not hold a length'
 						: 'the length looks wrong'
 					: lengthIssue === MESSAGES.notACount
-						? 'the count is not a number'
+						? 'the count box does not hold a count'
 						: divisor !== 'auto'
 							? 'the count gives a length no yarn has — try the divisor on Automatic'
 							: 'the count gives a length no yarn has';
@@ -1676,7 +1699,13 @@ const first = SYSTEMS[0];
 
 			// Its space is held whether or not there is a sum yet; see the markup. Empty, it says
 			// what it is for.
-			const count = countToMetres(input);
+			//
+			// A box holding something unreadable takes the sum with it: `countToMetres` skips that
+			// box and answers from the other one, so "abc / 28" printed a confident
+			// "Nm 28 x 100 = 2,800 m/100 g" for a count nobody had typed.
+			const unreadable = (box: HTMLInputElement) => box.value.trim() !== '' && parseNumber(box.value) === null;
+			const countUnreadable = countOpen && [millA, millB, singleInput].some(unreadable);
+			const count = countUnreadable ? null : countToMetres(input);
 			workingTile.classList.toggle('is-empty', !count);
 			setText(working, count?.working ?? 'The sum appears here once there is a count.');
 
@@ -1716,6 +1745,18 @@ const first = SYSTEMS[0];
 			const fresh = outcome.ok ? outcome : null;
 			const showing = fresh ?? lastGood;
 
+			// Three fixed sentences, one per state — not a running commentary. One sentence for all
+			// three states left a reader who had entered a count staring at a panel asking for a
+			// length the section beside it had already worked out.
+			setText(
+				waitingText,
+				lengthNow === null
+					? 'Now choose what it is made of.'
+					: blendNow === null
+						? 'Now fill in how long a ball of it is.'
+						: 'Fill in how long a ball of it is, and what it is made of.'
+			);
+
 			waiting.hidden = !!showing || !!(lengthWarning ?? blendWarning);
 			blocked.hidden = !!showing || !(lengthWarning ?? blendWarning);
 			result.hidden = !showing;
@@ -1752,15 +1793,20 @@ const first = SYSTEMS[0];
 
 			// The bar: the answer, or that it is out of date and where to see why. Never longer
 			// than one line — it used to wrap when the text grew, and grow over the form.
-			// The familiar name — "1 Fingering/Sock", not "1 Super Fine (Fingeri…": the bar is one
-			// line on a phone, and the words cut were the ones a crocheter knows.
-			const familiar = (name: string) => name.match(/\(([^)]+)\)/)?.[1] ?? name;
-			peekText = fresh ? `${fresh.category.n} ${familiar(fresh.category.name)}` : showing ? 'Out of date' : '';
+			// The same name as the panel. A short form was tried — "1 Fingering/Sock" — and two
+			// readers in one round read the bar and the panel as two different answers.
+			peekText = fresh ? `${fresh.category.n} ${fresh.category.name}` : showing ? 'Out of date' : '';
 			setText(peekCat, peekText);
 			// A disagreement between the count and the label is said on the bar too: the panel
 			// that explains it is a screen away on a phone.
 			const disagree = fresh?.check?.tone === 'warning';
 			setText(peekLink, fresh ? (disagree ? 'Check the figures' : 'See the details') : 'See why');
+			// "See why" used to scroll to the answer panel — the stale category, not the reason.
+			// It goes to the box the problem is in.
+			peekLink.setAttribute(
+				'href',
+				fresh || !lengthIssue ? '#yw-answer' : fromMetres ? '#yw-m100' : '#yw-count-block'
+			);
 			peek.classList.toggle('is-stale', !fresh);
 			peek.classList.toggle('is-warning', disagree);
 			updatePeek();

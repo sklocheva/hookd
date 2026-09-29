@@ -52,6 +52,12 @@ A fourth earns its place when a change is about one thing: someone who only ever
 wrong thing — a zero, a word, an extra digit — finds refusals, and someone using a keyboard
 alone finds focus order.
 
+**Give each reader its own tab.** Run in parallel they share one browser pane, and the first
+round of three watched each other navigate and saw digits appear in fields they had not
+touched. Both readers caught it and re-confirmed on freshly loaded pages, but four findings
+were thrown away to get there. Tell each one to open its own tab (`tabs_create`) and work in
+that tab alone.
+
 **Merge before you act.** The same defect arrives worded three ways, and three reports of one
 problem is still one problem. Group them, drop what only one reader saw and you cannot
 reproduce, and sort what survives by whether it changes an answer. Say how many readers hit

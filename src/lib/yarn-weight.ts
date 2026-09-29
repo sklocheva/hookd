@@ -216,6 +216,29 @@ export const systemFor = (id: string): System => SYSTEMS.find((s) => s.id === id
 
 export type DivisorMode = 'auto' | '1' | '1000';
 
+export type LengthUnit = 'm' | 'yd';
+
+/** A yard is 0.9144 m exactly. */
+const YARD_IN_METRES = 0.9144;
+
+/**
+ * The ball weights a band prints, in grams, in the order the dropdown offers them.
+ *
+ * The ounce sizes are the US skein sizes, converted here rather than by the reader: 3.5 oz is
+ * 99.2 g, which is *not* 100, so the tool cannot pretend otherwise.
+ */
+export const BALL_WEIGHTS: readonly { value: string; label: string }[] = [
+	{ value: '100', label: 'per 100 g' },
+	{ value: '50', label: 'per 50 g' },
+	{ value: '25', label: 'per 25 g' },
+	{ value: '99.2233', label: 'per 3.5 oz' },
+	{ value: '198.447', label: 'per 7 oz' },
+	{ value: '49.6116', label: 'per 1.75 oz' },
+];
+
+/** "per 3.5 oz", for reading a label back to someone who typed ounces. */
+const weightLabel = (grams: string) => BALL_WEIGHTS.find((w) => w.value === grams)?.label ?? `per ${grams} g`;
+
 export interface FibreRow {
 	fibre: string;
 	/** As typed. Blank, or anything that is not a positive number, counts as nothing. */
@@ -231,11 +254,16 @@ export interface Input {
 	/** The metres printed on the label, for a ball of `grams`. */
 	m100: string;
 	/**
-	 * The ball weight that length is for: '100', '50' or '25', from a dropdown. Many balls are
-	 * 50 g or 25 g, and a reader typing "125" off a 50 g band into a box that asked for metres
-	 * per 100 g was told a DK wool was Bulky. Absent means 100.
+	 * The ball weight that length is for, in grams, from a dropdown: '100', '50', '25', and the
+	 * ounce sizes US bands use. A reader typing "125" off a 50 g band into a box that asked for
+	 * metres per 100 g was told a DK wool was Bulky. Absent means 100.
 	 */
 	grams?: string;
+	/**
+	 * Whether the length is in metres or yards. US bands print yards, and a reader who typed
+	 * 220 yards as metres was told DK for a worsted — one category out, and the hook with it.
+	 */
+	lengthUnit?: LengthUnit;
 	system: SystemId;
 	millA: string;
 	millB: string;
@@ -265,10 +293,11 @@ export function parseNumber(text: string): number | null {
 /** Something typed that is not a positive number: "0", "-200", "abc". Blank is not this. */
 const unusable = (text: string) => String(text).trim() !== '' && parseNumber(text) === null;
 
-/** The label's length as metres per 100 g, whatever ball weight it was printed for. */
+/** The label's length as metres per 100 g, whatever unit and ball weight it was printed in. */
 export function statedPer100(input: Input): number | null {
-	const metres = parseNumber(input.m100);
-	if (metres === null) return null;
+	const length = parseNumber(input.m100);
+	if (length === null) return null;
+	const metres = input.lengthUnit === 'yd' ? length * YARD_IN_METRES : length;
 	const grams = parseNumber(input.grams ?? '100') ?? 100;
 	return (metres * 100) / grams;
 }
@@ -276,8 +305,14 @@ export function statedPer100(input: Input): number | null {
 /** Three decimals is enough to show a working and never enough to disagree with it. */
 const tidy = (value: number) => Math.round(value * 1000) / 1000;
 
-/** "200,000" rather than "200000": a misplaced zero is obvious with the commas in. */
-export const grouped = (value: number) => Math.round(value).toLocaleString('en-GB');
+/**
+ * "200,000" rather than "200000": a misplaced zero is obvious with the commas in.
+ *
+ * Under 10 it keeps one decimal, because rounding there changes the figure enough to make a
+ * written-out sum stop adding up: "÷ 1000 × 100 = 1 m/100 g" for a result of 1.4.
+ */
+export const grouped = (value: number) =>
+	value < 10 ? String(Math.round(value * 10) / 10) : Math.round(value).toLocaleString('en-GB');
 
 export interface CountResult {
 	system: System;
@@ -336,8 +371,11 @@ function autoDivisor(system: CountSystem, printed: number, stated: number | null
  */
 export function countToMetres(input: Input): CountResult | null {
 	const system = systemFor(input.system);
-	const a = parseNumber(input.millA);
-	const b = parseNumber(input.millB);
+	// A cone prints "2/28" as one string, and the section's own hint quotes it that way, so a
+	// reader types it into one box. Splitting it here costs nothing and saves a dead end.
+	const [rawA, rawB] = splitPair(input.millA, input.millB);
+	const a = parseNumber(rawA);
+	const b = parseNumber(rawB);
 
 	if (system.mode === 'linear') {
 		if (!b) return null;
@@ -383,6 +421,21 @@ export function countToMetres(input: Input): CountResult | null {
 		metres,
 		working: `${steps.join(' ')} × 100 = ${grouped(metres)} m/100 g.`,
 	};
+}
+
+/**
+ * "2/28" in one box is a pair, not a dead end. Only splits when the other box is empty, so a
+ * reader who has filled both boxes is never second-guessed.
+ */
+export function splitPair(a: string, b: string): [string, string] {
+	const both = [a, b];
+	for (const i of [0, 1] as const) {
+		const parts = String(both[i]).split('/');
+		if (parts.length === 2 && String(both[1 - i]).trim() === '' && parts.every((p) => p.trim() !== '')) {
+			return [parts[0], parts[1]];
+		}
+	}
+	return [a, b];
 }
 
 /** Percentages may drift this far from 100 before the blend is refused. */
@@ -519,6 +572,11 @@ const PLAUSIBLE_MAX = 30000;
  * reader who typed an extra zero was otherwise told "Lace" and nothing else.
  */
 const THREAD_FROM = 4000;
+
+/**
+ * How near a band's edge counts as "either could be right", in wool-equivalent m/100 g.
+ */
+const EDGE = 3;
 
 /**
  * The refusal for a length no yarn has, worded by whatever is most likely to have caused it.
@@ -756,6 +814,20 @@ export function calculate(input: Input): Outcome {
 		check = check ? { tone: check.tone, message: `${check.message} ${note}` } : { tone: 'caution', message: note };
 	}
 
+	// Within a whisker of the next band. The wool-equivalent is a model, not a measurement, so
+	// a figure one or two units from a boundary is not evidence of anything: Red Heart Super
+	// Saver (168 m/100 g, acrylic) lands at 149 against Medium's floor of 150, and every US
+	// shop calls it worsted. Saying so is honest; moving the boundary would not be.
+	const above = categoryMax(category);
+	const edge = Math.min(woolEquivalent - category.min, Number.isFinite(above) ? above - woolEquivalent : Infinity);
+	if (edge <= EDGE) {
+		const neighbour = woolEquivalent - category.min <= EDGE ? categoryFor(category.min - 1) : categoryFor(above);
+		if (neighbour) {
+			const note = `This is within a whisker of ${neighbour.n} ${neighbour.name}. The band on your yarn may well say that, and either is defensible — swatch it.`;
+			check = check ? { tone: check.tone, message: `${check.message} ${note}` } : { tone: 'caution', message: note };
+		}
+	}
+
 	// Finer than any yarn — possible, and answered, but not without saying so.
 	if (metres > THREAD_FROM) {
 		const note = `${grouped(metres)} m/100 g is finer than almost any knitting or crochet yarn — more like sewing thread. If this is yarn, check the figure.`;
@@ -763,11 +835,12 @@ export function calculate(input: Input): Outcome {
 	}
 
 	const grams = input.grams ?? '100';
+	const unit = input.lengthUnit === 'yd' ? 'yd' : 'm';
 	const source =
 		stated === null
 			? ' (worked out from the count)'
-			: grams !== '100'
-				? ` (${grouped(parseNumber(input.m100)!)} m per ${grams} g)`
+			: grams !== '100' || unit !== 'm'
+				? ` (${grouped(parseNumber(input.m100)!)} ${unit} ${weightLabel(grams)})`
 				: '';
 
 	return {

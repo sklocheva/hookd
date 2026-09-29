@@ -21,6 +21,9 @@ import {
 	countToMetres,
 	MESSAGES,
 	blendProblem,
+	BALL_WEIGHTS,
+	grouped,
+	splitPair,
 	hookAdvice,
 	lengthProblem,
 	parseNumber,
@@ -653,5 +656,46 @@ test('mohair and angora carry a note that a brushed halo is not counted', () => 
 	const r = answer(form({ m100: '800', rows: [{ fibre: 'Mohair', pct: '70' }, { fibre: 'Silk', pct: '30' }] }));
 	assert.equal(r.check?.tone, 'caution');
 	assert.match(r.check!.message, /^Mohair is usually brushed/);
+	assert.equal(answer(form({ m100: '250' })).check, null);
+});
+
+// ---- yards, ounces, and a pair typed as one string --------------------------------------
+
+test('a length in yards is converted, and read back in the unit it was typed in', () => {
+	// 220 yd per 3.5 oz is Red Heart-ish worsted; typed as metres it came out DK.
+	const r = answer(form({ m100: '220', lengthUnit: 'yd', grams: '99.2233' }));
+	assert.equal(Math.round(r.metres), 203);
+	assert.equal(r.category.n, 4);
+	assert.equal(r.summary, '100% wool at 203 m/100 g (220 yd per 3.5 oz).');
+	// The same figure taken as metres is a category out — which is what the reader saw.
+	assert.equal(answer(form({ m100: '220' })).category.n, 3);
+});
+
+test('an ounce ball weight is a real weight, not a rounded 100 g', () => {
+	assert.equal(BALL_WEIGHTS.find((w) => w.label === 'per 7 oz')?.value, '198.447');
+	const r = answer(form({ m100: '364', lengthUnit: 'yd', grams: '198.447' }));
+	assert.equal(Math.round(r.metres), 168);
+});
+
+test('a pair typed into one box is still a pair', () => {
+	assert.deepEqual(splitPair('2/28', ''), ['2', '28']);
+	assert.deepEqual(splitPair('', '6/15000'), ['6', '15000']);
+	// Both boxes filled: nothing is second-guessed.
+	assert.deepEqual(splitPair('2/28', '4'), ['2/28', '4']);
+	assert.equal(countToMetres(form({ millA: '2/28' }))!.metres, 1400);
+});
+
+test('a sum small enough to round away keeps its decimal', () => {
+	// "÷ 1000 × 100 = 1 m/100 g" for a result of 1.4 read as arithmetic that does not add up.
+	assert.equal(countToMetres(form({ millA: '2', millB: '28', divisor: '1000' }))!.working, 'Printed 28 ÷ 2 ÷ 1000 × 100 = 1.4 m/100 g.');
+	assert.equal(grouped(1400), '1,400');
+});
+
+test('a figure a whisker from the next band says so', () => {
+	// 168 m/100 g of acrylic lands at 149 against Medium's floor of 150.
+	const r = answer(form({ m100: '168', rows: [{ fibre: 'Acrylic', pct: '100' }] }));
+	assert.equal(r.category.n, 5);
+	assert.match(r.check!.message, /within a whisker of 4 Medium \(Worsted\/Aran\)/);
+	// Mid-band, it says nothing.
 	assert.equal(answer(form({ m100: '250' })).check, null);
 });

@@ -41,9 +41,12 @@ the rest of the site.
   the library, each asked on its own. `calculate` returns one refusal, and when that was the
   page's only source a wrong length hid a wrong blend: a reader fixed the length and was then
   surprised by a percentage problem the page had stopped showing.
-- **The words in the answer panel do not follow the typing.** The waiting panel is one
-  sentence — "Fill in how long a ball of it is, and what it is made of." — until there is an
-  answer, and an out-of-date reason names the problem without a running figure ("Waiting for
+- **The words in the answer panel do not follow the typing.** The waiting panel has three
+  fixed sentences and no running figures: both halves missing, "Fill in how long a ball of it
+  is, and what it is made of."; the length done, "Now choose what it is made of."; the blend
+  done, "Now fill in how long a ball of it is." One sentence for all three states left a
+  reader who had entered a count staring at a panel asking for a length the section beside it
+  had already worked out — two cold readers in one round. It changes at most twice, and an out-of-date reason names the problem without a running figure ("Waiting for
   the percentages to add up to 100", not "they come to 66% now"). A panel that reworded
   itself at every step pulled the author's eye away from the form, which is where it belongs.
   Progress shows as a small ochre tick **beside the part of the form that is done** — the
@@ -114,9 +117,15 @@ the rest of the site.
 **Step 1 asks for the length a ball is sold at, and the ball weight beside it.** The box was
 "Metres per 100 g", and a cold read pointed out that most balls say "50 g / 125 m": nothing
 said to double it, and 125 typed as it stands made a DK wool Bulky. The unit is now a
-dropdown — per 100 g, per 50 g, per 25 g — which the author chose over a grams box because
-balls come in those three and a choice needs no arithmetic. `statedPer100` in the library
-does the scaling, and the summary says it was done ("250 m/100 g (125 m per 50 g)").
+dropdown, which the author chose over a grams box because what a band prints is a short list
+and a choice needs no arithmetic. `BALL_WEIGHTS` in the library holds them: 100, 50 and 25 g,
+then the US skein sizes as the grams they really are — 3.5 oz is 99.2 g, not 100, and the tool
+does not pretend otherwise.
+
+**A second dropdown takes yards.** A US band prints "3.5 oz / 220 yds", and typed as metres
+that was 3 Light where the truth is 4 Medium, with the hook a size out. `statedPer100` does
+both conversions, and the summary reads the label back as it was typed
+("203 m/100 g (220 yd per 3.5 oz)") so the reader can see which dropdowns were used.
 
 **Every number box is a text box with `inputmode="decimal"`, never `type="number"`.** Italian
 cones print "Nm 2,5". A number box silently threw the comma away and kept 25, and the page
@@ -127,18 +136,32 @@ boxes were throwing it away before it got there. The number pad still comes up o
 panel back to "Fill in how long…" with the reader's figure still in the box; now it is
 `notALength` / `notACount`, flagged like any other length problem.
 
-**A half-typed ply pair is not a count.** "2" on its own is Nm 2 — Worsted — and it
-flashed up as a confident answer on the way to 2 / 28, which is Lace. While focus is in the
-pair and one box is still empty, `read` withholds the pair; a single figure in either box
-(which the hint allows) counts once focus leaves the pair. **"In the pair" is tracked from
-focusin/focusout (`inPair`), not read from `document.activeElement`**: the first version did
-that, passed a scripted test, and failed a real one — leaving the first box fires its
-`change` while focus is between the two boxes, so the half-typed pair was read as whole.
+**A half-typed ply pair is not a count, but a single figure is.** "2" on its own is Nm 2 —
+Worsted — and it flashed up as a confident answer on the way to 2 / 28, which is Lace. So the
+pair waits, and **the wait lasts only while the reader is standing in the box that is still
+empty**: the moment before the second figure arrives. Waiting whenever *either* box was empty
+also swallowed "NM 2000" typed into one box — the case the section's own hint promises works —
+with no sum, no answer and no error until focus left the pair. That shipped, and a cold reader
+called it the thing that would have made her give up.
+
+**"In the pair" is tracked from focusin/focusout (`inPair`), not read from
+`document.activeElement`**: the first version did that, passed a scripted test, and failed a
+real one — leaving the first box fires its `change` while focus is between the two boxes, so
+the half-typed pair was read as whole.
+
+**A pair typed into one box is still a pair.** `splitPair` splits "2/28" when the other box is
+empty; the hint quotes cone markings that way, so readers type them that way, and it was a
+dead end with no message.
 
 **A box holds a number or nothing.** `parseNumber` refuses anything else, so "220 yds" is
 refused rather than read as 220 metres (yards are for later; the box says metres). A comma or
 space before exactly three digits groups thousands — "1,200", "10 000" — and any other comma
 is a decimal one, so "2,5" is still 2.5. "1,200" read as 1.2 had been refused as "1 m/100 g".
+
+**A box it cannot read takes the sum with it.** `countToMetres` skips an unreadable box and
+answers from the other one, so "abc / 28" printed a confident "Nm 28 × 100 = 2,800 m/100 g"
+for a count nobody had typed. The component checks the boxes before it asks for a sum, and
+shows the tile's placeholder instead.
 
 **Every figure is written the same way**: "m/100 g", never "m / 100 g"; thousands with a
 comma everywhere (`grouped`); and the page joins a number to its unit with no-break spaces
@@ -192,6 +215,12 @@ otherwise answered "0 Lace" with the halo's bulk unmentioned outside the caveats
 **Nylon and polyamide, viscose and rayon are one entry each, with both names** — "Nylon
 (polyamide)", "Viscose (rayon)" — so a reader looking for either finds it. Two cold reads
 running wondered whether the pairs behaved differently. The author's call.
+
+**A figure a whisker from the next band says so.** The wool-equivalent is a model, not a
+measurement, so a figure within 3 units of a boundary is not evidence of anything: Red Heart
+Super Saver (168 m/100 g, acrylic) lands at 149 against Medium's floor of 150, and every US
+shop calls it worsted. The answer names the neighbour and says either is defensible. Moving
+the boundary would have been the wrong fix.
 
 **A figure finer than any yarn is answered, with a note.** Above 4,000 m/100 g (the finest
 lace on a cone is about 2,800) the answer carries a caution that it is more like sewing
@@ -259,8 +288,11 @@ came out of a cold usability read, and all three are easy to undo by accident:
 
 ## The answer panel, and the phone bar
 
-**A problem keeps the last good answer on screen, dimmed, with the reason inside it.** The
-category and hook fade; the reason takes the place of "The yarn you entered", so it is
+**A problem keeps the last good answer on screen, dimmed, with the reason inside it — and
+the hook goes entirely.** Three cold readers in one round took a stale card for a live answer:
+at 45% the big numeral was still the largest thing on the screen, and a faded "Start with
+6 mm" still read as the size to pick up. It fades to 30% and the hook is removed outright.
+The category the reason takes the place of "The yarn you entered", so it is
 beside the figures it explains. It used to be a line above the card, which pushed the card
 down on every invalid keystroke and was scrolled off screen while the reader worked in
 step 2 — leaving a pale card describing a yarn she had not typed. **The check and strands
@@ -295,8 +327,9 @@ not shown at all — under empty boxes it read as a warning, above a gap that lo
 covering the fibre dropdown being filled in. It is one line that never wraps: out of date it
 reads "Out of date · See why", and when the count and the label disagree its link reads
 "Check the figures" — the panel that explains it is a screen away. It shows the familiar
-name only — "1 Fingering/Sock", "4 Worsted/Aran" — with no "Answer" label: the full name
-was cut to "1 Super Fine (Fingeri…", losing the very words a crocheter knows. **It also goes once the foot of the form is nearly on screen**
+same name as the panel, with no "Answer" label to take the room. A short form was tried —
+"1 Fingering/Sock" — and two readers in one round read the bar and the panel as two different
+answers; the longest names still ellipse, and the panel is one tap away. **It also goes once the foot of the form is nearly on screen**
 (a third observer, on the row holding "Add a fibre", with a 72px bottom margin): there the
 answer is a short way below anyway, and the bar was sitting over "Add a fibre". Opening the
 yarn count section leaves focus on its toggle; it used to jump to the system select.
