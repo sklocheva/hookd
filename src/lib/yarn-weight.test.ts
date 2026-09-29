@@ -27,6 +27,7 @@ import {
 	hookAdvice,
 	lengthProblem,
 	parseNumber,
+	parsePercent,
 	strandsToReach,
 	type Input,
 } from './yarn-weight.ts';
@@ -101,7 +102,7 @@ test('380 m/100 g, 46% alpaca / 20% merino / 34% polyamide → 362 → 1 Super F
 	// reader's own figure instead — 380 ÷ 2 — because that is the sum she will check; the
 	// band chosen is the same either way.
 	assert.equal(said(strandsToReach(r.woolEquivalent, cat(4), r.metres)), '2 strands | Held together, about 190 m/100 g. For this yarn, 4 Medium (Worsted/Aran) is about 157–219 m/100 g.');
-	assert.equal(r.summary, '46% alpaca, 20% merino, 34% nylon (polyamide) at 380 m/100 g.');
+	assert.equal(r.summary, '46% alpaca, 20% merino, 34% nylon at 380 m/100 g.');
 });
 
 test('1402 m/100 g, 100% cashmere → 1391 → 0 Lace; 3 strands ≈ 467 → 1 Super Fine', () => {
@@ -395,7 +396,7 @@ test('a cone count with the divisor forced to 1 is refused, not called Lace', ()
 test('an absurd stated length blames the stated length', () => {
 	const r = calculate(form({ m100: '900000' }));
 	assert.equal(r.ok, false);
-	assert.match(r.ok ? '' : r.message, /check the metres on the label\.$/);
+	assert.match(r.ok ? '' : r.message, /check the length and the ball weight on the label\.$/);
 });
 
 test('an absurd count on Automatic blames the count and the system', () => {
@@ -698,4 +699,37 @@ test('a figure a whisker from the next band says so', () => {
 	assert.match(r.check!.message, /within a whisker of 4 Medium \(Worsted\/Aran\)/);
 	// Mid-band, it says nothing.
 	assert.equal(answer(form({ m100: '250' })).check, null);
+});
+
+test('a percentage may be zero, which a length may not', () => {
+	// "100% merino, 0% nylon" totals 100 and was refused as "not a number".
+	const rows = [{ fibre: 'Merino', pct: '100' }, { fibre: 'Nylon (polyamide)', pct: '0' }];
+	assert.equal(parsePercent('0'), 0);
+	assert.equal(parseNumber('0'), null);
+	assert.equal(blendProblem(rows), null);
+	const r = answer(form({ m100: '250', rows }));
+	assert.equal(r.category.n, 3);
+	// A fibre at 0% is not read back as part of the yarn.
+	assert.equal(r.summary, '100% merino at 250 m/100 g.');
+	// A word in the box is still a word.
+	assert.equal(blendProblem([{ fibre: 'Wool', pct: 'most' }]), MESSAGES.notAPercent);
+});
+
+test('a pair typed into one box is not refused by the guard that reads the boxes', () => {
+	// The split and the "a box holds a number or nothing" guard shipped together, and the
+	// guard judged the raw box: "2/28" was refused as not a count by the same commit that
+	// taught the page to accept it.
+	assert.equal(lengthProblem(form({ millA: '2/28' })), null);
+	assert.equal(answer(form({ millA: '2/28' })).metres, 1400);
+	assert.equal(lengthProblem(form({ millA: 'abc' })), MESSAGES.notACount);
+});
+
+test('two warnings stay two warnings', () => {
+	// A conflict and a borderline band are different things; welded together they read as one
+	// rambling sentence under a heading about the other.
+	const r = answer(form({ m100: '168', millB: '2', rows: [{ fibre: 'Acrylic', pct: '100' }] }));
+	assert.equal(r.check?.tone, 'warning');
+	assert.match(r.check!.message, /^The metres box says 168 m\/100 g but the count gives 200/);
+	assert.doesNotMatch(r.check!.message, /whisker/);
+	assert.match(r.check!.note!, /^This is within a whisker of 4 Medium/);
 });

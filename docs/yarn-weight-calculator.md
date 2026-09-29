@@ -122,6 +122,10 @@ and a choice needs no arithmetic. `BALL_WEIGHTS` in the library holds them: 100,
 then the US skein sizes as the grams they really are — 3.5 oz is 99.2 g, not 100, and the tool
 does not pretend otherwise.
 
+**The label follows the unit.** With yards chosen it reads "Yards on the label" and the
+example changes with it; saying "Metres on the label" beside a yd dropdown, and then refusing
+"220 yds" with a message naming metres, was the first thing a US reader hit.
+
 **A second dropdown takes yards.** A US band prints "3.5 oz / 220 yds", and typed as metres
 that was 3 Light where the truth is 4 Medium, with the hook a size out. `statedPer100` does
 both conversions, and the summary reads the label back as it was typed
@@ -151,7 +155,9 @@ the half-typed pair was read as whole.
 
 **A pair typed into one box is still a pair.** `splitPair` splits "2/28" when the other box is
 empty; the hint quotes cone markings that way, so readers type them that way, and it was a
-dead end with no message.
+dead end with no message. **The split runs before the "a box holds a number or
+nothing" guard**, which judged the raw box and refused "2/28" as not a count — the guard
+defeating the feature, both shipped the same day.
 
 **A box holds a number or nothing.** `parseNumber` refuses anything else, so "220 yds" is
 refused rather than read as 220 metres (yards are for later; the box says metres). A comma or
@@ -251,6 +257,10 @@ the two within the same 5% the cross-check uses. **The flat rule is the fallback
 default.**
 
 ## Alerts, colour and contrast
+
+**Two warnings are two paragraphs.** `Check.note` carries a second, unrelated thing worth
+saying — a brushed fibre, a band edge — and the panel renders it separately. Welded onto the
+end of the first message it read as one rambling chain under a heading about something else.
 
 **A message that needs attention gets a heading, a mark and a tint — never colour alone.**
 The cross-check and "Not yet" panels shipped as a white fill with a 3px bar and read as one

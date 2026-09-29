@@ -167,7 +167,7 @@ export const SYSTEMS: readonly System[] = [
 	},
 	{
 		id: 'worsted',
-		label: 'Worsted count',
+		label: 'NeK — English worsted count',
 		mode: 'count',
 		factor: 1.1289,
 		unit: 'NeK',
@@ -288,6 +288,18 @@ export function parseNumber(text: string): number | null {
 	if (!/^(\d+\.?\d*|\.\d+)$/.test(t)) return null;
 	const value = Number(t);
 	return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+/**
+ * A percentage, which unlike a length may be zero: a reader who lists a fibre and then types
+ * 0 has said something true, and "100% merino, 0% nylon" totals 100. `parseNumber` refuses 0
+ * because no length, count or ball weight can be zero, and that refusal reached the blend as
+ * "A percentage is not a number."
+ */
+export function parsePercent(text: string): number | null {
+	const t = String(text).trim();
+	if (/^0+([.,]0+)?$/.test(t)) return 0;
+	return parseNumber(t);
 }
 
 /** Something typed that is not a positive number: "0", "-200", "abc". Blank is not this. */
@@ -505,6 +517,12 @@ export type CheckTone = 'warning' | 'caution';
 
 export interface Check {
 	message: string;
+	/**
+	 * A second, unrelated thing worth saying — a brushed fibre, a borderline band. Kept apart
+	 * from `message` because welded on the end it read as one rambling sentence chain under a
+	 * heading about something else.
+	 */
+	note?: string;
 	/** `warning` means the two figures disagree; `caution` means only one exists. */
 	tone: CheckTone;
 }
@@ -539,7 +557,7 @@ const WEIGH =
 
 export const MESSAGES = {
 	needsLength: 'Enter the metres on the label, or a yarn count from a cone.',
-	notALength: 'That is not a length — enter the metres printed on the label.',
+	notALength: 'That is not a length — enter the length printed on the label, digits only.',
 	notACount: 'That is not a count — enter the figures printed on the cone.',
 	/** Not a mistake — the blend simply has not been started. The page waits, it does not warn. */
 	needsBlend: 'Choose what the yarn is made of.',
@@ -588,7 +606,7 @@ const EDGE = 3;
  */
 function implausible(metres: number, stated: number | null, manualDivisor: boolean): string {
 	const figure = `${grouped(metres)} m/100 g`;
-	if (stated !== null) return `${figure} is not a length any yarn has — check the metres on the label.`;
+	if (stated !== null) return `${figure} is not a length any yarn has — check the length and the ball weight on the label.`;
 	if (manualDivisor) {
 		return `${figure} is not a length any yarn has. Set the divisor back to Automatic.`;
 	}
@@ -707,7 +725,9 @@ function describeBlend(rows: readonly FibreRow[]): string {
 		if (pct > 0) totals.set(row.fibre, (totals.get(row.fibre) ?? 0) + pct);
 	}
 	return [...totals]
-		.map(([fibre, pct]) => `${Math.round(pct * 10) / 10}% ${fibre.toLowerCase()}`)
+		// "25% nylon (polyamide)" reads as a stumble mid-sentence; the dropdown keeps both names
+		// so either can be found.
+		.map(([fibre, pct]) => `${Math.round(pct * 10) / 10}% ${fibre.replace(/ \(.*\)$/, '').toLowerCase()}`)
 		.join(', ');
 }
 
@@ -718,7 +738,10 @@ function resolveLength(input: Input): Length | { message: string } {
 	// A figure typed that is no length at all used to read as a blank, and the page went back
 	// to "Fill in how long 100 g of it is" with the reader's 0 still in the box.
 	if (unusable(input.m100)) return { message: MESSAGES.notALength };
-	if (unusable(input.millA) || unusable(input.millB)) return { message: MESSAGES.notACount };
+	// Split first: "2/28" in one box is a pair, and judging the raw box refused it as "not a
+	// count" — the guard defeating the feature, both added on the same day.
+	const [rawA, rawB] = splitPair(input.millA, input.millB);
+	if (unusable(rawA) || unusable(rawB)) return { message: MESSAGES.notACount };
 
 	const stated = statedPer100(input);
 	const count = countToMetres(input);
@@ -752,7 +775,7 @@ export function lengthProblem(input: Input): string | null {
 export function blendProblem(rows: readonly FibreRow[]): string | null {
 	const used = effectiveRows(rows);
 	if (used.length === 0) return MESSAGES.needsBlend;
-	if (used.some((row) => row.pct.trim() !== '' && parseNumber(row.pct) === null)) return MESSAGES.notAPercent;
+	if (used.some((row) => row.pct.trim() !== '' && parsePercent(row.pct) === null)) return MESSAGES.notAPercent;
 	if (used.some((row) => row.fibre === '')) return MESSAGES.needsFibre;
 	if (!blendTotal(rows).ok || blendDensity(rows) === null) return MESSAGES.needsTotal;
 	return null;
@@ -806,12 +829,20 @@ export function calculate(input: Input): Outcome {
 		};
 	}
 
+	// A second thing worth saying goes in `note`, never on the end of `message`.
+	const addNote = (note: string) => {
+		check = check
+			? { ...check, note: check.note ? `${check.note} ${note}` : note }
+			: { tone: 'caution', message: note };
+	};
+
 	// Mohair and angora are nearly always brushed, and the halo is bulk this cannot see — the
 	// first caveat, said here too, since the reader has just told the page which fibre it is.
 	const brushed = rows.find((row) => /^(Mohair|Angora)$/.test(row.fibre) && (parseNumber(row.pct) ?? 0) > 0);
 	if (brushed) {
-		const note = `${brushed.fibre} is usually brushed, and a halo adds bulk this cannot see — it will likely work up heavier than this. Swatch it.`;
-		check = check ? { tone: check.tone, message: `${check.message} ${note}` } : { tone: 'caution', message: note };
+		addNote(
+			`${brushed.fibre} is usually brushed, and a halo adds bulk this cannot see — it will likely work up heavier than this. Swatch it.`
+		);
 	}
 
 	// Within a whisker of the next band. The wool-equivalent is a model, not a measurement, so
@@ -823,8 +854,9 @@ export function calculate(input: Input): Outcome {
 	if (edge <= EDGE) {
 		const neighbour = woolEquivalent - category.min <= EDGE ? categoryFor(category.min - 1) : categoryFor(above);
 		if (neighbour) {
-			const note = `This is within a whisker of ${neighbour.n} ${neighbour.name}. The band on your yarn may well say that, and either is defensible — swatch it.`;
-			check = check ? { tone: check.tone, message: `${check.message} ${note}` } : { tone: 'caution', message: note };
+			addNote(
+				`This is within a whisker of ${neighbour.n} ${neighbour.name}. The band on your yarn may well say that, and either is defensible — swatch it.`
+			);
 		}
 	}
 
@@ -840,7 +872,7 @@ export function calculate(input: Input): Outcome {
 		stated === null
 			? ' (worked out from the count)'
 			: grams !== '100' || unit !== 'm'
-				? ` (${grouped(parseNumber(input.m100)!)} ${unit} ${weightLabel(grams)})`
+				? ` (${input.m100.trim()} ${unit} ${weightLabel(grams)})`
 				: '';
 
 	return {

@@ -57,7 +57,10 @@ const first = SYSTEMS[0];
 		<div data-yw-group="metres">
 		{/* A small tick beside each part of the form once it is usable — so a reader can see what
 		    is left to do without the answer panel changing its words. Quiet on purpose. */}
-		<label class="label-text" for="yw-m100">Metres on the label <span class="done" aria-hidden="true" data-yw-done="metres"></span></label>
+		<label class="label-text" for="yw-m100"
+			><span data-yw-length-label>Metres on the label</span>
+			<span class="done" aria-hidden="true" data-yw-done="metres"></span
+		></label>
 		<div class="field">
 			{/* Text, not type="number": a number box throws away a decimal comma without a word,
 			    and "2,5" became 25. `inputmode` still brings up the number pad on a phone. */}
@@ -395,6 +398,9 @@ const first = SYSTEMS[0];
 						<span class="alert__title" data-yw-check-title></span>
 					</div>
 					<p class="check__text" data-yw-check-text></p>
+					{/* A second, unrelated thing worth saying — a brushed fibre, a borderline band.
+					    Its own paragraph: welded onto the first it read as one rambling chain. */}
+					<p class="check__text check__note" data-yw-check-note hidden></p>
 				</div>
 
 				{/* The spreadsheet's last block: the question a reader with a cone of something far
@@ -1194,6 +1200,10 @@ const first = SYSTEMS[0];
 		border-left-color: var(--terracotta);
 	}
 
+	.check__note {
+		margin-top: 10px;
+	}
+
 	.check__text {
 		margin: 0;
 		font: var(--type-callout);
@@ -1421,6 +1431,8 @@ const first = SYSTEMS[0];
 		const check = q('[data-yw-check]');
 		const checkTitle = q('[data-yw-check-title]');
 		const checkText = q('[data-yw-check-text]');
+		const checkNote = q('[data-yw-check-note]');
+		const lengthLabel = q('[data-yw-length-label]');
 		const strands = q('[data-yw-strands]');
 		const target = q<HTMLSelectElement>('[data-yw-target]');
 		const targetAnswer = q('[data-yw-target-answer]');
@@ -1588,17 +1600,17 @@ const first = SYSTEMS[0];
 		const staleReason = (lengthIssue: string | null, blendIssue: string | null, fromMetres: boolean) => {
 			// Said of the box it came from. "The length looks wrong" to a reader who typed only a
 			// count and changed the divisor sent her looking at a box she had left empty.
+			// A figure no yarn has has a message of its own, naming the figure. Paraphrasing it as
+			// "the length looks wrong" threw that away in the one state where the reader has an
+			// old answer on screen and most needs telling what is wrong with the new one.
+			const specific = lengthIssue && lengthIssue !== MESSAGES.notALength && lengthIssue !== MESSAGES.notACount;
 			const length = !lengthIssue
 				? null
-				: fromMetres
-					? lengthIssue === MESSAGES.notALength
+				: specific
+					? lengthIssue
+					: fromMetres
 						? 'the metres box does not hold a length'
-						: 'the length looks wrong'
-					: lengthIssue === MESSAGES.notACount
-						? 'the count box does not hold a count'
-						: divisor !== 'auto'
-							? 'the count gives a length no yarn has — try the divisor on Automatic'
-							: 'the count gives a length no yarn has';
+						: 'the count box does not hold a count';
 			const reasons = [
 				length,
 				blendIssue === MESSAGES.needsTotal ? 'the percentages do not add up to 100' : null,
@@ -1606,6 +1618,8 @@ const first = SYSTEMS[0];
 				blendIssue === MESSAGES.notAPercent ? 'a percentage is not a number' : null,
 			].filter((r): r is string => r !== null);
 			if (reasons.length === 0) return 'Something above has changed.';
+			// A message that is already a sentence keeps its own full stop and its own figures.
+			if (specific && reasons.length === 1) return reasons[0];
 			const sentence = reasons.join(', and ');
 			return `${sentence[0].toUpperCase()}${sentence.slice(1)}.`;
 		};
@@ -1634,6 +1648,8 @@ const first = SYSTEMS[0];
 				// and so the distinction survives for anyone not seeing the tint.
 				setText(checkTitle, warning ? 'These two do not agree' : 'Worth confirming');
 				setText(checkText, outcome.check.message);
+				checkNote.hidden = !outcome.check.note;
+				if (outcome.check.note) setText(checkNote, outcome.check.note);
 				check.classList.toggle('is-warning', warning);
 			}
 
@@ -1678,6 +1694,13 @@ const first = SYSTEMS[0];
 			);
 			countBlock.hidden = !countOpen;
 
+			// The label and the example follow the unit dropdown. They said "Metres on the label"
+			// and "e.g. 380" with yards chosen, and the refusal told a reader who had picked yards
+			// to enter metres.
+			const yards = unit.value === 'yd';
+			setText(lengthLabel, yards ? 'Yards on the label' : 'Metres on the label');
+			m100.placeholder = yards ? 'e.g. 420' : 'e.g. 380';
+
 			// Only the fields the chosen system can use.
 			pair.hidden = sys.mode !== 'count';
 			single.hidden = sys.mode !== 'linear';
@@ -1707,7 +1730,16 @@ const first = SYSTEMS[0];
 			const countUnreadable = countOpen && [millA, millB, singleInput].some(unreadable);
 			const count = countUnreadable ? null : countToMetres(input);
 			workingTile.classList.toggle('is-empty', !count);
-			setText(working, count?.working ?? 'The sum appears here once there is a count.');
+			// While a pair is half typed the sum waits (see `read`), and the tile said "once there
+			// is a count" at a reader who had just typed one. It says what it is waiting for.
+			const pairWaiting = countOpen && !count && (millA.value.trim() !== '' || millB.value.trim() !== '');
+			setText(
+				working,
+				count?.working ??
+					(pairWaiting
+						? 'Waiting for the second figure — or click away to use the one you have typed.'
+						: 'The sum appears here once there is a count.')
+			);
 
 			// A divisor means nothing for tex, dtex or denier — and nothing before there is a
 			// count to divide. Shown under empty boxes, "The count looks wrong" read as a warning.
