@@ -292,6 +292,15 @@ img {
 	--band-fill: var(--cream);
 }
 
+/* The title block of a single page — an article, a yarn note, a quiz, a tool, a text
+   page — on the cream band. Every page opens on cream under the header, so a reader
+   meets the same arrangement wherever they land. The band's lower edge is the divider
+   between title and content; nothing below it needs a rule of its own. */
+.title-band {
+	padding-block: 44px clamp(32px, 4vw, 44px);
+	margin-bottom: clamp(32px, 4vw, 44px);
+}
+
 /* A plain link on a band. :where() keeps this at the weight of the bare `a` rule, so
    any component that colours its own links still wins. */
 :where(.band) a {

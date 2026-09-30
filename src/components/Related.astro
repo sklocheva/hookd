@@ -66,8 +66,10 @@ const { items, heading = 'Read next' } = Astro.props;
 		margin: 0;
 		padding: 0;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-		gap: clamp(26px, 3vw, 34px);
+		/* 200px, so three fit in a journal post's 760px column rather than two and an
+		   orphan. */
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+		gap: clamp(20px, 2.4vw, 28px);
 	}
 
 	.grid > li {

@@ -1,19 +1,32 @@
 ---
 const year = new Date().getFullYear();
 
-const nav = [
-	{ label: 'Patterns', href: '/patterns/' },
-	{ label: 'Journal', href: '/journal/' },
-	{ label: 'Tools', href: '/tools/' },
-	{ label: 'About', href: '/about/' },
-	{ label: 'RSS', href: '/rss.xml' },
-];
-
-// Kept visually quieter than the main nav — present and findable, not competing.
-const legal = [
-	{ label: 'Pattern terms', href: '/licence/' },
-	{ label: 'Privacy', href: '/privacy/' },
-	{ label: 'Imprint', href: '/imprint/' },
+// The link columns. Three short lists rather than one long row, so a reader looking for
+// the small print finds it under its own heading instead of at the end of the nav.
+const columns = [
+	{
+		heading: 'Read',
+		links: [
+			{ label: 'Patterns', href: '/patterns/' },
+			{ label: 'Journal', href: '/journal/' },
+			{ label: 'Tools', href: '/tools/' },
+		],
+	},
+	{
+		heading: 'Hookd',
+		links: [
+			{ label: 'About', href: '/about/' },
+			{ label: 'RSS feed', href: '/rss.xml' },
+		],
+	},
+	{
+		heading: 'Small print',
+		links: [
+			{ label: 'Pattern terms', href: '/licence/' },
+			{ label: 'Privacy', href: '/privacy/' },
+			{ label: 'Imprint', href: '/imprint/' },
+		],
+	},
 ];
 
 // Only Instagram has an address yet. The others are placeholders until their accounts
@@ -29,54 +42,65 @@ const social = [
 
 <footer class="site-footer">
 	<div class="shell">
-		<div class="footer-row">
-			<div class="footer-left">
+		<div class="footer-top">
+			<div class="brand">
 				<a href="/" class="footer-wordmark">hookd<span class="footer-wordmark__stop">.</span></a>
-				<nav class="footer-nav">
-					{nav.map((item) => <a href={item.href}>{item.label}</a>)}
-				</nav>
+				<p class="blurb">
+					Crochet patterns written out in full, and write-ups of yarn, fibre and stitch tests.
+				</p>
+
+				<div class="socials">
+					{
+						social.map((s) => (
+							<a
+								href={s.href ?? '#'}
+								class:list={['social', { 'social--word': !s.icon }]}
+								aria-label={s.href ? `${s.name} (opens in a new tab)` : s.name}
+								target={s.href ? '_blank' : undefined}
+								rel={s.href ? 'noopener' : undefined}
+								data-scaffold={s.href ? undefined : ''}
+							>
+								{s.icon === 'instagram' && (
+									<svg viewBox="0 0 24 24" aria-hidden="true">
+										<rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+										<circle cx="12" cy="12" r="4" />
+										<circle cx="17.2" cy="6.8" r="0.9" class="fill" />
+									</svg>
+								)}
+								{s.icon === 'youtube' && (
+									<svg viewBox="0 0 24 24" aria-hidden="true">
+										<rect x="2.5" y="5.5" width="19" height="13" rx="4" />
+										<path d="M10 9.2v5.6l4.8-2.8z" class="fill" />
+									</svg>
+								)}
+								{s.icon === 'pinterest' && (
+									<svg viewBox="0 0 24 24" aria-hidden="true">
+										<path d="M9.5 21l2-8.5M11.5 12.5c-.6-2.4.9-4.5 3-4.5 1.9 0 3 1.4 3 3.3 0 2.7-1.4 4.9-3.4 4.9-1.1 0-1.9-.8-1.7-1.9" />
+										<path d="M8.2 15.2A7 7 0 1 1 12 19" />
+									</svg>
+								)}
+								{!s.icon && 'RAV'}
+							</a>
+						))
+					}
+				</div>
 			</div>
 
-			<div class="socials">
-				{
-					social.map((s) => (
-						<a
-							href={s.href ?? '#'}
-							class:list={['social', { 'social--word': !s.icon }]}
-							aria-label={s.href ? `${s.name} (opens in a new tab)` : s.name}
-							target={s.href ? '_blank' : undefined}
-							rel={s.href ? 'noopener' : undefined}
-							data-scaffold={s.href ? undefined : ''}
-						>
-							{s.icon === 'instagram' && (
-								<svg viewBox="0 0 24 24" aria-hidden="true">
-									<rect x="3.5" y="3.5" width="17" height="17" rx="5" />
-									<circle cx="12" cy="12" r="4" />
-									<circle cx="17.2" cy="6.8" r="0.9" class="fill" />
-								</svg>
-							)}
-							{s.icon === 'youtube' && (
-								<svg viewBox="0 0 24 24" aria-hidden="true">
-									<rect x="2.5" y="5.5" width="19" height="13" rx="4" />
-									<path d="M10 9.2v5.6l4.8-2.8z" class="fill" />
-								</svg>
-							)}
-							{s.icon === 'pinterest' && (
-								<svg viewBox="0 0 24 24" aria-hidden="true">
-									<path d="M9.5 21l2-8.5M11.5 12.5c-.6-2.4.9-4.5 3-4.5 1.9 0 3 1.4 3 3.3 0 2.7-1.4 4.9-3.4 4.9-1.1 0-1.9-.8-1.7-1.9" />
-									<path d="M8.2 15.2A7 7 0 1 1 12 19" />
-								</svg>
-							)}
-							{!s.icon && 'RAV'}
-						</a>
-					))
-				}
-			</div>
+			{
+				columns.map((col) => (
+					<nav class="col" aria-label={col.heading}>
+						<p class="col__heading">{col.heading}</p>
+						<ul>
+							{col.links.map((l) => (
+								<li>
+									<a href={l.href}>{l.label}</a>
+								</li>
+							))}
+						</ul>
+					</nav>
+				))
+			}
 		</div>
-
-		<nav class="legal-nav">
-			{legal.map((item) => <a href={item.href}>{item.label}</a>)}
-		</nav>
 
 		<div class="copyright">
 			© {year} Hookd. Anything for sale lives on Ravelry, never here.
@@ -96,20 +120,58 @@ const social = [
 		outline-color: var(--on-walnut);
 	}
 
-	.footer-row {
-		padding-top: 50px;
+	/* The brand block takes the most room; the three columns share the rest and wrap
+	   under it on a phone. Flex rather than a grid so it needs no media query. */
+	.footer-top {
+		padding-top: clamp(48px, 6vw, 64px);
 		display: flex;
 		flex-wrap: wrap;
-		gap: 24px;
-		justify-content: space-between;
-		align-items: flex-start;
+		gap: 36px clamp(32px, 5vw, 64px);
 	}
 
-	.footer-left {
+	.brand {
+		flex: 2 1 280px;
 		display: flex;
 		flex-direction: column;
+		align-items: flex-start;
 		gap: 16px;
-		min-width: 0;
+	}
+
+	.blurb {
+		margin: 0;
+		max-width: 320px;
+		font: 400 15px/1.6 var(--sans);
+		color: var(--on-walnut-quiet);
+	}
+
+	.col {
+		flex: 1 1 130px;
+	}
+
+	.col__heading {
+		margin: 0 0 12px;
+		font: var(--type-label);
+		color: var(--paper);
+	}
+
+	.col ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.col a {
+		display: inline-block;
+		padding-block: 6px;
+		font: 400 15px/1.3 var(--sans);
+		color: var(--on-walnut);
+		text-decoration: none;
+	}
+
+	.col a:hover {
+		color: var(--paper);
+		text-decoration: underline;
+		text-underline-offset: 3px;
 	}
 
 	.footer-wordmark {
@@ -132,32 +194,10 @@ const social = [
 		color: var(--on-walnut-stop);
 	}
 
-	.footer-nav {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 4px 20px;
-		font: 400 15px/1 var(--sans);
-		white-space: nowrap;
-	}
-
-	.footer-nav a,
-	.legal-nav a {
-		color: var(--on-walnut);
-		text-decoration: none;
-		display: inline-block;
-		padding-block: 6px;
-	}
-
-	.footer-nav a:hover,
-	.legal-nav a:hover {
-		color: var(--paper);
-		text-decoration: underline;
-		text-underline-offset: 3px;
-	}
-
 	.socials {
 		display: flex;
 		gap: 10px;
+		margin-top: 6px;
 	}
 
 	.social {
@@ -198,20 +238,8 @@ const social = [
 		color: var(--on-walnut-accent);
 	}
 
-	.legal-nav {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 4px 18px;
-		padding-top: 22px;
-		font: var(--type-meta);
-	}
-
-	.legal-nav a {
-		color: var(--on-walnut-quiet);
-	}
-
 	.copyright {
-		margin-top: 22px;
+		margin-top: clamp(40px, 5vw, 56px);
 		padding: 28px 0 46px;
 		border-top: 1px solid var(--on-walnut-rule);
 		font: 400 14px/1.6 var(--sans);

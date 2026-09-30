@@ -157,7 +157,7 @@ const schema = articleSchema({
 	<article class="shell review">
 		{d.draft && <DraftNotice />}
 
-		<div class="review__title">
+		<div class="review__title band band--cream band--bleed title-band">
 			<Eyebrow kind={YARN_KIND} tone="journal" rest={`· ${formatDate(d.date)}`} />
 			<h1>{d.title}</h1>
 			{d.standfirst && <p class="review__standfirst">{d.standfirst}</p>}
@@ -244,10 +244,6 @@ const schema = articleSchema({
 </Base>
 
 <style>
-	.review__title {
-		padding-top: 40px;
-	}
-
 	.review__title :global(.eyebrow) {
 		margin-bottom: 14px;
 	}

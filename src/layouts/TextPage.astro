@@ -21,7 +21,7 @@ const { title, description, heading, standfirst, active, updated } = Astro.props
 
 <Base title={title} description={description} active={active}>
 	<article class="shell shell--narrow">
-		<div class="head">
+		<div class="head band band--cream band--bleed title-band">
 			<h1>{heading}</h1>
 			{standfirst && <p class="standfirst">{standfirst}</p>}
 			{updated && <p class="updated">{updated}</p>}
@@ -36,10 +36,6 @@ const { title, description, heading, standfirst, active, updated } = Astro.props
 <style>
 	article {
 		padding-bottom: 20px;
-	}
-
-	.head {
-		padding-top: 44px;
 	}
 
 	h1 {

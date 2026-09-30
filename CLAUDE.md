@@ -425,6 +425,13 @@ measurement each size is cut for, yardage per size, US/UK terms.
   `.section-foot`, `.card` / `.card__body`, `.button` and `.button--outline`. A listing that
   builds its own card is how the site stops looking like one site. Two buttons side by side
   are the same button — both filled or both outline, never one of each.
+- **Every page opens on cream under the header.** Listings do it with their band
+  (`PageHead`, the homepage hero); a single page — journal post, yarn note, quiz, tool, text
+  page, 404 — puts its title block on `.title-band`. A new template should do the same, and
+  needs no rule under its title: the band's edge is the divider.
+- **The footer is a brand block and three link columns** — Read, Hookd, Small print — so
+  the legal pages sit under a heading of their own rather than trailing the nav. The blurb
+  is the homepage meta description, word for word; change them together.
 - **Text over a photograph declares its worst case.** The audit reads the nearest
   background colour and cannot see a gradient, so the homepage tiles set
   `data-contrast-bg` to what sits behind the text over a pure *white* photograph, and the

@@ -7,6 +7,7 @@ import Base from '../layouts/Base.astro';
 	description="That page does not exist. The patterns and journal indexes are the quickest way back."
 	noindex
 >
+	<div class="band band--cream">
 	<section class="shell notfound">
 		<p class="code">404</p>
 		<h1>That page isn't here</h1>
@@ -15,12 +16,13 @@ import Base from '../layouts/Base.astro';
 			site is reachable from the two indexes below.
 		</p>
 
-		<div class="ways label">
-			<a href="/patterns/" class="cta--terracotta">All patterns →</a>
-			<a href="/journal/" class="cta--ochre">Read the journal →</a>
-			<a href="/" class="cta--quiet">Back to the homepage →</a>
+		<div class="ways">
+			<a href="/patterns/" class="button">All patterns</a>
+			<a href="/journal/" class="button">Read the journal</a>
 		</div>
+		<a href="/" class="home">Back to the homepage →</a>
 	</section>
+	</div>
 </Base>
 
 <style>
@@ -50,25 +52,14 @@ import Base from '../layouts/Base.astro';
 
 	.ways {
 		display: flex;
-		flex-direction: column;
+		flex-wrap: wrap;
 		gap: 14px;
+		margin-bottom: 22px;
 	}
 
-	.ways a {
-		text-decoration: none;
+	.home {
 		display: inline-block;
-		padding-block: 7px;
-	}
-
-	.cta--terracotta {
-		color: var(--terracotta);
-	}
-
-	.cta--ochre {
-		color: var(--ochre);
-	}
-
-	.cta--quiet {
-		color: var(--muted);
+		padding-block: 6px;
+		color: var(--terracotta-on-band);
 	}
 </style>

@@ -61,7 +61,7 @@ const schema = articleSchema({
 	<article class="shell note">
 		{d.draft && <DraftNotice />}
 
-		<div class="title-block">
+		<div class="title-block band band--cream band--bleed title-band">
 			<Eyebrow
 				kind="Journal"
 				rest={`· ${d.kind} · ${formatDate(d.date)} · ${readTime(post.body)} min${d.updated ? ` · updated ${formatDate(d.updated)}` : ''}`}
@@ -117,7 +117,6 @@ const schema = articleSchema({
 	}
 
 	.title-block {
-		padding-top: 44px;
 		max-width: var(--measure);
 	}
 

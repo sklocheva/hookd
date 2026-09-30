@@ -65,7 +65,7 @@ const schema = articleSchema({
 	<article class="shell quiz-page">
 		{d.draft && <DraftNotice />}
 
-		<div class="title-block">
+		<div class="title-block band band--cream band--bleed title-band">
 			<Eyebrow
 				kind="Quiz"
 				rest={`· ${questionCountLabel(d)} · ${formatDate(d.date)}${d.updated ? ` · updated ${formatDate(d.updated)}` : ''}`}
@@ -80,8 +80,6 @@ const schema = articleSchema({
 			</p>
 		</div>
 
-		<hr />
-
 		<Quiz quiz={d} relatedHref={related && `/journal/${related.id}/`} relatedTitle={related?.data.title} />
 	</article>
 </Base>
@@ -95,7 +93,6 @@ const schema = articleSchema({
 	}
 
 	.title-block {
-		padding-top: 44px;
 		max-width: var(--measure);
 	}
 
@@ -122,11 +119,5 @@ const schema = articleSchema({
 		font: var(--type-note);
 		color: var(--muted);
 		text-wrap: pretty;
-	}
-
-	hr {
-		margin: 34px 0 30px;
-		border: none;
-		border-top: 1px solid var(--rule);
 	}
 </style>
