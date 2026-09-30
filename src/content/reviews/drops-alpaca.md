@@ -2,7 +2,7 @@
 title: Drops Alpaca
 date: 2026-09-03
 updated: 2026-09-14
-draft: false
+draft: true
 previewId: 8ae26cff-96ca-40c2-85bd-a6c76b9830d0
 standfirst: Soft and surprisingly fluffy. Has a really nice drape, but I’m always surprised by how long it takes me to finish a piece with this yarn. WORTH IT, though!
 metaDescription: Drops Alpaca - my view on the yarn
