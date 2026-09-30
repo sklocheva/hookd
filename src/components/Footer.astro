@@ -16,106 +16,143 @@ const legal = [
 	{ label: 'Imprint', href: '/imprint/' },
 ];
 
-// Text stubs standing in for icon artwork. Ravelry carries the accent colour.
+// Only Instagram has an address yet. The others are placeholders until their accounts
+// exist; a link that goes nowhere is marked as scaffolding so the audit knows.
+// Ravelry carries the accent colour. It has no mark of its own, so it stays a word.
 const social = [
-	{ label: 'IG', name: 'Instagram', accent: false },
-	{ label: 'YT', name: 'YouTube', accent: false },
-	{ label: 'PIN', name: 'Pinterest', accent: false },
-	{ label: 'RAV', name: 'Ravelry', accent: true },
-];
+	{ name: 'Instagram', href: 'https://www.instagram.com/hookd_works/', icon: 'instagram' },
+	{ name: 'YouTube', href: undefined, icon: 'youtube' },
+	{ name: 'Pinterest', href: undefined, icon: 'pinterest' },
+	{ name: 'Ravelry', href: undefined, icon: undefined },
+] as const;
 ---
 
-<footer class="shell site-footer">
-	<div class="hairline"></div>
+<footer class="site-footer">
+	<div class="shell">
+		<div class="footer-row">
+			<div class="footer-left">
+				<a href="/" class="footer-wordmark">hookd<span class="footer-wordmark__stop">.</span></a>
+				<nav class="footer-nav">
+					{nav.map((item) => <a href={item.href}>{item.label}</a>)}
+				</nav>
+			</div>
 
-	<div class="footer-row">
-		<div class="footer-left">
-			<a href="/" class="footer-wordmark">hookd<span class="footer-wordmark__stop">.</span></a>
-			<nav class="footer-nav">
-				{nav.map((item) => <a href={item.href}>{item.label}</a>)}
-			</nav>
+			<div class="socials">
+				{
+					social.map((s) => (
+						<a
+							href={s.href ?? '#'}
+							class:list={['social', { 'social--word': !s.icon }]}
+							aria-label={s.href ? `${s.name} (opens in a new tab)` : s.name}
+							target={s.href ? '_blank' : undefined}
+							rel={s.href ? 'noopener' : undefined}
+							data-scaffold={s.href ? undefined : ''}
+						>
+							{s.icon === 'instagram' && (
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+									<circle cx="12" cy="12" r="4" />
+									<circle cx="17.2" cy="6.8" r="0.9" class="fill" />
+								</svg>
+							)}
+							{s.icon === 'youtube' && (
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<rect x="2.5" y="5.5" width="19" height="13" rx="4" />
+									<path d="M10 9.2v5.6l4.8-2.8z" class="fill" />
+								</svg>
+							)}
+							{s.icon === 'pinterest' && (
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<path d="M9.5 21l2-8.5M11.5 12.5c-.6-2.4.9-4.5 3-4.5 1.9 0 3 1.4 3 3.3 0 2.7-1.4 4.9-3.4 4.9-1.1 0-1.9-.8-1.7-1.9" />
+									<path d="M8.2 15.2A7 7 0 1 1 12 19" />
+								</svg>
+							)}
+							{!s.icon && 'RAV'}
+						</a>
+					))
+				}
+			</div>
 		</div>
 
-		<div class="socials">
-			{
-				social.map((s) => (
-					<a
-						href="#"
-						class:list={['social', { 'social--accent': s.accent }]}
-						aria-label={s.name}
-					>
-						{s.label}
-					</a>
-				))
-			}
+		<nav class="legal-nav">
+			{legal.map((item) => <a href={item.href}>{item.label}</a>)}
+		</nav>
+
+		<div class="copyright">
+			© {year} Hookd. Anything for sale lives on Ravelry, never here.
 		</div>
-	</div>
-
-	<nav class="legal-nav">
-		{legal.map((item) => <a href={item.href}>{item.label}</a>)}
-	</nav>
-
-	<div class="copyright">
-		<span>
-			© {year} Hookd.
-		</span>
-		{/* Placeholder scaffolding: delete with the social stubs above. */}
-		<span class="annotation" data-scaffold>Social marks — drop in icon artwork</span>
 	</div>
 </footer>
 
 <style>
+	/* The walnut band. Everything on it is set from the --on-walnut tokens; the site's
+	   ink and rust are both unreadable here. */
 	.site-footer {
-		padding-top: clamp(48px, 6vw, 72px);
+		background: var(--walnut);
+		color: var(--on-walnut);
+	}
+
+	.site-footer :focus-visible {
+		outline-color: var(--on-walnut);
 	}
 
 	.footer-row {
-		padding-top: 46px;
+		padding-top: 50px;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 24px;
 		justify-content: space-between;
-		align-items: center;
+		align-items: flex-start;
 	}
 
 	.footer-left {
 		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 24px;
-	}
-
-	.footer-wordmark__stop {
-		color: var(--terracotta);
+		flex-direction: column;
+		gap: 16px;
+		min-width: 0;
 	}
 
 	.footer-wordmark {
 		display: inline-block;
+		align-self: flex-start;
 		padding-block: 3px;
-		font: 500 19px/1 var(--wordmark);
-		/* -0.04em, not the header's -0.05em: at this size the tighter setting collides. */
-		letter-spacing: -0.04em;
-		color: var(--ink);
+		/* 22px, above the 19px where -0.05em starts to collide, so it takes the
+		   header's tracking rather than the loosened one. */
+		font: 500 22px/1 var(--wordmark);
+		letter-spacing: -0.05em;
+		color: var(--paper);
 		text-decoration: none;
-		text-decoration: none;
+	}
+
+	.footer-wordmark:hover {
+		color: var(--paper);
+	}
+
+	.footer-wordmark__stop {
+		color: var(--on-walnut-stop);
 	}
 
 	.footer-nav {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 20px;
-		font: 400 14px/1 var(--sans);
+		gap: 4px 20px;
+		font: 400 15px/1 var(--sans);
+		white-space: nowrap;
 	}
 
-	.footer-nav a {
-		color: var(--muted);
+	.footer-nav a,
+	.legal-nav a {
+		color: var(--on-walnut);
 		text-decoration: none;
 		display: inline-block;
 		padding-block: 6px;
 	}
 
-	.footer-nav a:hover {
-		color: var(--ink);
+	.footer-nav a:hover,
+	.legal-nav a:hover {
+		color: var(--paper);
+		text-decoration: underline;
+		text-underline-offset: 3px;
 	}
 
 	.socials {
@@ -124,57 +161,60 @@ const social = [
 	}
 
 	.social {
-		width: 38px;
-		height: 38px;
+		width: 44px;
+		height: 44px;
 		border-radius: 999px;
-		border: 1px solid var(--border-dashed);
+		border: 1px solid var(--on-walnut-ring);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font: 600 11px/1 var(--sans);
-		letter-spacing: 0.06em;
-		color: var(--muted);
+		color: var(--on-walnut);
 		text-decoration: none;
 	}
 
-	.social--accent {
-		color: var(--terracotta);
+	.social:hover {
+		color: var(--paper);
+		border-color: var(--on-walnut);
+	}
+
+	.social svg {
+		width: 20px;
+		height: 20px;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.6;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	.social svg .fill {
+		fill: currentColor;
+		stroke: none;
+	}
+
+	.social--word {
+		font: var(--type-label);
+		letter-spacing: 0.04em;
+		color: var(--on-walnut-accent);
 	}
 
 	.legal-nav {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 18px;
+		gap: 4px 18px;
 		padding-top: 22px;
 		font: var(--type-meta);
 	}
 
 	.legal-nav a {
-		color: var(--muted);
-		text-decoration: none;
-		display: inline-block;
-		padding-block: 6px;
-	}
-
-	.legal-nav a:hover {
-		color: var(--ink);
+		color: var(--on-walnut-quiet);
 	}
 
 	.copyright {
-		padding: 18px 0 46px;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 12px;
-		justify-content: space-between;
-		align-items: baseline;
-		font: 400 13.5px/1.6 var(--sans);
-		color: var(--muted);
-	}
-
-	.annotation {
-		font: var(--type-mono-caption);
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--faint);
+		margin-top: 22px;
+		padding: 28px 0 46px;
+		border-top: 1px solid var(--on-walnut-rule);
+		font: 400 14px/1.6 var(--sans);
+		color: var(--on-walnut-quiet);
 	}
 </style>

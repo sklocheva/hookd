@@ -17,8 +17,8 @@ const { patterns } = Astro.props;
 <style>
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-		gap: 52px 36px;
-		padding-top: 40px;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+		gap: clamp(20px, 2.4vw, 28px);
+		padding-top: clamp(40px, 5vw, 56px);
 	}
 </style>

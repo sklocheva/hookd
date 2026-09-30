@@ -26,8 +26,6 @@ const { kind, rest, tone = 'pattern' } = Astro.props;
 <style>
 	.eyebrow {
 		font: var(--type-label);
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
 	}
 
 	.kind--pattern {
@@ -36,6 +34,16 @@ const { kind, rest, tone = 'pattern' } = Astro.props;
 
 	.kind--journal {
 		color: var(--ochre);
+	}
+
+	/* Both accents fail AA on an oat or sage band, so an eyebrow on one takes the
+	   darker pair. */
+	:global(.band) .kind--pattern {
+		color: var(--terracotta-on-band);
+	}
+
+	:global(.band) .kind--journal {
+		color: var(--ochre-on-band);
 	}
 
 	/* --annotation is for scaffolding captions that get deleted; it is too light for

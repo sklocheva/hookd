@@ -21,8 +21,8 @@ const { entries } = Astro.props;
 
 <div class="shell list">
 	{
-		entries.map((entry, i) => (
-			<a href={entry.href} class:list={['row', { 'row--first': i === 0 }]}>
+		entries.map((entry) => (
+			<a href={entry.href} class="row card">
 				<div class="row__media">
 					{/* An entry with a tile is one that will never be photographed — a quiz,
 					    not a shot still to come. See PlaceholderTile.astro. */}
@@ -58,32 +58,35 @@ const { entries } = Astro.props;
 </div>
 
 <style>
-	.row {
+	.list {
 		display: flex;
+		flex-direction: column;
+		gap: clamp(18px, 2.4vw, 26px);
+		padding-top: clamp(40px, 5vw, 56px);
+	}
+
+	/* A card laid on its side: the photograph runs flush to the left edge, the text sits
+	   beside it, and on a phone the two stack like any other card. */
+	.row {
+		flex-direction: row;
 		flex-wrap: wrap;
-		gap: clamp(22px, 3vw, 40px);
 		align-items: center;
-		text-decoration: none;
-		color: inherit;
-		border-top: 1px solid var(--rule-light);
-		padding-block: clamp(30px, 4vw, 44px);
 	}
 
-	.row--first {
-		border-top: none;
-		padding-top: 34px;
-	}
-
-	/* The max-width is deliberate: without it the image column grows to half the shell
-	   and the row reads as a banner rather than a list item. */
+	/* The cap is deliberate: without it the image column grows to half the shell and the
+	   row reads as a banner rather than a list item. But once the card is too narrow for
+	   the two to sit side by side (under 600px) the image is the full width like any other
+	   card. The multiplied difference flips the cap between 320px and effectively none
+	   without a media query — this site has none. */
 	.row__media {
 		flex: 1 1 240px;
-		max-width: 320px;
+		max-width: max(320px, (600px - 100%) * 999);
 	}
 
 	.row__text {
 		flex: 1 1 340px;
 		min-width: 0;
+		padding: clamp(20px, 3vw, 32px);
 	}
 
 	.row__meta {

@@ -2,7 +2,6 @@
 import Hero from './Hero.astro';
 import Eyebrow from './Eyebrow.astro';
 import { formatDate } from '../lib/format';
-import SectionLabel from './SectionLabel.astro';
 import type { RelatedItem } from '../lib/related';
 
 /**
@@ -24,15 +23,16 @@ const { items, heading = 'Read next' } = Astro.props;
 
 {
 	items.length > 0 && (
-		<section class="related" aria-labelledby="read-next">
-			<SectionLabel id="read-next">{heading}</SectionLabel>
+		<section class="related band band--cream band--bleed" aria-labelledby="read-next">
+			<div class="section-head">
+				<h2 id="read-next">{heading}</h2>
+			</div>
 
 			<ul class="grid">
 				{items.map((item) => (
 					<li>
 						<a href={item.href} class="card hoverable">
-							<div class="card__media">
-								<Hero
+							<Hero
 									image={item.heroImage}
 									alt={item.heroImageAlt}
 									ratio="3/2"
@@ -40,10 +40,11 @@ const { items, heading = 'Read next' } = Astro.props;
 									widths={[280, 560]}
 									sizes="(min-width: 1000px) 300px, 100vw"
 								/>
+							<div class="card__body">
+								<Eyebrow kind={item.kind} rest={`· ${formatDate(item.date)}`} tone={item.tone} />
+								<h3 class="hoverable__title">{item.title}</h3>
+								<p>{item.summary}</p>
 							</div>
-							<Eyebrow kind={item.kind} rest={`· ${formatDate(item.date)}`} tone={item.tone} />
-							<h3 class="hoverable__title">{item.title}</h3>
-							<p>{item.summary}</p>
 						</a>
 					</li>
 				))}
@@ -53,10 +54,11 @@ const { items, heading = 'Read next' } = Astro.props;
 }
 
 <style>
+	/* The cream band at the foot of an article, just above the footer: the article ends,
+	   the band says "and next". */
 	.related {
-		margin-top: clamp(44px, 6vw, 68px);
-		padding-top: clamp(28px, 4vw, 38px);
-		border-top: 1px solid var(--rule-strong);
+		margin-top: clamp(56px, 7vw, 88px);
+		padding-block: clamp(48px, 6vw, 72px);
 	}
 
 	.grid {
@@ -68,23 +70,16 @@ const { items, heading = 'Read next' } = Astro.props;
 		gap: clamp(26px, 3vw, 34px);
 	}
 
-	.card {
-		display: block;
-		text-decoration: none;
-		color: inherit;
+	.grid > li {
+		display: flex;
 	}
 
-	.card__media {
-		margin-bottom: 14px;
-	}
-
-	/* The eyebrow sits between image and title, so it needs its own breathing room. */
-	.card :global(.eyebrow) {
-		margin-bottom: 8px;
+	.grid .card {
+		flex: 1;
 	}
 
 	h3 {
-		margin: 0 0 8px;
+		margin: 0;
 		font: 400 clamp(19px, 2.1vw, 22px) / 1.25 var(--serif);
 		color: var(--ink);
 		text-wrap: pretty;

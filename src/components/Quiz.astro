@@ -301,6 +301,7 @@ const total = quiz.questions.length;
 		background: var(--panel);
 		border: 1px solid var(--rule);
 		border-left: 3px solid var(--rule-bar);
+		border-radius: var(--radius-button);
 		cursor: pointer;
 		transition:
 			background 0.18s ease,
@@ -375,8 +376,6 @@ const total = quiz.questions.length;
 
 	.or__word {
 		font: var(--type-label);
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
 		color: var(--ochre);
 	}
 
@@ -398,8 +397,6 @@ const total = quiz.questions.length;
 		border-bottom: 1px solid var(--border-dashed);
 		cursor: pointer;
 		font: var(--type-label);
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
 		color: var(--ink-2);
 	}
 
@@ -429,8 +426,6 @@ const total = quiz.questions.length;
 	.result__eyebrow {
 		margin-bottom: 14px;
 		font: var(--type-label);
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
 		color: var(--ochre);
 	}
 
@@ -466,8 +461,6 @@ const total = quiz.questions.length;
 	.result__steps-label {
 		margin-bottom: 14px;
 		font: var(--type-label);
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
 		color: var(--label-ink);
 	}
 
@@ -499,18 +492,17 @@ const total = quiz.questions.length;
 		justify-content: center;
 		min-height: 48px;
 		padding: 12px 26px;
-		background: var(--ink);
-		border: 1px solid var(--ink);
+		background: var(--walnut);
+		border: 1px solid var(--walnut);
+		border-radius: var(--radius-button);
 		color: var(--paper);
 		cursor: pointer;
 		font: var(--type-label);
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
 		transition: background 0.18s ease;
 	}
 
 	.button:hover {
-		background: var(--ink-hover);
+		background: var(--walnut-hover);
 	}
 
 	.result__link {
@@ -518,8 +510,6 @@ const total = quiz.questions.length;
 		align-items: center;
 		min-height: 44px;
 		font: var(--type-label);
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
 		text-decoration: none;
 		color: var(--terracotta);
 		border-bottom: 1px solid currentColor;

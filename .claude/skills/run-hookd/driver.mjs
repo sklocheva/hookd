@@ -321,6 +321,14 @@ function pageAudit() {
 	const parse = (c) => { const m = c.match(/rgba?\(([^)]+)\)/); return m ? m[1].split(',').map(Number).slice(0, 3) : null; };
 
 	const effBg = (el) => {
+		// Text over a photograph has no background colour to find. An element may declare
+		// the worst case it is read against — what sits behind it over a pure white photo —
+		// and that is measured instead. Declare the worst case, never the typical one.
+		const declared = el.closest('[data-contrast-bg]');
+		if (declared) {
+			const h = declared.getAttribute('data-contrast-bg').replace('#', '');
+			return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+		}
 		let n = el;
 		while (n && n !== document.documentElement) {
 			const c = getComputedStyle(n).backgroundColor;

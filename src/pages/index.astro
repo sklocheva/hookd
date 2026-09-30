@@ -4,11 +4,13 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Eyebrow from '../components/Eyebrow.astro';
 import { formatDate, patternSpecLine } from '../lib/format';
+import { YARN_KIND, kindHref } from '../lib/taxonomy';
 
 // Drafts are absent from every listing, this one included — see src/lib/drafts.ts.
-const [patterns, posts] = await Promise.all([
+const [patterns, posts, yarnNotes] = await Promise.all([
 	getCollection('patterns', ({ data }) => !data.draft),
 	getCollection('posts', ({ data }) => !data.draft),
+	getCollection('reviews', ({ data }) => !data.draft),
 ]);
 
 type FeedItem = {
@@ -95,6 +97,21 @@ const pinned = picks.flatMap((pick) => {
 	// The title comes from the entry, so a pin cannot drift from what the page says.
 	return [{ ...pick, title: entry.data.title, href: `${base}/${entry.id}/` }];
 });
+
+/**
+ * The three ways into the site, as photographs with their names over them. The whole
+ * tile is the link. `photo` is the shot list until real images land: pick ones with a
+ * calm lower third, because the title sits there on a dark fade.
+ *
+ * A section with nothing published has no page to link to — its filter route is only
+ * built once it has an entry — so its tile drops out rather than leading to a 404. The
+ * grid is auto-fit, so two tiles simply sit wider.
+ */
+const tiles = [
+	{ title: 'Patterns', link: 'Browse patterns', href: '/patterns/', photo: 'finished piece, worn or styled' },
+	{ title: 'Journal', link: 'Read the journal', href: '/journal/', photo: 'swatches, notes, process' },
+	{ title: YARN_KIND, link: 'Read the notes', href: kindHref(YARN_KIND), photo: 'skeins, close up', empty: yarnNotes.length === 0 },
+].filter((tile) => !tile.empty);
 ---
 
 <Base
@@ -109,6 +126,7 @@ const pinned = picks.flatMap((pick) => {
 		/* Every pinned entry is rendered server-side; the script only toggles which is
 		   visible. Crawlers that fetch but do not execute JS still see the first. */
 		pinned.length > 0 && (
+			<div class="band band--cream">
 			<section class="shell pinned" data-rotator>
 			{
 				pinned.map((item, i) => (
@@ -120,78 +138,94 @@ const pinned = picks.flatMap((pick) => {
 							<div class="pinned__eyebrow">Pinned</div>
 							<h2>{item.title}</h2>
 							<p>{item.excerpt}</p>
-							<a href={item.href} class="pinned__cta">
+							<a href={item.href} class="button">
 								{item.cta}
 							</a>
+							{/* One set of dots per slide, so they sit under the text the way
+							    the design has them. Only the visible slide's set is ever shown. */}
+							<div class="dots" role="tablist" aria-label="Pinned posts">
+								{
+									pinned.map((other, j) => (
+										<button
+											type="button"
+											class:list={['dot', { 'dot--on': j === i }]}
+											data-dot
+											data-index={j}
+											role="tab"
+											aria-selected={j === i ? 'true' : 'false'}
+											aria-label={`Show pinned post: ${other.title}`}
+										>
+											<span class="dot__mark" aria-hidden="true" />
+										</button>
+									))
+								}
+							</div>
 						</div>
 					</div>
 				))
 			}
-
-			<div class="dots" role="tablist" aria-label="Pinned posts">
-				{
-					pinned.map((item, i) => (
-						<button
-							type="button"
-							class:list={['dot', { 'dot--on': i === 0 }]}
-							data-dot
-							data-index={i}
-							role="tab"
-							aria-selected={i === 0 ? 'true' : 'false'}
-							aria-label={`Show pinned post: ${item.title}`}
-						>
-							<span class="dot__mark" aria-hidden="true" />
-						</button>
-					))
-				}
-			</div>
 		</section>
+		</div>
 		)
 	}
 
-	<div class="shell latest-bar">
-		<div class="latest-bar__title">Latest</div>
-		<div class="latest-bar__filters label">
-			<a href="/" class="filter filter--active" aria-current="page">All</a>
-			<a href="/patterns/" class="filter">Patterns</a>
-			<a href="/journal/" class="filter">Journal</a>
+	<section class="shell section">
+		<div class="section-head">
+			<h2>Latest</h2>
+			<p>New patterns and journal entries, most recent first.</p>
 		</div>
-	</div>
 
-	<section class="shell feed">
-		{
-			feed.map((item) => (
-				<a href={item.href} class="feed__row hoverable">
-					<div class="feed__thumb">
-						<Hero image={item.image} alt={item.title} ratio="1/1" caption={item.photo} widths={[140, 280]} sizes="140px" />
-					</div>
-					<div class="feed__text">
-						<div class="feed__meta">
+		<div class="latest">
+			{
+				feed.map((item) => (
+					<a href={item.href} class="card hoverable">
+						<Hero image={item.image} alt={item.title} ratio="1/1" caption={item.photo} widths={[280, 560]} sizes="(min-width: 1160px) 270px, (min-width: 560px) 50vw, 100vw" />
+						<div class="card__body">
 							<Eyebrow
 								kind={item.kind}
 								rest={`· ${formatDate(item.date)}`}
 								tone={item.kind === 'Pattern' ? 'pattern' : 'journal'}
 							/>
+							<h3 class="hoverable__title">{item.title}</h3>
+							<p class="latest__excerpt">{item.summary}</p>
+							{item.spec && <p class="latest__spec">{item.spec}</p>}
 						</div>
-						<h3 class="hoverable__title">{item.title}</h3>
-						<p class="feed__excerpt">{item.summary}</p>
-						{item.spec && <p class="feed__spec">{item.spec}</p>}
-					</div>
-				</a>
-			))
-		}
-	</section>
+					</a>
+				))
+			}
+		</div>
 
-	<section class="shell archive">
-		<div class="hairline"></div>
-		<p class="archive__line">
-			You're looking at our latest posts — the rest live in the archive.
-		</p>
-		<div class="archive__ctas label">
-			<a href="/patterns/" class="cta--terracotta">All patterns →</a>
-			<a href="/journal/" class="cta--ochre">Read the journal →</a>
+		{/* Two of the same button, side by side — never a filled one next to an outline. */}
+		<div class="section-foot latest__more">
+			<a href="/patterns/" class="button button--outline">All patterns</a>
+			<a href="/journal/" class="button button--outline">The whole journal</a>
 		</div>
 	</section>
+
+	<div class="band band--cream">
+		<section class="shell section">
+			<div class="section-head">
+				<h2>Where to start</h2>
+				<p>Patterns written out in full, and notes on what a yarn or a stitch actually did.</p>
+			</div>
+
+			<div class="tiles">
+				{
+					tiles.map((tile) => (
+						<a href={tile.href} class="tile">
+							<Hero alt="" ratio="4/3" caption={tile.photo} widths={[360, 720]} sizes="(min-width: 1160px) 360px, 100vw" />
+							{/* The fade guarantees at least 72% walnut behind the text, so this is the
+							    background it is read against when the photograph under it is pure white. */}
+							<span class="tile__text" data-contrast-bg="#72665e">
+								<span class="tile__title">{tile.title}</span>
+								<span class="tile__link">{tile.link} →</span>
+							</span>
+						</a>
+					))
+				}
+			</div>
+		</section>
+	</div>
 </Base>
 
 <script>
@@ -213,16 +247,17 @@ const pinned = picks.flatMap((pick) => {
 				const link = slide.querySelector('a');
 				if (link) link.tabIndex = on ? 0 : -1;
 			});
-			dots.forEach((dot, i) => {
-				dot.classList.toggle('dot--on', i === index);
-				dot.setAttribute('aria-selected', i === index ? 'true' : 'false');
+			dots.forEach((dot) => {
+				const on = Number(dot.dataset.index) === index;
+				dot.classList.toggle('dot--on', on);
+				dot.setAttribute('aria-selected', on ? 'true' : 'false');
 			});
 		}
 
 		function start() {
 			if (reduced.matches) return;
 			stop();
-			timer = window.setInterval(() => show(index + 1), 5000);
+			timer = window.setInterval(() => show(index + 1), 8000);
 		}
 		function stop() {
 			if (timer) window.clearInterval(timer);
@@ -231,7 +266,12 @@ const pinned = picks.flatMap((pick) => {
 
 		dots.forEach((dot) =>
 			dot.addEventListener('click', () => {
-				show(Number(dot.dataset.index));
+				const next = Number(dot.dataset.index);
+				const hadFocus = document.activeElement === dot;
+				show(next);
+				// The dot pressed lives in the slide that just hid. Move focus to its twin
+				// in the slide now showing, or a keyboard user is dropped back to the top.
+				if (hadFocus) slides[index].querySelector<HTMLElement>(`[data-dot][data-index="${next}"]`)?.focus();
 				start();
 			})
 		);
@@ -262,12 +302,15 @@ const pinned = picks.flatMap((pick) => {
 
 	/* Pinned hero */
 	.pinned {
-		padding-block: clamp(28px, 4vw, 44px);
+		padding-block: clamp(36px, 5vw, 64px);
 		position: relative;
 	}
 
 	.pinned__slide {
 		display: flex;
+		/* The photograph sits on the right, and stacks above the text on a phone. */
+		flex-direction: row-reverse;
+		justify-content: space-between;
 		flex-wrap: wrap;
 		gap: clamp(24px, 4vw, 52px);
 		align-items: center;
@@ -292,8 +335,6 @@ const pinned = picks.flatMap((pick) => {
 
 	.pinned__eyebrow {
 		font: var(--type-label);
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
 		/* --annotation is scaffolding-only (3.76:1). This label ships. */
 		color: var(--muted);
 		margin-bottom: 18px;
@@ -312,16 +353,6 @@ const pinned = picks.flatMap((pick) => {
 		color: var(--muted);
 		max-width: 440px;
 		text-wrap: pretty;
-	}
-
-	.pinned__cta {
-		display: inline-block;
-		padding-block: 7px;
-		font: var(--type-label);
-		letter-spacing: 0.07em;
-		text-transform: uppercase;
-		color: var(--terracotta);
-		text-decoration: none;
 	}
 
 	.dots {
@@ -354,108 +385,106 @@ const pinned = picks.flatMap((pick) => {
 	}
 
 	.dot--on .dot__mark {
-		background: var(--terracotta);
+		background: var(--walnut);
 	}
 
-	/* Latest bar */
-	.latest-bar {
-		padding-bottom: 16px;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 12px;
-		justify-content: space-between;
-		align-items: baseline;
+	/* Section tiles: three across on a desktop, one on a phone. */
+	.tiles {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+		gap: clamp(12px, 1.6vw, 20px);
 	}
 
-	.latest-bar__title {
-		font: italic 400 clamp(18px, 2vw, 21px) / 1 var(--serif);
-		color: var(--ink);
-	}
-
-	.latest-bar__filters {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 16px;
-	}
-
-	/* Feed */
-	.feed__row {
-		display: flex;
-		gap: clamp(16px, 2vw, 24px);
-		align-items: center;
-		padding-block: clamp(18px, 2vw, 22px);
-		border-top: 1px solid var(--rule-light);
+	.tile {
+		position: relative;
+		display: block;
+		border-radius: var(--radius-image);
+		overflow: hidden;
 		text-decoration: none;
-		color: inherit;
 	}
 
-	.feed__thumb {
-		width: clamp(100px, 20vw, 140px);
-		flex: none;
+	/* The fade that carries the title, over the lower 55%. The design runs it to 72% walnut
+	   at the foot; here it reaches 72% by 40% of the way down and holds from there, so the
+	   whole text block sits on at least that much. That is 5.17:1 for cream text even over
+	   a white photograph — the contrast does not depend on which picture is chosen. The
+	   text never climbs above that point: it is 75px tall and the smallest tile is 240px. */
+	.tile::after {
+		content: '';
+		position: absolute;
+		inset: 45% 0 0;
+		background: linear-gradient(
+			180deg,
+			transparent,
+			color-mix(in srgb, var(--walnut) 72%, transparent) 40%,
+			color-mix(in srgb, var(--walnut) 80%, transparent)
+		);
+		pointer-events: none;
 	}
 
-	.feed__text {
-		flex: 1;
-		min-width: 0;
+	.tile__text {
+		position: absolute;
+		left: 22px;
+		right: 22px;
+		bottom: 20px;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
 	}
 
-	.feed__meta {
-		margin-bottom: 10px;
+	.tile__title {
+		font: 400 clamp(24px, 2.6vw, 30px) / 1.1 var(--serif);
+		color: var(--paper);
 	}
 
-	.feed__text h3 {
-		margin: 0 0 8px;
-		font: 400 clamp(19px, 2.2vw, 24px) / 1.25 var(--serif);
+	.tile__link {
+		font: var(--type-label);
+		/* Cream, not the design's #f3e6d4: 14px text needs 4.5:1, and only the lighter
+		   value clears it over the fade's floor. */
+		color: var(--paper);
+	}
+
+	.tile:hover .tile__title {
+		text-decoration: underline;
+		text-underline-offset: 4px;
+		text-decoration-thickness: 1px;
+	}
+
+	/* Latest: four cards across on a desktop, two on a tablet, one on a phone. */
+	.latest {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+		gap: clamp(16px, 2vw, 24px);
+	}
+
+	.latest h3 {
+		margin: 0;
+		font: 400 clamp(20px, 2vw, 23px) / 1.25 var(--serif);
 		color: var(--ink);
 	}
 
-	.feed__excerpt {
-		margin: 0 0 8px;
-		font: 400 clamp(12.5px, 1.3vw, 14px) / 1.55 var(--sans);
+	.latest__excerpt {
+		margin: 0;
+		font: 400 14px/1.55 var(--sans);
 		color: var(--muted);
 		display: -webkit-box;
-		-webkit-line-clamp: 1;
-		line-clamp: 1;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
 
-	.feed__spec {
-		margin: 0;
-		font: 400 clamp(10.5px, 1.1vw, 11.5px) / 1.5 var(--sans);
+	.latest__spec {
+		margin: auto 0 0;
+		padding-top: 6px;
+		font: 400 13px/1.5 var(--sans);
 		color: var(--muted);
 	}
 
-	/* Archive nudge */
-	.archive {
-		padding-top: 40px;
-	}
-
-	.archive__line {
-		margin: 26px 0 18px;
-		text-align: center;
-		font: 400 clamp(14px, 1.4vw, 15.5px) / 1.6 var(--sans);
-		color: var(--muted);
-	}
-
-	.archive__ctas {
+	.latest__more {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 26px;
+		gap: 14px;
 		justify-content: center;
-	}
-
-	.archive__ctas a {
-		text-decoration: none;
-		display: inline-block;
-		padding-block: 7px;
-	}
-
-	.cta--terracotta {
-		color: var(--terracotta);
-	}
-
-	.cta--ochre {
-		color: var(--ochre);
 	}
 </style>

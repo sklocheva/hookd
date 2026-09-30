@@ -31,6 +31,7 @@ const specs = [
 		sizes="(min-width: 1160px) 270px, 100vw"
 	/>
 
+	<div class="card__body">
 	<h2 class="hoverable__title">{d.title}</h2>
 
 	<Difficulty level={d.difficulty} />
@@ -47,19 +48,18 @@ const specs = [
 			))
 		}
 	</div>
+	</div>
 </a>
 
 <style>
-	.card {
-		display: block;
-		text-decoration: none;
-		color: inherit;
-	}
-
 	h2 {
-		margin: 18px 0 12px;
+		margin: 0;
 		font: 400 24px/1.2 var(--serif);
 		color: var(--ink);
+	}
+
+	.specs {
+		margin-top: 6px;
 	}
 
 	.spec {

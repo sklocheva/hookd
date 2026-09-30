@@ -55,8 +55,10 @@ const figures = [
 	.gauge {
 		max-width: 760px;
 		margin-top: clamp(30px, 4vw, 38px);
-		border: 1px solid var(--border-dashed);
-		background: var(--panel);
+		/* The page's one sage surface: the comparison a yarn note exists for. A yarn note
+		   has no other band, so it never meets a second one. */
+		background: var(--sage);
+		border-radius: var(--radius-image);
 		padding: 20px 22px;
 	}
 
@@ -71,8 +73,6 @@ const figures = [
 	.gauge__title {
 		margin: 0;
 		font: var(--type-label-sm);
-		letter-spacing: 0.05em;
-		text-transform: uppercase;
 		color: var(--ink);
 	}
 
@@ -99,8 +99,6 @@ const figures = [
 	.gauge__label {
 		margin-bottom: 6px;
 		font: var(--type-label-sm);
-		letter-spacing: 0.05em;
-		text-transform: uppercase;
 		color: var(--label-ink);
 	}
 
@@ -111,7 +109,7 @@ const figures = [
 
 	/* The blocked figure is the one to work to, so it is the one that is coloured. */
 	.gauge__value--blocked {
-		color: var(--terracotta);
+		color: var(--terracotta-on-band);
 	}
 
 	.gauge__note {

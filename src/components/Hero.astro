@@ -29,6 +29,12 @@ interface Props {
 	widths?: number[];
 	sizes?: string;
 	loading?: 'eager' | 'lazy';
+	/**
+	 * Corner radius: 8px for a large image, 6px for a thumbnail of 140px or less, where
+	 * 8px starts to read as a pill. Applied to every state, placeholder included, so a
+	 * slot does not change shape the day its photograph lands.
+	 */
+	corner?: 'image' | 'thumb';
 }
 
 const {
@@ -41,11 +47,13 @@ const {
 	widths = [400, 800, 1200],
 	sizes = '(min-width: 1160px) 560px, 100vw',
 	loading = 'lazy',
+	corner = 'image',
 } = Astro.props;
 
 const image = resolveImage(imagePath);
 ---
 
+<div class="frame" style={`border-radius:var(--radius-${corner})`}>
 {
 	image ? (
 		<Image
@@ -62,3 +70,16 @@ const image = resolveImage(imagePath);
 		<PhotoPlaceholder caption={`${caption}, ${ratio.replace('/', ':')}`} ratio={ratio} />
 	)
 }
+</div>
+
+<style>
+	.frame {
+		overflow: hidden;
+	}
+
+	/* The designed absent-photo state draws its own dashed edge, which has to follow the
+	   same corner. */
+	.frame > :global(*) {
+		border-radius: inherit;
+	}
+</style>

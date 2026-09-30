@@ -133,8 +133,9 @@ and is the only end-to-end proof that the image pipeline works on real files.
 `PhotoPlaceholder.astro` draws the striped stand-in and
 its caption doubles as the shot list — it is scaffolding, to be deleted when real images land.
 `PhotoPending.astro` is different: it is the *designed* state for a pattern that is written but
-not yet shot, triggered by omitting `heroImage`, and it ships. Same for the dashed wordmark box
-in `Header.astro` and the social stubs in `Footer.astro`, both marked in the source.
+not yet shot, triggered by omitting `heroImage`, and it ships. The YouTube, Pinterest and
+Ravelry circles in `Footer.astro` are the other scaffolding: they link to `#` and carry
+`data-scaffold` until those accounts exist. Instagram is real.
 
 **A comma inside `- { key: value }` silently eats the rest of the line.** That is a YAML
 flow mapping: the comma ends the entry and the remainder parses as a further key, which Zod
@@ -402,26 +403,47 @@ measurement each size is cut for, yardage per size, US/UK terms.
   literals in components — there are currently zero outside the token definitions, and
   that is worth keeping. Sizes used in more than one place get a `--type-*` token, so a
   change is one edit rather than seven.
-- **There is one uppercase label size, 14px**, and it is a token — `--type-label` on one
-  line, `--type-label-sm` where it wraps. **Size is only half of it: a label is `--ink-2` at
-  0.06em tracking, never `--muted` at 0.09em.** The instructions section shipped with the
-  artboard's lighter, wider setting and read noticeably smaller than the spec block at the
-  identical size — light grey plus uppercase plus tracking is what does it, not the pixels. Eleven components had drifted to their own value
-  between 11 and 12.5px, so a badge, a difficulty level and a spec label were three sizes
-  of the same thing. Only two uppercase roles may differ, because they are not labels:
-  `--type-nav` and `--type-prose-label`, both 14px too. Column heads are `--type-table-head`
-  at 13px — a shade smaller on purpose, because they sit directly above their own data.
-  **Raising the token is not enough on its own**: the eyebrow, the footer links and the
-  social labels were 11px, 12.5px and 9.5px set by hand in their own components, and three
-  successive raises of the token never touched them. Measure the computed sizes on a
-  rendered page rather than grepping for a declaration — the audit's floor is 12px and it
-  checks the render.
-  Small uppercase with wide tracking is the hardest thing on a page to read, and passing
-  contrast does not make it legible; anything below 11px is scaffolding that gets deleted.
+- **The look is design v3, pushed towards woolyyarn.com** — a reference for feel, not a
+  thing to copy. v3 (`design_handoff_hookd_v3`, in the author's `_Crochet blog` folder)
+  gave the walnut nav, buttons and footer and the image corners; the reference then
+  decided the rest: a **white page with cream bands**, **all text one brown** (`--ink` is
+  walnut), **sentence case** for every label, nav item and button, **centred section heads**
+  with one plain line under them, and **white cards with a walnut-tinted shadow** for every
+  listing. The headings stay Newsreader — the author's call, so Hookd keeps its own voice
+  rather than borrowing the reference's bold sans. Not taken from v3: "Free patterns" and
+  "Patterns are free" (see the top of this file), dropping Tools from the nav, `#b1603f`
+  rust (fails AA), and a 28–40px wordmark (the author prefers it larger).
+- **Sections alternate white and cream, and two cream bands never touch.** The
+  alternation is what tells a reader one section has ended; the space inside `.section` is
+  generous for the same reason. A band is `.band band--cream` wrapping a `.shell`, or
+  `.band--bleed` when it cannot leave its `<article>` (the pattern lede, Read next). A page
+  that ends on a band runs straight into the footer — `main` drops its bottom padding.
+  **Rust fails AA on cream** (4.41), so text on a band takes `--terracotta-on-band` /
+  `--ochre-on-band`; `Eyebrow` and `PhotoPending` switch inside `.band`, and a plain link
+  does via `:where(.band) a`. A component that colours its own text does not.
+- **Shared pieces live in `global.css`, not in components:** `.section`, `.section-head`,
+  `.section-foot`, `.card` / `.card__body`, `.button` and `.button--outline`. A listing that
+  builds its own card is how the site stops looking like one site. Two buttons side by side
+  are the same button — both filled or both outline, never one of each.
+- **Text over a photograph declares its worst case.** The audit reads the nearest
+  background colour and cannot see a gradient, so the homepage tiles set
+  `data-contrast-bg` to what sits behind the text over a pure *white* photograph, and the
+  fade is built so that figure clears AA. Declare the worst case, never the typical one —
+  a typical value would pass the audit and fail the first pale photo.
+- **There is one label size, 14px semibold, sentence case**, and it is a token —
+  `--type-label` on one line, `--type-label-sm` where it wraps — in `--ink-2`, not `--muted`.
+  Labels were tracked uppercase until the woolyyarn pass. The token was raised three times
+  (12, 13, 14px) trying to make them readable, and eleven components had drifted to their
+  own sizes between 11 and 12.5px along the way; the uppercase was the problem, not the
+  pixels. **Do not bring uppercase back** for a new label — it is what made the site hard
+  to read. Nav and buttons are `--type-nav` / `--type-button`, 16px at 500: things to
+  press, not things to read past. Column heads are `--type-table-head` at 13px. Measure
+  computed sizes on a rendered page rather than grepping — the audit checks the render.
 - **The wordmark is live text, and it is `hookd.`** — Space Grotesk 500, all lowercase,
   tracked at −0.05em, with the full stop in `--terracotta`. Never another typeface, never
   sentence case, never without the stop. Tracking loosens to −0.04em at 19px and below,
-  where −0.05em collides; the footer is set at 19px for that reason. Space Grotesk is loaded
+  where −0.05em collides. The footer's is 22px in cream on walnut, and its stop is
+  `--on-walnut-stop`, because the rust disappears on walnut. Space Grotesk is loaded
   for this one purpose and `--wordmark` is the only place it may be used. Lora was here for
   the same single purpose and came out with it — nothing else on the site used it.
 - Class naming is BEM-ish: `block__element`, `block--modifier`.

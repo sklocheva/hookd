@@ -1,6 +1,7 @@
 ---
 /**
- * The head of an index page: title, standfirst, filter row, hairline.
+ * The head of an index page: title, standfirst and filter row, on the oat band. The
+ * band's edge is the divider now, so there is no hairline under the filters.
  *
  * Shared by /patterns/, /journal/ and their category routes, which previously carried
  * four near-identical copies of this markup and its styles.
@@ -24,6 +25,7 @@ interface Props {
 const { heading, standfirst, filters } = Astro.props;
 ---
 
+<div class="band band--cream">
 <div class="shell head">
 	<h1>{heading}</h1>
 	{standfirst && <p class="standfirst">{standfirst}</p>}
@@ -45,13 +47,12 @@ const { heading, standfirst, filters } = Astro.props;
 			</nav>
 		)
 	}
-
-	<div class="hairline"></div>
+</div>
 </div>
 
 <style>
 	.head {
-		padding-top: 44px;
+		padding-block: 44px 22px;
 	}
 
 	h1 {
@@ -72,6 +73,5 @@ const { heading, standfirst, filters } = Astro.props;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 18px;
-		padding-bottom: 18px;
 	}
 </style>

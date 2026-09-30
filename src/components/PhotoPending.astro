@@ -50,8 +50,17 @@ const { note, ratio = '4/5' } = Astro.props;
 
 	.note {
 		font: var(--type-label);
-		letter-spacing: 0.07em;
-		text-transform: uppercase;
 		color: var(--ochre);
+	}
+
+	/* Inside a card the card is the frame, so a dashed one inside it would be two. */
+	:global(.card) .pending {
+		border: none;
+		background: var(--cream);
+	}
+
+	/* On a cream band --ochre is 4.52:1, too close to the line. */
+	:global(.band) .note {
+		color: var(--ochre-on-band);
 	}
 </style>

@@ -54,10 +54,15 @@ Exit code 0 clean, 1 on findings, 2 if it could not start. Output ends with:
 Both counts move as content is added — two renders per route — so read them as a shape, not
 a target. What matters is the issue count, and that the skipped count is not silently rising.
 
-The skipped count is real. Elements marked `data-scaffold` — the dashed wordmark caption,
-the social-stub caption, the striped photo placeholders — fail contrast on purpose and are
+The skipped count is real. Elements marked `data-scaffold` — the footer's placeholder
+social links, the striped photo placeholders — fail contrast on purpose and are
 counted rather than reported. **When you delete a placeholder, delete its `data-scaffold`
 attribute too**, or the audit will stop watching something that now ships.
+
+Text over a photograph has no background colour for the audit to find, so it would measure
+it against the page. An ancestor carrying `data-contrast-bg="#rrggbb"` is measured against
+that colour instead. It must be the **worst case** — what is behind the text over a white
+photograph — or the audit passes a page the first pale photo will fail.
 
 ## Take a screenshot
 

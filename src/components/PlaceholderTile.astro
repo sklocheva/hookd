@@ -41,6 +41,12 @@ const { symbol, caption, ratio = '3/2' } = Astro.props;
 		border: 1px solid var(--rule);
 	}
 
+	/* Inside a card the card is the frame. */
+	:global(.card) .tile {
+		border: none;
+		height: 100%;
+	}
+
 	.tile__symbol {
 		flex: none;
 		display: flex;
@@ -59,8 +65,6 @@ const { symbol, caption, ratio = '3/2' } = Astro.props;
 	   so it takes the label token like every other one. */
 	.tile__caption {
 		font: var(--type-label-sm);
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
 		color: var(--label-ink);
 		text-wrap: balance;
 	}

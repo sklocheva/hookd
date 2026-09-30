@@ -35,7 +35,7 @@ const nav = [
 	</nav>
 </header>
 
-<div class="shell"><div class="hairline"></div></div>
+<div class="shell site-header-rule"><div class="hairline"></div></div>
 
 <style>
 	.site-header {
@@ -72,12 +72,10 @@ const nav = [
 		flex-wrap: wrap;
 		gap: 22px;
 		font: var(--type-nav);
-		letter-spacing: 0.07em;
-		text-transform: uppercase;
 	}
 
 	.nav-link {
-		color: var(--muted);
+		color: var(--walnut);
 		text-decoration: none;
 		/* 13px text in a 13px box was under the 24px minimum hit area. */
 		display: inline-block;
@@ -85,11 +83,10 @@ const nav = [
 	}
 
 	.nav-link:hover {
-		color: var(--ink);
+		color: var(--walnut-hover);
 	}
 
 	.nav-link--active {
-		color: var(--ink);
-		box-shadow: inset 0 -1px 0 var(--rule-active);
+		box-shadow: inset 0 -2px 0 var(--rule-active);
 	}
 </style>
