@@ -101,21 +101,6 @@ export function gaugeLine(g: Pattern['data']['gauge']): string {
 	return `${g.stitches} sts × ${g.rows} rows = ${g.overCm} × ${g.overCm} cm`;
 }
 
-/**
- * The one-liner on a pattern's homepage tile. The weight carries its Craft Yarn Council
- * number, as on the pattern cards: the names alone differ between entries ("Light" on one,
- * "Light (DK)" on the next) and the number is what settles which category is meant.
- */
-export function patternSpecLine(p: Pattern['data']): string {
-	const y = mainYarn(p);
-	return [
-		`${y.cycWeight} · ${y.cycWeightName}`,
-		`${p.hookMm} mm hook`,
-		sizeRange(p),
-		yardageRange(p),
-	].join(' · ');
-}
-
 /** Journal posts state their method instead of a spec. */
 export function postSpecLine(p: Post['data']): string | undefined {
 	return p.method;

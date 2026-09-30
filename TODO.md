@@ -31,10 +31,6 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
       gone and colour doing the separating instead. How it should look is still open — design
       it together before building. Keep the gauge warning callout, and remember the size
       picker rewrites numbers inside those rows.
-- [ ] **Yards on the homepage tiles.** A US cold reader could not judge any pattern from the
-      homepage: the spec line is metres only, while the pattern page gives yards and US hooks.
-      Parked 30 Sep 2026 — fold into the metric / imperial switch below, or add yards to
-      `patternSpecLine` on its own.
 - [ ] **Instagram strip on the homepage — pinned, undecided.** Design v3 has four 4:5 posts
       and a "Follow @hookd_works ↗" button; it would sit after "Where to start", on white.
       Researched 30 Sep 2026. @hookd_works is already a Creator account, which any automatic

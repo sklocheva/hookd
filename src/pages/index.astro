@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Eyebrow from '../components/Eyebrow.astro';
-import { formatDate, patternSpecLine } from '../lib/format';
 import { allJournalEntries } from '../lib/journal';
 import { QUIZ_KIND, YARN_KIND } from '../lib/taxonomy';
 
@@ -24,7 +23,6 @@ type FeedItem = {
 	title: string;
 	href: string;
 	date: Date;
-	spec?: string;
 	/** What the link line says. A quiz is taken, not read — that is the difference to show. */
 	cta: string;
 	photo: string;
@@ -47,7 +45,6 @@ const feed: FeedItem[] = [
 		title: p.data.title,
 		href: `/patterns/${p.id}/`,
 		date: p.data.date,
-		spec: patternSpecLine(p.data),
 		cta: 'Read the pattern',
 		photo: p.data.title.toLowerCase(),
 		image: p.data.heroImage,
@@ -61,7 +58,6 @@ const feed: FeedItem[] = [
 			title: e.title,
 			href: e.href,
 			date: e.date,
-			spec: e.method,
 			cta: quiz ? 'Take the quiz' : e.kind === YARN_KIND ? 'Read the notes' : 'Read the post',
 			photo: e.title.toLowerCase(),
 			image: e.heroImage,
@@ -73,10 +69,6 @@ const feed: FeedItem[] = [
 	.sort((a, b) => b.date.valueOf() - a.date.valueOf())
 	.slice(0, 4);
 
-// Four across, two by two, or one — never three and one left over. Pairs that wrap as a
-// unit do it without a media query: each pair is two tiles or one, and the pairs sit side
-// by side or stacked.
-const pairs = [feed.slice(0, 2), feed.slice(2, 4)].filter((pair) => pair.length > 0);
 
 /**
  * Editorially pinned, in rotation order. Hand-picked rather than derived — this is the
@@ -199,36 +191,32 @@ const pinned = picks.flatMap((pick) => {
 
 		<div class="latest">
 			{
-				pairs.map((pair) => (
-					<div class="latest__pair">
-						{pair.map((item) => (
-							<a href={item.href} class:list={['tile', `tile--${item.tone}`]}>
-								{item.symbol ? (
-									<span class="tile__drawn" aria-hidden="true">
-										<span class="tile__symbol">{item.symbol}</span>
-									</span>
-								) : (
-									<Hero
-										image={item.image}
-										alt={item.imageAlt}
-										ratio="4/5"
-										caption={item.photo}
-										widths={[300, 600]}
-										sizes="(min-width: 1160px) 270px, (min-width: 560px) 50vw, 100vw"
-									/>
-								)}
-								<span class="tile__badge">{item.badge}</span>
-								{/* A photograph tile's fade guarantees at least 72% walnut behind the text, so
-								    this is what it is read against when the photo under it is pure white. */}
-								<span class="tile__text" data-contrast-bg="#72665e">
-									<span class="tile__date">{formatDate(item.date)}</span>
-									<span class="tile__title">{item.title}</span>
-									{item.spec && <span class="tile__spec">{item.spec}</span>}
-									<span class="tile__link">{item.cta} →</span>
-								</span>
-							</a>
-						))}
-					</div>
+				/* Only the title and where it goes. The photograph is the description; a date
+				   and a spec line on top of it were more than a tile can carry. */
+				feed.map((item) => (
+					<a href={item.href} class:list={['tile', `tile--${item.tone}`]}>
+						{item.symbol ? (
+							<span class="tile__drawn" aria-hidden="true">
+								<span class="tile__symbol">{item.symbol}</span>
+							</span>
+						) : (
+							<Hero
+								image={item.image}
+								alt={item.imageAlt}
+								ratio="1/1"
+								caption={item.photo}
+								widths={[400, 800, 1100]}
+								sizes="(min-width: 1160px) 530px, (min-width: 900px) 50vw, 100vw"
+							/>
+						)}
+						<span class="tile__badge">{item.badge}</span>
+						{/* A photograph tile's fade guarantees at least 72% walnut behind the text, so
+						    this is what it is read against when the photo under it is pure white. */}
+						<span class="tile__text" data-contrast-bg="#72665e">
+							<span class="tile__title">{item.title}</span>
+							<span class="tile__link">{item.cta} →</span>
+						</span>
+					</a>
 				))
 			}
 		</div>
@@ -417,18 +405,12 @@ const pinned = picks.flatMap((pick) => {
 		background: var(--walnut);
 	}
 
-	/* Latest: pairs side by side (four across), stacked (two by two), or each pair one
-	   tile wide on a phone. */
+	/* Latest: two large tiles across, one on a phone. Two by two holds four entries
+	   without a leftover, and at this size the photograph does the describing. */
 	.latest {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr));
-		gap: clamp(14px, 1.8vw, 22px);
-	}
-
-	.latest__pair {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
-		gap: clamp(14px, 1.8vw, 22px);
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+		gap: clamp(16px, 2vw, 26px);
 	}
 
 	.tile {
@@ -448,14 +430,14 @@ const pinned = picks.flatMap((pick) => {
 		transform: translateY(-2px);
 	}
 
-	/* The fade that carries the text, over the lower 75%. It reaches 72% walnut a fifth of
+	/* The fade that carries the text, over the lower 55%. It reaches 72% walnut a fifth of
 	   the way in and deepens from there, so the whole text block sits on at least that:
-	   5.17:1 for cream even over a white photograph. The text is at most about 150px tall
-	   and the smallest tile is 230 × 288, so it never climbs above the 72% line. */
+	   5.17:1 for cream even over a white photograph. The text is at most about 130px tall
+	   and the smallest tile is about 335px square, so it never climbs above the 72% line. */
 	.tile:not(.tile--quiz)::after {
 		content: '';
 		position: absolute;
-		inset: 25% 0 0;
+		inset: 45% 0 0;
 		background: linear-gradient(
 			180deg,
 			transparent,
@@ -470,23 +452,23 @@ const pinned = picks.flatMap((pick) => {
 	.tile__drawn {
 		display: grid;
 		place-items: start center;
-		aspect-ratio: 4 / 5;
-		padding-top: 18%;
+		aspect-ratio: 1 / 1;
+		padding-top: 12%;
 		background: var(--walnut);
 	}
 
 	.tile__symbol {
-		font: 400 clamp(88px, 11vw, 120px) / 1 var(--serif);
+		font: 400 clamp(110px, 14vw, 180px) / 1 var(--serif);
 		color: var(--on-walnut-stop);
 	}
 
 	/* What kind of thing it is, before the title: a pattern, a post's kind, or a quiz. */
 	.tile__badge {
 		position: absolute;
-		top: 14px;
-		left: 14px;
+		top: 18px;
+		left: 18px;
 		z-index: 1;
-		padding: 6px 11px;
+		padding: 7px 13px;
 		border-radius: 999px;
 		font: var(--type-label);
 		background: var(--paper);
@@ -505,32 +487,23 @@ const pinned = picks.flatMap((pick) => {
 
 	.tile__text {
 		position: absolute;
-		left: 20px;
-		right: 20px;
-		bottom: 18px;
+		left: clamp(20px, 3vw, 30px);
+		right: clamp(20px, 3vw, 30px);
+		bottom: clamp(20px, 3vw, 28px);
 		z-index: 1;
 		display: flex;
 		flex-direction: column;
-		gap: 6px;
+		gap: 10px;
 		color: var(--paper);
 	}
 
-	.tile__date {
-		font: 400 14px/1.3 var(--sans);
-	}
-
 	.tile__title {
-		font: 400 clamp(21px, 2.2vw, 25px) / 1.15 var(--serif);
+		font: 400 clamp(26px, 2.8vw, 34px) / 1.12 var(--serif);
 		text-wrap: pretty;
 	}
 
-	.tile__spec {
-		font: 400 14px/1.45 var(--sans);
-	}
-
 	.tile__link {
-		margin-top: 4px;
-		font: 600 16px/1.3 var(--sans);
+		font: 600 17px/1.3 var(--sans);
 	}
 
 	.tile:hover .tile__title {

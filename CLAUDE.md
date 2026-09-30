@@ -438,11 +438,11 @@ measurement each size is cut for, yardage per size, US/UK terms.
 - **The homepage is a featured carousel and "Latest", nothing else.** "Where to start"
   was cut: Latest does the same job. Latest mixes patterns with *every* journal kind —
   posts, yarn notes and **quizzes**, which the author ranks at least as high as a post —
-  as 4:5 photo tiles with the text laid over, a corner badge saying what each one is, and
-  a quiz drawn as a walnut tile with its "?" and "Take the quiz", so it never passes for a
-  post. Four across, two by two, or one, never three and a leftover: the tiles come in
-  pairs that wrap as a unit. Under it, Patterns, Journal and Tools as three identical
-  buttons — the author gives the three the same weight.
+  as large square photo tiles, two across, carrying **only the title and its link line**
+  over the photo, plus a corner badge saying what each one is. A date and a spec line were
+  tried and cut as too much text. A quiz is drawn as a walnut tile with its "?" and "Take
+  the quiz", so it never passes for a post. Under it, Patterns, Journal and Tools as three
+  identical buttons — the author gives the three the same weight.
 - **The carousel is called Featured, and holds still.** All slides share one grid cell,
   so its height never changes as it turns; with `display:none` it jumped 67px on a phone
   and put a button where a dot had been. Picking a dot stops the rotation for good.
