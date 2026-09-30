@@ -7,13 +7,12 @@
  * apologising for one. This says what is missing, why, and where to go instead.
  *
  * Two deliberate departures from the design, both house rules that outrank it:
- * the label is 11px rather than 10px (small uppercase with wide tracking is the hardest
- * thing on a page to read, and the floor exists because of it), and it is `--ink-2` rather
+ * the label is on the 14px label token rather than the design's 10px, and it is `--ink-2` rather
  * than the design's `#8a7c6e` — that value is `--faint`, reserved for scaffolding captions
  * that get deleted. This ships, so it gets a colour that ships.
  */
 interface Props {
-	/** The small uppercase line, e.g. "Nothing here yet" or "No matches". */
+	/** The small label line, e.g. "Nothing here yet" or "No matches". */
 	label: string;
 	heading: string;
 	body: string;

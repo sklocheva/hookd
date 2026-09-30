@@ -14,7 +14,7 @@
 interface Props {
 	/** A single character, set in the serif at display size. */
 	symbol: string;
-	/** The uppercase line beneath it. */
+	/** The label line beneath it. */
 	caption?: string;
 	/** CSS aspect-ratio, matched to the slot it replaces. */
 	ratio?: string;
@@ -60,8 +60,7 @@ const { symbol, caption, ratio = '3/2' } = Astro.props;
 		color: var(--ochre);
 	}
 
-	/* The design set this at 11px, which is below the 12px floor the audit enforces and
-	   below the point where uppercase-plus-tracking stays readable at all. It is a label,
+	/* The design set this at 11px, which is below the 12px floor the audit enforces. It is a label,
 	   so it takes the label token like every other one. */
 	.tile__caption {
 		font: var(--type-label-sm);

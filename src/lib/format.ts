@@ -4,12 +4,19 @@ import { hookLabel } from './hooks';
 type Pattern = CollectionEntry<'patterns'>;
 type Post = CollectionEntry<'posts'>;
 
+/**
+ * "4 Sept 2026", held together with no-break spaces. A date is one figure: in a wrapping
+ * eyebrow on a phone it used to break as "4 Sept" / "2026", which reads as two things.
+ * Display only — anything machine-read takes the Date itself.
+ */
 export function formatDate(date: Date): string {
-	return date.toLocaleDateString('en-GB', {
-		day: 'numeric',
-		month: 'short',
-		year: 'numeric',
-	});
+	return date
+		.toLocaleDateString('en-GB', {
+			day: 'numeric',
+			month: 'short',
+			year: 'numeric',
+		})
+		.replace(/ /g, ' ');
 }
 
 const M_PER_YD = 1.09361;

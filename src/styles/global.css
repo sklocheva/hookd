@@ -48,7 +48,7 @@
 	--radius-button: 6px;
 	--radius-image: 8px;
 	--radius-thumb: 6px;
-	/* Between --ink-2 and --muted. The review tables' label column: uppercase and small, so
+	/* Between --ink-2 and --muted. The review tables' label column: small, so
 	   it needs more weight than --muted without becoming body ink. */
 	--label-ink: #5c5148;
 	/* The one filled panel on the site — the gauge box on a yarn review. */
