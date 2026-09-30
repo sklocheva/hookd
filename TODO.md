@@ -24,6 +24,32 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
 
 ## Next up
 
+- [ ] **Pattern page: replace the hairline rules with coloured rows — brainstorm first.**
+      Pinned 30 Sep 2026, after the woolyyarn restyle. The rest of the site moved to bands and
+      cards, but the pattern page still separates everything with thin rules: the quick specs,
+      "Before you start", the instructions' round rows, the size table. Sophia wants the rules
+      gone and colour doing the separating instead. How it should look is still open — design
+      it together before building. Keep the gauge warning callout, and remember the size
+      picker rewrites numbers inside those rows.
+- [ ] **Instagram strip on the homepage — pinned, undecided.** Design v3 has four 4:5 posts
+      and a "Follow @hookd_works ↗" button; it would sit after "Where to start", on white.
+      Researched 30 Sep 2026. @hookd_works is already a Creator account, which any automatic
+      route needs. The options:
+      - **Hand-picked in `/admin` (the leaning).** Four slots: photo, post link, alt text. No
+        third party, no tokens, readers never touch Instagram until they click. Only changes
+        when Sophia changes it — woolyyarn.com's strip was still showing June in September,
+        and it does its job anyway.
+      - **Behold.so** JSON feed, read once per build, images downloaded and served from Hookd.
+        Free plan is ample. Rejected for now: Sophia does not want another service connected
+        to her account.
+      - **Own Meta developer app** (Instagram API with Instagram Login, `/me/media`), with a
+        scheduled job refreshing the 60-day token. No third party, but the most setup, and it
+        goes stale silently if the refresh ever fails.
+      - **Not possible from a post link alone:** oEmbed needs the same Meta app token;
+        reading `og:image` off the post page is blocked often and against Instagram's terms;
+        the embed widget loads Instagram's tracking and needs JavaScript.
+      Any automatic route can rebuild daily through a Cloudflare Deploy Hook (Workers Builds,
+      since April 2026) called from a scheduled GitHub Action.
 - [ ] **Fill in the blocked gauge for `drops-cotton-merino`, or leave it in draft.** It was
       published with `gauge.blocked` empty, which the publish gate requires and the build
       refuses. Back to draft for now — untick Draft again once the number exists.
@@ -145,8 +171,9 @@ Pins read), robots.txt, sitemap, one `<h1>` per page.
       (`public/favicon.svg` and `favicon.ico`). The wordmark spec calls for `hookd.` cropped
       to the h–d box, or just `h.`. It cannot be live text in a favicon — the font will not
       load — so this one does need an exported asset.
-- [ ] **Social icons** for Instagram, YouTube, Pinterest, Ravelry. Currently text stubs in
-      circles, with a caption to delete alongside them.
+- [x] ~~**Social icons**~~ — Instagram, YouTube and Pinterest are drawn icons now; Ravelry
+      stays a word. Only Instagram has an address; the other three still link to `#` and
+      carry `data-scaffold` until their accounts exist.
 - [ ] All photography. `PhotoPlaceholder.astro` is scaffolding and should eventually be
       deleted; `PhotoPending.astro` is a real state and stays.
 
