@@ -40,9 +40,17 @@ export function yardageRangeBoth(p: Pattern['data']): string {
 		: `${lo}–${hi} m / ${y(lo)}–${y(hi)} yd`;
 }
 
-/** e.g. "XS–3X", or "One size". */
+/**
+ * e.g. "XS–3X", "One size", or "One size (M)".
+ *
+ * A lone size name on its own reads as something else: three cold readers took the "M" in
+ * "Light · 3 mm hook · M · 2070 m" for a weight, or asked whether other sizes existed.
+ */
 export function sizeRange(p: Pattern['data']): string {
-	if (p.sizes.length === 1) return p.sizes[0].name;
+	if (p.sizes.length === 1) {
+		const name = p.sizes[0].name;
+		return /^one size$/i.test(name.trim()) ? name : `One size (${name})`;
+	}
 	return `${p.sizes[0].name}–${p.sizes[p.sizes.length - 1].name}`;
 }
 
@@ -93,10 +101,19 @@ export function gaugeLine(g: Pattern['data']['gauge']): string {
 	return `${g.stitches} sts × ${g.rows} rows = ${g.overCm} × ${g.overCm} cm`;
 }
 
-/** The muted one-liner under a pattern in the homepage feed. */
+/**
+ * The one-liner on a pattern's homepage tile. The weight carries its Craft Yarn Council
+ * number, as on the pattern cards: the names alone differ between entries ("Light" on one,
+ * "Light (DK)" on the next) and the number is what settles which category is meant.
+ */
 export function patternSpecLine(p: Pattern['data']): string {
 	const y = mainYarn(p);
-	return [y.cycWeightName, `${p.hookMm} mm hook`, sizeRange(p), yardageRange(p)].join(' · ');
+	return [
+		`${y.cycWeight} · ${y.cycWeightName}`,
+		`${p.hookMm} mm hook`,
+		sizeRange(p),
+		yardageRange(p),
+	].join(' · ');
 }
 
 /** Journal posts state their method instead of a spec. */

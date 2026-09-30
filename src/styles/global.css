@@ -143,7 +143,7 @@
 	--type-section-label: italic 400 22px/1.2 var(--serif);
 	--type-body: 400 clamp(16px, 1.6vw, 17.5px) / 1.8 var(--sans);
 	--type-standfirst: 400 clamp(15px, 1.6vw, 18px) / 1.6 var(--sans);
-	--type-lede: 400 clamp(15px, 1.5vw, 17px) / 1.7 var(--sans);
+	--type-lede: 400 clamp(16px, 1.5vw, 18px) / 1.65 var(--sans);
 	/* One label size, 14px semibold, for every eyebrow, filter, badge and spec label on
 	   the site. The two variants differ only in leading: --type-label for a label on one
 	   line, --type-label-sm where it wraps.
@@ -161,9 +161,11 @@
 	   they read in context, and a column head at full label size fights the cell. */
 	--type-table-head: 600 13px/1.3 var(--sans);
 	/* The nav and the filled button. Larger and lighter than a label: they are things to
-	   press, not things to read past. */
-	--type-nav: 500 16px/1 var(--sans);
-	--type-button: 500 16px/1 var(--sans);
+	   press, not things to read past. Measured against woolyyarn.com, the reference for
+	   feel, which sets both at 16px: ours are a step above because the wordmark is larger
+	   than its logo, and at 16px the author found the nav lost beside it. */
+	--type-nav: 500 17px/1 var(--sans);
+	--type-button: 500 17px/1 var(--sans);
 	--type-prose-label: 600 14px/1.4 var(--sans);
 	--type-table-cell: 400 13.5px/1.5 var(--sans);
 	--type-callout: 400 14px/1.7 var(--sans);
@@ -254,6 +256,8 @@ img {
    share the look but not the surrounding layout — so the link style lives here and
    the layout stays with each component. */
 .filter {
+	/* A filter row is a small menu, so it is set like the nav rather than like a label. */
+	font: 500 16px/1 var(--sans);
 	color: var(--muted);
 	text-decoration: none;
 	/* The text is 11px; padding lifts the hit area past the 24px minimum
@@ -337,8 +341,8 @@ body:has(
 	align-items: center;
 	justify-content: center;
 	gap: 10px;
-	min-height: 52px;
-	padding: 0 28px;
+	min-height: 56px;
+	padding: 0 30px;
 	border: 1px solid var(--walnut);
 	border-radius: var(--radius-button);
 	background: var(--walnut);

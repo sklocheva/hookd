@@ -29,15 +29,17 @@ const columns = [
 	},
 ];
 
-// Only Instagram has an address yet. The others are placeholders until their accounts
-// exist; a link that goes nowhere is marked as scaffolding so the audit knows.
-// Ravelry carries the accent colour. It has no mark of its own, so it stays a word.
-const social = [
+// An account with no address is not shown. They used to link to "#", and all three cold
+// readers clicked a dead Ravelry button right under a line naming Ravelry. Add the address
+// here and the icon appears. Ravelry carries the accent colour; it has no mark of its own,
+// so it stays a word.
+const accounts: { name: string; href?: string; icon?: 'instagram' | 'youtube' | 'pinterest' }[] = [
 	{ name: 'Instagram', href: 'https://www.instagram.com/hookd_works/', icon: 'instagram' },
-	{ name: 'YouTube', href: undefined, icon: 'youtube' },
-	{ name: 'Pinterest', href: undefined, icon: 'pinterest' },
-	{ name: 'Ravelry', href: undefined, icon: undefined },
-] as const;
+	{ name: 'YouTube', icon: 'youtube' },
+	{ name: 'Pinterest', icon: 'pinterest' },
+	{ name: 'Ravelry' },
+];
+const social = accounts.filter((a) => a.href);
 ---
 
 <footer class="site-footer">
@@ -53,12 +55,11 @@ const social = [
 					{
 						social.map((s) => (
 							<a
-								href={s.href ?? '#'}
+								href={s.href}
 								class:list={['social', { 'social--word': !s.icon }]}
-								aria-label={s.href ? `${s.name} (opens in a new tab)` : s.name}
-								target={s.href ? '_blank' : undefined}
-								rel={s.href ? 'noopener' : undefined}
-								data-scaffold={s.href ? undefined : ''}
+								aria-label={`${s.name} (opens in a new tab)`}
+								target="_blank"
+								rel="noopener"
 							>
 								{s.icon === 'instagram' && (
 									<svg viewBox="0 0 24 24" aria-hidden="true">
@@ -137,10 +138,12 @@ const social = [
 		gap: 16px;
 	}
 
+	/* Footer sizes follow woolyyarn.com: 16px text, 18px column heads. At 14–15px the
+	   footer was the smallest text on the page and the author found it the hardest to read. */
 	.blurb {
 		margin: 0;
-		max-width: 320px;
-		font: 400 15px/1.6 var(--sans);
+		max-width: 340px;
+		font: 400 16px/1.6 var(--sans);
 		color: var(--on-walnut-quiet);
 	}
 
@@ -150,7 +153,7 @@ const social = [
 
 	.col__heading {
 		margin: 0 0 12px;
-		font: var(--type-label);
+		font: 600 18px/1.3 var(--sans);
 		color: var(--paper);
 	}
 
@@ -163,7 +166,7 @@ const social = [
 	.col a {
 		display: inline-block;
 		padding-block: 6px;
-		font: 400 15px/1.3 var(--sans);
+		font: 400 16px/1.4 var(--sans);
 		color: var(--on-walnut);
 		text-decoration: none;
 	}
@@ -178,9 +181,9 @@ const social = [
 		display: inline-block;
 		align-self: flex-start;
 		padding-block: 3px;
-		/* 22px, above the 19px where -0.05em starts to collide, so it takes the
-		   header's tracking rather than the loosened one. */
-		font: 500 22px/1 var(--wordmark);
+		/* 28px, well above the 19px where -0.05em starts to collide, so it takes the
+		   header's tracking. It was 22px and read as a footnote next to the columns. */
+		font: 500 28px/1 var(--wordmark);
 		letter-spacing: -0.05em;
 		color: var(--paper);
 		text-decoration: none;
@@ -242,7 +245,7 @@ const social = [
 		margin-top: clamp(40px, 5vw, 56px);
 		padding: 28px 0 46px;
 		border-top: 1px solid var(--on-walnut-rule);
-		font: 400 14px/1.6 var(--sans);
+		font: 400 15px/1.6 var(--sans);
 		color: var(--on-walnut-quiet);
 	}
 </style>

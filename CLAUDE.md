@@ -431,7 +431,21 @@ measurement each size is cut for, yardage per size, US/UK terms.
   needs no rule under its title: the band's edge is the divider.
 - **The footer is a brand block and three link columns** — Read, Hookd, Small print — so
   the legal pages sit under a heading of their own rather than trailing the nav. The blurb
-  is the homepage meta description, word for word; change them together.
+  is the homepage meta description, word for word; change them together. **A social
+  account appears only once it has an address** — a link to `#` under a line naming
+  Ravelry was the one thing all three cold readers clicked. Footer type follows
+  woolyyarn.com (16px text, 18px heads); at 14–15px it was the hardest text on the page.
+- **The homepage is a featured carousel and "Latest", nothing else.** "Where to start"
+  was cut: Latest does the same job. Latest mixes patterns with *every* journal kind —
+  posts, yarn notes and **quizzes**, which the author ranks at least as high as a post —
+  as 4:5 photo tiles with the text laid over, a corner badge saying what each one is, and
+  a quiz drawn as a walnut tile with its "?" and "Take the quiz", so it never passes for a
+  post. Four across, two by two, or one, never three and a leftover: the tiles come in
+  pairs that wrap as a unit. Under it, Patterns, Journal and Tools as three identical
+  buttons — the author gives the three the same weight.
+- **The carousel is called Featured, and holds still.** All slides share one grid cell,
+  so its height never changes as it turns; with `display:none` it jumped 67px on a phone
+  and put a button where a dot had been. Picking a dot stops the rotation for good.
 - **Text over a photograph declares its worst case.** The audit reads the nearest
   background colour and cannot see a gradient, so the homepage tiles set
   `data-contrast-bg` to what sits behind the text over a pure *white* photograph, and the
@@ -449,7 +463,7 @@ measurement each size is cut for, yardage per size, US/UK terms.
 - **The wordmark is live text, and it is `hookd.`** — Space Grotesk 500, all lowercase,
   tracked at −0.05em, with the full stop in `--terracotta`. Never another typeface, never
   sentence case, never without the stop. Tracking loosens to −0.04em at 19px and below,
-  where −0.05em collides. The footer's is 22px in cream on walnut, and its stop is
+  where −0.05em collides. The footer's is 28px in cream on walnut, and its stop is
   `--on-walnut-stop`, because the rust disappears on walnut. Space Grotesk is loaded
   for this one purpose and `--wordmark` is the only place it may be used. Lora was here for
   the same single purpose and came out with it — nothing else on the site used it.
