@@ -1,0 +1,24 @@
+---
+/**
+ * One topic of the construction cheat sheet: a heading, then its cards. The id is the
+ * topic's anchor and its filter key, so the topic links work with JavaScript off.
+ */
+interface Props {
+	id: string;
+	title: string;
+	/** A quiet aside after the heading, e.g. "square yoke". */
+	note?: string;
+}
+
+const { id, title, note } = Astro.props;
+---
+
+<section class="cs-topic" id={id} data-topic={id}>
+	<h2>
+		{title}
+		{note && <small>{note}</small>}
+	</h2>
+	<div class="cs-cards">
+		<slot />
+	</div>
+</section>

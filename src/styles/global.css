@@ -27,6 +27,7 @@
 	--shadow-card: 0 4px 6px -1px rgba(59, 42, 32, 0.08), 0 2px 4px -2px rgba(59, 42, 32, 0.08);
 	--shadow-card-hover: 0 10px 24px -4px rgba(59, 42, 32, 0.16);
 	--card-border: rgba(59, 42, 32, 0.08);
+	--card: #ffffff;
 
 	/* Text on the walnut footer. The full stop is lighter than --terracotta because the
 	   rust disappears on walnut; the mark is exempt from contrast, but not from being seen. */
@@ -178,6 +179,44 @@
 	--shell-narrow: 1000px;
 	--measure: 640px;
 	--gutter: clamp(20px, 4vw, 48px);
+}
+
+/* Dark mode, for the pages that opt in through Base's `darkMode` — none of the rest of the
+   site is designed for it. Same walnut family, inverted: the brown becomes the ground and
+   the cream becomes the ink. Measured on the page ground (#1d1814), the band and the card:
+   ink 14.3 / 12.5 / 13.3, muted 7.3 / 6.4 / 6.8, rust 8.1 / 7.1 / 7.5. */
+@media (prefers-color-scheme: dark) {
+	:root[data-dark] {
+		color-scheme: dark;
+		--paper: #1d1814;
+		--card: #241e1a;
+		--cream: #2a231e;
+		--walnut: #efe6dc;
+		--walnut-hover: #ffffff;
+		--ink: #efe6dc;
+		--ink-2: #d8ccbf;
+		--muted: #b2a497;
+		--terracotta: #e3a07f;
+		--terracotta-hover: #f0b898;
+		--terracotta-on-band: #e3a07f;
+		--ochre: #d6b061;
+		--ochre-on-band: #d6b061;
+		--field: #241e1a;
+		--field-border: rgba(239, 230, 220, 0.28);
+		--rule: rgba(239, 230, 220, 0.16);
+		--rule-section: rgba(239, 230, 220, 0.2);
+		--rule-light: rgba(239, 230, 220, 0.11);
+		--rule-strong: rgba(239, 230, 220, 0.3);
+		--card-border: rgba(239, 230, 220, 0.1);
+		--shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+	}
+
+	/* The footer is walnut in both modes; it keeps the light values its colours are
+	   measured against. */
+	:root[data-dark] .site-footer {
+		--paper: #ffffff;
+		--walnut: #3b2a20;
+	}
 }
 
 *,

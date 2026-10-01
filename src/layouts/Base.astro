@@ -27,6 +27,12 @@ interface Props {
 	jsonLd?: JsonLd[];
 	/** The last breadcrumb's readable name, when the slug would not do. */
 	breadcrumbName?: string;
+	/**
+	 * Follow the reader's dark-mode setting. Off everywhere except where it was asked for —
+	 * the construction cheat sheet, which is read at night with a hook in hand. The dark
+	 * tokens live in global.css under `:root[data-dark]`.
+	 */
+	darkMode?: boolean;
 }
 
 const {
@@ -38,6 +44,7 @@ const {
 	noindex = false,
 	jsonLd = [],
 	breadcrumbName,
+	darkMode = false,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -58,7 +65,7 @@ const usingDefault = !shareImage;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-dark={darkMode ? '' : undefined}>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -66,6 +73,7 @@ const usingDefault = !shareImage;
 		<meta name="description" content={description} />
 		<link rel="canonical" href={canonical} />
 		{noindex && <meta name="robots" content="noindex, follow" />}
+		{darkMode && <meta name="color-scheme" content="light dark" />}
 		<link rel="sitemap" href="/sitemap-index.xml" />
 		<link rel="alternate" type="application/rss+xml" title="Hookd" href="/rss.xml" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />

@@ -1,0 +1,13 @@
+---
+/**
+ * A formula, one line per entry. Lines rather than a slot, because a slot's text arrives
+ * with the page's indentation in it and a formula's alignment is part of what it says.
+ */
+interface Props {
+	lines: string[];
+}
+
+const { lines } = Astro.props;
+---
+
+<pre class="cs-formula">{lines.join('\n')}</pre>

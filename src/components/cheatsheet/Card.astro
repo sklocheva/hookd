@@ -1,0 +1,21 @@
+---
+/**
+ * One question and its answer. The question is its own link, so a single card can be
+ * bookmarked or sent: /tools/construction/#holes-at-the-underarm-corners.
+ */
+interface Props {
+	q: string;
+}
+
+const { q } = Astro.props;
+const id = q
+	.toLowerCase()
+	.replace(/[“”"?]/g, '')
+	.replace(/[^a-z0-9]+/g, '-')
+	.replace(/^-|-$/g, '');
+---
+
+<article class="cs-card" id={id} data-card>
+	<h3><a href={`#${id}`}>{q}</a></h3>
+	<slot />
+</article>

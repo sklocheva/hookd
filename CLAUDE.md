@@ -268,6 +268,22 @@ answer panel's states, the phone bar, the strands picker, the hook table, the fi
 refuses, the spacing and colour decisions — is in `docs/yarn-weight-calculator.md`. Read it
 before changing the tool's behaviour, its arithmetic or its wording.
 
+**The construction cheat sheet at `/tools/construction/` is unlisted, not private.** The
+author's own garment-construction reference, kept on the site so it opens from any device
+(she bookmarks it). It is `noindex`, in the `UNLISTED` set in `astro.config.mjs` so the
+sitemap skips it, absent from the Tools list, and linked from nowhere. **The repo is public,
+so the text is readable on GitHub** — she chose that knowingly. Publishing it is those
+three things undone. Parts of it are her design method, which the paid PDFs sell, so ask
+before making it public. It is edited by hand through a session: one `<Card>` per question
+inside its `<Topic>`, in `src/pages/tools/construction/index.astro`. Every card is in the
+HTML; search and topics only hide, and each card is its own anchor.
+
+**Dark mode exists on that page alone.** `Base` takes `darkMode`, which sets
+`data-dark` on `<html>`; the dark tokens sit under `:root[data-dark]` in `global.css`,
+measured on the dark ground, band and card. The rest of the site is not designed for dark
+and must not opt in without a design pass. The footer keeps its light tokens in both modes.
+The audit runs light only — check dark by hand (`resize_window` with `colorScheme: dark`).
+
 **Routes.** `/`, `/patterns/`, `/patterns/[slug]`, `/journal/`, `/journal/[slug]`, plus
 `/patterns/c/[category]` and `/journal/c/[kind]` behind the index filters. The filters are real
 static routes rather than client-side filtering, because of the no-JS rule. Both indexes use

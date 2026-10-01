@@ -75,6 +75,16 @@ const live = {
 };
 
 /**
+ * Pages that are built and reachable but deliberately not advertised: noindex on the page,
+ * absent from the sitemap, linked from nowhere. The author's own references, kept on the
+ * site so they open from any device. Publishing one means deleting it from this set,
+ * dropping `noindex` on the page, and listing it where it belongs.
+ *
+ * Unlisted is not private — the repository is public, so the text is readable on GitHub.
+ */
+const UNLISTED = new Set(['/tools/construction/']);
+
+/**
  * Whether a built page belongs in the sitemap.
  *
  * Anything that is not an entry page — the indexes, the category and kind routes, the
@@ -84,6 +94,7 @@ const live = {
  */
 function inSitemap(/** @type {string} */ pathname) {
 	if (pathname.startsWith('/go/')) return false;
+	if (UNLISTED.has(pathname)) return false;
 
 	const yarn = pathname.match(/^\/journal\/yarn\/([^/]+)\/$/);
 	if (yarn) return live.reviews.has(yarn[1]);

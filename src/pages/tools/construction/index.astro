@@ -1,0 +1,660 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Topic from '../../../components/cheatsheet/Topic.astro';
+import Card from '../../../components/cheatsheet/Card.astro';
+import Formula from '../../../components/cheatsheet/Formula.astro';
+
+/**
+ * The construction cheat sheet — the author's own reference, kept on the site so it opens
+ * from any device. **Unlisted:** noindex here, excluded from the sitemap in
+ * astro.config.mjs (`UNLISTED`), not in the Tools list, linked from nowhere. Publishing it
+ * is those three things undone. The text is still readable on GitHub; the repo is public.
+ *
+ * Edited by hand, through a session — a card is a <Card> inside its <Topic>.
+ *
+ * Every card is in the HTML. Search and the topic filter only hide what does not match,
+ * and with JavaScript off the topics are plain links down the page.
+ */
+const topics = [
+	{ id: 'basics', label: 'Basics' },
+	{ id: 'yoke', label: 'Raglan yoke' },
+	{ id: 'round', label: 'Round yoke' },
+	{ id: 'rise', label: 'Back rise' },
+	{ id: 'split', label: 'Underarm & split' },
+	{ id: 'sleeve', label: 'Sleeves & cuffs' },
+	{ id: 'panels', label: 'Drop shoulder' },
+	{ id: 'ease', label: 'Ease' },
+	{ id: 'measure', label: 'Measuring' },
+	{ id: 'fit', label: 'Fit fixes' },
+	{ id: 'bands', label: 'Collar & bands' },
+	{ id: 'fabric', label: 'Fabric & sag' },
+];
+---
+
+<Base
+	title="Crochet construction cheat sheet — Hookd"
+	description="The basics of garment construction that are easy to forget, one question per card: increases, yokes, underarms, sleeves, ease, measuring and fit."
+	active="tools"
+	breadcrumbName="Construction cheat sheet"
+	noindex
+	darkMode
+>
+	<div class="shell cheat" id="top">
+		<div class="band band--cream band--bleed title-band cheat__head">
+			<h1>Crochet construction cheat sheet</h1>
+			<p class="cheat__lede">
+				The basics that are easy to forget, one question per card. Type a word to search, or
+				pick a topic. US terms, centimetres.
+			</p>
+		</div>
+
+		<div class="cheat__bar">
+			<label class="visually-hidden" for="cs-q">Search the cheat sheet</label>
+			{/* Shown by the script: without it there is nothing to search with. */}
+			<input
+				id="cs-q"
+				class="cheat__search"
+				type="search"
+				placeholder="Search: increase, underarm, cuff, ease…"
+				autocomplete="off"
+				hidden
+			/>
+			<nav class="cheat__topics" aria-label="Topics">
+				<a href="#top" class="filter filter--active" data-filter="all" aria-current="true">All</a>
+				{
+					topics.map((t) => (
+						<a href={`#${t.id}`} class="filter" data-filter={t.id}>
+							{t.label}
+						</a>
+					))
+				}
+			</nav>
+			<p class="cheat__count" id="cs-count" aria-live="polite"></p>
+		</div>
+
+		<Topic id="basics" title="Basics">
+			<Card q="US or UK terms?">
+				<div class="cs-table"><table>
+					<thead><tr><th>US</th><th>UK</th></tr></thead>
+					<tbody>
+						<tr><td>sc single crochet</td><td>dc double crochet</td></tr>
+						<tr><td>hdc half double crochet</td><td>htr half treble</td></tr>
+						<tr><td>dc double crochet</td><td>tr treble</td></tr>
+						<tr><td>tr treble</td><td>dtr double treble</td></tr>
+					</tbody>
+				</table></div>
+				<p class="cs-why">A UK pattern has no “sc”. If you see sc, it is US.</p>
+			</Card>
+
+			<Card q="How many stitches for a width?">
+				<Formula lines={['stitches = width in cm × sts per 10 cm ÷ 10', 'rows     = length in cm × rows per 10 cm ÷ 10']} />
+				<p>Example: 50 cm at 18 sts per 10 cm = 90 sts.</p>
+			</Card>
+
+			<Card q="Spreading increases evenly">
+				<Formula lines={['repeat = stitches ÷ increases', '*work (repeat − 1), 2 in the next*']} />
+				<p>60 sts, 6 increases: repeat 10 → *hdc 9, 2 hdc in next* 6 times = 66.</p>
+				<p class="cs-why">Not a whole number? Mix two repeats. 64 sts, 6 increases: 4 repeats of 11 and 2 of 10.</p>
+			</Card>
+
+			<Card q="Spreading decreases evenly">
+				<Formula lines={['*work (repeat − 2), dec*']} />
+				<p>60 sts, 6 decreases: repeat 10 → *hdc 8, dec* 6 times = 54.</p>
+				<p class="cs-why">A decrease uses 2 stitches, so take 2 off the repeat, not 1.</p>
+			</Card>
+
+			<Card q="What does “inc” add?">
+				<p>2 sts in one stitch adds <b>1</b>. Some notes and patterns use “inc” for a group that adds 2 or more. Check before you count.</p>
+			</Card>
+
+			<Card q="Turning chains">
+				<div class="cs-table"><table>
+					<thead><tr><th>Stitch</th><th>Chain</th><th>Counts as a stitch?</th></tr></thead>
+					<tbody>
+						<tr><td>sc</td><td>ch 1</td><td>No</td></tr>
+						<tr><td>hdc</td><td>ch 1 or 2</td><td>Depends on the pattern</td></tr>
+						<tr><td>dc</td><td>ch 3</td><td>Usually yes</td></tr>
+					</tbody>
+				</table></div>
+				<p class="cs-why">Write in the pattern whether it counts. That one line stops most count errors at the edges.</p>
+			</Card>
+
+			<Card q="Which loop?">
+				<ul>
+					<li><b>FLO:</b> front loop only, the one nearer to you</li>
+					<li><b>BLO:</b> back loop only, the one further away</li>
+					<li><b>hdc 3rd loop:</b> the bar below the back loop, made by the yarn over. Gives a knit-look rib.</li>
+				</ul>
+			</Card>
+
+			<Card q="Gauge swatch">
+				<p>At least 15 × 15 cm in the garment stitch. Wash and dry it the way the garment will be. Measure 10 cm in the middle, and 10 rows, never 1.</p>
+				<p class="cs-why">Hang it for a day too: a heavy garment pulls longer than a flat swatch shows.</p>
+			</Card>
+		</Topic>
+
+		<Topic id="yoke" title="Top-down raglan yoke" note="square yoke">
+			<Card q="How many increases a round?">
+				<Formula lines={['increases per round = 4 lines × 2 sides × stitches added per side']} />
+				<ul>
+					<li><b>1 hdc, ch 2, 1 hdc</b> → 8 a round, each section +2</li>
+					<li><b>2 hdc, ch 2, 2 hdc</b> → 16 a round, each section +4</li>
+				</ul>
+				<p class="cs-why">The construction sets the rate, not the gauge. Read what sits either side of the ch-2 before quoting a number.</p>
+			</Card>
+
+			<Card q="Will the yoke lie flat, dome or cone?">
+				<Formula lines={['R = sts per 10 cm ÷ rows per 10 cm']} />
+				<p>8 a round lies flat at <b>R ≈ 1.27</b>. Above that it domes, below it cones. hdc is usually about 1.2–1.4, so a plain raglan works in hdc.</p>
+				<p class="cs-why">16 a round domes hard. Use it only for a few rounds at the neck, then drop to 8.</p>
+			</Card>
+
+			<Card q="How big is each section at the split?">
+				<Formula lines={['section at split = section at neck + increase rounds × sts added per section per round']} />
+				<p>Every section grows at the same rate, so the difference set at the neck stays the same all the way down. Make the front and back much wider than the sleeves at the neck.</p>
+			</Card>
+
+			<Card q="Where do the increases go so I never lose them?">
+				<p>Work the pair into the marked stitch with <b>ch 2</b> between, then into that ch-2 space every round. The line marks itself and stays straight.</p>
+				<p>The set-up round gains less, because the marked stitch is used up: +4 a round with 1 each side, +12 with 2 each side.</p>
+			</Card>
+
+			<Card q="Where should the round start?">
+				<p><b>Centre back</b>, never on a raglan point. Split the back stitches in half around the start; no count changes.</p>
+				<p class="cs-why">A start on a raglan point gets treated differently at the split, and the two sleeves come out different. The join and any colour ridge also hide best at centre back.</p>
+			</Card>
+
+			<Card q="Turn every round, or spiral?">
+				<p>For FLO or BLO fabric, <b>turn</b>: sl st to the first stitch, ch 2, turn. The last stitch hides under the turning chain; work into it.</p>
+				<p class="cs-why">In a spiral every unworked loop lands on one face: a hard ridge inside, bulky stitches outside. Put this reason in the pattern, or testers will spiral.</p>
+			</Card>
+		</Topic>
+
+		<Topic id="round" title="Round yoke">
+			<Card q="How many increases for a flat circle?">
+				<Formula lines={['increases per round ≈ 2π × R ≈ 6.28 × R']} />
+				<p>sc ≈ 6 a round. hdc ≈ 8–9. Knit stockinette ≈ 4–5, so crochet needs about twice what a knit pattern uses. Don't copy a knit schedule.</p>
+			</Card>
+
+			<Card q="Why does the shoulder look hexagonal?">
+				<p>Too few increases per increase round. Use <b>10 or more</b>, spread out. Fewer, bigger steps show as corners.</p>
+			</Card>
+		</Topic>
+
+		<Topic id="rise" title="Back neck rise">
+			<Card q="How do I raise the back of the neck?">
+				<ul>
+					<li><b>Taller stitch on the back:</b> e.g. ehdc on the back, hdc on front and sleeves. Easiest to write.</li>
+					<li><b>Short rows:</b> extra rows across the back (and part of the sleeves) only. Works when the stitch can't change.</li>
+				</ul>
+			</Card>
+
+			<Card q="How much rise will I get?">
+				<Formula lines={['rise = rounds × (back row height − front row height)']} />
+				<p>The sleeves are not in it. A taller stitch on the sleeves only deepens the armhole.</p>
+			</Card>
+
+			<Card q="How much rise do I need?">
+				<p>A tall or <b>folded collar</b> sits higher at the back of the neck, so it needs more rise than a flat neckband.</p>
+				<p class="cs-why">Check it on the body: line up the four raglan points two by two and look at how the collar sits.</p>
+			</Card>
+		</Topic>
+
+		<Topic id="split" title="Underarm and the split">
+			<Card q="How wide should the underarm be?">
+				<p>Usually 2–10 cm. Narrow for a close fit, wider for a relaxed one.</p>
+				<p class="cs-why">The width is set by the stitches worked across the chain, not by the chain length: stitches × stitch width.</p>
+			</Card>
+
+			<Card q="Holes at the underarm corners">
+				<p>Chain N, then work <b>N + 2</b> across it: 1 at each corner, 1 in each chain. Work the body first, then match the sleeve to it.</p>
+			</Card>
+
+			<Card q="What happens at the split?">
+				<p>Stop increasing. Skip each sleeve and <b>both</b> of its ch-2 spaces, chain the underarm, carry on across the front.</p>
+				<Formula lines={['sleeve pick-up = sts across the chain + 2 in each ch-2 space + sleeve sts']} />
+				<p class="cs-why">Each sleeve taking both its spaces is what makes the two sleeves match.</p>
+			</Card>
+
+			<Card q="How many yoke stitches at the split?">
+				<Formula lines={['yoke circ. = (bust − 2 × underarm) + 2 × (bicep − underarm)']} />
+				<p>The underarm comes off <b>four times</b>, once where each body side meets each sleeve.</p>
+			</Card>
+
+			<Card q="When is the yoke deep enough?">
+				<p>Check depth and width <b>together</b>. A taller stitch reaches the depth in fewer rounds, so the yoke gains fewer stitches.</p>
+				<p>Rounds after the split don't deepen the armhole.</p>
+				<p class="cs-why">A top-down raglan can't set depth, upper arm and chest separately: the same rounds make all three. Use seamed pieces when you need that control.</p>
+			</Card>
+		</Topic>
+
+		<Topic id="sleeve" title="Sleeves and cuffs">
+			<Card q="How wide should the sleeve be?">
+				<p>Comfort ease at the upper arm is about <b>1.3–5 cm</b>. More is design ease; say so in the pattern. Never negative.</p>
+			</Card>
+
+			<Card q="How do I taper a sleeve?">
+				<Formula lines={['decrease rounds = (start sts − end sts) ÷ 2', 'every Nth round, N = rounds available ÷ decrease rounds']} />
+				<p>Put the decreases at the underarm line, where they show least: <b>hdc 3, inv dec, hdc to last 5, inv dec, hdc 3</b>. Leave a few plain rounds before the cuff.</p>
+			</Card>
+
+			<Card q="How much can a cuff gather?">
+				<p>It depends on the rib. A rib that barely stretches can't gather two to one. Taper the sleeve first so the cuff has less to do.</p>
+			</Card>
+
+			<Card q="A cuff that joins as you go">
+				<p>Work the cuff <b>sideways</b> in rib. At the sleeve end of every other row, sl st into the sleeve edge, taking 2 sleeve stitches together to gather. ch 2 at the free end, none at the sleeve end.</p>
+				<p class="cs-why">Any sleeve stitches left over go into the closing row.</p>
+			</Card>
+		</Topic>
+
+		<Topic id="panels" title="Drop shoulder and panels">
+			<Card q="How wide is each panel?">
+				<Formula lines={['governing = MAX(bust, high hip)', 'finished  = governing + ease', 'panel     = finished ÷ 2']} />
+				<p class="cs-why">Use the hip if it is bigger: a straight tube still has to pass over it.</p>
+			</Card>
+
+			<Card q="Sleeve width and armhole">
+				<Formula lines={['sleeve circumference = 2 × armhole opening']} />
+				<p>You can't widen the sleeve without deepening the armhole. Change the armhole and change the body below it by the same amount.</p>
+			</Card>
+
+			<Card q="Working sideways?">
+				<p>The gauge swaps: width comes from <b>row</b> gauge, length from <b>stitch</b> gauge.</p>
+			</Card>
+
+			<Card q="Narrow shoulders, drop-shoulder look">
+				<p>Start at the full-ease size at the hem and decrease up the body, so the underarm count is one size smaller.</p>
+			</Card>
+		</Topic>
+
+		<Topic id="ease" title="Ease">
+			<Card q="Fit at the bust (CYC)">
+				<div class="cs-table"><table>
+					<thead><tr><th>Fit</th><th>Ease at bust</th></tr></thead>
+					<tbody>
+						<tr><td>Very close</td><td>−5 to −10 cm</td></tr>
+						<tr><td>Close</td><td>0</td></tr>
+						<tr><td>Classic</td><td>+5 to +10 cm</td></tr>
+						<tr><td>Loose</td><td>+10 to +15 cm</td></tr>
+						<tr><td>Oversized</td><td>+15 cm and up</td></tr>
+					</tbody>
+				</table></div>
+				<Formula lines={['ease = finished measurement − body measurement']} />
+			</Card>
+
+			<Card q="Ease by construction">
+				<ul>
+					<li><b>Set-in sleeve:</b> least, can go negative</li>
+					<li><b>Raglan:</b> 2.5–10 cm is common</li>
+					<li><b>Drop shoulder:</b> 15–30 cm</li>
+					<li><b>Layering:</b> add 5–20 cm</li>
+					<li><b>Armhole depth:</b> 2.5–5 cm</li>
+				</ul>
+			</Card>
+
+			<Card q="Yarn changes the ease you need">
+				<p>Heavy and hairy yarns (mohair, brushed alpaca) need a little more. Fibres that don't spring back (cotton, alpaca, superwash) grow: make them shorter.</p>
+			</Card>
+
+			<Card q="Ease across sizes">
+				<p>Designers differ: a fixed %, less as sizes go up, or the same cm everywhere. Pick one per pattern and write it down.</p>
+			</Card>
+		</Topic>
+
+		<Topic id="measure" title="Measuring">
+			<Card q="Same start point for every length">
+				<p>With a raised back, the front neck starts lower than the back and the sleeve tops. Measure every length from the same point, and write down which.</p>
+			</Card>
+
+			<Card q="Armhole depth: straight down">
+				<p>Ruler under the arm, tape from the shoulder point straight down. Never round the curve into the armpit; that reads about 2.5 cm too big.</p>
+				<p class="cs-why">Raglan yoke depth (neck edge along the raglan line) is always bigger than armhole depth. Don't swap them.</p>
+			</Card>
+
+			<Card q="Neckline comes from the head">
+				<p>Woman 53–58 cm, man 56–61 cm. A ribbed collar can sit at the low end because it stretches.</p>
+			</Card>
+
+			<Card q="What to measure">
+				<p>Full bust, high bust, cross back, upper arm, armhole depth, back waist length, hip. <b>Full bust minus high bust</b> tells you most about fit.</p>
+				<p class="cs-why">“Arm length” differs: CYC is armpit to wrist; EN 13402 is shoulder point over a bent elbow.</p>
+			</Card>
+
+			<Card q="Swatch vs piece">
+				<p>A swatch under-predicts growth and drape. Once the piece is long enough, measure 10 rows on it, laid flat, and use that.</p>
+			</Card>
+		</Topic>
+
+		<Topic id="fit" title="Fit fixes">
+			<Card q="Read the wrinkles">
+				<div class="cs-table"><table>
+					<thead><tr><th>You see</th><th>Fix</th></tr></thead>
+					<tbody>
+						<tr><td>Front rides up</td><td>Bust darts (short rows)</td></tr>
+						<tr><td>Pulls across the chest</td><td>More width at the bust only</td></tr>
+						<tr><td>Diagonals neck → armpit</td><td>Adjust shoulder slope</td></tr>
+						<tr><td>Armhole binds</td><td>Deepen armhole and widen sleeve together</td></tr>
+						<tr><td>Neckline gapes</td><td>Narrow the neck</td></tr>
+						<tr><td>Tents below the bust</td><td>Waist shaping, or less ease lower down</td></tr>
+						<tr><td>Negative-ease top too short</td><td>Add ~70% of the negative ease to the length</td></tr>
+					</tbody>
+				</table></div>
+				<p class="cs-why">Wrinkles point at the area that needs more fabric.</p>
+			</Card>
+
+			<Card q="Bust darts">
+				<p>Needed when full bust minus high bust is over about 5 cm. Short rows at full-bust height: first pair ends 2.5 cm from the sides, last pair 2.5 cm outside the bust point.</p>
+				<p class="cs-why">Simpler in crochet: work the front longer than the back by the dart amount, spread over a few rows below the bust.</p>
+			</Card>
+		</Topic>
+
+		<Topic id="bands" title="Collar, bands and rib">
+			<Card q="Folded double collar">
+				<p>Work a rib band sideways to twice the collar height wide, long enough to go round the neck. Join it into a ring, fold it in half, then work the first yoke round through both layers.</p>
+				<p class="cs-why">Work the colour-change round on the wrong side, so the ridge lands outside as a clean line.</p>
+			</Card>
+
+			<Card q="Joining a band into a ring">
+				<p>sl st with <b>one yarn over</b> between the two sides. The join comes out the same height as the fabric, so the seam doesn't pull in.</p>
+			</Card>
+
+			<Card q="Which rib?">
+				<ul>
+					<li><b>Post stitch rib</b> (FPdc/BPdc): closest to knit rib, heavy</li>
+					<li><b>BLO/FLO rib:</b> lighter, suits long bands</li>
+					<li><b>hdc 3rd loop only:</b> knit-look rib</li>
+				</ul>
+				<p class="cs-why">Work the last stitch of each rib row through both loops so the edge sits straight.</p>
+			</Card>
+
+			<Card q="Bands on curves and edges">
+				<p>A straight band can't lie flat around a curve; decrease through the corner. A hem band can be dense; a full-length front band can't.</p>
+				<Formula lines={['band rows per body row = body row height ÷ band row height']} />
+			</Card>
+		</Topic>
+
+		<Topic id="fabric" title="Fabric, seams and sag">
+			<Card q="Seamless or seamed?">
+				<p>Seams hold shape: they stop a garment stretching under its own weight. The less a fibre springs back (cotton, linen, silk, superwash, rayon, low-wool blends), the more seams are worth it.</p>
+			</Card>
+
+			<Card q="Which seams must stretch?">
+				<p>Only seams that run along the stretch, like cuff to sleeve. Shoulders, sides and armholes can be firm. Mattress stitch is flat and near invisible.</p>
+			</Card>
+
+			<Card q="Will it grow?">
+				<p>Wash the swatch and hang it to dry; don't only lay it flat. Wool reshapes each wash; superwash grows (make it shorter); cotton can stretch for good.</p>
+			</Card>
+		</Topic>
+
+		<p class="cheat__none" id="cs-none" hidden>Nothing matches. Try a shorter word.</p>
+	</div>
+</Base>
+
+<script>
+	// Progressive enhancement: without this every card shows, and the topics are links down
+	// the page. With it, search and topics filter in place — they only ever hide.
+	const q = document.getElementById('cs-q') as HTMLInputElement | null;
+	const filters = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-filter]'));
+	const topics = Array.from(document.querySelectorAll<HTMLElement>('[data-topic]'));
+	const count = document.getElementById('cs-count');
+	const none = document.getElementById('cs-none');
+
+	if (q && count && none) {
+		q.hidden = false;
+		let topic = 'all';
+
+		const apply = () => {
+			const term = q.value.trim().toLowerCase();
+			let shown = 0;
+			topics.forEach((section) => {
+				const inTopic = topic === 'all' || section.dataset.topic === topic;
+				let any = 0;
+				section.querySelectorAll<HTMLElement>('[data-card]').forEach((card) => {
+					const hit = inTopic && (!term || (card.textContent ?? '').toLowerCase().includes(term));
+					card.hidden = !hit;
+					if (hit) {
+						any++;
+						shown++;
+					}
+				});
+				section.hidden = any === 0;
+			});
+			none.hidden = shown > 0;
+			count.textContent = `${shown} ${shown === 1 ? 'card' : 'cards'}`;
+		};
+
+		filters.forEach((link) =>
+			link.addEventListener('click', (event) => {
+				event.preventDefault();
+				topic = link.dataset.filter ?? 'all';
+				filters.forEach((other) => {
+					const on = other === link;
+					other.classList.toggle('filter--active', on);
+					if (on) other.setAttribute('aria-current', 'true');
+					else other.removeAttribute('aria-current');
+				});
+				apply();
+			})
+		);
+
+		q.addEventListener('input', apply);
+		apply();
+	}
+</script>
+
+<style is:global>
+	.cheat .visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+
+	.cheat {
+		max-width: calc(1000px + 2 * var(--gutter));
+		padding-bottom: 40px;
+	}
+
+	.cheat__head h1 {
+		margin: 0 0 14px;
+		font: var(--type-page-title);
+		color: var(--ink);
+		text-wrap: balance;
+	}
+
+	.cheat__lede {
+		margin: 0;
+		max-width: 620px;
+		font: var(--type-standfirst);
+		color: var(--ink-2);
+	}
+
+	/* Search and topics stay in reach while scrolling — the sheet is used mid-project,
+	   looking up one thing after another. */
+	.cheat__bar {
+		position: sticky;
+		top: 0;
+		z-index: 5;
+		margin: 0 calc(-1 * var(--gutter)) 8px;
+		padding: 14px var(--gutter) 10px;
+		background: var(--paper);
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.cheat__search {
+		display: block;
+		width: 100%;
+		min-height: 48px;
+		padding: 0 14px;
+		font: 400 17px/1 var(--sans);
+		color: var(--ink);
+		background: var(--field);
+		border: 1px solid var(--field-border);
+		border-radius: var(--radius-button);
+	}
+
+	.cheat__search[hidden] {
+		display: none;
+	}
+
+	.cheat__search::placeholder {
+		color: var(--muted);
+	}
+
+	/* One row on a phone, scrolled sideways, so the bar never grows to half the screen. */
+	.cheat__topics {
+		display: flex;
+		gap: 4px 18px;
+		overflow-x: auto;
+		padding-top: 6px;
+		scrollbar-width: thin;
+		white-space: nowrap;
+	}
+
+	.cheat__count {
+		margin: 2px 0 0;
+		font: var(--type-note);
+		color: var(--muted);
+	}
+
+	.cheat__count:empty {
+		display: none;
+	}
+
+	.cs-topic {
+		padding-top: clamp(28px, 4vw, 40px);
+		scroll-margin-top: 140px;
+	}
+
+	.cs-topic[hidden] {
+		display: none;
+	}
+
+	.cs-topic h2 {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 4px 14px;
+		margin: 0 0 16px;
+		font: var(--type-article-h2);
+		color: var(--ink);
+	}
+
+	.cs-topic h2 small {
+		font: var(--type-label);
+		color: var(--muted);
+	}
+
+	/* Two columns on a desktop, one on a phone. Cards keep their own height. */
+	.cs-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr));
+		align-items: start;
+		gap: 16px;
+	}
+
+	.cs-card {
+		min-width: 0;
+		padding: 18px 20px;
+		background: var(--card);
+		border: 1px solid var(--card-border);
+		border-radius: var(--radius-image);
+		box-shadow: var(--shadow-card);
+		font: 400 16px/1.6 var(--sans);
+		color: var(--ink-2);
+		scroll-margin-top: 140px;
+	}
+
+	.cs-card[hidden] {
+		display: none;
+	}
+
+	.cs-card:target {
+		outline: 2px solid var(--terracotta);
+		outline-offset: 2px;
+	}
+
+	.cs-card h3 {
+		margin: 0 0 8px;
+		font: 400 21px/1.3 var(--serif);
+	}
+
+	/* The whole title is the card's link, and a 24px-high tap target at the least. */
+	.cs-card h3 a {
+		display: block;
+		padding-block: 3px;
+		color: var(--ink);
+		text-decoration: none;
+	}
+
+	.cs-card h3 a:hover {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	.cs-card p,
+	.cs-card ul {
+		margin: 8px 0 0;
+	}
+
+	.cs-card ul {
+		padding-left: 1.2em;
+	}
+
+	.cs-card b {
+		color: var(--ink);
+	}
+
+	.cs-why {
+		font-size: 15px;
+		color: var(--muted);
+	}
+
+	.cs-formula {
+		margin: 10px 0 0;
+		padding: 10px 12px;
+		font: 500 14.5px/1.55 var(--mono);
+		color: var(--ink);
+		background: var(--cream);
+		border-left: 3px solid var(--walnut);
+		border-radius: 4px;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+	}
+
+	.cs-table {
+		margin: 8px 0 0;
+		overflow-x: auto;
+	}
+
+	.cs-table table {
+		width: 100%;
+		border-collapse: collapse;
+		font: 400 15px/1.45 var(--sans);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.cs-table th,
+	.cs-table td {
+		padding: 6px 8px 6px 0;
+		text-align: left;
+		vertical-align: top;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.cs-table th {
+		font: var(--type-table-head);
+		color: var(--ink-2);
+	}
+
+	.cheat__none {
+		padding: 24px 0;
+		font: var(--type-lede);
+		color: var(--muted);
+	}
+</style>
