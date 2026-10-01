@@ -123,17 +123,17 @@ const topics = [
 				<ul>
 					<li><b>FLO:</b> front loop only, the one nearer to you</li>
 					<li><b>BLO:</b> back loop only, the one further away</li>
-					<li><b>hdc 3rd loop:</b> the bar below the back loop, made by the yarn over. Gives a knit-look rib.</li>
+					<li><b>hdc 3rd loop:</b> the horizontal bar the yarn over leaves just below the top two loops. Gives a knit-look rib.</li>
 				</ul>
 			</Card>
 
 			<Card q="Gauge swatch" keys="blocking tension">
-				<p>Make it at least 15 × 15 cm, in the garment stitch. Wash and dry it the way you will wash the garment. Count the stitches across 10 cm in the middle. For rows, measure the height of 10 rows, never 1 — a single row is too small to measure.</p>
-				<p class="cs-why">Hang it for a day too: a heavy garment pulls longer than a flat swatch shows.</p>
+				<p>Make it at least 15 × 15 cm, in the garment stitch. Wash and dry it the way you will wash the garment. Lay it flat and count the stitches across 10 cm in the middle. For rows, measure the height of 10 rows, never 1 — a single row is too small to measure.</p>
+				<p class="cs-why">That flat reading is your gauge. Hanging it is a separate test, for growth — see “Will it grow?”.</p>
 			</Card>
 		</Topic>
 
-		<Topic id="yoke" title="Top-down raglan yoke" note="square yoke">
+		<Topic id="yoke" title="Top-down raglan yoke">
 			<Card q="How many increases a round?">
 				<Formula lines={['increases per round = 4 raglan lines × 2 sides of each line × stitches added per side']} />
 				<ul>
@@ -145,8 +145,8 @@ const topics = [
 
 			<Card q="Will the yoke lie flat, dome or cone?">
 				<Formula lines={['R = sts per 10 cm ÷ rows per 10 cm']} />
-				<p>R is how many stitches you get for each row of height, from your gauge. 8 increases a round lies flat at <b>R ≈ 1.27</b>. Above that it domes, below it cones. hdc is usually about 1.2–1.4, so a plain raglan works in hdc.</p>
-				<p class="cs-why">16 a round domes hard. Use it only for a few rounds at the neck, then drop to 8.</p>
+				<p>R is how many stitches you get for each row of height, from your gauge. 8 increases a round lies flat at <b>R ≈ 1.27</b>. Above that, 8 is too few and the yoke cups into a dome. Below it, 8 is too many and the yoke ruffles. hdc is usually about 1.2–1.4, so a plain raglan works in hdc.</p>
+				<p class="cs-why">16 a round can keep the yoke flat and square at the neck, but by the split it makes the yoke far too wide. Use it for the first rounds, then drop to 8.</p>
 			</Card>
 
 			<Card q="How big is each section at the split?">
@@ -177,14 +177,14 @@ const topics = [
 			</Card>
 
 			<Card q="Why does the shoulder look hexagonal?">
-				<p>Too few increases per increase round. Use <b>10 or more</b>, spread out. Fewer, bigger steps show as corners.</p>
+				<p>Too few increases per increase round. When the increases fall only every few rounds, each increase round needs <b>10 or more</b>, spread out. Fewer, bigger steps show as corners.</p>
 			</Card>
 		</Topic>
 
 		<Topic id="rise" title="Back neck rise">
 			<Card q="How do I raise the back of the neck?">
 				<ul>
-					<li><b>Taller stitch on the back:</b> for example ehdc (extended hdc) on the back, hdc on the front and sleeves. Easiest to write.</li>
+					<li><b>Taller stitch on the back:</b> for example ehdc (extended hdc: yo, insert, yo and pull up a loop, yo and pull through 1, yo and pull through all 3) on the back, hdc on the front and sleeves. Easiest to write.</li>
 					<li><b>Short rows:</b> extra rows across the back (and part of the sleeves) only. Works when the stitch can't change.</li>
 				</ul>
 			</Card>
@@ -197,7 +197,6 @@ const topics = [
 
 			<Card q="How much rise do I need?">
 				<p>A tall or <b>folded collar</b> sits higher at the back of the neck, so it needs more rise than a flat neckband.</p>
-				<p class="cs-why">Check it on the body: line up the four raglan points two by two and look at how the collar sits.</p>
 			</Card>
 		</Topic>
 
@@ -214,11 +213,13 @@ const topics = [
 			<Card q="What happens at the split?">
 				<p>Stop increasing. Skip each sleeve and <b>both</b> of its ch-2 spaces, chain the underarm, carry on across the front. The skipped spaces are worked later, when you pick up the sleeve.</p>
 				<Formula lines={['sleeve pick-up = sts across the chain + 2 in each ch-2 space + sleeve sts']} />
+				<p>Sts across the chain is N + 2, corners included — the same as on the body. ch 7 and 60 sleeve sts: 9 + 2 + 2 + 60 = 73.</p>
 				<p class="cs-why">Each sleeve taking both its spaces is what makes the two sleeves match.</p>
 			</Card>
 
 			<Card q="How many yoke stitches at the split?">
 				<Formula lines={['yoke circumference = (bust − 2 × underarm) + 2 × (upper arm − underarm)']} />
+				<p>Bust and upper arm are the finished measurements, ease included.</p>
 				<p>The underarm comes off <b>four times</b>, once where each body side meets each sleeve.</p>
 			</Card>
 
@@ -236,7 +237,7 @@ const topics = [
 
 			<Card q="How do I taper a sleeve?">
 				<Formula lines={['decrease rounds = (start sts − end sts) ÷ 2   (2 decreases a round)', 'every Nth round, N = rounds available ÷ decrease rounds']} />
-				<p>Put the decreases at the underarm line, where they show least: <b>hdc 3, inv dec, hdc to last 5, inv dec, hdc 3</b> (inv dec: invisible decrease). Leave a few plain rounds before the cuff.</p>
+				<p>Put the decreases at the underarm line, where they show least: <b>hdc 3, inv dec, hdc to last 5, inv dec, hdc 3</b> (inv dec, invisible decrease: yo, insert through the front loops of the next 2 sts, yo and pull up a loop, yo and pull through all 3). Leave a few plain rounds before the cuff.</p>
 			</Card>
 
 			<Card q="How much can a cuff gather?">
@@ -256,7 +257,7 @@ const topics = [
 			</Card>
 
 			<Card q="Sleeve width and armhole">
-				<Formula lines={['sleeve circumference = 2 × armhole opening']} />
+				<Formula lines={['sleeve circumference = 2 × armhole depth']} />
 				<p>You can't widen the sleeve without deepening the armhole. Change the armhole and change the body below it by the same amount.</p>
 			</Card>
 
@@ -265,7 +266,7 @@ const topics = [
 			</Card>
 
 			<Card q="Narrow shoulders, drop-shoulder look">
-				<p>Start at the full-ease size at the hem and decrease up the body, so the underarm count is one size smaller.</p>
+				<p>Start at the full-ease size at the hem and decrease up the body until the underarm count is one size smaller. The hem keeps its drape and the shoulders stay in proportion.</p>
 			</Card>
 		</Topic>
 
@@ -284,18 +285,20 @@ const topics = [
 				<Formula lines={['ease = finished measurement − body measurement']} />
 			</Card>
 
-			<Card q="Ease by construction">
+			<Card q="Bust ease by construction">
 				<ul>
 					<li><b>Set-in sleeve:</b> least, can go negative</li>
 					<li><b>Raglan:</b> 2.5–10 cm is common</li>
 					<li><b>Drop shoulder:</b> 15–30 cm</li>
 					<li><b>Layering:</b> add 5–20 cm</li>
-					<li><b>Armhole depth:</b> 2.5–5 cm</li>
 				</ul>
+				<p>Armhole depth takes its own ease: add 2.5–5 cm to the body measurement.</p>
+				<p class="cs-why">Bust ease only. Sleeves never take negative ease, whatever the construction.</p>
 			</Card>
 
 			<Card q="Yarn changes the ease you need">
 				<p>Heavy and hairy yarns (mohair, brushed alpaca) need a little more. Fibres that don't spring back (cotton, alpaca, superwash) grow: make them shorter.</p>
+				<p class="cs-why">Brushed alpaca does both: a little more width, and a little shorter.</p>
 			</Card>
 
 			<Card q="Ease across sizes">
@@ -318,12 +321,12 @@ const topics = [
 			</Card>
 
 			<Card q="What to measure">
-				<p>Full bust, high bust, cross back, upper arm, armhole depth, back waist length, hip. <b>Full bust minus high bust</b> tells you most about fit.</p>
+				<p>Full bust, high bust, cross back, upper arm, armhole depth, back waist length, high hip, hip. <b>Full bust minus high bust</b> tells you most about fit.</p>
 				<p class="cs-why">“Arm length” differs: CYC is armpit to wrist; EN 13402 is shoulder point over a bent elbow.</p>
 			</Card>
 
 			<Card q="Swatch vs piece">
-				<p>A swatch under-predicts growth and drape. Once the piece is long enough, measure 10 rows on it, laid flat, and use that.</p>
+				<p>A swatch under-predicts growth and drape. Once the piece is long enough, measure 10 rows on it, laid flat. That replaces the swatch gauge from then on.</p>
 			</Card>
 		</Topic>
 
@@ -338,7 +341,7 @@ const topics = [
 						<tr><td>Armhole binds</td><td>Deepen armhole and widen sleeve together</td></tr>
 						<tr><td>Neckline gapes</td><td>Narrow the neck</td></tr>
 						<tr><td>Tents below the bust</td><td>Waist shaping, or less ease lower down</td></tr>
-						<tr><td>Negative-ease top too short</td><td>Add ~70% of the negative ease to the length</td></tr>
+						<tr><td>Negative-ease top too short</td><td>Make the body longer by about 70% of the bust's negative ease: −5 cm at the bust → about 3.5 cm longer. Stretching it wide pulls it shorter. A rough rule.</td></tr>
 					</tbody>
 				</table></div>
 				<p class="cs-why">Wrinkles point at the area that needs more fabric.</p>
@@ -346,18 +349,18 @@ const topics = [
 
 			<Card q="Bust darts">
 				<p>Needed when full bust minus high bust is over about 5 cm. Short rows at full-bust height: first pair ends 2.5 cm from the sides, last pair 2.5 cm outside the bust point.</p>
-				<p class="cs-why">Simpler in crochet: work the front longer than the back by the dart amount, spread over a few rows below the bust.</p>
+				<p class="cs-why">Simpler in crochet: work the front longer than the back by the dart amount — the extra length the front needs, about 2.5 cm per cup size above A — spread over a few rows below the bust.</p>
 			</Card>
 		</Topic>
 
 		<Topic id="bands" title="Collar, bands and rib">
 			<Card q="Folded double collar">
 				<p>Work a rib band sideways. Make it twice as wide as the finished collar is tall, and long enough to go round the neck. Join it into a ring, fold it in half, then work the first yoke round through both layers.</p>
-				<p class="cs-why">Work the colour-change round on the wrong side, so the ridge lands outside as a clean line.</p>
+				<p class="cs-why">Work the colour-change round with the wrong side facing you. That puts the ridge on the outside, where it reads as a clean line at the base of the collar.</p>
 			</Card>
 
 			<Card q="Joining a band into a ring">
-				<p>sl st with <b>one yarn over</b> between the two sides. The join comes out the same height as the fabric, so the seam doesn't pull in.</p>
+				<p>Before the sl st, work <b>one yarn over</b> between the two sides. The join comes out the same height as the fabric, so the seam doesn't pull in.</p>
 			</Card>
 
 			<Card q="Which rib?" keys="ribbing third loop">
@@ -377,7 +380,7 @@ const topics = [
 
 		<Topic id="fabric" title="Fabric, seams and sag">
 			<Card q="Seamless or seamed?">
-				<p>Seams hold shape: they stop a garment stretching under its own weight. The less a fibre springs back (cotton, linen, silk, superwash, rayon, low-wool blends), the more seams are worth it.</p>
+				<p>Seams hold shape: they stop a garment stretching under its own weight. The less a fibre springs back (cotton, linen, silk, alpaca, superwash, rayon, low-wool blends), the more seams are worth it.</p>
 			</Card>
 
 			<Card q="Which seams must stretch?">
@@ -385,7 +388,8 @@ const topics = [
 			</Card>
 
 			<Card q="Will it grow?">
-				<p>Wash the swatch and hang it to dry; don't only lay it flat. Wool reshapes each wash; superwash grows (make it shorter); cotton can stretch for good.</p>
+				<p>Wash the swatch and hang it to dry. It shows how much a heavy garment will grow. Wool reshapes each wash; superwash grows (make it shorter); cotton can stretch for good.</p>
+				<p class="cs-why">This is a test, not your gauge. Take the gauge from the swatch laid flat.</p>
 			</Card>
 		</Topic>
 
