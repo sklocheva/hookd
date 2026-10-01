@@ -94,7 +94,7 @@ const topics = [
 			<Card q="Spreading increases evenly">
 				<Formula lines={['repeat = stitches ÷ increases', '*work (repeat − 1), 2 in the next*']} />
 				<p>60 sts, 6 increases: repeat 10 → *hdc 9, 2 hdc in next* 6 times = 66.</p>
-				<p class="cs-why">Not a whole number? Mix two repeats. 64 sts, 6 increases: 4 repeats of 11 and 2 of 10.</p>
+				<p class="cs-why">Not a whole number? Mix two repeats. 64 sts, 6 increases: 64 ÷ 6 = 10.7, so work 4 repeats of 11 and 2 of 10.</p>
 			</Card>
 
 			<Card q="Spreading decreases evenly">
@@ -128,14 +128,14 @@ const topics = [
 			</Card>
 
 			<Card q="Gauge swatch">
-				<p>At least 15 × 15 cm in the garment stitch. Wash and dry it the way the garment will be. Measure 10 cm in the middle, and 10 rows, never 1.</p>
+				<p>Make it at least 15 × 15 cm, in the garment stitch. Wash and dry it the way you will wash the garment. Count the stitches across 10 cm in the middle. For rows, measure the height of 10 rows, never 1 — a single row is too small to measure.</p>
 				<p class="cs-why">Hang it for a day too: a heavy garment pulls longer than a flat swatch shows.</p>
 			</Card>
 		</Topic>
 
 		<Topic id="yoke" title="Top-down raglan yoke" note="square yoke">
 			<Card q="How many increases a round?">
-				<Formula lines={['increases per round = 4 lines × 2 sides × stitches added per side']} />
+				<Formula lines={['increases per round = 4 raglan lines × 2 sides of each line × stitches added per side']} />
 				<ul>
 					<li><b>1 hdc, ch 2, 1 hdc</b> → 8 a round, each section +2</li>
 					<li><b>2 hdc, ch 2, 2 hdc</b> → 16 a round, each section +4</li>
@@ -145,7 +145,7 @@ const topics = [
 
 			<Card q="Will the yoke lie flat, dome or cone?">
 				<Formula lines={['R = sts per 10 cm ÷ rows per 10 cm']} />
-				<p>8 a round lies flat at <b>R ≈ 1.27</b>. Above that it domes, below it cones. hdc is usually about 1.2–1.4, so a plain raglan works in hdc.</p>
+				<p>R is how many stitches you get for each row of height, from your gauge. 8 increases a round lies flat at <b>R ≈ 1.27</b>. Above that it domes, below it cones. hdc is usually about 1.2–1.4, so a plain raglan works in hdc.</p>
 				<p class="cs-why">16 a round domes hard. Use it only for a few rounds at the neck, then drop to 8.</p>
 			</Card>
 
@@ -156,11 +156,11 @@ const topics = [
 
 			<Card q="Where do the increases go so I never lose them?">
 				<p>Work the pair into the marked stitch with <b>ch 2</b> between, then into that ch-2 space every round. The line marks itself and stays straight.</p>
-				<p>The set-up round gains less, because the marked stitch is used up: +4 a round with 1 each side, +12 with 2 each side.</p>
+				<p>The first round gains less, because the marked stitch itself is used up: 4 instead of 8 with 1 hdc each side, and 12 instead of 16 with 2 hdc each side.</p>
 			</Card>
 
 			<Card q="Where should the round start?">
-				<p><b>Centre back</b>, never on a raglan point. Split the back stitches in half around the start; no count changes.</p>
+				<p><b>Centre back</b>, never on a raglan point. Half the back stitches come before the start and half after; the counts don't change.</p>
 				<p class="cs-why">A start on a raglan point gets treated differently at the split, and the two sleeves come out different. The join and any colour ridge also hide best at centre back.</p>
 			</Card>
 
@@ -172,7 +172,7 @@ const topics = [
 
 		<Topic id="round" title="Round yoke">
 			<Card q="How many increases for a flat circle?">
-				<Formula lines={['increases per round ≈ 2π × R ≈ 6.28 × R']} />
+				<Formula lines={['increases per round ≈ 2π × R ≈ 6.28 × R', '(R = sts per 10 cm ÷ rows per 10 cm)']} />
 				<p>sc ≈ 6 a round. hdc ≈ 8–9. Knit stockinette ≈ 4–5, so crochet needs about twice what a knit pattern uses. Don't copy a knit schedule.</p>
 			</Card>
 
@@ -184,14 +184,14 @@ const topics = [
 		<Topic id="rise" title="Back neck rise">
 			<Card q="How do I raise the back of the neck?">
 				<ul>
-					<li><b>Taller stitch on the back:</b> e.g. ehdc on the back, hdc on front and sleeves. Easiest to write.</li>
+					<li><b>Taller stitch on the back:</b> for example ehdc (extended hdc) on the back, hdc on the front and sleeves. Easiest to write.</li>
 					<li><b>Short rows:</b> extra rows across the back (and part of the sleeves) only. Works when the stitch can't change.</li>
 				</ul>
 			</Card>
 
 			<Card q="How much rise will I get?">
 				<Formula lines={['rise = rounds × (back row height − front row height)']} />
-				<p>The sleeves are not in it. A taller stitch on the sleeves only deepens the armhole.</p>
+				<p>Only the back and front count. A taller stitch on the sleeves only deepens the armhole.</p>
 			</Card>
 
 			<Card q="How much rise do I need?">
@@ -217,7 +217,7 @@ const topics = [
 			</Card>
 
 			<Card q="How many yoke stitches at the split?">
-				<Formula lines={['yoke circ. = (bust − 2 × underarm) + 2 × (bicep − underarm)']} />
+				<Formula lines={['yoke circumference = (bust − 2 × underarm) + 2 × (upper arm − underarm)']} />
 				<p>The underarm comes off <b>four times</b>, once where each body side meets each sleeve.</p>
 			</Card>
 
@@ -234,12 +234,12 @@ const topics = [
 			</Card>
 
 			<Card q="How do I taper a sleeve?">
-				<Formula lines={['decrease rounds = (start sts − end sts) ÷ 2', 'every Nth round, N = rounds available ÷ decrease rounds']} />
+				<Formula lines={['decrease rounds = (start sts − end sts) ÷ 2   (2 decreases a round)', 'every Nth round, N = rounds available ÷ decrease rounds']} />
 				<p>Put the decreases at the underarm line, where they show least: <b>hdc 3, inv dec, hdc to last 5, inv dec, hdc 3</b>. Leave a few plain rounds before the cuff.</p>
 			</Card>
 
 			<Card q="How much can a cuff gather?">
-				<p>It depends on the rib. A rib that barely stretches can't gather two to one. Taper the sleeve first so the cuff has less to do.</p>
+				<p>It depends on the rib. A rib that barely stretches can't pull the sleeve in to half its width. Taper the sleeve first so the cuff has less to do.</p>
 			</Card>
 
 			<Card q="A cuff that joins as you go">
@@ -250,7 +250,7 @@ const topics = [
 
 		<Topic id="panels" title="Drop shoulder and panels">
 			<Card q="How wide is each panel?">
-				<Formula lines={['governing = MAX(bust, high hip)', 'finished  = governing + ease', 'panel     = finished ÷ 2']} />
+				<Formula lines={['widest   = the larger of bust and high hip', 'finished = widest + ease', 'panel    = finished ÷ 2']} />
 				<p class="cs-why">Use the hip if it is bigger: a straight tube still has to pass over it.</p>
 			</Card>
 
@@ -313,7 +313,7 @@ const topics = [
 			</Card>
 
 			<Card q="Neckline comes from the head">
-				<p>Woman 53–58 cm, man 56–61 cm. A ribbed collar can sit at the low end because it stretches.</p>
+				<p>The neck opening has to go over the head. Head circumference is about 53–58 cm for a woman and 56–61 cm for a man. A ribbed collar can sit at the low end because it stretches.</p>
 			</Card>
 
 			<Card q="What to measure">
@@ -351,7 +351,7 @@ const topics = [
 
 		<Topic id="bands" title="Collar, bands and rib">
 			<Card q="Folded double collar">
-				<p>Work a rib band sideways to twice the collar height wide, long enough to go round the neck. Join it into a ring, fold it in half, then work the first yoke round through both layers.</p>
+				<p>Work a rib band sideways. Make it twice as wide as the finished collar is tall, and long enough to go round the neck. Join it into a ring, fold it in half, then work the first yoke round through both layers.</p>
 				<p class="cs-why">Work the colour-change round on the wrong side, so the ridge lands outside as a clean line.</p>
 			</Card>
 
