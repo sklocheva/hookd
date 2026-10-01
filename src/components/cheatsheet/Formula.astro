@@ -1,7 +1,9 @@
 ---
 /**
  * A formula, one line per entry. Lines rather than a slot, because a slot's text arrives
- * with the page's indentation in it and a formula's alignment is part of what it says.
+ * with the page's indentation in it. Each line is its own block, so on a phone a long one
+ * wraps with a hanging indent instead of breaking mid-expression into what looks like a
+ * second line of the formula.
  */
 interface Props {
 	lines: string[];
@@ -10,4 +12,4 @@ interface Props {
 const { lines } = Astro.props;
 ---
 
-<pre class="cs-formula">{lines.join('\n')}</pre>
+<div class="cs-formula">{lines.map((line) => <span class="cs-formula__line">{line}</span>)}</div>

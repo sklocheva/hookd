@@ -5,9 +5,11 @@
  */
 interface Props {
 	q: string;
+	/** Extra words search should find this card by, when the card itself does not say them. */
+	keys?: string;
 }
 
-const { q } = Astro.props;
+const { q, keys } = Astro.props;
 const id = q
 	.toLowerCase()
 	.replace(/[“”"?]/g, '')
@@ -15,7 +17,7 @@ const id = q
 	.replace(/^-|-$/g, '');
 ---
 
-<article class="cs-card" id={id} data-card>
+<article class="cs-card" id={id} data-card data-keys={keys}>
 	<h3><a href={`#${id}`}>{q}</a></h3>
 	<slot />
 </article>

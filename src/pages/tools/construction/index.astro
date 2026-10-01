@@ -55,7 +55,7 @@ const topics = [
 				id="cs-q"
 				class="cheat__search"
 				type="search"
-				placeholder="Search: increase, underarm, cuff, ease…"
+				placeholder="Search, e.g. underarm"
 				autocomplete="off"
 				hidden
 			/>
@@ -86,7 +86,7 @@ const topics = [
 				<p class="cs-why">A UK pattern has no “sc”. If you see sc, it is US.</p>
 			</Card>
 
-			<Card q="How many stitches for a width?">
+			<Card q="How many stitches for a width?" keys="gauge">
 				<Formula lines={['stitches = width in cm × sts per 10 cm ÷ 10', 'rows     = length in cm × rows per 10 cm ÷ 10']} />
 				<p>Example: 50 cm at 18 sts per 10 cm = 90 sts.</p>
 			</Card>
@@ -119,7 +119,7 @@ const topics = [
 				<p class="cs-why">Write in the pattern whether it counts. That one line stops most count errors at the edges.</p>
 			</Card>
 
-			<Card q="Which loop?">
+			<Card q="Which loop?" keys="third loop">
 				<ul>
 					<li><b>FLO:</b> front loop only, the one nearer to you</li>
 					<li><b>BLO:</b> back loop only, the one further away</li>
@@ -127,7 +127,7 @@ const topics = [
 				</ul>
 			</Card>
 
-			<Card q="Gauge swatch">
+			<Card q="Gauge swatch" keys="blocking tension">
 				<p>Make it at least 15 × 15 cm, in the garment stitch. Wash and dry it the way you will wash the garment. Count the stitches across 10 cm in the middle. For rows, measure the height of 10 rows, never 1 — a single row is too small to measure.</p>
 				<p class="cs-why">Hang it for a day too: a heavy garment pulls longer than a flat swatch shows.</p>
 			</Card>
@@ -190,6 +190,7 @@ const topics = [
 			</Card>
 
 			<Card q="How much rise will I get?">
+				<p>With a taller stitch on the back:</p>
 				<Formula lines={['rise = rounds × (back row height − front row height)']} />
 				<p>Only the back and front count. A taller stitch on the sleeves only deepens the armhole.</p>
 			</Card>
@@ -211,7 +212,7 @@ const topics = [
 			</Card>
 
 			<Card q="What happens at the split?">
-				<p>Stop increasing. Skip each sleeve and <b>both</b> of its ch-2 spaces, chain the underarm, carry on across the front.</p>
+				<p>Stop increasing. Skip each sleeve and <b>both</b> of its ch-2 spaces, chain the underarm, carry on across the front. The skipped spaces are worked later, when you pick up the sleeve.</p>
 				<Formula lines={['sleeve pick-up = sts across the chain + 2 in each ch-2 space + sleeve sts']} />
 				<p class="cs-why">Each sleeve taking both its spaces is what makes the two sleeves match.</p>
 			</Card>
@@ -235,7 +236,7 @@ const topics = [
 
 			<Card q="How do I taper a sleeve?">
 				<Formula lines={['decrease rounds = (start sts − end sts) ÷ 2   (2 decreases a round)', 'every Nth round, N = rounds available ÷ decrease rounds']} />
-				<p>Put the decreases at the underarm line, where they show least: <b>hdc 3, inv dec, hdc to last 5, inv dec, hdc 3</b>. Leave a few plain rounds before the cuff.</p>
+				<p>Put the decreases at the underarm line, where they show least: <b>hdc 3, inv dec, hdc to last 5, inv dec, hdc 3</b> (inv dec: invisible decrease). Leave a few plain rounds before the cuff.</p>
 			</Card>
 
 			<Card q="How much can a cuff gather?">
@@ -359,7 +360,7 @@ const topics = [
 				<p>sl st with <b>one yarn over</b> between the two sides. The join comes out the same height as the fabric, so the seam doesn't pull in.</p>
 			</Card>
 
-			<Card q="Which rib?">
+			<Card q="Which rib?" keys="ribbing third loop">
 				<ul>
 					<li><b>Post stitch rib</b> (FPdc/BPdc): closest to knit rib, heavy</li>
 					<li><b>BLO/FLO rib:</b> lighter, suits long bands</li>
@@ -388,31 +389,74 @@ const topics = [
 			</Card>
 		</Topic>
 
-		<p class="cheat__none" id="cs-none" hidden>Nothing matches. Try a shorter word.</p>
+		<p class="cheat__none" id="cs-none" hidden>Nothing matches. Try another word.</p>
 	</div>
 </Base>
 
 <script>
 	// Progressive enhancement: without this every card shows, and the topics are links down
 	// the page. With it, search and topics filter in place — they only ever hide.
+	//
+	// Search and a topic never combine: typing searches every card, and choosing a topic
+	// clears the search. Combined, they produced "0 cards" for a word the sheet plainly
+	// contains, with nothing on screen saying a topic was still narrowing it.
 	const q = document.getElementById('cs-q') as HTMLInputElement | null;
+	const bar = document.querySelector<HTMLElement>('.cheat__bar');
 	const filters = Array.from(document.querySelectorAll<HTMLAnchorElement>('[data-filter]'));
 	const topics = Array.from(document.querySelectorAll<HTMLElement>('[data-topic]'));
 	const count = document.getElementById('cs-count');
 	const none = document.getElementById('cs-none');
 
-	if (q && count && none) {
+	// Hyphens and spacing vary ("pick-up", "pick up", "pickup"), and so does spelling.
+	const normalise = (s: string) =>
+		s
+			.toLowerCase()
+			.replace(/[-–—]/g, ' ')
+			.replace(/\bpickup\b/g, 'pick up')
+			.replace(/\bcolor/g, 'colour')
+			.replace(/\bcenter/g, 'centre')
+			.replace(/\s+/g, ' ')
+			.trim();
+
+	const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+	if (q && bar && count && none) {
 		q.hidden = false;
 		let topic = 'all';
+		// Where the bar sits before it sticks; choosing a topic scrolls back to here.
+		const barTop = bar.getBoundingClientRect().top + window.scrollY;
+
+		// Each card is searched with its topic's title and its extra keys, so "raglan" finds
+		// every card under "Top-down raglan yoke", not only those that repeat the word.
+		const haystacks = new Map<HTMLElement, string>();
+		topics.forEach((section) => {
+			const title = section.querySelector('h2')?.textContent ?? '';
+			section.querySelectorAll<HTMLElement>('[data-card]').forEach((card) => {
+				haystacks.set(card, normalise(`${title} ${card.dataset.keys ?? ''} ${card.textContent ?? ''}`));
+			});
+		});
+
+		// A search must start a word on the card: "ease" no longer matches "increase". What
+		// was typed is tried as a phrase first ("pick up"), and only if no card has the
+		// phrase does every word have to appear somewhere on the card ("sleeve ease").
+		const startsWord = (s: string) => new RegExp(`(^|[^a-z0-9])${escape(s)}`);
+		const matcher = () => {
+			const term = normalise(q.value);
+			if (!term) return () => true;
+			const phrase = startsWord(term);
+			if ([...haystacks.values()].some((t) => phrase.test(t))) return (t: string) => phrase.test(t);
+			const words = term.split(' ').map(startsWord);
+			return (t: string) => words.every((w) => w.test(t));
+		};
 
 		const apply = () => {
-			const term = q.value.trim().toLowerCase();
+			const matches = matcher();
 			let shown = 0;
 			topics.forEach((section) => {
 				const inTopic = topic === 'all' || section.dataset.topic === topic;
 				let any = 0;
 				section.querySelectorAll<HTMLElement>('[data-card]').forEach((card) => {
-					const hit = inTopic && (!term || (card.textContent ?? '').toLowerCase().includes(term));
+					const hit = inTopic && matches(haystacks.get(card) ?? '');
 					card.hidden = !hit;
 					if (hit) {
 						any++;
@@ -425,21 +469,44 @@ const topics = [
 			count.textContent = `${shown} ${shown === 1 ? 'card' : 'cards'}`;
 		};
 
+		const setTopic = (next: string) => {
+			topic = topics.some((s) => s.dataset.topic === next) ? next : 'all';
+			filters.forEach((link) => {
+				const on = (link.dataset.filter ?? 'all') === topic;
+				link.classList.toggle('filter--active', on);
+				if (on) {
+					link.setAttribute('aria-current', 'true');
+					link.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+				} else link.removeAttribute('aria-current');
+			});
+			// The topic is in the address, so a filtered view can be bookmarked or sent.
+			history.replaceState(null, '', topic === 'all' ? location.pathname : `#${topic}`);
+		};
+
 		filters.forEach((link) =>
 			link.addEventListener('click', (event) => {
 				event.preventDefault();
-				topic = link.dataset.filter ?? 'all';
-				filters.forEach((other) => {
-					const on = other === link;
-					other.classList.toggle('filter--active', on);
-					if (on) other.setAttribute('aria-current', 'true');
-					else other.removeAttribute('aria-current');
-				});
+				q.value = '';
+				setTopic(link.dataset.filter ?? 'all');
 				apply();
+				// Filtering removes cards above a reader who has scrolled down, which used to
+				// leave them looking at the footer. Bring the results back under the bar.
+				if (window.scrollY > barTop) window.scrollTo({ top: barTop });
 			})
 		);
 
-		q.addEventListener('input', apply);
+		const onSearch = () => {
+			if (topic !== 'all') setTopic('all');
+			apply();
+		};
+		q.addEventListener('input', onSearch);
+		// The clear button on a search box fires "search", not always "input".
+		q.addEventListener('search', onSearch);
+
+		// Opened at a topic's address: show that topic. A card's own address is left alone,
+		// so the browser scrolls to the card as usual.
+		const fromHash = location.hash.slice(1);
+		if (topics.some((s) => s.dataset.topic === fromHash)) setTopic(fromHash);
 		apply();
 	}
 </script>
@@ -455,8 +522,8 @@ const topics = [
 		white-space: nowrap;
 	}
 
+	/* The full shell, so the twelve topics fit on one line at desktop width. */
 	.cheat {
-		max-width: calc(1000px + 2 * var(--gutter));
 		padding-bottom: 40px;
 	}
 
@@ -506,14 +573,27 @@ const topics = [
 		color: var(--muted);
 	}
 
-	/* One row on a phone, scrolled sideways, so the bar never grows to half the screen. */
+	/* One row, scrolled sideways on a phone, so the bar never grows to half the screen.
+	   The fade on the right says there is more; the scrollbar is hidden because it drew a
+	   line under one topic that read as a second selection. */
 	.cheat__topics {
 		display: flex;
-		gap: 4px 18px;
+		gap: 4px 14px;
 		overflow-x: auto;
 		padding-top: 6px;
-		scrollbar-width: thin;
+		padding-right: 32px;
+		scrollbar-width: none;
 		white-space: nowrap;
+		/* A mask reads only opacity; the colour is irrelevant, so it is a token. */
+		mask-image: linear-gradient(90deg, var(--ink) calc(100% - 40px), transparent);
+	}
+
+	.cheat__topics::-webkit-scrollbar {
+		display: none;
+	}
+
+	.cheat__topics .filter {
+		font-size: 15px;
 	}
 
 	.cheat__count {
@@ -623,8 +703,14 @@ const topics = [
 		background: var(--cream);
 		border-left: 3px solid var(--walnut);
 		border-radius: 4px;
+	}
+
+	/* A wrapped line hangs under its own start, so it never reads as the next line. */
+	.cs-formula__line {
+		display: block;
+		padding-left: 1.5em;
+		text-indent: -1.5em;
 		white-space: pre-wrap;
-		overflow-wrap: anywhere;
 	}
 
 	.cs-table {
