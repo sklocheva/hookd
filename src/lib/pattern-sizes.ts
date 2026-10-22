@@ -102,9 +102,9 @@ export function keysUsed(pattern: Pattern['data']): Set<string> {
  * Built from the size's own finished measurements rather than authored again, so it cannot
  * disagree with the size table above it.
  */
-export function sizeSummary(size: Sizes[number]): string {
+export function sizeSummary(size: Sizes[number], metresPerGram: number): string {
 	return [
 		...size.measurements.map((m) => `${m.value} ${m.unit} ${m.label.toLowerCase()}`),
-		`${size.yardageM} m`,
+		`${size.grams} g (${Math.round(size.grams * metresPerGram)} m)`,
 	].join(' · ');
 }

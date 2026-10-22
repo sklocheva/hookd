@@ -48,7 +48,7 @@ const feed: FeedItem[] = [
 		cta: 'Read the pattern',
 		photo: p.data.title.toLowerCase(),
 		image: p.data.heroImage,
-		imageAlt: p.data.heroImageAlt,
+		imageAlt: p.data.heroImageAlt ?? '',
 	})),
 	...journal.map((e) => {
 		const quiz = e.kind === QUIZ_KIND;
@@ -121,7 +121,7 @@ const pinned = picks.flatMap((pick) => {
 			title: entry.data.title,
 			href: `${base}/${entry.id}/`,
 			image: entry.data.heroImage,
-			imageAlt: entry.data.heroImageAlt,
+			imageAlt: entry.data.heroImageAlt ?? '',
 		},
 	];
 });

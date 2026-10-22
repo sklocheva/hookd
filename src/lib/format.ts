@@ -25,19 +25,32 @@ function range(values: number[]): [number, number] {
 	return [Math.min(...values), Math.max(...values)];
 }
 
-/** e.g. "980–1640 m" — yardage across every size. */
-export function yardageRange(p: Pattern['data']): string {
-	const [lo, hi] = range(p.sizes.map((s) => s.yardageM));
-	return lo === hi ? `${lo} m` : `${lo}–${hi} m`;
+/**
+ * Metres per gram of the main yarn, from its ball weight and length.
+ *
+ * Sizes store grams, because grams are what the author weighs; metres and yards are worked
+ * out here. It uses the main yarn, so a pattern mixing two yarns of different thickness
+ * gets an approximate length — the grams stay exact.
+ */
+export function metresPerGram(p: Pattern['data']): number {
+	const y = mainYarn(p);
+	return y.ballLengthM / y.ballWeightG;
 }
 
-/** e.g. "980–1640 m / 1070–1795 yd" */
-export function yardageRangeBoth(p: Pattern['data']): string {
-	const [lo, hi] = range(p.sizes.map((s) => s.yardageM));
-	const y = (m: number) => Math.round(m * M_PER_YD);
+/** e.g. 133 g of a 140 m / 50 g yarn → 372. */
+export function metresFor(grams: number, perGram: number): number {
+	return Math.round(grams * perGram);
+}
+
+/** e.g. "133 g · 372 m / 407 yd", or a range across every size. */
+export function yarnAmount(p: Pattern['data']): string {
+	const perGram = metresPerGram(p);
+	const [lo, hi] = range(p.sizes.map((s) => s.grams));
+	const m = (g: number) => metresFor(g, perGram);
+	const y = (g: number) => Math.round(m(g) * M_PER_YD);
 	return lo === hi
-		? `${lo} m / ${y(lo)} yd`
-		: `${lo}–${hi} m / ${y(lo)}–${y(hi)} yd`;
+		? `${lo} g · ${m(lo)} m / ${y(lo)} yd`
+		: `${lo}–${hi} g · ${m(lo)}–${m(hi)} m / ${y(lo)}–${y(hi)} yd`;
 }
 
 /**

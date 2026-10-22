@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import Hero from './Hero.astro';
 import Difficulty from './Difficulty.astro';
 import { finishedMeasurements, hook, mainYarn, sizeRange } from '../lib/format';
+import { cycWeightName } from '../lib/cyc';
 
 interface Props {
 	pattern: CollectionEntry<'patterns'>;
@@ -13,7 +14,7 @@ const d = pattern.data;
 const yarn = mainYarn(d);
 
 const specs = [
-	{ label: 'Yarn', value: `${yarn.cycWeight} · ${yarn.cycWeightName}` },
+	{ label: 'Yarn', value: `${yarn.cycWeight} · ${cycWeightName(yarn.cycWeight)}` },
 	{ label: 'Hook', value: hook(d), nowrap: true },
 	{ label: 'Finished', value: `${sizeRange(d)} · ${finishedMeasurements(d)}` },
 ];
@@ -22,7 +23,7 @@ const specs = [
 <a href={`/patterns/${pattern.id}/`} class="card hoverable">
 	<Hero
 		image={d.heroImage}
-		alt={d.heroImageAlt}
+		alt={d.heroImageAlt ?? ''}
 		ratio="4/5"
 		caption={d.title.toLowerCase()}
 		pending

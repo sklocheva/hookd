@@ -11,8 +11,16 @@ import { fileURLToPath } from 'node:url';
  */
 const seoFields = {
 	metaDescription: z.string().max(160, 'metaDescription must be 160 characters or fewer'),
-	/** Alt text for the hero image. Required even when the image itself is not yet shot. */
-	heroImageAlt: z.string().min(1, 'heroImageAlt is required'),
+	/**
+	 * Alt text for the hero image — required to publish once there is a hero image, and
+	 * not before. It was required unconditionally, so the author was asked to describe a
+	 * photograph that did not exist yet; all three form testers stumbled on it. A pattern
+	 * with no photo shows "photography still to come", which needs no description. Checked
+	 * in each collection's superRefine.
+	 *
+	 * Written out rather than `optionalString`, which is declared further down this file.
+	 */
+	heroImageAlt: z.preprocess((v) => (v === '' || v === null ? undefined : v), z.string().optional()),
 	/**
 	 * Social share image, as a root-relative path under public/.
 	 *
@@ -150,23 +158,62 @@ const galleryField = z
 	)
 	.default([]);
 
-const yarn = z.object({
-	brand: z.string(),
-	line: z.string(),
-	fibreContent: z.string(),
-	ballWeightG: z.number(),
-	ballLengthM: z.number(),
-	/** Craft Yarn Council weight category, 0–7. */
-	cycWeight: z.number().int().min(0).max(7),
-	cycWeightName: z.string(),
-	colourName: optionalString,
-	/**
-	 * Only meaningful when a pattern uses more than one yarn. Blank means main —
-	 * `blankToUndefined` first, because a cleared field arrives as `''` and a `.default()`
-	 * fills in for `undefined` only.
-	 */
-	role: z.preprocess(blankToUndefined, z.string().default('main')),
+/**
+ * One colour of a yarn, and how much of it the pattern takes when the author weighed it.
+ * A cleared row arrives as `{ name: '', grams: null }` and is dropped.
+ */
+const colour = z.object({
+	name: z.string().min(1),
+	grams: optionalNumber,
 });
+
+const dropBlankColours = (v: unknown) =>
+	Array.isArray(v)
+		? v.filter((c) => c && typeof c === 'object' && typeof c.name === 'string' && c.name.trim() !== '')
+		: v === null || v === ''
+			? undefined
+			: v;
+
+/**
+ * One yarn line, entered once, with its colours listed under it.
+ *
+ * It was one row per colour, so a two-colour shawl in a single yarn meant typing the brand,
+ * fibre, ball size and weight twice. The weight is the CYC number alone; the name is looked
+ * up in src/lib/cyc.ts. An old entry's `colourName` is read as a one-colour list, and its
+ * `cycWeightName` is ignored.
+ */
+const yarn = z.preprocess(
+	(v) => {
+		if (!v || typeof v !== 'object') return v;
+		const o = v as Record<string, unknown>;
+		if (o.colours === undefined && typeof o.colourName === 'string' && o.colourName.trim() !== '') {
+			return { ...o, colours: [{ name: o.colourName }] };
+		}
+		return o;
+	},
+	z.object({
+		brand: z.string(),
+		line: z.string(),
+		fibreContent: z.string(),
+		ballWeightG: z.number(),
+		ballLengthM: z.number(),
+		/**
+		 * Craft Yarn Council weight category, 0–7. Picked from a dropdown, which may save
+		 * "5" as text rather than 5 — read either.
+		 */
+		cycWeight: z.preprocess(
+			(v) => (typeof v === 'string' && v.trim() !== '' ? Number(v) : v),
+			z.number().int().min(0).max(7)
+		),
+		colours: z.preprocess(dropBlankColours, z.array(colour).default([])),
+		/**
+		 * Only meaningful when a pattern uses more than one yarn. Blank means main —
+		 * `blankToUndefined` first, because a cleared field arrives as `''` and a `.default()`
+		 * fills in for `undefined` only.
+		 */
+		role: z.preprocess(blankToUndefined, z.string().default('main')),
+	})
+);
 
 /**
  * One finished measurement. The label is free text because different garments need
@@ -214,7 +261,11 @@ const size = z.object({
 	 * than having to work it out.
 	 */
 	fitsBodyCm: optionalString,
-	yardageM: z.number(),
+	/**
+	 * Yarn this size takes, in grams — what the author actually weighs. Metres and yards
+	 * are worked out on the page from the main yarn's ball weight and length.
+	 */
+	grams: z.number(),
 });
 
 /** A term and its one-line explanation: abbreviations, and "how this is written". */
@@ -445,6 +496,13 @@ const patterns = defineCollection({
 		 * saveable, and this only matters once someone can read it.
 		 */
 		.superRefine((d, ctx) => {
+			if (!d.draft && d.heroImage && !d.heroImageAlt) {
+				ctx.addIssue({
+					code: 'custom',
+					path: ['heroImageAlt'],
+					message: 'heroImageAlt is required when there is a hero image',
+				});
+			}
 			if (d.draft || !d.instructions) return;
 
 			const keys = keysUsed(d);
@@ -501,6 +559,16 @@ const posts = defineCollection({
 			previewId,
 
 			...seoFields,
+		})
+		/** Alt text at publish, and only when there is a hero image — see `seoFields`. */
+		.superRefine((d, ctx) => {
+			if (!d.draft && d.heroImage && !d.heroImageAlt) {
+				ctx.addIssue({
+					code: 'custom',
+					path: ['heroImageAlt'],
+					message: 'heroImageAlt is required when there is a hero image',
+				});
+			}
 		}),
 });
 
@@ -872,7 +940,11 @@ const quizzes = defineCollection({
 						name: z.string(),
 						/** The italic serif line under the name. */
 						line: z.string(),
-						body: z.string(),
+						/**
+						 * Optional. A short answer says everything in its line; a required
+						 * body made the form tester repeat the line here word for word.
+						 */
+						body: optionalString,
 						steps: z.array(z.string()).default([]),
 					})
 				)

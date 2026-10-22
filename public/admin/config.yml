@@ -49,15 +49,21 @@ media_libraries:
 
 collections:
   # ---------------------------------------------------------------- patterns
+  #
+  # Field order follows the work: what the pattern is, then the yarn and the making, then
+  # the instructions, then photos, links, dates, and last the search-and-sharing settings
+  # nobody needs while writing. Hints say what to type, in plain words; the reasons behind
+  # a rule live in comments here and in CLAUDE.md, not in front of the author. Four
+  # first-time testers drove this form on 22 Oct 2026 — see CLAUDE.md.
   - name: patterns
-    label: Free patterns
+    label: Patterns
     label_singular: Pattern
     folder: src/content/patterns
     create: true
     extension: mdx
     format: frontmatter
     slug: '{{fields.title | slugify}}'
-    summary: '{{title}} — {{difficulty}}'
+    summary: "{{title}} — {{difficulty}}{{draft | ternary(' · Draft', '')}}"
     # The "view on site" link. It points at /go/<previewId>/ rather than at the page,
     # because preview_path is one template per collection and cannot ask whether the
     # entry is a draft: a link to the preview address would break on publishing, and a
@@ -66,99 +72,45 @@ collections:
     preview_path: go/{{fields.previewId}}
     fields:
       - { label: Title, name: title, widget: string }
-      - { label: Publish date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
-      - label: Last corrected
-        name: updated
-        widget: datetime
-        date_format: 'YYYY-MM-DD'
-        time_format: false
-        required: false
-        hint: >-
-          Set this when you fix something in a published pattern — a stitch count, a
-          measurement. Leave empty until then.
-      - label: Summary
-        name: summary
-        widget: text
-        hint: The standfirst under the title. Two sentences at most.
-
+      # On by default: a new entry that is saved without a second look must not publish.
+      # It started off, and two testers found it would have published on first save.
       - label: Draft
         name: draft
         widget: boolean
-        default: false
+        default: true
         hint: >-
-          A draft is not listed anywhere on the site — not on the homepage, the indexes,
-          the feed or the sitemap — and is served at the unguessable preview address
-          below rather than its real URL. Untick it to publish.
-      - label: Preview address
-        name: previewId
-        widget: uuid
-        hint: >-
-          Generated once, never edited. While this entry is a draft it is served at this
-          address instead of its real one, so the real URL stays a 404 until you publish.
-
-      # --- SEO. Required, deliberately. ---------------------------------
-      - label: Meta description
+          Leave this on while you work: a draft is hidden from every list on the site.
+          Switch it off when the pattern is ready to publish.
+      - label: Summary
+        name: summary
+        widget: text
+        hint: One or two sentences under the title, saying what the pattern makes.
+      - label: Publish date
+        name: date
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        hint: Needed to save. Click Today; you can change it when you publish.
+      - label: Search description
         name: metaDescription
         widget: string
         required: true
         pattern: ['^.{1,160}$', 'Must be 160 characters or fewer.']
-        hint: Max 160 characters. The build fails without this.
-      - label: Hero image
-        name: heroImage
-        widget: image
+        hint: Needed to save. What search engines show under the title, up to 160 characters. Pasting the summary is fine.
+      - label: Introduction
+        name: body
+        widget: markdown
         required: false
-        hint: Leave empty and the pattern shows "photography still to come" — it stays published and usable.
-      - label: Hero image alt text
-        name: heroImageAlt
-        widget: string
-        required: true
-        hint: Describe the photo for someone who cannot see it. Required even before the photo exists.
-      - label: Social share image
-        name: socialImage
-        widget: string
-        required: true
-        default: /og-default.png
-        hint: Root-relative path under public/. Leave as /og-default.png until this entry has its own artwork — the build checks the file exists.
-      - label: More photographs
-        name: gallery
-        widget: list
-        required: false
-        label_singular: Photograph
-        summary: '{{fields.alt}}'
         hint: >-
-          Extra shots, shown as a gallery below the pattern. The hero image stays separate
-          and is always the first thing anyone sees.
-        fields:
-          - { label: Image, name: image, widget: image }
-          - label: Alt text
-            name: alt
-            widget: string
-            required: true
-            hint: Describe the photo for someone who cannot see it. Required, like the hero's.
-          - label: Caption
-            name: caption
-            widget: string
-            required: false
-            hint: >-
-              The line shown under the photo, e.g. "Size M, worn with 12 cm ease". Say
-              something the photo cannot — not a repeat of the alt text.
-      - label: Hero caption
-        name: heroImageCaption
-        widget: string
-        required: false
-        hint: Caption for the hero photo, which is the gallery's first frame.
-      - label: Shoot note
-        name: heroImagePending
-        widget: string
-        required: false
-        hint: Shown when there is no hero image, e.g. "Shoot booked · September".
+          The text above the pattern: what it is, why you made it, anything a maker should
+          know before starting. Optional.
 
-      # --- Classification ------------------------------------------------
+      # --- What it is -----------------------------------------------------
       - label: Difficulty
         name: difficulty
         widget: select
         options: [Basic, Easy, Intermediate, Complex]
-        hint: Craft Yarn Council's four levels. Drawn as four bars on the card.
+        hint: Craft Yarn Council's four levels. Colour changes count as colour work, so Easy at least.
       # Several per pattern — a hooded scarf is both clothing and an accessory. Stored as
       # lowercase slugs; the labels a reader sees live in src/lib/taxonomy.ts.
       - label: Type
@@ -172,36 +124,55 @@ collections:
           - { label: Accessories, value: accessories }
           - { label: Pets, value: pets }
           - { label: Home, value: home }
-        hint: Tick every one that applies. At least one — the build fails on none.
-      - { label: Tags, name: tags, widget: list, required: false }
+        hint: Pick every one that applies — a hooded scarf is both clothing and an accessory.
+      - label: Tags
+        name: tags
+        widget: list
+        required: false
+        hint: A few lowercase words, e.g. shawl, colour blocks. Used to suggest related pages.
 
-      # --- Yarn. A list, because colour-blocked work uses several. --------
+      # --- Yarn. One row per yarn line; its colours are listed inside it. ----
       - label: Yarns
         name: yarns
         widget: list
         label_singular: Yarn
-        summary: '{{fields.brand}} {{fields.line}} ({{fields.role}})'
+        summary: '{{fields.brand}} {{fields.line}}'
+        hint: One entry per yarn. Two colours of the same yarn are one entry, with both colours listed in it. How much yarn goes under Sizes.
         fields:
-          - { label: Brand, name: brand, widget: string }
-          - { label: Line, name: line, widget: string }
-          - { label: Fibre content, name: fibreContent, widget: string, hint: 'e.g. 100% Norwegian wool' }
+          - { label: Brand, name: brand, widget: string, hint: 'e.g. DROPS' }
+          - { label: Yarn name, name: line, widget: string, hint: 'e.g. Melody' }
+          - { label: Fibre content, name: fibreContent, widget: string, hint: 'e.g. 71% alpaca, 25% wool, 4% polyamide' }
           - { label: Ball weight (g), name: ballWeightG, widget: number, value_type: int }
           - { label: Ball length (m), name: ballLengthM, widget: number, value_type: int }
-          - label: CYC weight category
+          # The number only. The name is looked up in src/lib/cyc.ts, so it cannot
+          # disagree with the number the way the old free-text name field did.
+          - label: Weight (Craft Yarn Council)
             name: cycWeight
-            widget: number
-            value_type: int
-            min: 0
-            max: 7
-          - { label: CYC weight name, name: cycWeightName, widget: string, hint: 'e.g. Medium (worsted/aran)' }
-          - { label: Colour name, name: colourName, widget: string, required: false }
+            widget: select
+            options:
+              - { label: '0 – Lace', value: 0 }
+              - { label: '1 – Super Fine (fingering, sock)', value: 1 }
+              - { label: '2 – Fine (sport)', value: 2 }
+              - { label: '3 – Light (DK)', value: 3 }
+              - { label: '4 – Medium (worsted, aran)', value: 4 }
+              - { label: '5 – Bulky (chunky)', value: 5 }
+              - { label: '6 – Super Bulky', value: 6 }
+              - { label: '7 – Jumbo', value: 7 }
+          - label: Colours
+            name: colours
+            widget: list
+            required: false
+            label_singular: Colour
+            summary: '{{fields.name}}'
+            hint: Each colour used.
+            fields:
+              - { label: Colour, name: name, widget: string, hint: 'With its number, e.g. Dark Jeans Blue (07).' }
+              - { label: Grams used, name: grams, widget: number, value_type: int, required: false, hint: Only if you weighed this colour on its own. }
           - label: Role
             name: role
             widget: string
             required: false
-            hint: >-
-              Only worth filling in when a pattern uses more than one yarn — main,
-              contrast, edging. Left blank it is the main yarn.
+            hint: Only when the pattern uses two different yarns — main, contrast, edging. Empty means main.
 
       # --- Hook ----------------------------------------------------------
       # Only the mm is typed. The US size is looked up from it at build time
@@ -211,7 +182,7 @@ collections:
         name: hookMm
         widget: number
         value_type: float
-        hint: The US size is added automatically. Nothing to look up.
+        hint: The US size is added for you where one exists.
       - { label: Second hook (mm), name: secondHookMm, widget: number, value_type: float, required: false }
       - { label: Second hook used for, name: secondHookFor, widget: string, required: false, hint: 'e.g. bands and cuffs' }
 
@@ -219,132 +190,108 @@ collections:
       - label: Gauge
         name: gauge
         widget: object
-        hint: >-
-          Measured on the actual piece after blocking, under its own weight — not on a
-          swatch pinned flat.
+        collapsed: false
+        hint: Stitches and rows across a measured square, counted in the middle of the piece.
         fields:
           - { label: Stitches, name: stitches, widget: number, value_type: float }
           - { label: Rows, name: rows, widget: number, value_type: float }
-          - { label: Measured over (cm), name: overCm, widget: number, value_type: int, default: 10 }
-          - { label: Stitch pattern, name: stitchPattern, widget: string }
-          - { label: Blocked, name: blocked, widget: boolean, default: true }
+          - { label: Measured over (cm), name: overCm, widget: number, value_type: float, hint: 'The side of the square you measured, e.g. 10 for 10 × 10 cm.' }
+          - { label: Stitch pattern, name: stitchPattern, widget: string, hint: 'The stitch you measured in, e.g. dc' }
+          - label: Blocked
+            name: blocked
+            widget: boolean
+            default: false
+            hint: Switch on only if you measured after washing or blocking. Not blocked yet? Leave it off and update it later.
           - label: Note
             name: note
             widget: string
             required: false
-            hint: >-
-              Where on the piece you measured. Worth writing: it is what tells a maker how
-              to swatch so their number matches yours.
+            hint: Where and how you measured — it tells a maker how to swatch to match your number.
 
       # --- Sizes. Structured, so the table is generated. ------------------
       - label: Sizes
         name: sizes
         widget: list
         label_singular: Size
-        summary: '{{fields.name}} — {{fields.yardageM}} m'
-        hint: The finished-measurements table is generated from this, so it must be data, not prose.
+        summary: '{{fields.name}} — {{fields.grams}} g'
+        hint: One entry per size. A one-size piece has one entry, named One size.
         fields:
-          - { label: Size name, name: name, widget: string, hint: 'XS, M, 3X, One size…' }
-          - label: Fits body (cm)
+          - { label: Size name, name: name, widget: string, hint: 'XS, M, 3X, or One size' }
+          - label: Fits body (cm) — garments only
             name: fitsBodyCm
             widget: string
             required: false
-            hint: >-
-              The body this size is cut for, e.g. 76–81. Shown next to the finished
-              measurements so a maker can see the ease instead of working it out.
+            hint: The body this size is cut for, e.g. 76–81. Leave empty for accessories.
           - label: Finished measurements
             name: measurements
             widget: list
             required: false
             label_singular: Measurement
-            summary: '{{fields.label}} — {{fields.value}}'
+            summary: '{{fields.label}} — {{fields.value}} {{fields.unit}}'
             hint: >-
-              Name each one yourself: bust and length for a sweater, circumference and
-              depth for a hat, nothing at all for a blanket. Use the same labels in every
-              size — they become the table columns.
+              Name each one yourself — width and length for a shawl, bust and length for a
+              sweater. Use the same names in every size.
             fields:
-              - { label: Label, name: label, widget: string, hint: 'e.g. Finished bust' }
-              - { label: Value, name: value, widget: number, value_type: float }
-              - { label: Unit, name: unit, widget: string, default: cm, required: false }
-          - label: Yarn needed (metres)
-            name: yardageM
+              - { label: Measurement, name: label, widget: string, hint: 'e.g. Width' }
+              - { label: Value, name: value, widget: number, value_type: float, hint: 'In the unit below — usually cm.' }
+              - { label: Unit, name: unit, widget: string, default: cm, required: false, hint: Usually cm. }
+          # Grams, because grams are what the author weighs. Metres and yards are worked
+          # out on the page from the main yarn's ball weight and length.
+          - label: Yarn needed (g)
+            name: grams
             widget: number
             value_type: int
-            hint: >-
-              Metres, not yards. The page converts and shows both — "1180 m / 1290 yd" —
-              so only ever type the metres.
-          - label: Numbers for this size
+            hint: Weigh the finished piece. Metres and yards are worked out for you.
+          - label: Numbers for this size — several sizes only
             name: values
             widget: list
             required: false
             label_singular: Number
             summary: '{{fields.key}} = {{fields.value}}'
             hint: >-
-              Only for a graded pattern. Write the instruction once using {curly braces} —
-              "Ch {neckCh}, loosely" — and give each size its own value here. The reader
-              sees only their own numbers, and a correction is made in one place instead of
-              once per size. Use the same key names in every size.
+              Skip for one size. Write the instruction once with a name in
+              curly braces — "Ch {neckCh}" — and give each size its own number here.
             fields:
-              - label: Key
-                name: key
-                widget: string
-                hint: 'The name inside the braces, e.g. neckCh. Letters and digits, no spaces.'
-              - label: Value
-                name: value
-                widget: string
-                hint: 'What this size uses, e.g. 88. Text, so ranges like 12–14 are fine.'
-      - { label: Ease, name: ease, widget: string, required: false, hint: 'e.g. worn with 10–15 cm ease' }
-      - label: How to choose a size
+              - { label: Name, name: key, widget: string, hint: 'The name inside the braces, e.g. neckCh. No spaces.' }
+              - { label: Number, name: value, widget: string, hint: 'This size''s number, e.g. 88, or a range like 12–14.' }
+      - { label: Ease — garments only, name: ease, widget: string, required: false, hint: 'For garments, e.g. worn with 10–15 cm ease' }
+      - label: How to choose a size — garments only
         name: sizeNote
         widget: text
         required: false
-        hint: >-
-          Your own guidance — which measurement to go by, what to do between two sizes.
-          Shown above the size table. Leave empty for a sensible default.
-      - label: Body measurement chart
+        hint: For garments — which measurement to go by, and what to do between two sizes.
+      - label: Body measurement chart — garments only
         name: bodyChartUrl
         widget: string
         required: false
         default: https://www.craftyarncouncil.com/standards/body-sizing
-        hint: >-
-          Linked from the sizing note. The Craft Yarn Council chart is the industry
-          reference and includes an ease table — change it only to point somewhere better.
+        hint: Accessories ignore it. For a garment, leave it as it is unless you want to point somewhere else.
 
-      # --- Links ----------------------------------------------------------
       # ------------------------------------------------------------ the pattern itself
       #
-      # All optional: a pattern page is complete without any of it, and the three example
-      # patterns have none. One template covers both designed variants — several sizes gets
-      # the sticky size picker and the numbers follow the choice, one size gets a static
-      # band. Nothing here declares which; the size list decides.
+      # All optional: a pattern page is complete without any of it. One template covers
+      # both designed variants — several sizes gets the sticky size picker, one size gets a
+      # static band. Open by default: it holds every instruction, and closed behind a tick
+      # box it read as an optional extra.
       #
       # Deliberately absent: schematic, stitch chart, photo tutorial. Those are the paid
       # PDF on Ravelry, and this is the free page.
       - label: The pattern
         name: instructions
         widget: object
-        required: false
-        collapsed: true
+        collapsed: false
+        hint: The written instructions, section by section.
         fields:
-          - label: Default size
-            name: defaultSize
-            widget: string
-            required: false
-            hint: >-
-              Which size is written into the page, by name. This is what a reader with no
-              JavaScript gets, so pick a middle size. Leave blank for the middle of the list.
           - label: How this pattern is written
             name: howWritten
             widget: list
             required: false
             label_singular: Entry
             summary: '{{fields.term}} — {{fields.definition}}'
-            hint: >-
-              Terms, what * means, where counts appear. Reference material, so keep each to
-              one clause — nobody reads this start to finish, they look one thing up.
+            hint: 'Short reference lines, e.g. Topic: Terms · Note: US throughout.'
             fields:
-              - { label: Term, name: term, widget: string }
-              - { label: Definition, name: definition, widget: string }
+              - { label: Topic, name: term, widget: string }
+              - { label: Note, name: definition, widget: string }
           - label: Abbreviations
             name: abbreviations
             widget: list
@@ -352,39 +299,37 @@ collections:
             label_singular: Abbreviation
             summary: '{{fields.term}} — {{fields.definition}}'
             fields:
-              - { label: Term, name: term, widget: string }
-              - { label: Definition, name: definition, widget: string }
+              - { label: Abbreviation, name: term, widget: string, hint: 'e.g. BLO' }
+              - { label: Meaning, name: definition, widget: string, hint: 'e.g. back loop only' }
           - label: Stitches to learn first
             name: specialStitches
             widget: list
             required: false
             label_singular: Stitch
             summary: '{{fields.label}}'
-            hint: >-
-              Only genuinely unusual stitches. Plain dc and sc do not belong here — a list
-              that explains what a double crochet is teaches the reader to skip the list.
+            hint: Stitches a maker might not know. Leave out plain sc and dc.
             fields:
               - { label: Name, name: label, widget: string }
               - { label: How to work it, name: body, widget: text }
-          - label: Nothing-else-is-unusual line
+          - label: Reassurance line
             name: specialStitchesNote
             widget: text
             required: false
-            hint: The reassurance under the special stitches. One or two sentences.
+            hint: An optional reassurance under the stitches, e.g. "Everything else is plain dc."
           - label: Sections
             name: sections
             widget: list
             required: false
             label_singular: Section
             summary: '{{fields.heading}}'
-            hint: One per construction stage — Yoke, Body, Sleeves; or Base, Sides, Rim.
+            hint: One per stage of the work — e.g. Blocks, End accent; or Yoke, Body, Sleeves.
             fields:
               - { label: Heading, name: heading, widget: string }
               - label: Intro
                 name: intro
                 widget: text
                 required: false
-                hint: What this stage does structurally. Optional.
+                hint: Optional — one or two sentences on what this part makes.
               - label: Instructions
                 name: rows
                 widget: list
@@ -395,49 +340,95 @@ collections:
                   - label: Label
                     name: label
                     widget: string
-                    hint: 'Row 1, Rnds 5–11, Set up, Hem. May use {braces} too.'
+                    hint: 'Row 1, Rows 2–14, Each block, Each short end.'
                   - label: Instruction
                     name: text
                     widget: text
                     hint: >-
-                      Use {braces} for anything that changes with the size. Put a stitch
-                      count in brackets only where a maker could lose track — after a set-up
-                      row, a repeat, a divide or increases.
+                      End with the stitch count in brackets where a maker could lose track,
+                      e.g. (25). In a pattern with several sizes, use {names} for numbers that change.
               - label: Closing note
                 name: note
                 widget: text
                 required: false
-                hint: A caveat that is not an instruction. Set quieter, under the rows.
-              - label: Coaching callout
+                hint: Optional — a caveat that isn't an instruction, set quietly under the rows.
+              - label: Tip
                 name: tip
                 widget: object
                 required: false
                 collapsed: true
-                hint: >-
-                  The one thing that goes wrong at this stage, and how to catch it before
-                  carrying on. Leave empty unless there is something specific to say.
+                hint: Optional — the one thing that goes wrong at this stage, and how to catch it.
                 fields:
-                  - { label: Lead, name: lead, widget: string, required: false }
-                  - { label: Body, name: body, widget: text, required: false }
+                  - { label: Lead, name: lead, widget: string, required: false, hint: 'A short bold opening, e.g. Count after the first block.' }
+                  - { label: Tip, name: body, widget: text, required: false }
           - label: Finishing intro
             name: finishingIntro
             widget: text
             required: false
-          - label: Finishing notes
+            hint: e.g. "Weave in ends." Optional.
+          - label: Finishing steps
             name: finishing
             widget: list
             required: false
-            label_singular: Note
+            label_singular: Step
             summary: '{{fields.label}}'
-            hint: >-
-              Pattern-specific finishing only — closing an underarm, closing a magic ring.
-              Blocking and care belong to the yarn, not the pattern, and live on the yarn note.
+            hint: Only steps specific to this pattern, e.g. closing an underarm. Blocking and care belong on the yarn note.
             fields:
               - { label: Name, name: label, widget: string }
               - { label: How to do it, name: body, widget: text }
-      - { label: Ravelry URL, name: ravelryUrl, widget: string, required: false }
-      - { label: PDF URL, name: pdfUrl, widget: string, required: false }
-      - label: Related journal post
+          - label: Default size
+            name: defaultSize
+            widget: string
+            required: false
+            hint: Several sizes only — which size the page shows first. Empty means the middle one.
+
+      # --- Photos ----------------------------------------------------------
+      - label: Hero image
+        name: heroImage
+        widget: image
+        required: false
+        hint: The main photo. Leave empty until you have one — the page shows "photography still to come".
+      # Required to publish once there is a hero image, and not before — enforced in the
+      # schema. It used to be required always, which asked for a photo that did not exist.
+      - label: Hero image alt text
+        name: heroImageAlt
+        widget: string
+        required: false
+        hint: Needed once there is a hero image — describe what the photo shows, for someone who can't see it.
+      - label: Hero caption
+        name: heroImageCaption
+        widget: string
+        required: false
+        hint: Optional line under the photo, e.g. "Shown in Dark Jeans Blue and Off White".
+      - label: Shoot note
+        name: heroImagePending
+        widget: string
+        required: false
+        hint: Optional, shown while there is no photo, e.g. "Shoot booked · November".
+      - label: More photographs
+        name: gallery
+        widget: list
+        required: false
+        label_singular: Photograph
+        summary: '{{fields.alt}}'
+        hint: Extra photos, shown with the main one.
+        fields:
+          - { label: Image, name: image, widget: image }
+          - label: Alt text
+            name: alt
+            widget: string
+            required: true
+            hint: Describe what the photo shows, for someone who can't see it.
+          - label: Caption
+            name: caption
+            widget: string
+            required: false
+            hint: Optional — say something the photo can't, e.g. "Size M, worn with 12 cm ease".
+
+      # --- Links -----------------------------------------------------------
+      - { label: Ravelry link, name: ravelryUrl, widget: string, required: false, hint: Optional — the pattern's Ravelry page. }
+      - { label: PDF link, name: pdfUrl, widget: string, required: false, hint: Optional — a paid PDF of this pattern, if there is one. }
+      - label: Yarn test behind this pattern
         name: relatedPost
         widget: relation
         collection: posts
@@ -448,41 +439,57 @@ collections:
         # below it, which reads as a broken control and does not survive twenty patterns.
         dropdown_threshold: 0
         required: false
-        hint: The test that justifies this pattern's yarn advice. Linked from the substitution note.
-
+        hint: Optional — the journal post your yarn advice comes from. Linked in the note on substituting yarn.
       # --- Read next. Optional: leave empty and the site picks by shared tags. ------
-      - label: Related patterns
+      - label: Read next — patterns
         name: relatedPatterns
         widget: relation
         collection: patterns
         search_fields: [title]
         value_field: '{{slug}}'
         display_fields: [title]
-        # Always a search box. The default threshold of 5 draws radios and checkboxes
-        # below it, which reads as a broken control and does not survive twenty patterns.
         dropdown_threshold: 0
         multiple: true
         required: false
-        hint: >-
-          Shown at the foot of the page under "read next". Your picks come first, in this
-          order. Leave empty and the site fills the strip from shared tags.
-      - label: Related journal posts
+        hint: Optional — patterns to suggest at the end of the page. Empty means the site picks by tags.
+      - label: Read next — journal posts
         name: relatedPosts
         widget: relation
         collection: posts
         search_fields: [title]
         value_field: '{{slug}}'
         display_fields: [title]
-        # Always a search box. The default threshold of 5 draws radios and checkboxes
-        # below it, which reads as a broken control and does not survive twenty patterns.
         dropdown_threshold: 0
         multiple: true
         required: false
-        hint: The test behind a pattern is the most useful thing to link here.
+        hint: Optional — journal posts to suggest at the end of the page.
 
-      - { label: Body, name: body, widget: markdown }
+      # --- Dates -----------------------------------------------------------
+      - label: Last corrected
+        name: updated
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        required: false
+        hint: Only when you fix something in a published pattern — a stitch count, a measurement.
+
+      # --- Search and sharing. Rarely touched while writing. ----------------
+      - label: Share picture
+        name: socialImage
+        widget: string
+        required: true
+        default: /og-default.png
+        hint: The picture shown when someone shares the page. Leave it as it is for now.
+      - label: Preview address
+        name: previewId
+        widget: uuid
+        hint: Made for you. While this is a draft, the page lives at this hidden address instead of its real one.
 
   # ---------------------------------------------------------------- posts
+  #
+  # Same order as the pattern form: the writing first, then photos and links, then dates,
+  # then search and sharing. The article body used to come last, after a dozen settings,
+  # and a first-time tester concluded the form had nowhere to put the article.
   - name: posts
     label: Journal
     label_singular: Journal post
@@ -491,7 +498,7 @@ collections:
     extension: mdx
     format: frontmatter
     slug: '{{fields.title | slugify}}'
-    summary: '{{title}} — {{kind}}'
+    summary: "{{title}} — {{kind}}{{draft | ternary(' · Draft', '')}}"
     # The "view on site" link. It points at /go/<previewId>/ rather than at the page,
     # because preview_path is one template per collection and cannot ask whether the
     # entry is a draft: a link to the preview address would break on publishing, and a
@@ -500,80 +507,85 @@ collections:
     preview_path: go/{{fields.previewId}}
     fields:
       - { label: Title, name: title, widget: string }
-      - { label: Date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
-      - { label: Updated, name: updated, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false, required: false }
-      - { label: Summary, name: summary, widget: text }
-      - label: Kind
-        name: kind
-        widget: select
-        options: ['Garment making', 'Yarn notes', 'How-tos']
-        hint: Drives the eyebrow colour and the journal filters.
-
+      # On by default, as on every other form — it started off here too.
       - label: Draft
         name: draft
         widget: boolean
-        default: false
+        default: true
         hint: >-
-          A draft is not listed anywhere on the site — not on the homepage, the indexes,
-          the feed or the sitemap — and is served at the unguessable preview address
-          below rather than its real URL. Untick it to publish.
-      - label: Preview address
-        name: previewId
-        widget: uuid
-        hint: >-
-          Generated once, never edited. While this entry is a draft it is served at this
-          address instead of its real one, so the real URL stays a 404 until you publish.
-
-      # --- SEO. Required, deliberately. ---------------------------------
-      - label: Meta description
+          Leave this on while you work: a draft is hidden from every list on the site.
+          Switch it off when the post is ready to publish.
+      - label: Summary
+        name: summary
+        widget: text
+        hint: One or two sentences, shown under the title and in the journal list.
+      - label: Publish date
+        name: date
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        hint: Needed to save. Click Today; you can change it when you publish.
+      - label: Search description
         name: metaDescription
         widget: string
         required: true
         pattern: ['^.{1,160}$', 'Must be 160 characters or fewer.']
-        hint: Max 160 characters. The build fails without this.
-      - { label: Hero image, name: heroImage, widget: image, required: false }
+        hint: Needed to save. What search engines show under the title, up to 160 characters. Pasting the summary is fine.
+      - label: Kind
+        name: kind
+        widget: select
+        options: ['Garment making', 'Yarn notes', 'How-tos']
+        hint: Which part of the journal this files under. Yarn notes here is a longer post about yarn; a note on one yarn goes in the Yarn notes section instead.
+      - label: Article
+        name: body
+        widget: markdown
+        hint: The post itself.
+      - label: What I tested
+        name: method
+        widget: string
+        required: false
+        hint: 'Optional — one short line shown under the summary, e.g. "6 yarns · 32 sts × 24 rows hdc", or for one piece "One cat toy · leftover wool · 3.5 mm hook".'
+      - label: Tags
+        name: tags
+        widget: list
+        required: false
+        hint: A few lowercase words, e.g. sweaters, top-down. Used to suggest related pages.
+
+      # --- Photos ----------------------------------------------------------
+      - label: Hero image
+        name: heroImage
+        widget: image
+        required: false
+        hint: Optional — the main photo, shown at the top of the post.
+      # Required to publish once there is a hero image, and not before — enforced in the
+      # schema. It used to be required always, which asked for a photo that did not exist.
       - label: Hero image alt text
         name: heroImageAlt
         widget: string
-        required: true
+        required: false
+        hint: Needed once there is a hero image — describe what the photo shows, for someone who can't see it.
       - label: More photographs
         name: gallery
         widget: list
         required: false
         label_singular: Photograph
         summary: '{{fields.alt}}'
-        hint: >-
-          Extra shots, shown as a gallery on the entry page. The hero image stays separate
-          and is always the first thing anyone sees.
+        hint: Extra photos, shown together at the end of the post.
         fields:
           - { label: Image, name: image, widget: image }
           - label: Alt text
             name: alt
             widget: string
             required: true
-            hint: Describe the photo for someone who cannot see it. Required, like the hero's.
+            hint: Describe what the photo shows, for someone who can't see it.
           - label: Caption
             name: caption
             widget: string
             required: false
-            hint: >-
-              The line shown under the photo. Say something the photo cannot — not a repeat
-              of the alt text.
-      - label: Social share image
-        name: socialImage
-        widget: string
-        required: true
-        default: /og-default.png
-        hint: Root-relative path under public/. Leave as /og-default.png until this entry has its own artwork — the build checks the file exists.
+            hint: 'Optional — say something the photo can''t, e.g. "Left: 7 stitches across. Right: 9."'
 
-      - label: Method
-        name: method
-        widget: string
-        required: false
-        hint: 'The muted line under the excerpt, e.g. "6 yarns · 32 sts × 24 rows hdc".'
-      - { label: Tags, name: tags, widget: list, required: false }
       # --- Read next. Optional: leave empty and the site picks by shared tags. ------
-      - label: Related patterns
+      - label: Read next — patterns
         name: relatedPatterns
         widget: relation
         collection: patterns
@@ -585,24 +597,39 @@ collections:
         dropdown_threshold: 0
         multiple: true
         required: false
-        hint: >-
-          Shown at the foot of the page under "read next". Your picks come first, in this
-          order. Leave empty and the site fills the strip from shared tags.
-      - label: Related journal posts
+        hint: Optional — patterns to suggest at the end of the post. Empty means the site picks by tags.
+      - label: Read next — journal posts
         name: relatedPosts
         widget: relation
         collection: posts
         search_fields: [title]
         value_field: '{{slug}}'
         display_fields: [title]
-        # Always a search box. The default threshold of 5 draws radios and checkboxes
-        # below it, which reads as a broken control and does not survive twenty patterns.
         dropdown_threshold: 0
         multiple: true
         required: false
-        hint: The test behind a pattern is the most useful thing to link here.
+        hint: Optional — other posts to suggest at the end.
 
-      - { label: Body, name: body, widget: markdown }
+      # --- Dates -----------------------------------------------------------
+      - label: Last updated
+        name: updated
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        required: false
+        hint: Only when you change a published post in a way a reader should know about.
+
+      # --- Search and sharing. Rarely touched while writing. ----------------
+      - label: Share picture
+        name: socialImage
+        widget: string
+        required: true
+        default: /og-default.png
+        hint: The picture shown when someone shares the page. Leave it as it is for now.
+      - label: Preview address
+        name: previewId
+        widget: uuid
+        hint: Made for you. While this is a draft, the page lives at this hidden address instead of its real one.
 
   # ---------------------------------------------------------------- reviews
   # A yarn note is a spec sheet with a short essay at the end — the mirror of a test note,
@@ -610,8 +637,10 @@ collections:
   # fields overlap. Called notes, not reviews: this is writing down what a yarn did.
   #
   # NOTHING here is required by the panel, so a half-filled draft always saves. What a
-  # *published* review needs is enforced by the schema instead — see the superRefine in
-  # src/content.config.ts. Untick Draft and the build names anything still missing.
+  # *published* note needs is enforced by the schema instead — see the superRefine in
+  # src/content.config.ts. Switch Draft off and the build names anything still missing.
+  # Groups are marked `required: false` so the panel draws no asterisk on them: a starred
+  # group that saved empty taught a tester not to trust any asterisk.
   - name: reviews
     label: Yarn notes
     label_singular: Yarn note
@@ -620,7 +649,7 @@ collections:
     extension: md
     format: frontmatter
     slug: '{{fields.title | slugify}}'
-    summary: '{{title}}'
+    summary: "{{title}}{{draft | ternary(' · Draft', '')}}"
     # The "view on site" link. It points at /go/<previewId>/ rather than at the page,
     # because preview_path is one template per collection and cannot ask whether the
     # entry is a draft: a link to the preview address would break on publishing, and a
@@ -631,107 +660,56 @@ collections:
       - label: Yarn name
         name: title
         widget: string
-        hint: As you would say it, e.g. Nordfjord Fjellull DK
-      - { label: Publish date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
-      - label: Last corrected
-        name: updated
-        widget: datetime
-        date_format: 'YYYY-MM-DD'
-        time_format: false
-        required: false
+        hint: As you would say it, e.g. Drops Alpaca.
       - label: Draft
         name: draft
         widget: boolean
         default: true
         hint: >-
-          Leave ticked while you work — a draft saves with whatever you have, is not
-          listed anywhere on the site, and is served at the unguessable preview address
-          below. Untick it when the note is ready, and the build will tell you if
-          anything is missing.
-      - label: Preview address
-        name: previewId
-        widget: uuid
-        hint: >-
-          Generated once, never edited. While this entry is a draft it is served at this
-          address instead of its real one, so the real URL stays a 404 until you publish.
-      - label: Standfirst
+          Leave this on while you work: a draft saves with whatever you have and is hidden
+          from every list on the site. Switch it off when the note is ready — if anything
+          needed to publish is missing, the site will say what.
+      - label: In one or two sentences
         name: standfirst
         widget: text
         required: false
-        hint: >-
-          One or two sentences giving the answer. Someone who reads only this should know
-          whether to buy the yarn — it replaces a verdict section.
-
-      # --- SEO. Required to publish, not to save. -----------------------
-      - label: Meta description
-        name: metaDescription
-        widget: string
-        required: false
-        pattern: ['^.{0,160}$', 'Must be 160 characters or fewer.']
-      - label: Social share image
-        name: socialImage
-        widget: string
-        required: false
-        default: /og-default.png
-
-      # --- Photos. Both optional even when published: a review with neither
-      #     is a finished page, and early reviews go out before any shoot. ---
-      - { label: Yarn photo, name: heroImage, widget: image, required: false }
-      - label: Yarn photo alt text
-        name: heroImageAlt
-        widget: string
-        required: false
-        hint: Describe it for someone who cannot see it. Needed to publish, even before the photo exists.
-      - label: Yarn photo caption
-        name: heroImageCaption
-        widget: string
-        required: false
-        hint: e.g. Shade 118 Kalkstein, one 50 g ball.
-      - { label: Swatch photo, name: swatchImage, widget: image, required: false }
-      - { label: Swatch photo alt text, name: swatchImageAlt, widget: string, required: false }
-      - { label: Swatch photo caption, name: swatchImageCaption, widget: string, required: false }
+        hint: The answer — someone who reads only this should know whether to buy the yarn. Needed to publish.
 
       # --- Table 1: transcribed from the ball band and the shop. ---------
       #     Any row left empty simply does not appear on the page.
-      - label: The yarn
+      - label: The ball band
         name: yarn
         widget: object
+        required: false
+        collapsed: false
+        hint: Copy what the band says. Anything left empty simply doesn't appear on the page.
         fields:
-          - { label: Brand, name: brand, widget: string, required: false }
-          - { label: Line, name: line, widget: string, required: false }
-          - label: Content
+          - { label: Brand, name: brand, widget: string, required: false, hint: 'e.g. Drops' }
+          - { label: Yarn name, name: line, widget: string, required: false, hint: 'e.g. Alpaca' }
+          - label: Fibre content
             name: content
             widget: string
             required: false
-            hint: >-
-              Just the fibres, e.g. "50% cotton, 50% merino wool". Ply belongs in Strand
-              construction, and superwash is already implied by the care line.
-          - label: Weight, as the label says
+            hint: Just the fibres, e.g. 100% alpaca. Ply goes under Strand construction.
+          - label: Weight, as the band says
             name: weightLabel
             widget: string
             required: false
-            hint: >-
-              Copy the band's own word — "Worsted", "DK / 8 ply". No CYC number: bands
-              disagree with the CYC scale and with each other, so a number would mean
-              deciding who is right.
-          - label: WPI
+            hint: Copy it as printed, e.g. Sport – Drops yarn group A.
+          - label: Wraps per inch
             name: wpi
             widget: number
             value_type: float
             required: false
-            hint: >-
-              Wraps per inch, if you measured it. Wrap the yarn round a ruler for an inch
-              without stretching or overlapping, and count. This is the thickness measured
-              rather than claimed — useful when two shops sell the same yarn as different
-              weights.
+            hint: Optional — wrap the yarn round a ruler for an inch, without stretching or overlapping, and count.
 
-          # How the strand is built. The type is a short fixed list so two reviews can be
-          # compared on it; the note carries what you actually see when you untwist it.
+          # How the strand is built. The type is a short fixed list so two notes can be
+          # compared on it; the line carries what you actually see when you untwist it.
           - label: Strand construction
             name: construction
             widget: object
             required: false
-            collapsed: true
+            collapsed: false
             fields:
               - label: Type
                 name: type
@@ -744,16 +722,13 @@ collections:
                   - Chainette
                   - Roving
                 hint: >-
-                  Singles — one unplied strand. Plied — strands twisted together. Cabled —
-                  plied yarns plied together again. Chainette — fine plies braided into a
-                  hollow tube. Roving — barely twisted at all.
+                  Singles — one strand. Plied — strands twisted together. Cabled — plied
+                  yarns twisted together again. Chainette — a knitted tube. Roving — barely twisted.
               - label: What you see
                 name: note
                 widget: text
                 required: false
-                hint: >-
-                  Untwist a length and describe it. e.g. "Two strands, cotton and merino,
-                  twisted into a tweedy 2-ply; six of those twisted together again."
+                hint: Untwist a length and describe it, e.g. "3 strands, tightly twisted".
 
           - { label: Ball weight (g), name: ballWeightG, widget: number, value_type: int, required: false }
           - label: Ball length (m)
@@ -762,55 +737,50 @@ collections:
             value_type: int
             required: false
             hint: Yards are worked out for you.
-          - label: Ball-band gauge
+          - label: Gauge on the band
             name: ballBandGauge
             widget: string
             required: false
             hint: Copy it as printed, knitted figures and all.
-          - label: Hook on label
+          - label: Hook on the band
             name: hookOnLabel
             widget: string
             required: false
-            hint: What the band suggests, e.g. "3.5–4.5 mm".
-          - label: Hook I used
+            hint: As printed, e.g. 3.5–4.5 mm.
+          - label: Hook I used (mm)
             name: hookMm
             widget: number
             value_type: float
             required: false
-            hint: >-
-              The US size is added automatically where one exists. Several common sizes have
-              no US equivalent in the Craft Yarn Council table — 2.5, 3, 7 and 12 mm — and
-              those show the millimetres alone rather than an invented letter.
+            hint: In mm. The US size is added for you where one exists.
           - label: Grams per 10 × 10 cm
             name: gramsPer10cm
             widget: number
             value_type: float
             required: false
-            hint: Measured from your swatch. Squares per ball is worked out from it.
-          - { label: Metres per 10 × 10 cm, name: metresPer10cm, widget: number, value_type: float, required: false }
-          - { label: Care, name: care, widget: string, required: false }
-
+            hint: Optional — weigh your swatch. Squares per ball is worked out from it.
+          - { label: Metres per 10 × 10 cm, name: metresPer10cm, widget: number, value_type: float, required: false, hint: Optional. }
+          - { label: Care, name: care, widget: string, required: false, hint: 'As printed, e.g. Hand wash, max 30°C. Dry flat. Felts.' }
 
       # --- Where it comes from. Its own section, not five more fields buried at the
       #     bottom of a twenty-field yarn block where nobody could find them. ---
       - label: Where it comes from
         name: origin
         widget: object
+        required: false
         collapsed: false
-        hint: Fill in whatever the band actually says. Anything left empty is simply absent from the page.
+        hint: Whatever the band or shop says. Anything left empty doesn't appear.
         fields:
           - label: Fibre from
             name: fibreOrigin
             widget: string
             required: false
-            hint: >-
-              Where the raw material came from. e.g. "Wool from South America, cotton from
-              Turkey". Often a different country from where it was spun.
-          - label: Made in
+            hint: Name the fibre and the country, e.g. Alpaca from Peru.
+          - label: Spun in
             name: madeIn
             widget: string
             required: false
-            hint: Where it was spun and milled.
+            hint: e.g. Peru. Often a different country from the fibre.
           - label: OEKO-TEX® STANDARD 100 class
             name: oekoTexClass
             widget: number
@@ -820,9 +790,7 @@ collections:
             required: false
             hint: >-
               1 = babies and children to 3 · 2 = direct skin contact · 3 = no direct skin
-              contact · 4 = decoration. It means the article was tested for harmful
-              substances — it is NOT an organic or environmental label. Leave empty if the
-              band does not say.
+              contact · 4 = decoration. Empty if the band doesn't say.
           - label: Also claimed
             name: certifications
             widget: select
@@ -834,113 +802,166 @@ collections:
               - Mulesing-free
               - Recycled
               - Undyed
-            hint: >-
-              Tick only what the label or the shop listing actually says. Most labels are
-              silent about most of this, and an unticked box shows nothing — it never reads
-              as an accusation. GOTS, RWS and mulesing-free are third-party certifications;
-              recycled and undyed are the maker's word, and the page says so underneath.
+            hint: Tick only what the label or shop actually says. An unticked box shows nothing.
 
       # --- Price as a position, never a figure. --------------------------
       - label: Price
         name: price
         widget: object
-        hint: >-
-          Where it sits in the market, 1 budget to 5 premium. Never a currency figure —
-          prices change and vary by country, the position does not.
+        required: false
+        collapsed: false
         fields:
-          - { label: Level, name: level, widget: number, value_type: int, min: 1, max: 5, required: false }
+          - { label: 'Price level (1 = budget, 5 = premium)', name: level, widget: number, value_type: int, min: 1, max: 5, required: false, hint: Where it sits in the market — never a price, which changes. }
           - label: Why
             name: note
             widget: string
             required: false
-            hint: One line, e.g. Mid — about what a plain undyed wool of this quality costs.
+            hint: One line, e.g. Often on sale in autumn and winter.
 
       # --- The gauge panel: only ever unblocked vs blocked. --------------
       - label: My gauge
         name: gauge
         widget: object
-        hint: >-
-          Only these two figures. Washed and hung numbers were tried and cut — they
-          duplicate the blocked figure and bury the comparison.
+        required: false
+        collapsed: false
+        hint: Your swatch, over 10 × 10 cm, before and after washing. Leave empty until you've swatched. Needed to publish.
         fields:
           - { label: Unblocked, name: unblocked, widget: string, required: false, hint: 'Stitches × rows, e.g. 17.5 × 11' }
-          - { label: Blocked, name: blocked, widget: string, required: false, hint: 'e.g. 16.5 × 10.5' }
-          - label: Method
+          - { label: Blocked, name: blocked, widget: string, required: false, hint: 'After washing, e.g. 16.5 × 10.5' }
+          - label: How you measured
             name: method
             widget: string
             required: false
-            hint: e.g. Over 10 × 10 cm · half double crochet · 4 mm hook
-          - { label: What the change means, name: note, widget: text, required: false }
+            hint: e.g. Over 10 × 10 cm · hdc · 4 mm hook
+          - { label: What the change means, name: note, widget: text, required: false, hint: Optional — e.g. "Grows a little in length; size down for a garment." }
 
-      # --- Table 2: the same six judgements on every review. -------------
+      # --- Table 2: the same six judgements on every note. ---------------
       - label: What these notes are based on
         name: inTheHandBasis
         widget: string
         required: false
-        hint: e.g. My notes, one swatch and one hat
+        hint: e.g. One swatch and one jumper, started 3 Sept 2026.
       - label: In the hand
         name: inTheHand
         widget: object
+        required: false
+        collapsed: false
         hint: >-
-          The same six on every review, so two yarns can be read against each other.
-          **More bars is always better**, except Drape, which runs structured to fluid. All
-          six are needed to publish — with one missing, two reviews no longer compare. A
-          score of 1–5 and one short sentence; a score with no reason is an opinion with a
-          number stuck on it.
+          Six scores from 1 to 5, each with one sentence saying why. All six are needed to
+          publish, so two yarns can be compared.
         fields:
           - label: Stitch definition
             name: stitchDefinition
             widget: object
-            collapsed: true
+            required: false
+            collapsed: false
+            hint: 1 = stitches blur · 5 = every stitch crisp
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
-              - { label: Note, name: note, widget: string, required: false }
+              - { label: Why, name: note, widget: string, required: false }
           - label: Split resistance
             name: splitResistance
             widget: object
-            collapsed: true
-            hint: More bars = splits less. A yarn that splits badly scores 1.
+            required: false
+            collapsed: false
+            hint: 1 = splits badly · 5 = never splits
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
-              - { label: Note, name: note, widget: string, required: false }
+              - { label: Why, name: note, widget: string, required: false }
           - label: Softness
             name: softness
             widget: object
-            collapsed: true
+            required: false
+            collapsed: false
+            hint: 1 = harsh · 5 = very soft in the hand
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
-              - { label: Note, name: note, widget: string, required: false }
+              - { label: Why, name: note, widget: string, required: false }
           - label: Next to skin
             name: nextToSkin
             widget: object
-            collapsed: true
-            hint: More bars = kinder on skin. Prickly scores 1. This is not the same as Softness — a yarn can feel soft in the hand and still scratch a neck.
+            required: false
+            collapsed: false
+            hint: 1 = prickly · 5 = fine against a neck. Not the same as softness — a soft yarn can still scratch.
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
-              - { label: Note, name: note, widget: string, required: false }
+              - { label: Why, name: note, widget: string, required: false }
           - label: Drape
             name: drape
             widget: object
-            collapsed: true
+            required: false
+            collapsed: false
+            hint: 1 = structured, holds its shape · 5 = fluid, flows. Neither end is better.
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
-              - { label: Note, name: note, widget: string, required: false }
+              - { label: Why, name: note, widget: string, required: false }
           - label: Frogging
             name: frogging
             widget: object
-            collapsed: true
+            required: false
+            collapsed: false
+            hint: 1 = hard to rip back · 5 = rips back cleanly
             fields:
               - { label: Score, name: score, widget: number, value_type: int, min: 1, max: 5, required: false }
-              - { label: Note, name: note, widget: string, required: false }
+              - { label: Why, name: note, widget: string, required: false }
 
-      - label: Body
+      - label: Your notes
         name: body
         widget: markdown
         required: false
         hint: >-
-          Two paragraphs, no more. One on gauge and fibre behaviour, one on
-          use-it-for / do-not-use-it-for. Start with "## What that adds up to", and link
-          the test note behind the review inline, in the second paragraph.
+          A paragraph or two: how the yarn behaves, and what to use it for and what not.
+          If you wrote a longer test post about it, link it here.
+
+      # --- Photos. Both optional even when published: a note with neither is a finished
+      #     page, and early notes go out before any shoot. ---------------------------
+      - { label: Yarn photo, name: heroImage, widget: image, required: false, hint: Optional. }
+      - label: Yarn photo alt text
+        name: heroImageAlt
+        widget: string
+        required: false
+        hint: Needed once there is a yarn photo — describe what it shows, for someone who can't see it.
+      - label: Yarn photo caption
+        name: heroImageCaption
+        widget: string
+        required: false
+        hint: Optional, e.g. Shade 118, one 50 g ball.
+      - { label: Swatch photo, name: swatchImage, widget: image, required: false, hint: Optional. }
+      - { label: Swatch photo alt text, name: swatchImageAlt, widget: string, required: false, hint: Needed once there is a swatch photo. }
+      - { label: Swatch photo caption, name: swatchImageCaption, widget: string, required: false, hint: Optional. }
+
+      # --- Dates -----------------------------------------------------------
+      - label: Publish date
+        name: date
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        hint: The date shown on the page. Click Today; you can change it when you publish.
+      - label: Last corrected
+        name: updated
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        required: false
+        hint: Only when you correct a published note.
+
+      # --- Search and sharing. Required to publish, not to save. -----------
+      - label: Search description
+        name: metaDescription
+        widget: string
+        required: false
+        pattern: ['^.{0,160}$', 'Must be 160 characters or fewer.']
+        hint: What search engines show under the title. Up to 160 characters. Needed to publish.
+      - label: Share picture
+        name: socialImage
+        widget: string
+        required: false
+        default: /og-default.png
+        hint: The picture shown when someone shares the page. Leave it as it is for now.
+      - label: Preview address
+        name: previewId
+        widget: uuid
+        hint: Made for you. While this is a draft, the page lives at this hidden address instead of its real one.
 
   # ---------------------------------------------------------------- quizzes
   #
@@ -957,6 +978,11 @@ collections:
   # quiz on one summed number instead and the middle result becomes whatever the average
   # lands on, which is how someone answering strongly at both extremes ends up being told
   # the moderate thing.
+  #
+  # The answer IDs are typed twice — once on the answer, once on every score that points
+  # at it. A dropdown of the answers would be better, but Sveltia cannot point a field at a
+  # sibling list inside the same entry. A typo fails the build and names the question and
+  # option, so it is safe; the hints say exactly where to copy the tag from.
   - name: quizzes
     label: Quizzes
     label_singular: Quiz
@@ -965,7 +991,7 @@ collections:
     extension: json
     format: json
     slug: '{{fields.title | slugify}}'
-    summary: '{{title}}'
+    summary: "{{title}}{{draft | ternary(' · Draft', '')}}"
     # As everywhere else: /go/<previewId>/ forwards to wherever the entry currently lives,
     # which is the only link that survives publishing. See src/pages/go/[id].astro.
     preview_path: go/{{fields.previewId}}
@@ -973,104 +999,37 @@ collections:
       - label: Title
         name: title
         widget: string
-        hint: >-
-          The question the quiz answers, phrased the way a reader would arrive asking it.
-      - { label: Publish date, name: date, widget: datetime, date_format: 'YYYY-MM-DD', time_format: false }
-      - label: Last corrected
-        name: updated
-        widget: datetime
-        date_format: 'YYYY-MM-DD'
-        time_format: false
-        required: false
+        hint: The question the quiz answers, as a reader would ask it, e.g. Which first sweater should you make?
       - label: Draft
         name: draft
         widget: boolean
         default: true
         hint: >-
-          Leave ticked while you work — a draft is not listed anywhere on the site and is
-          served at the unguessable preview address below. Untick it when the quiz is
-          ready.
-      - label: Preview address
-        name: previewId
-        widget: uuid
-        hint: >-
-          Generated once, never edited. While this quiz is a draft it is served at this
-          address instead of its real one, so the real URL stays a 404 until you publish.
-
-      - label: Standfirst
+          Leave this on while you work: a draft is hidden from every list on the site.
+          Switch it off when the quiz is ready to publish.
+      - label: Intro paragraph
         name: standfirst
         widget: text
-        hint: >-
-          The paragraph under the title. Say what the quiz is for and name the answers it
-          can give, so nobody starts it without knowing what they are getting.
-      - label: Extra line under the standfirst
-        name: intro
-        widget: text
-        required: false
-        hint: >-
-          Optional. The page always says "Nothing is saved and there is no email box at
-          the end" on its own — this is only what you want to add after it, e.g. a nudge
-          to answer honestly.
-
-      # --- SEO -----------------------------------------------------------
-      #
-      # No hero image alt text here, unlike every other collection: a quiz has no
-      # photograph, and alt text is required for a picture, not in advance of one.
-      - label: Meta description
+        hint: Under the title. Say what the quiz is for and which answers it can give.
+      - label: Publish date
+        name: date
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        hint: Needed to save. Click Today; you can change it when you publish.
+      - label: Search description
         name: metaDescription
         widget: string
         required: true
         pattern: ['^.{0,160}$', 'Must be 160 characters or fewer.']
-        hint: What a search result shows. 160 characters at most.
-      - label: Social share image
-        name: socialImage
-        widget: string
-        required: true
-        default: /og-default.png
-        hint: Root-relative path under public/. Leave as /og-default.png until this quiz has its own artwork — the build checks the file exists.
-
-      # --- how it shows up elsewhere --------------------------------------
-      - label: Teaser — journal list
-        name: teaser
-        widget: text
-        hint: The summary on the row in /journal/. Written for someone browsing.
-      - label: Teaser — in-article callout
-        name: calloutTeaser
+        hint: Needed to save. What search engines show under the title, up to 160 characters. Pasting the summary is fine.
+      - label: Extra line under the intro
+        name: intro
         widget: text
         required: false
         hint: >-
-          Optional, and shorter. Used in the card inside an article, where the reader is
-          being interrupted rather than browsing. Falls back to the journal teaser.
-      - label: Tile caption
-        name: tileCaption
-        widget: string
-        required: false
-        hint: >-
-          The line on the journal row where a photo would be — normally the outcome names
-          separated by "·". It falls back to those names automatically, which is usually
-          right; set it by hand when they are in scoring order rather than reading order,
-          or when they are written as verdicts and read badly in a list.
-      - label: Article this quiz belongs to
-        name: relatedPost
-        widget: relation
-        collection: posts
-        search_fields: [title]
-        value_field: '{{slug}}'
-        display_fields: [title]
-        # Always a search box. The default threshold of 5 draws radios and checkboxes
-        # below it, which reads as a broken control and does not survive twenty posts.
-        dropdown_threshold: 0
-        required: false
-        hint: >-
-          Linked from the result screen. The link disappears by itself while the article
-          is a draft, so this is safe to set before the article is published.
-      - label: Footnote under the result
-        name: resultFootnote
-        widget: text
-        required: false
-        hint: >-
-          Optional. The muted line after the answer — usually a reminder of what a quiz
-          cannot know about the reader's actual situation.
+          Optional. The page already says "Nothing is saved and there is no email box at
+          the end" — add only what goes after it, e.g. a nudge to answer honestly.
 
       # --- the answers ----------------------------------------------------
       #
@@ -1082,38 +1041,33 @@ collections:
         label_singular: Answer
         summary: '{{fields.id}} — {{fields.name}}'
         hint: >-
-          At least two. **Order matters**: when two answers tie, the one listed first
-          wins, so put the least drastic answer at the top — a quiz that cannot decide
-          should not be the thing recommending the irreversible option.
+          The results someone can end up with — at least two. If two tie, the one listed
+          first wins, so put your safest suggestion first.
         fields:
-          - label: ID
-            name: id
-            widget: string
-            pattern: ['^[a-z0-9-]+$', 'Lowercase letters, numbers and hyphens only.']
-            hint: >-
-              A short tag used only for scoring, e.g. keep. Never shown to a reader. Type
-              it exactly the same way in the answers below — the build fails if a score
-              points at an ID that does not exist here, and tells you which one.
           - label: Name
             name: name
             widget: string
-            hint: >-
-              The heading a reader sees. Write it as the verdict itself, ending in a
-              full stop, e.g. "Start again."
-          - label: Line
+            hint: 'The result heading the reader sees, ending in a full stop, e.g. Top-down raglan.'
+          - label: Tag
+            name: id
+            widget: string
+            pattern: ['^[a-z0-9-]+$', 'Lowercase letters, numbers and hyphens only.']
+            hint: 'A short lowercase word for this answer, e.g. raglan. Never shown — you type it again in the questions to give it points.'
+          - label: One-line verdict
             name: line
             widget: string
-            hint: The italic line under the name. One sentence, the verdict in short.
-          - label: Body
+            hint: One sentence under the name, e.g. Try it on as you go.
+          - label: More detail
             name: body
             widget: text
-            hint: A paragraph explaining the answer back to the person who got it.
+            required: false
+            hint: Optional — a paragraph explaining the answer to the person who got it.
           - label: What to do next
             name: steps
             widget: list
             required: false
             field: { label: Step, name: step, widget: string }
-            hint: The numbered steps in the panel. Leave empty for an answer that needs none.
+            hint: Optional numbered steps.
 
       # --- the questions --------------------------------------------------
       - label: Questions
@@ -1127,55 +1081,103 @@ collections:
             name: note
             widget: string
             required: false
-            hint: The small grey line under the question. Optional.
+            hint: Optional small line under the question.
           - label: Photo
             name: image
             widget: image
             required: false
-            hint: >-
-              Optional. For questions about something you can see — "which fibre is this?".
-              Shown under the question, above the options.
+            hint: Optional — for questions about something you can see, e.g. "which fibre is this?".
           - label: Photo description (alt text)
             name: imageAlt
             widget: string
             required: false
             hint: >-
-              Needed once there is a photo. Describe what is visible, not what it is — for a
-              guess-the-fibre question, "a close-up of a hairy, slightly shiny yarn", never
-              "mohair". Otherwise a screen reader hears the answer.
+              Needed once there is a photo. Describe what is visible, never the answer — "a
+              hairy, slightly shiny yarn", not "mohair", or a screen reader gives it away.
           - label: Options
             name: options
             widget: list
             label_singular: Option
             summary: '{{fields.label}}'
-            hint: Two to five. Picking one moves the reader straight on, so there is no "next".
+            hint: Two to five. Picking one moves the reader straight on.
             fields:
               - { label: Option, name: label, widget: string }
               - label: Sub-line
                 name: sub
                 widget: string
                 required: false
-                hint: The smaller second line inside the option. Optional.
-              - label: Scores
+                hint: Optional smaller line inside the option.
+              - label: Points
                 name: score
                 widget: list
-                label_singular: Score
+                label_singular: Points for an answer
                 summary: '{{fields.outcome}} +{{fields.points}}'
                 hint: >-
-                  What this option argues for. Add one row per answer it points at — most
-                  options only need one. An option that says nothing about an answer
-                  simply does not list it; it is not scored zero.
+                  Which answers this option argues for. One row per answer — most options need
+                  one. An answer not listed gets nothing from this option.
                 fields:
-                  - label: Answer ID
+                  - label: Answer tag
                     name: outcome
                     widget: string
                     pattern: ['^[a-z0-9-]+$', 'Lowercase letters, numbers and hyphens only.']
-                    hint: One of the IDs from "Possible answers" above, spelled identically.
+                    hint: The Tag from Possible answers, typed exactly the same, e.g. raglan.
                   - label: Points
                     name: points
                     widget: number
                     value_type: int
                     default: 1
-                    hint: >-
-                      How strongly this option argues for that answer. Keep the scale
-                      small and consistent — 1 for a hint, 3 for a clear signal.
+                    hint: 1 for a hint, 2 or 3 for a clear signal. Keep it small.
+
+      # --- how it shows up elsewhere --------------------------------------
+      - label: Journal list teaser
+        name: teaser
+        widget: text
+        hint: The line under the quiz in the journal list. Your intro's first sentence often works.
+      - label: Short teaser for articles
+        name: calloutTeaser
+        widget: text
+        required: false
+        hint: Optional, shorter — used when the quiz is suggested inside an article. Empty uses the journal list teaser.
+      - label: Tile caption
+        name: tileCaption
+        widget: string
+        required: false
+        hint: Optional. The line on the quiz tile. Empty lists the answer names, which is usually right.
+      - label: Article this quiz belongs to
+        name: relatedPost
+        widget: relation
+        collection: posts
+        search_fields: [title]
+        value_field: '{{slug}}'
+        display_fields: [title]
+        # Always a search box. The default threshold of 5 draws radios and checkboxes
+        # below it, which reads as a broken control and does not survive twenty posts.
+        dropdown_threshold: 0
+        required: false
+        hint: Optional — linked from the result screen.
+      - label: Footnote under the result
+        name: resultFootnote
+        widget: text
+        required: false
+        hint: Optional quiet line after the answer, e.g. what a quiz can't know about your project.
+
+      # --- Dates -----------------------------------------------------------
+      - label: Last corrected
+        name: updated
+        widget: datetime
+        date_format: 'YYYY-MM-DD'
+        time_format: false
+        required: false
+        hint: Only when you correct a published quiz.
+
+      # --- Search and sharing. No photo alt text: a quiz has no hero photograph. -----
+      - label: Share picture
+        name: socialImage
+        widget: string
+        required: true
+        default: /og-default.png
+        hint: The picture shown when someone shares the page. Leave it as it is for now.
+      - label: Preview address
+        name: previewId
+        widget: uuid
+        hint: Made for you. While this is a draft, the page lives at this hidden address instead of its real one.

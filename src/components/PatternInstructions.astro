@@ -29,9 +29,11 @@ import {
 interface Props {
 	instructions: NonNullable<CollectionEntry<'patterns'>['data']['instructions']>;
 	sizes: CollectionEntry<'patterns'>['data']['sizes'];
+	/** For the yarn line in each size's summary — sizes store grams. */
+	metresPerGram: number;
 }
 
-const { instructions: ins, sizes } = Astro.props;
+const { instructions: ins, sizes, metresPerGram } = Astro.props;
 
 const graded = sizes.length > 1;
 const activeIndex = defaultSizeIndex(sizes, ins.defaultSize);
@@ -42,7 +44,7 @@ const values = active ? valuesFor(active) : {};
 const sizeData = graded
 	? JSON.stringify({
 			values: allSizeValues(sizes),
-			summaries: Object.fromEntries(sizes.map((s) => [s.name, sizeSummary(s)])),
+			summaries: Object.fromEntries(sizes.map((s) => [s.name, sizeSummary(s, metresPerGram)])),
 		})
 	: null;
 
@@ -112,7 +114,7 @@ const learnHeading =
 						{graded ? 'Your size — every number below follows it' : 'The pattern — one size'}
 					</p>
 					<p class="picker__summary" data-size-summary>
-						{active ? sizeSummary(active) : ''}
+						{active ? sizeSummary(active, metresPerGram) : ''}
 					</p>
 				</div>
 

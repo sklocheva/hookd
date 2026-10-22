@@ -73,7 +73,7 @@ const schema = articleSchema({
 
 		<Hero
 			image={d.heroImage}
-			alt={d.heroImageAlt}
+			alt={d.heroImageAlt ?? ''}
 			ratio="3/2"
 			caption={d.title.toLowerCase()}
 			widths={[600, 1000, 1600]}

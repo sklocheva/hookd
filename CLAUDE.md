@@ -133,9 +133,8 @@ and is the only end-to-end proof that the image pipeline works on real files.
 `PhotoPlaceholder.astro` draws the striped stand-in and
 its caption doubles as the shot list — it is scaffolding, to be deleted when real images land.
 `PhotoPending.astro` is different: it is the *designed* state for a pattern that is written but
-not yet shot, triggered by omitting `heroImage`, and it ships. The YouTube, Pinterest and
-Ravelry circles in `Footer.astro` are the other scaffolding: they link to `#` and carry
-`data-scaffold` until those accounts exist. Instagram is real.
+not yet shot, triggered by omitting `heroImage`, and it ships. The footer shows a social
+account only once it has an address in `Footer.astro`; today that is Instagram alone.
 
 **A comma inside `- { key: value }` silently eats the rest of the line.** That is a YAML
 flow mapping: the comma ends the entry and the remainder parses as a further key, which Zod
@@ -314,17 +313,33 @@ schemas and should be replaced by real ones. The `publishing` skill covers getti
 `/admin` to a live page, and the several ways a save from the browser has broken the build.
 
 **patterns** carries structured data, not prose: yarn (brand, line, fibre content, ball
-weight and length, CYC weight category), hook size in mm only, one gauge, difficulty
-(Basic/Easy/Intermediate/Complex), sizes with free-form finished measurements and the body
-measurement each size is cut for, yardage per size, US/UK terms.
+weight and length, CYC weight category, colours), hook size in mm only, one gauge,
+difficulty (Basic/Easy/Intermediate/Complex), sizes with free-form finished measurements
+and the body measurement each size is cut for, grams per size, US terms.
+
+- **One yarn line is one entry, with its colours listed under it** (`colours`, each a name
+  and optional grams). It was one entry per colour, so a two-colour shawl in one yarn meant
+  typing the brand, fibre, ball size and weight twice. An old `colourName` is still read as
+  a one-colour list.
+- **The weight is the CYC number alone**; the name ("Light (DK)") comes from
+  `src/lib/cyc.ts`, which reuses the yarn weight calculator's table and adds 7 Jumbo. A
+  hand-typed name beside the number disagreed with itself across patterns ("Light" on one,
+  "Light (DK)" on the next).
+- **Sizes store grams, because grams are what the author weighs.** Metres and yards are
+  worked out from the main yarn's ball weight and length (`yarnAmount`, `metresPerGram` in
+  `src/lib/format.ts`). A pattern mixing two yarns of different thickness gets approximate
+  metres; the grams stay exact. The page labels it "Yarn needed", grams first.
 
 **posts** is looser: title, date, summary, hero image, tags.
 
 ### Rules
 
-- **SEO fields are required on both collections**: meta description (max 160 chars), hero
-  image alt text, social share image. The build MUST fail if any is missing. This is
-  deliberate — it replaces an SEO plugin with an error.
+- **SEO fields are required on both collections**: meta description (max 160 chars) and
+  social share image. The build MUST fail if either is missing. This is deliberate — it
+  replaces an SEO plugin with an error. **Hero alt text is required once there is a hero
+  image, and not before** — the author's call, 22 Oct 2026, after every form tester was
+  asked to describe a photograph that did not exist yet. Checked at publish in each
+  collection's `superRefine`.
 - **One gauge, measured on the actual piece after blocking.** This was two fields — swatch
   and piece — on the grounds that they genuinely differ, which they do. But only the piece
   number is ever measured here, and a field filled in by copying the other one is worse than
@@ -403,8 +418,8 @@ measurement each size is cut for, yardage per size, US/UK terms.
   out and nothing else moves. No placeholder art, no empty frame. **Alt text is therefore
   required for a photograph, not in advance of one** — the publish gate asked for
   `heroImageAlt` unconditionally and blocked a complete note that simply had no hero. Patterns
-  are the opposite and require it either way, because there a missing photo is `PhotoPending`,
-  a designed state that ships.
+  and posts now follow the same rule: a pattern with no photo is `PhotoPending`, a designed
+  state, and it needs no description.
 - US crochet terms throughout.
 
 ## Conventions
@@ -483,6 +498,31 @@ measurement each size is cut for, yardage per size, US/UK terms.
   `--on-walnut-stop`, because the rust disappears on walnut. Space Grotesk is loaded
   for this one purpose and `--wordmark` is the only place it may be used. Lora was here for
   the same single purpose and came out with it — nothing else on the site used it.
+- **The `/admin` forms are written for the author, not for a developer.** Four first-time
+  testers drove every form on 22 Oct 2026 and the forms were rewritten from what they hit:
+  - **Draft starts on in every collection.** Patterns and posts started off, so a first
+    save published.
+  - **Order follows the writing**: title, draft, summary, the content itself, then photos,
+    links, dates, and last a "Search and sharing" group. The post body used to come after a
+    dozen settings and a tester concluded there was nowhere to put the article.
+  - **Hints say what to type, in plain words, with units in the label.** No "root-relative
+    path", "the build fails", "eyebrow", or history of why a field was cut — reasons go in
+    YAML comments and here. Every yarn-note score carries its own 1–5 scale.
+  - **Anything needed to save sits near the top** — Publish date and Search description
+    come straight after the summary, because at the bottom a first save failed on fields
+    the author had not reached. The entry list marks drafts (`· Draft`, via `ternary`).
+  - **No default that can be silently wrong.** Gauge "Measured over" had 10 and Blocked
+    started on, so an unwashed 11 cm gauge would have published as a blocked 10 cm one.
+    Garment-only fields say so in their label ("— garments only") rather than
+    hiding by category, which has not been tried.
+  - **An asterisk means needed to save.** Groups enforced only at publish are
+    `required: false` and say "Needed to publish" in the hint.
+  - **The quiz's answer tags are typed by hand** — Sveltia cannot offer a dropdown from a
+    sibling list in the same entry. The hints say exactly where to copy the tag from.
+  - **To test a form without signing in**, serve a copy of `public/admin/` with
+    `backend: name: test-repo` (Sveltia's in-browser backend: no login, saves only to the
+    browser) on a localhost port of its own, and have a reader enter real notes. Never
+    commit that config, and never sign in to GitHub as the author for a test.
 - Class naming is BEM-ish: `block__element`, `block--modifier`.
 - Server-rendered HTML only. No client-side-only content — AI crawlers fetch JavaScript
   but do not execute it.

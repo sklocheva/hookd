@@ -19,10 +19,12 @@ import {
 	mainYarn,
 	sizeRange,
 	sizeLine,
-	yardageRangeBoth,
+	yarnAmount,
+	metresPerGram,
 	finishedMeasurements,
 } from '../../lib/format';
 import { hookLabel } from '../../lib/hooks';
+import { cycWeightName, cycWeightShort } from '../../lib/cyc';
 import { categoryLabel } from '../../lib/taxonomy';
 import { articleSchema } from '../../lib/schema';
 import { segment } from '../../lib/drafts';
@@ -42,6 +44,14 @@ const d = pattern.data;
 const { Content } = await render(pattern);
 
 const yarn = mainYarn(d);
+const perGram = metresPerGram(d);
+// "Dark Jeans Blue (07) and Off White (01)" — every colour of every yarn, in order.
+const colourNames = d.yarns.flatMap((y) => y.colours.map((c) => c.name));
+const colourLine = colourNames.length
+	? colourNames.length === 1
+		? `, in ${colourNames[0]}`
+		: `, in ${colourNames.slice(0, -1).join(', ')} and ${colourNames.at(-1)}`
+	: '';
 // One size: no size table, no "choosing your size", dimensions stated in the spec block.
 const oneSize = d.sizes.length === 1;
 const related = d.relatedPost ? await getEntry(d.relatedPost) : undefined;
@@ -76,14 +86,14 @@ const schema = articleSchema({
 // The hero leads the gallery rather than sitting apart from it — it is the same photograph
 // cards and shares use, and on this page it is simply frame one.
 const frames = [
-	{ image: d.heroImage, alt: d.heroImageAlt, caption: d.heroImageCaption },
+	{ image: d.heroImage, alt: d.heroImageAlt ?? '', caption: d.heroImageCaption },
 	...d.gallery,
 ];
 
 // A short echo of the spec block below, beside the photographs. Abbreviated on purpose:
 // this is for deciding whether to read on, not for working from.
 const quickSpecs = [
-	{ label: 'Yarn', value: `CYC ${yarn.cycWeight} ${yarn.cycWeightName.split(' ')[0]}`, nowrap: true },
+	{ label: 'Yarn', value: `CYC ${yarn.cycWeight} ${cycWeightShort(yarn.cycWeight)}`, nowrap: true },
 	{ label: 'Hook', value: hookLabel(d.hookMm), nowrap: true },
 	oneSize
 		? { label: 'Finished size', value: sizeLine(d.sizes[0]) || d.sizes[0].name }
@@ -94,13 +104,15 @@ const quickSpecs = [
 const specs = [
 	{
 		label: 'Yarn',
-		value: `CYC ${yarn.cycWeight} · ${yarn.cycWeightName}`,
-		note: `Shown in ${yarn.brand} ${yarn.line}, ${yarn.fibreContent}`,
+		value: `CYC ${yarn.cycWeight} · ${cycWeightName(yarn.cycWeight)}`,
+		note: `Shown in ${yarn.brand} ${yarn.line}, ${yarn.fibreContent}${colourLine}`,
 	},
 	{
-		label: 'Yardage',
-		value: yardageRangeBoth(d),
-		note: `${sizeRange(d)} · buy one extra skein for the largest sizes`,
+		// Grams first: they are what was weighed. Metres and yards are worked out.
+		label: 'Yarn needed',
+		value: yarnAmount(d),
+		// "The largest sizes" is advice only a graded pattern can use.
+		note: oneSize ? undefined : `${sizeRange(d)} · buy one extra skein for the largest sizes`,
 	},
 	{ label: 'Hook', value: hookValue, note: hookSecond },
 	{
@@ -208,7 +220,7 @@ const specs = [
 				}
 			</div>
 
-			<div class="callout callout--gauge">
+			{d.gauge.blocked && (<div class="callout callout--gauge">
 				<span class="callout__bar" aria-hidden="true"></span>
 				<p>
 					<strong>This gauge was measured on the blocked piece</strong>, not on a swatch
@@ -219,22 +231,21 @@ const specs = [
 					swatch measured flat will read tighter than this number, and you will size up
 					for no reason.
 				</p>
-			</div>
+			</div>)}
 
 			<div class="callout callout--sub">
 				<span class="callout__bar" aria-hidden="true"></span>
 				<p>
 					<strong>Substituting yarn.</strong> Stay within CYC {yarn.cycWeight} and check
-					metreage per gram rather than the category label. Two of the wools in{' '}
-					{
-						related ? (
-							<a href={`/journal/${related.id}/`}>the DK wool test</a>
-						) : (
-							<span>the DK wool test</span>
-						)
-					}{' '}
-					grew by five per cent after washing and never came back — if you pick one of
-					those, swatch long and hang it for a day before you size.
+					metreage per gram rather than the category label.
+					{related && (
+						<>
+							{' '}Two of the wools in{' '}
+							<a href={`/journal/${related.id}/`}>the DK wool test</a> grew by five per
+							cent after washing and never came back — if you pick one of those, swatch
+							long and hang it for a day before you size.
+						</>
+					)}
 				</p>
 			</div>
 
@@ -259,6 +270,7 @@ const specs = [
 					ease={d.ease}
 					sizeNote={d.sizeNote}
 					bodyChartUrl={d.bodyChartUrl}
+					metresPerGram={perGram}
 				/>
 			)
 		}
@@ -267,7 +279,7 @@ const specs = [
 			<Content />
 		</div>
 
-		{d.instructions && <PatternInstructions instructions={d.instructions} sizes={d.sizes} />}
+		{d.instructions && <PatternInstructions instructions={d.instructions} sizes={d.sizes} metresPerGram={perGram} />}
 
 		<PatternLicence />
 

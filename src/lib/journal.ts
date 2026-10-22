@@ -49,7 +49,7 @@ export function fromPost(p: CollectionEntry<'posts'>): JournalEntry {
 		summary: p.data.summary,
 		date: p.data.date,
 		heroImage: p.data.heroImage,
-		heroImageAlt: p.data.heroImageAlt,
+		heroImageAlt: p.data.heroImageAlt ?? '',
 		method: p.data.method,
 		readMinutes: readTime(p.body ?? ''),
 	};

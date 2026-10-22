@@ -150,7 +150,7 @@ const total = quiz.questions.length;
 					<p class="result__line">{outcome.line}</p>
 
 					<div class="result__panel">
-						<p class="result__body">{outcome.body}</p>
+						{outcome.body && <p class="result__body">{outcome.body}</p>}
 						{outcome.steps.length > 0 && (
 							<Fragment>
 								<div class="result__steps-label">What to do next</div>

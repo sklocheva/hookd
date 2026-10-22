@@ -23,9 +23,11 @@ interface Props {
 	/** The author's own guidance on picking between sizes. */
 	sizeNote?: string;
 	bodyChartUrl: string;
+	/** Sizes store grams; the table shows metres beside them. */
+	metresPerGram: number;
 }
 
-const { sizes, ease, sizeNote, bodyChartUrl } = Astro.props;
+const { sizes, ease, sizeNote, bodyChartUrl, metresPerGram } = Astro.props;
 
 // First-seen order across every size, so a measurement only some sizes carry still
 // gets a column rather than being silently dropped.
@@ -76,7 +78,7 @@ const measurementFor = (s: (typeof sizes)[number], label: string) => {
 							{labels.map((l) => (
 								<td style="text-align:right">{measurementFor(s, l)}</td>
 							))}
-							<td style="text-align:right">{s.yardageM} m</td>
+							<td style="text-align:right">{s.grams} g · {Math.round(s.grams * metresPerGram)} m</td>
 						</tr>
 					))
 				}

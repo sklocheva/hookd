@@ -32,8 +32,13 @@ SCHEMA_ONLY: set[str] = {
     'terms',
 }
 
-# The SEO trio, required wherever a collection spreads `seoFields` — see CLAUDE.md.
-SEO_REQUIRED = {'metaDescription', 'heroImageAlt', 'socialImage'}
+# The SEO fields the form must mark required wherever a collection spreads `seoFields` —
+# see CLAUDE.md. Hero alt text is not one of them: it is required to publish only once
+# there is a hero image, which the form cannot express, so the schema checks it instead.
+SEO_REQUIRED = {'metaDescription', 'socialImage'}
+# Every field the `seoFields` spread brings in, required or not — added back to a
+# collection's schema fields before comparing, because the spread is not literal.
+SEO_FIELDS = SEO_REQUIRED | {'heroImageAlt'}
 
 # Collections whose required-ness is enforced at publish rather than at save, so that a
 # half-filled draft can be saved. The panel marks nothing required; the schema refuses to
@@ -129,7 +134,7 @@ def main() -> int:
         form = {f['name'] for f in coll['fields']}
         # The shared seoFields spread is not literal in a collection block, so add it
         # back for the collections that actually use it.
-        shared = SEO_REQUIRED if spreads_seo_fields(src, name) else set()
+        shared = SEO_FIELDS if spreads_seo_fields(src, name) else set()
         schema = schema_fields(src, name) | shared
 
         missing_in_form = schema - form - SCHEMA_ONLY
