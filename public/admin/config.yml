@@ -439,7 +439,7 @@ collections:
         # below it, which reads as a broken control and does not survive twenty patterns.
         dropdown_threshold: 0
         required: false
-        hint: Optional — the journal post your yarn advice comes from. Linked in the note on substituting yarn.
+        hint: Optional — the journal post where you tested this yarn. The page links to it by its title, in the note on substituting yarn.
       # --- Read next. Optional: leave empty and the site picks by shared tags. ------
       - label: Read next — patterns
         name: relatedPatterns

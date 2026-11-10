@@ -100,6 +100,9 @@ Steps 1, 2, 3 and 5 are done; 6 is nearly done.
 
 ## Step 6 — Implement the design (nearly done)
 
+- [ ] **Rewrite `/about/` in Sophia's own words** — dictate, then tidy. What is there is a
+      stand-in. Its visible "Draft — to be rewritten" box was removed on 10 Nov 2026 because
+      every visitor saw it, so this line is now the only reminder.
 - [ ] Legal pages exist (`/privacy/`, `/licence/`, `/imprint/`) and need Sophia's review.
       The Austrian §5 ECG / §§24–25 Mediengesetz duties do **not** apply — she is not resident
       in Austria — and `imprint.astro` already says so. Revisit only if that changes.

@@ -38,8 +38,8 @@ still static assets only — there is no server process, and that constraint is 
 There is no linter. The checks that exist are:
 
 - `npm test` — Node's built-in runner over `src/**/*.test.ts`, no dependency. It covers the
-  yarn weight calculator's arithmetic and nothing else; see Architecture. CI runs it after
-  the build.
+  yarn weight calculator's arithmetic and the escaping of braces in article text, and
+  nothing else; see Architecture. CI runs it after the build.
 - `node .claude/skills/run-hookd/driver.mjs audit` — builds, serves, and drives all routes
   in headless Chrome at 375px and 1280px: overflow, one `<h1>`, content present without JS,
   tap targets, contrast, the label floor, internal links. **Run this before pushing.** CI
@@ -161,6 +161,17 @@ removable, and it is not: since Astro 7.3 the default Markdown processor is Sät
 `remarkPlugins` only runs on the unified processor that package provides. Without it the
 build fails in config validation, before a page is rendered. Sveltia also formats dates with
 **Day.js** tokens (`YYYY-MM-DD`) — date-fns style silently writes garbage like `yyyy-08-We`.
+
+**A brace typed into an article is text, and one file makes it so.** Patterns and posts are
+`.mdx`, where `{` opens a JavaScript expression and `<` before a figure opens a tag. Typed
+into a post's Article or a pattern's Introduction in `/admin`, `{neckCh}` failed the build
+with "neckCh is not defined", named the page only by its preview address, and Cloudflare
+deployed nothing. `src/lib/mdx-prose.mjs` escapes those characters before MDX compiles the
+entry — a Vite `load` hook, registered in `astro.config.mjs`, so it runs ahead of the MDX
+plugin whatever the plugin order. Frontmatter, `import` lines, code, and **any line that
+opens a component** (`<Row …>`, a capital after `<`) are left alone; a component's opening
+tag therefore has to sit on one line. `src/lib/mdx-prose.test.ts` is the list of cases. It
+looks removable — nothing in `src/` imports it — and it is not.
 
 **A draft says so on the page.** `DraftNotice.astro` renders at the top of any entry still
 marked draft, with the time the page was built. That timestamp is what makes a draft usable as

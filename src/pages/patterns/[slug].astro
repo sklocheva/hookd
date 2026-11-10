@@ -4,7 +4,6 @@ import DraftNotice from '../../components/DraftNotice.astro';
 import { getRelated } from '../../lib/related';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
-import Hero from '../../components/Hero.astro';
 import Eyebrow from '../../components/Eyebrow.astro';
 import PatternLicence from '../../components/PatternLicence.astro';
 import PatternInstructions from '../../components/PatternInstructions.astro';
@@ -27,7 +26,7 @@ import { hookLabel } from '../../lib/hooks';
 import { cycWeightName, cycWeightShort } from '../../lib/cyc';
 import { categoryLabel } from '../../lib/taxonomy';
 import { articleSchema } from '../../lib/schema';
-import { segment } from '../../lib/drafts';
+import { isDraft, segment } from '../../lib/drafts';
 
 // A draft is built at its preview id instead of its real slug, so the URL it will own
 // once published stays a 404 until then. See src/lib/drafts.ts.
@@ -54,7 +53,15 @@ const colourLine = colourNames.length
 	: '';
 // One size: no size table, no "choosing your size", dimensions stated in the spec block.
 const oneSize = d.sizes.length === 1;
-const related = d.relatedPost ? await getEntry(d.relatedPost) : undefined;
+// The journal post the yarn advice comes from, linked by its own title in the substitution
+// callout. That callout used to say "Two of the wools in the DK wool test grew by five per
+// cent…" — a sentence written for one pattern and then printed on every pattern with a
+// related post, whatever the post was about. A claim about a specific test belongs in the
+// entry's own text; the template only knows the post's name.
+//
+// A draft is not linked: it is not served at its real address, so the link would 404.
+const relatedEntry = d.relatedPost ? await getEntry(d.relatedPost) : undefined;
+const related = relatedEntry && !isDraft(relatedEntry) ? relatedEntry : undefined;
 
 const [allPatterns, allPosts] = await Promise.all([
 	getCollection('patterns'),
@@ -240,10 +247,8 @@ const specs = [
 					metreage per gram rather than the category label.
 					{related && (
 						<>
-							{' '}Two of the wools in{' '}
-							<a href={`/journal/${related.id}/`}>the DK wool test</a> grew by five per
-							cent after washing and never came back — if you pick one of those, swatch
-							long and hang it for a day before you size.
+							{' '}The yarn test behind this pattern is{' '}
+							<a href={`/journal/${related.id}/`}>{related.data.title}</a>.
 						</>
 					)}
 				</p>

@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 import { remarkCmsImages } from './src/lib/remark-cms-images.mjs';
+import { mdxProse } from './src/lib/mdx-prose.mjs';
 import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -119,6 +120,9 @@ export default defineConfig({
 	// The CMS writes body images as /src/assets/… ; Astro only optimizes relative
 	// markdown paths, so this rewrites them before the asset pipeline runs.
 	markdown: { remarkPlugins: [remarkCmsImages] },
+	// A brace or a stray "<" typed into an article in /admin is text, not MDX. Without this
+	// one character in a post stops the whole site building — see src/lib/mdx-prose.mjs.
+	vite: { plugins: [mdxProse()] },
 	integrations: [
 		mdx(),
 		sitemap({

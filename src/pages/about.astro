@@ -3,13 +3,18 @@ import TextPage from '../layouts/TextPage.astro';
 
 // DRAFT — placeholder voice. Sophia should rewrite this in her own words; the method
 // for that is dictate-then-tidy, not ghostwriting. See PLAN.md step 0.
+//
+// The page used to say so in a dashed "Draft — to be rewritten" box, which every visitor
+// saw. The reminder lives here and in TODO.md now. It also promised that the patterns
+// "stay free" and that this "will not become" a shop — the site no longer makes either
+// promise (see the top of CLAUDE.md), so do not write them back in.
 ---
 
 <TextPage
 	title="About — Hookd"
-	description="A personal crochet blog: free patterns written out in full, and write-ups of yarn, fibre and stitch tests. Not a shop."
+	description="A personal crochet blog: patterns written out in full, and write-ups of yarn, fibre and stitch tests. Not a shop."
 	heading="About"
-	standfirst="Free crochet patterns, and write-ups of the tests behind them."
+	standfirst="Crochet patterns, and write-ups of the tests behind them."
 	active="about"
 >
 	<p>
@@ -21,8 +26,8 @@ import TextPage from '../layouts/TextPage.astro';
 	<h2>What is here</h2>
 
 	<p>
-		<strong>Free patterns</strong>, written out in full. No video-only instructions, no
-		paywall, no partial pattern with the good part behind a purchase. Sizes and gauge are
+		<strong>Patterns</strong>, written out in full. No video-only instructions, and nothing
+		left to guess. Sizes and gauge are
 		stated the way the Craft Yarn Council defines them, and gauge is measured on the actual
 		piece after blocking — not on a swatch pinned flat, because those two numbers differ and
 		almost no published pattern admits it.
@@ -37,12 +42,8 @@ import TextPage from '../layouts/TextPage.astro';
 	<h2>What is not here</h2>
 
 	<p>
-		This is not a shop and it will not become one. There are no carts, no accounts, no
-		newsletter pop-up over the recipe. Anything I sell lives on Ravelry, never here.
-	</p>
-
-	<p>
-		The patterns published here stay free. Not as an introductory offer — free.
+		This is not a shop. There are no carts, no accounts, no newsletter pop-up over the
+		recipe. Anything I sell lives on Ravelry, never here.
 	</p>
 
 	<h2>Using the patterns</h2>
@@ -51,10 +52,4 @@ import TextPage from '../layouts/TextPage.astro';
 		Make them, gift them, and sell what you make. The <a href="/licence/">pattern terms</a> set
 		that out properly, but that is the short version.
 	</p>
-
-	<div class="placeholder">
-		<strong>Draft — to be rewritten</strong>
-		This page is a stand-in written to the right shape and length. It should be replaced with
-		Sophia's own words, dictated and then tidied — not written for her.
-	</div>
 </TextPage>

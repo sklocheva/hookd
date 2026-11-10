@@ -13,6 +13,21 @@
 			project's "server-rendered HTML only" rule, which exists so AI crawlers can
 			read the content — nothing here is content, and it is noindexed.
 		-->
-		<script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+		<!--
+			Pinned to an exact version, with an integrity hash. This page is where the author
+			signs in to GitHub, so whatever this script is runs with her access to the
+			repository. Unpinned, it was whatever unpkg served that day; now the browser
+			refuses to run a file that is not byte for byte this one.
+
+			To update: pick a version from https://github.com/sveltia/sveltia-cms/releases,
+			change it in the URL, and replace the hash with the output of
+			  curl -s <the new URL> | openssl dgst -sha384 -binary | openssl base64 -A
+			prefixed with "sha384-". Change both together, or /admin loads as a blank page.
+		-->
+		<script
+			src="https://unpkg.com/@sveltia/cms@0.262.2/dist/sveltia-cms.js"
+			integrity="sha384-Josw8D7cNtvJa9iXSrbwyAf7B9OX3m0y9pHkX+AdmktzDgw58CR3oioeIo5sqsG5"
+			crossorigin="anonymous"
+		></script>
 	</body>
 </html>

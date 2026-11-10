@@ -67,6 +67,13 @@ remainder parses as another key and Zod strips it as unknown, with no error anyw
 Twenty-six rows across three patterns had lost text this way. Write block mappings with
 quoted values.
 
+**A brace in the body is text.** Patterns and posts are MDX, where `{` would open an
+expression; `src/lib/mdx-prose.mjs` escapes `{`, `}` and a `<` before a figure before the
+entry is compiled, so what is typed in `/admin` cannot break the build. A hand-written
+component is still MDX, on one condition: **its opening tag sits on one line**
+(`<Row label="Row 1" counts={{ XS: 62 }}>`). Spread across several lines, its braces are
+escaped and the build fails on that line.
+
 Dates use Day.js tokens (`YYYY-MM-DD`) — date-fns style writes garbage like `yyyy-08-We`.
 
 ## Images

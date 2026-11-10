@@ -494,6 +494,16 @@ a.card:hover {
 }
 
 
+/* A heading made bold in the editor. The /admin toolbar lets a heading be bold as well,
+   and the first real post came out with every heading wrapped in ** — which set them in
+   a heavier weight than the headings on every other page. A heading is already a
+   heading; bold inside one changes nothing. The class is doubled to outrank each page's
+   own scoped `.prose strong` rule, which carries an attribute selector. */
+.prose.prose :is(h2, h3, h4) strong,
+.review__prose.review__prose :is(h2, h3, h4) strong {
+	font-weight: inherit;
+}
+
 /* Article images, sized from markdown.
    Markdown's optional title slot doubles as a size hint, so an author can scale an
    image from the CMS's plain text box without any component syntax:

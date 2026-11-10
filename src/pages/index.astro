@@ -2,7 +2,6 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
-import Eyebrow from '../components/Eyebrow.astro';
 import { allJournalEntries } from '../lib/journal';
 import { QUIZ_KIND, YARN_KIND } from '../lib/taxonomy';
 
@@ -84,25 +83,19 @@ const picks = [
 	{
 		collection: 'patterns' as const,
 		slug: 'halland-cowl',
-		excerpt:
-			'A single-skein cowl in garter-look crochet, picked to open the season — free while the wool lasts.',
 		cta: 'Read the pattern →',
 		photo: 'cowl styled',
 	},
 	{
 		collection: 'patterns' as const,
 		slug: 'fjord-yoke-pullover',
-		excerpt:
-			'The one everyone asks about — a top-down circular yoke, still our most-repeated pattern.',
 		cta: 'Read the pattern →',
-		photo: 'blanket folded, textured',
+		photo: 'pullover worn',
 	},
 	{
 		collection: 'posts' as const,
 		slug: 'leftover-wool-cat-toy',
-		excerpt:
-			'Non-superwash scraps, a yarn needle and a normal wash — a light, bouncy felted ball with nothing synthetic in it.',
-		cta: 'Read the notes →',
+		cta: 'Read the post →',
 		photo: 'felted wool balls',
 	},
 ];
@@ -113,12 +106,16 @@ const pinned = picks.flatMap((pick) => {
 	if (!entry) return [];
 
 	const base = pick.collection === 'patterns' ? '/patterns' : '/journal';
-	// Title and photograph come from the entry, so a featured slot cannot drift from what
-	// the page says — or show a placeholder while the entry has a real photo.
+	// Title, photograph and blurb come from the entry, so a featured slot cannot drift from
+	// what the page says — or show a placeholder while the entry has a real photo. The blurb
+	// was typed here once, and said things no entry did: "free while the wool lasts", "still
+	// our most-repeated pattern". The entry's own summary is the author's words, and it
+	// changes when she changes it in /admin.
 	return [
 		{
 			...pick,
 			title: entry.data.title,
+			excerpt: entry.data.summary,
 			href: `${base}/${entry.id}/`,
 			image: entry.data.heroImage,
 			imageAlt: entry.data.heroImageAlt ?? '',

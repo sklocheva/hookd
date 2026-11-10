@@ -1,4 +1,7 @@
-import { defineCollection, reference, z } from 'astro:content';
+import { defineCollection, reference } from 'astro:content';
+// `z` from 'astro:content' is deprecated, and every use of it was a hint — 156 of the 159
+// that `npm run check` printed, which is how a real one gets missed.
+import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 import { keysUsed } from './lib/pattern-sizes';
 import { YARN_CERTIFICATIONS } from './lib/taxonomy';

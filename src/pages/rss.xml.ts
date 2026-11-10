@@ -1,17 +1,21 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
+import { QUIZ_KIND, YARN_KIND } from '../lib/taxonomy';
 
 export async function GET(context: APIContext) {
-	// Drafts are invented example content. They stay on the site so it does not look
-	// empty, but they must not reach a subscriber's reader.
-	const [patterns, posts, reviews] = await Promise.all([
+	// Drafts are unlisted everywhere, and a subscriber's reader is a listing like any
+	// other — see src/lib/drafts.ts.
+	const [patterns, posts, reviews, quizzes] = await Promise.all([
 		getCollection('patterns', ({ data }) => !data.draft),
 		getCollection('posts', ({ data }) => !data.draft),
 		getCollection('reviews', ({ data }) => !data.draft),
+		getCollection('quizzes', ({ data }) => !data.draft),
 	]);
 
-	// One feed for the whole site — the homepage mixes both, so the feed should too.
+	// One feed for the whole site. It carries what the homepage's "Latest" carries, so a
+	// quiz is in it: it was left out once, and the newest thing on the site never reached
+	// anyone who subscribed.
 	const items = [
 		...patterns.map((p) => ({
 			title: p.data.title,
@@ -31,10 +35,18 @@ export async function GET(context: APIContext) {
 			title: r.data.title,
 			pubDate: r.data.date,
 			// The standfirst is written to work alone, which is exactly what a feed shows.
-			// Published reviews always have one; the fallback is only for the type.
+			// Published notes always have one; the fallback is only for the type.
 			description: r.data.standfirst ?? '',
 			link: `/journal/yarn/${r.id}/`,
-			categories: ['Yarn review', r.data.yarn.brand].filter((c): c is string => !!c),
+			// They are yarn notes, never reviews — the word comes from the one place it lives.
+			categories: [YARN_KIND, r.data.yarn.brand].filter((c): c is string => !!c),
+		})),
+		...quizzes.map((q) => ({
+			title: q.data.title,
+			pubDate: q.data.date,
+			description: q.data.teaser,
+			link: `/journal/quiz/${q.id}/`,
+			categories: [QUIZ_KIND],
 		})),
 	].sort((a, b) => b.pubDate.valueOf() - a.pubDate.valueOf());
 
