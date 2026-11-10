@@ -1,5 +1,5 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 import { remarkCmsImages } from './src/lib/remark-cms-images.mjs';
@@ -123,6 +123,44 @@ export default defineConfig({
 	// A brace or a stray "<" typed into an article in /admin is text, not MDX. Without this
 	// one character in a post stops the whole site building — see src/lib/mdx-prose.mjs.
 	vite: { plugins: [mdxProse()] },
+	// The three typefaces, fetched once at build and served from this site. They used to
+	// load from fonts.googleapis.com on every visit, which made Google the one third party
+	// a reader's browser contacted — and so the one the privacy page had to name. The files
+	// are the same Google Fonts files; only where they are served from has changed.
+	//
+	// Newsreader keeps its optical-size axis (6–72), as the old stylesheet link asked for:
+	// that is what draws a 44px heading finer than a 16px line, and without it the headings
+	// change shape. Weights and styles match what the stylesheet link requested, no more.
+	fonts: [
+		{
+			provider: fontProviders.google(),
+			name: 'Newsreader',
+			cssVariable: '--font-newsreader',
+			weights: [400, 500],
+			styles: ['normal', 'italic'],
+			subsets: ['latin', 'latin-ext'],
+			fallbacks: ['Georgia', 'Times New Roman', 'serif'],
+			options: { experimental: { variableAxis: { opsz: [['6', '72']] } } },
+		},
+		{
+			provider: fontProviders.google(),
+			name: 'Work Sans',
+			cssVariable: '--font-work-sans',
+			weights: [400, 500, 600],
+			styles: ['normal'],
+			subsets: ['latin', 'latin-ext'],
+			fallbacks: ['system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+		},
+		{
+			provider: fontProviders.google(),
+			name: 'Space Grotesk',
+			cssVariable: '--font-space-grotesk',
+			weights: [500],
+			styles: ['normal'],
+			subsets: ['latin'],
+			fallbacks: ['system-ui', 'sans-serif'],
+		},
+	],
 	integrations: [
 		mdx(),
 		sitemap({

@@ -48,8 +48,10 @@ const sizeData = graded
 		})
 	: null;
 
+// No count in the plural. It read "Two stitches to learn first" whatever the number, and
+// the first real pattern listed three under it.
 const learnHeading =
-	ins.specialStitches.length === 1 ? 'One thing to learn first' : 'Two stitches to learn first';
+	ins.specialStitches.length === 1 ? 'One thing to learn first' : 'Stitches to learn first';
 ---
 
 <section class="ins" id="pattern">

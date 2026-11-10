@@ -104,9 +104,15 @@ export function hook(p: Pattern['data']): string {
 	return hookLabel(p.hookMm);
 }
 
-/** The main yarn drives the card's Yarn row. */
+/**
+ * The main yarn drives the card's Yarn row, and every metre and yard on the page.
+ *
+ * Role is typed by hand in /admin, so "Main" and "main " have to count: an exact match
+ * quietly fell back to the first yarn listed, and the yardage was then worked out from
+ * the wrong ball.
+ */
 export function mainYarn(p: Pattern['data']) {
-	return p.yarns.find((y) => y.role === 'main') ?? p.yarns[0];
+	return p.yarns.find((y) => y.role.trim().toLowerCase() === 'main') ?? p.yarns[0];
 }
 
 /** e.g. "16 sts × 11 rows = 10 × 10 cm" */

@@ -1,4 +1,5 @@
 ---
+import { Font } from 'astro:assets';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
@@ -103,12 +104,11 @@ const usingDefault = !shareImage;
 		}
 		<meta name="twitter:card" content="summary_large_image" />
 
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Space+Grotesk:wght@500&family=Work+Sans:wght@400;500;600&display=swap"
-		/>
+		{/* Served from this site, not from Google — see `fonts` in astro.config.mjs. Each
+		    one sets a CSS variable that the type tokens in global.css read. */}
+		<Font cssVariable="--font-newsreader" />
+		<Font cssVariable="--font-work-sans" />
+		<Font cssVariable="--font-space-grotesk" />
 	</head>
 	<body>
 		<a href="#main" class="skip-link">Skip to content</a>

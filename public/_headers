@@ -1,0 +1,27 @@
+# Response headers for the static site. Cloudflare reads this file from the build output
+# and does not serve it as a page.
+# https://developers.cloudflare.com/workers/static-assets/headers/
+#
+# Every page:
+#   X-Content-Type-Options  a browser must not guess a file's type from its contents
+#   Referrer-Policy         a link out says which site it came from, never which page
+#   X-Frame-Options         no other site may show these pages inside a frame
+#   Permissions-Policy      the site uses none of these, so no script on it may ask
+#
+# There is deliberately no Content-Security-Policy. /admin loads its editor from unpkg
+# and talks to GitHub, and the pages carry small inline scripts; a policy that is wrong
+# by one source breaks publishing or the size picker, and nothing would report it. It
+# needs its own piece of work, tested against /admin with a real sign-in.
+#
+# /_astro/: everything Astro emits there has a hash of its contents in its name — CSS,
+# scripts, optimised images, fonts — so a changed file is a new address and the old one
+# can be kept for a year. Without this each of them is re-checked on every visit.
+
+/*
+	X-Content-Type-Options: nosniff
+	Referrer-Policy: strict-origin-when-cross-origin
+	X-Frame-Options: DENY
+	Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+/_astro/*
+	Cache-Control: public, max-age=31536000, immutable

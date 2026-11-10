@@ -125,11 +125,14 @@
 	--dot-inactive: rgba(59, 42, 32, 0.22);
 
 	/* Type */
-	--serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+	/* The --font-* variables are set by Astro in <head>, each one a family plus its
+	   fallbacks — see `fonts` in astro.config.mjs. The stacks after them are only what a
+	   page without that <head> would fall back to. */
+	--serif: var(--font-newsreader, Georgia, 'Times New Roman', serif);
 	/* The wordmark, and nothing else. Lora was here for the same single purpose and
 	   came out with it — no other element on the site used it. */
-	--wordmark: 'Space Grotesk', 'Work Sans', system-ui, sans-serif;
-	--sans: 'Work Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--wordmark: var(--font-space-grotesk, system-ui, sans-serif);
+	--sans: var(--font-work-sans, system-ui, -apple-system, 'Segoe UI', sans-serif);
 	--mono: ui-monospace, Menlo, monospace;
 
 

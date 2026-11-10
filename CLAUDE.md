@@ -118,6 +118,25 @@ reads it to emit `<loc>` entries, and `Base.astro` derives the canonical `<link>
 `public/robots.txt`. **Changing the domain means editing both files together**, and this will
 have to happen again when a custom domain is attached.
 
+**The typefaces are served from this site, and a reader's browser contacts nobody else.**
+`fonts` in `astro.config.mjs` fetches Newsreader, Work Sans and Space Grotesk from Google
+Fonts **at build** and emits them under `/_astro/fonts/`; `Base.astro` places a `<Font>` for
+each, which sets `--font-newsreader`, `--font-work-sans` and `--font-space-grotesk`, and the
+type tokens in `global.css` read those. They loaded from `fonts.googleapis.com` on every
+visit until 10 Nov 2026, which made Google the one third party the privacy page had to
+name. **The privacy page now says nobody else is involved — anything added to a reader's
+page from another host (an embed, analytics, a widget) makes that sentence false, so the
+two change in the same commit.** Newsreader keeps its optical-size axis; drop the
+`variableAxis` option and every heading changes shape. The swap was checked by measuring
+five elements on the live page and the new build: identical to a tenth of a pixel.
+
+**`public/_headers` sets the response headers**, read by Cloudflare from the build output:
+`nosniff`, a referrer policy, no framing, a closed permissions policy, and a year's caching
+for `/_astro/*`, whose file names carry a content hash. There is **no Content-Security-Policy
+on purpose** — `/admin` loads from unpkg and talks to GitHub, and one wrong source breaks
+publishing with nothing to report it. It only applies on the deployed site; `astro preview`
+ignores the file, so check it with `curl -I` against the live host.
+
 **`wrangler.jsonc` is what keeps the deploy static.** It declares the Worker name and
 `assets.directory: ./dist`. Without it Cloudflare infers a config and builds Astro in server
 mode, which breaks every image. Do not delete it. See Deployment.
@@ -600,8 +619,8 @@ Things that have already gone wrong here, and cost real time:
   `/admin`, which reach `main` with nobody watching a terminal. The audit runs Chrome with
   `--no-sandbox` on CI only: Ubuntu 24.04 blocks the user namespaces Chrome's sandbox needs.
 - **`.github/workflows/weekly.yml` checks what breaks without a commit** — Mondays 06:00 UTC:
-  the live site serves the tip of `main`, the audit, and external links (Google Fonts, the
-  unpkg script `/admin` loads, links in posts). Failure emails whoever last edited its
+  the live site serves the tip of `main`, the audit, and external links (the unpkg script
+  `/admin` loads, links in posts). Failure emails whoever last edited its
   `cron:` line. **Dependabot** batches updates into a PR a month per ecosystem (npm, Actions),
   with an npm *major* on its own; every one runs the full CI, so green is safe to merge.
 
